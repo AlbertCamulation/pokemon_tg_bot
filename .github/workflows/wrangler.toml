@@ -1,0 +1,12 @@
+# wrangler.toml
+
+# 您的 Worker 名稱，請確保這與您在 Cloudflare 儀表板上設定的名稱一致
+name = "pokemon-tg-bot"
+
+# 您的 Worker 主程式檔案的路徑。這是最重要的設定。
+# 依照慣例，通常是 "src/index.js"。
+# 如果您的檔案是直接放在根目錄且檔名為 worker.js，就改成 "worker.js"
+main = "src/index.js"
+
+# 相容性日期，建議使用當前日期
+compatibility_date = "2025-08-04"
