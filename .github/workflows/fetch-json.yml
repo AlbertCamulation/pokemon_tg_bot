@@ -10,17 +10,16 @@ jobs:
   fetch-and-commit:
     runs-on: ubuntu-latest
     
-    # 【步驟 A: 授予權限】
-    # 這是最關鍵的一步，授予 workflow 寫入儲存庫的權限
+    # 授予 workflow 寫入儲存庫的權限
     permissions:
       contents: write
 
     steps:
-      # 步驟 1: 先 Checkout 你的專案程式碼到虛擬環境中
+      # 步驟 1: 先 Checkout 你的專案程式碼
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 步驟 2: (與之前相同) 獲取版本號
+      # 步驟 2: 獲取網站版本號 (只需執行一次)
       - name: Extract Site Version
         id: extract_version
         run: |
@@ -28,31 +27,38 @@ jobs:
           echo "VERSION_NUMBER=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Found version: ${VERSION}"
 
-      # 步驟 3: 下載 JSON 檔案到指定的資料夾
-      - name: Fetch versioned JSON file
+      # 步驟 3: 下載所有聯盟的 JSON 檔案
+      - name: Fetch all versioned JSON files
         run: |
-          # 建立一個名為 data 的資料夾 (如果不存在)
+          # 建立 data 資料夾
           mkdir -p data
-          # 下載檔案並儲存到 data/pvpoke_rankings.json
-          curl -L -o data/pvpoke_rankings.json "https://pvpoke.com/data/rankings/all/overall/rankings-1500.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
+          
+          # 下載超級聯盟 (1500) 的排名
+          echo "Fetching rankings for Great League (1500)..."
+          curl -L -o data/rankings_1500.json "https://pvpoke.com/data/rankings/all/overall/rankings-1500.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
+          
+          # 下載高級聯盟 (2500) 的排名
+          echo "Fetching rankings for Ultra League (2500)..."
+          curl -L -o data/rankings_2500.json "https://pvpoke.com/data/rankings/all/overall/rankings-2500.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
+          
+          # 下載大師聯盟 (10000) 的排名
+          echo "Fetching rankings for Master League (10000)..."
+          curl -L -o data/rankings_10000.json "https://pvpoke.com/data/rankings/all/overall/rankings-10000.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
 
       # 步驟 4: 設定 Git 並 Commit/Push 檔案
       - name: Commit and push if there are changes
         run: |
-          # 設定 Git 的機器人使用者名稱和 Email
+          # 設定 Git 的機器人使用者
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # 將新下載的檔案加入 Git 的追蹤列表
-          git add data/pvpoke_rankings.json
+          # 將 data 資料夾中的所有變更加入追蹤列表
+          git add data/
           
-          # 檢查是否有檔案變更。如果有，才執行 commit 和 push
-          # git status --porcelain 會在有變更時輸出檔案狀態，否則為空
+          # 檢查是否有檔案變更，若有才執行 commit 和 push
           if [[ -n $(git status --porcelain) ]]; then
             echo "Changes detected. Committing and pushing..."
-            # 建立一個 commit，訊息包含當前日期
             git commit -m "Update PvPoke rankings data ($(date +'%Y-%m-%d'))"
-            # 將 commit 推送到您的儲存庫
             git push
           else
             echo "No changes detected. Skipping commit."
