@@ -1,6 +1,4 @@
-# .github/workflows/fetch-json.yml
-
-name: Fetch PvPoke Rankings JSON (Dynamic Version)
+name: Fetch and Commit PvPoke Rankings
 
 on:
   schedule:
@@ -9,41 +7,53 @@ on:
   workflow_dispatch:
 
 jobs:
-  fetch-pvpoke-data:
+  fetch-and-commit:
     runs-on: ubuntu-latest
     
-    steps:
-      # 步驟 1: 先下載主頁面的 HTML
-      - name: Fetch main HTML page
-        id: fetch_html
-        run: curl -L -o pvpoke_page.html "https://pvpoke.com/rankings/all/1500/overall/"
+    # 【步驟 A: 授予權限】
+    # 這是最關鍵的一步，授予 workflow 寫入儲存庫的權限
+    permissions:
+      contents: write
 
-      # 步驟 2: 從 HTML 中提取 siteVersion 的值
+    steps:
+      # 步驟 1: 先 Checkout 你的專案程式碼到虛擬環境中
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 步驟 2: (與之前相同) 獲取版本號
       - name: Extract Site Version
         id: extract_version
         run: |
-          # 使用 grep 找到包含 siteVersion 的那一行
-          # 然後用 awk -F'"' 以雙引號為分隔符，印出第 2 個部分 (也就是版本號)
-          # 最後將版本號設定為這個步驟的輸出 (output)
-          VERSION=$(grep 'var siteVersion' pvpoke_page.html | awk -F'"' '{print $2}')
+          VERSION=$(grep 'var siteVersion' <(curl -s -L "https://pvpoke.com/rankings/all/1500/overall/") | awk -F'"' '{print $2}')
           echo "VERSION_NUMBER=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Found version: ${VERSION}"
 
-      # 步驟 3: 使用上一步提取到的版本號，組合 URL 並下載最終的 JSON 檔案
+      # 步驟 3: 下載 JSON 檔案到指定的資料夾
       - name: Fetch versioned JSON file
         run: |
-          echo "Fetching JSON with version: ${{ steps.extract_version.outputs.VERSION_NUMBER }}"
-          curl -L -o pvpoke_rankings.json "https://pvpoke.com/data/rankings/all/overall/rankings-1500.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
+          # 建立一個名為 data 的資料夾 (如果不存在)
+          mkdir -p data
+          # 下載檔案並儲存到 data/pvpoke_rankings.json
+          curl -L -o data/pvpoke_rankings.json "https://pvpoke.com/data/rankings/all/overall/rankings-1500.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
 
-      # 步驟 4 (可選): 顯示檔案內容的前 20 行，方便預覽
-      - name: Display first 20 lines of the fetched data
-        run: head -n 20 pvpoke_rankings.json
-
-      # 步驟 5: 將生成的 JSON 檔案上傳為成品 (Artifact)
-      - name: Upload rankings as an artifact
-        uses: actions/upload-artifact@v4
-        with:
-          # 成品檔案的名稱，下載時會是 pvpoke-rankings.zip
-          name: pvpoke-rankings
-          # 要上傳的檔案路徑
-          path: pvpoke_rankings.json
+      # 步驟 4: 設定 Git 並 Commit/Push 檔案
+      - name: Commit and push if there are changes
+        run: |
+          # 設定 Git 的機器人使用者名稱和 Email
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 將新下載的檔案加入 Git 的追蹤列表
+          git add data/pvpoke_rankings.json
+          
+          # 檢查是否有檔案變更。如果有，才執行 commit 和 push
+          # git status --porcelain 會在有變更時輸出檔案狀態，否則為空
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Changes detected. Committing and pushing..."
+            # 建立一個 commit，訊息包含當前日期
+            git commit -m "Update PvPoke rankings data ($(date +'%Y-%m-%d'))"
+            # 將 commit 推送到您的儲存庫
+            git push
+          else
+            echo "No changes detected. Skipping commit."
+          fi
