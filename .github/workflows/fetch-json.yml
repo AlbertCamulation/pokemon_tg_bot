@@ -1,0 +1,40 @@
+# .github/workflows/fetch-json.yml
+
+name: Fetch PvPoke Rankings JSON (Dynamic Version)
+
+on:
+  schedule:
+    # 每天執行一次
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch-pvpoke-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 步驟 1: 先下載主頁面的 HTML
+      - name: Fetch main HTML page
+        id: fetch_html
+        run: curl -L -o pvpoke_page.html "https://pvpoke.com/rankings/all/1500/overall/"
+
+      # 步驟 2: 從 HTML 中提取 siteVersion 的值
+      - name: Extract Site Version
+        id: extract_version
+        run: |
+          # 使用 grep 找到包含 siteVersion 的那一行
+          # 然後用 awk -F'"' 以雙引號為分隔符，印出第 2 個部分 (也就是版本號)
+          # 最後將版本號設定為這個步驟的輸出 (output)
+          VERSION=$(grep 'var siteVersion' pvpoke_page.html | awk -F'"' '{print $2}')
+          echo "VERSION_NUMBER=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Found version: ${VERSION}"
+
+      # 步驟 3: 使用上一步提取到的版本號，組合 URL 並下載最終的 JSON 檔案
+      - name: Fetch versioned JSON file
+        run: |
+          echo "Fetching JSON with version: ${{ steps.extract_version.outputs.VERSION_NUMBER }}"
+          curl -L -o pvpoke_rankings.json "https://pvpoke.com/data/rankings/all/overall/rankings-1500.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
+
+      # 步驟 4 (可選): 顯示檔案內容的前 20 行，方便預覽
+      - name: Display first 20 lines of the fetched data
+        run: head -n 20 pvpoke_rankings.json
