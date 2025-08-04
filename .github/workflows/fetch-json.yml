@@ -38,3 +38,12 @@ jobs:
       # 步驟 4 (可選): 顯示檔案內容的前 20 行，方便預覽
       - name: Display first 20 lines of the fetched data
         run: head -n 20 pvpoke_rankings.json
+
+      # 步驟 5: 將生成的 JSON 檔案上傳為成品 (Artifact)
+      - name: Upload rankings as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # 成品檔案的名稱，下載時會是 pvpoke-rankings.zip
+          name: pvpoke-rankings
+          # 要上傳的檔案路徑
+          path: pvpoke_rankings.json
