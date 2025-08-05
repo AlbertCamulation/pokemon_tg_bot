@@ -15,18 +15,6 @@ const TOKEN = ENV_BOT_TOKEN;
 const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
 
-// --- 【新功能】盃賽規則定義 ---
-const CUP_RULES = {
-  "化石盃": {
-    league: 1500,
-    allowedTypes: ["water", "rock", "steel"],
-  },
-  "夏日盃": {
-    league: 2500,
-    allowedTypes: ["normal", "fire", "water", "grass", "electric", "bug"],
-  },
-};
-
 /**
  * 主監聽事件
  */
@@ -44,87 +32,76 @@ addEventListener('fetch', event => {
 });
 
 /**
- * 【核心修改】: 處理寶可夢模糊搜尋，並在結果中直接包含特殊盃賽
+ * 【核心】: 處理寶可夢模糊搜尋，並按聯盟分組排序顯示
  */
 async function handlePokemonSearch(chatId, query) {
   await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
 
   try {
-    // 1. 獲取中英文對照表
     // 1. 獲取中英文對照表，並加入快取清除機制
     const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
     const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
     const transResponse = await fetch(translationUrl);
     if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
     const allPokemonData = await transResponse.json();
-    const pokemonMetaMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p]));
     
-    // 2. 進行模糊搜尋並擴展至家族
+    // 2. 進行模糊搜尋，找出所有符合條件的寶可夢
     const isChinese = /[\u4e00-\u9fa5]/.test(query);
     const lowerCaseQuery = query.toLowerCase();
     const initialMatches = allPokemonData.filter(p => isChinese ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lowerCaseQuery));
     if (initialMatches.length === 0) return await sendMessage(chatId, `很抱歉，找不到任何與 "${query}" 相關的寶可夢。`);
 
+    // 3. 擴展搜尋至整個家族
     const familyIds = new Set(initialMatches.map(p => p.family ? p.family.id : null).filter(id => id));
     const familyMatches = allPokemonData.filter(p => p.family && familyIds.has(p.family.id));
     const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
-    const matchingIds = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
 
-    // 3. 一次性獲取所有聯盟的排名資料
+    const matchingIds = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
+    const idToNameMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+
+    // 4. 一次性獲取所有聯盟的排名資料
     const leagues = [
-      { name: "超級聯盟", cp: 1500, path: "data/rankings_1500.json" },
-      { name: "高級聯盟", cp: 2500, path: "data/rankings_2500.json" },
-      { name: "大師聯盟", cp: 10000, path: "data/rankings_10000.json" },
+      { name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
+      { name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
+      { name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
     ];
     const fetchPromises = leagues.map(league => 
       fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}`, { cf: { cacheTtl: 86400 } })
         .then(res => res.ok ? res.json() : null)
     );
-    const [greatLeagueRanks, ultraLeagueRanks, masterLeagueRanks] = await Promise.all(fetchPromises);
-    
-    // 4. 建立包含所有常規與特殊盃賽的排名資料庫
-    const allRankings = {
-      "超級聯盟": greatLeagueRanks,
-      "高級聯盟": ultraLeagueRanks,
-      "大師聯盟": masterLeagueRanks,
-      "化石盃": greatLeagueRanks ? greatLeagueRanks.filter(p => {
-        const meta = pokemonMetaMap.get(p.speciesId.toLowerCase());
-        return meta && meta.types.some(t => CUP_RULES.化石盃.allowedTypes.includes(t));
-      }) : null,
-      "夏日盃": ultraLeagueRanks ? ultraLeagueRanks.filter(p => {
-        const meta = pokemonMetaMap.get(p.speciesId.toLowerCase());
-        return meta && meta.types.some(t => CUP_RULES.夏日盃.allowedTypes.includes(t));
-      }) : null,
-    };
+    const allLeagueRanks = await Promise.all(fetchPromises);
 
-    // 5. 彙總所有匹配結果的排名資訊
+    // 5. 逐一聯盟處理，並彙總結果
     let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢家族排名結果 🏆\n`;
-    const displayLimit = 5;
+    let foundAnyResults = false;
 
-    finalMatches.slice(0, displayLimit).forEach(pokemon => {
-      replyMessage += `\n====================\n`;
-      replyMessage += `*${pokemon.speciesName}*\n`;
+    allLeagueRanks.forEach((rankings, index) => {
+      const league = leagues[index];
+      if (!rankings) return;
 
-      // 遍歷所有盃賽
-      for (const leagueName in allRankings) {
-        const rankings = allRankings[leagueName];
-        if (!rankings) continue;
-
-        const pokemonIndex = rankings.findIndex(p => p.speciesId.toLowerCase() === pokemon.speciesId.toLowerCase());
-        if (pokemonIndex !== -1) {
-          const pokemonData = rankings[pokemonIndex];
-          const rank = pokemonIndex + 1;
-          const rating = getPokemonRating(rank);
-          replyMessage += `\n*${leagueName}:*\n`;
-          replyMessage += `  - 排名: #${rank}\n`;
-          replyMessage += `  - 評價: ${rating}\n`;
-          replyMessage += `  - 分數: ${pokemonData.score.toFixed(2)}\n`;
+      const resultsInThisLeague = [];
+      rankings.forEach((pokemon, rankIndex) => {
+        if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
+          resultsInThisLeague.push({
+            rank: rankIndex + 1,
+            speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
+            score: pokemon.score,
+          });
         }
+      });
+      
+      if (resultsInThisLeague.length > 0) {
+        foundAnyResults = true;
+        replyMessage += `\n*${league.name} (${league.cp}):*\n`;
+        resultsInThisLeague.forEach(p => {
+          const rating = getPokemonRating(p.rank);
+          replyMessage += `${p.speciesName} #${p.rank} (${p.score.toFixed(2)}) - ${rating}\n`;
+        });
       }
     });
 
-    if (finalMatches.length > displayLimit) {
-        replyMessage += `\n====================\n...還有 ${finalMatches.length - displayLimit} 筆相關寶可夢未顯示。`;
+    if (!foundAnyResults) {
+      replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
     }
 
     return await sendMessage(chatId, replyMessage.trim(), 'Markdown');
