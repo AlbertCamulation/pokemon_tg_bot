@@ -1,6 +1,7 @@
 /**
  * 整合了 Telegram Bot、從 GitHub 讀取資料、User ID 白名單、
- * 以及中英文寶可夢模糊搜尋並直接顯示所有結果的 Worker 腳本
+ * 以及中英文寶可夢模糊搜尋功能的 Worker 腳本
+ * (增加了針對翻譯檔的快取清除機制來解決部署問題)
  */
 
 // --- GitHub 相關設定 ---
@@ -96,9 +97,14 @@ async function handlePokemonSearch(chatId, query) {
 
   try {
     // 1. 獲取中英文對照表
-    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json`;
-    const transResponse = await fetch(translationUrl, { cf: { cacheTtl: 86400 } });
-    if (!transResponse.ok) throw new Error('無法載入寶可夢資料庫');
+    // --- 【核心修改點】: 在 URL 後面加上一個隨機參數來強制繞過快取 ---
+    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+
+    // 我們暫時不使用 Cloudflare 的 cf 快取，直接請求最新版本
+    const transResponse = await fetch(translationUrl); 
+    if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
+    
     const allPokemonData = await transResponse.json();
     
     // 2. 進行模糊搜尋
@@ -129,7 +135,7 @@ async function handlePokemonSearch(chatId, query) {
 
     // 4. 彙總所有匹配結果的排名資訊
     let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢排名結果 🏆\n`;
-    const displayLimit = 5; // 最多顯示 5 筆結果，避免訊息過長
+    const displayLimit = 5;
     
     matches.slice(0, displayLimit).forEach(pokemon => {
       replyMessage += `\n====================\n`;
@@ -166,9 +172,8 @@ async function handlePokemonSearch(chatId, query) {
   }
 }
 
-/**
- * 處理 /ranking 指令 (舊功能)
- */
+// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
+
 async function handleRankingCommand(chatId) {
   const filePath = "data/rankings_1500.json";
   const fileUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filePath}`;
@@ -185,10 +190,6 @@ async function handleRankingCommand(chatId) {
     return await sendMessage(chatId, '抱歉，獲取排名資料時發生錯誤。');
   }
 }
-
-/**
- * 傳送訊息的輔助函式，支援 Markdown
- */
 async function sendMessage(chatId, text, parseMode = null) {
   const params = { chat_id: chatId, text };
   if (parseMode) {
@@ -196,27 +197,15 @@ async function sendMessage(chatId, text, parseMode = null) {
   }
   return (await fetch(apiUrl('sendMessage', params))).json();
 }
-
-/**
- * 註冊 Webhook
- */
 async function registerWebhook(event, requestUrl, suffix, secret) {
   const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
   const r = await (await fetch(apiUrl('setWebhook', { url: webhookUrl, secret_token: secret }))).json();
   return new Response('ok' in r && r.ok ? 'Ok' : JSON.stringify(r, null, 2));
 }
-
-/**
- * 移除 Webhook
- */
 async function unRegisterWebhook(event) {
   const r = await (await fetch(apiUrl('setWebhook', { url: '' }))).json();
   return new Response('ok' in r && r.ok ? 'Ok' : JSON.stringify(r, null, 2));
 }
-
-/**
- * 組合 Telegram API 的網址
- */
 function apiUrl(methodName, params = null) {
   let query = '';
   if (params) {
