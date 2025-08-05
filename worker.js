@@ -1,6 +1,7 @@
 /**
- * 整合了 Telegram Bot、從 GitHub 讀取資料、User ID 白名單、
+ * 結合了 Telegram Bot、從 GitHub 讀取資料、User ID 白名單、
  * 以及中英文寶可夢名稱查詢功能的 Worker 腳本
+ * (增加了針對翻譯檔的快取清除機制用於除錯)
  */
 
 // --- GitHub 相關設定 ---
@@ -30,14 +31,66 @@ addEventListener('fetch', event => {
   }
 });
 
-// ... (handleWebhook, onUpdate, onMessage 函式與之前版本相同) ...
-async function handleWebhook(event) { /* ... */ }
-async function onUpdate(update) { /* ... */ }
-async function onMessage(message) { /* ... */ }
-
+/**
+ * 處理來自 Telegram 的 Webhook 請求
+ */
+async function handleWebhook(event) {
+  if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
+    return new Response('Unauthorized', { status: 403 });
+  }
+  const update = await event.request.json();
+  event.waitUntil(onUpdate(update));
+  return new Response('Ok');
+}
 
 /**
- * 【核心修改】: 處理寶可夢名稱搜尋的函式，增加了快取清除機制
+ * 處理收到的訊息更新，並進行 User ID 驗證
+ */
+async function onUpdate(update) {
+  let allowedUserIds = [];
+  try {
+    if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
+      allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
+    }
+  } catch (e) {
+    console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
+  }
+  
+  if ('message' in update && update.message.from) {
+    const user = update.message.from;
+    const userId = user.id;
+
+    if (!allowedUserIds.includes(userId)) {
+      let userInfo = user.first_name || '';
+      if (user.last_name) userInfo += ` ${user.last_name}`;
+      if (user.username) userInfo += ` (@${user.username})`;
+      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
+      return;
+    }
+    
+    if ('text' in update.message) {
+      await onMessage(update.message);
+    }
+  }
+}
+
+/**
+ * 根據訊息內容進行路由
+ */
+async function onMessage(message) {
+  const text = message.text.trim();
+  
+  if (text.startsWith('/ranking')) {
+    return await handleRankingCommand(message.chat.id);
+  } else if (text.startsWith('/')) {
+    return sendMessage(message.chat.id, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
+  } else if (text) {
+    return await handlePokemonSearch(message.chat.id, text);
+  }
+}
+
+/**
+ * 處理寶可夢名稱搜尋的函式，支援中英文，並包含快取清除機制
  */
 async function handlePokemonSearch(chatId, query) {
   await sendMessage(chatId, `🔍 正在查詢 ${query} 的排名資料，請稍候...`);
@@ -45,10 +98,10 @@ async function handlePokemonSearch(chatId, query) {
   let searchTerm = query.toLowerCase();
   let displayName = query;
   
-  const isChinese = /[\u4e-0-9fa5]/.test(query);
+  const isChinese = /[\u4e00-\u9fa5]/.test(query);
   if (isChinese) {
     try {
-      // --- 【修改點】: 在 URL 後面加上一個隨機參數來強制繞過快取 ---
+      // 在 URL 後面加上一個隨機參數來強制繞過快取
       const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
       const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
       
@@ -57,7 +110,6 @@ async function handlePokemonSearch(chatId, query) {
       const transResponse = await fetch(translationUrl); // 暫時移除 cf 快取設定，直接請求最新版
       
       if (!transResponse.ok) {
-        // 拋出更詳細的錯誤，方便我們看到 HTTP 狀態碼
         throw new Error(`無法載入中文翻譯檔，HTTP 狀態碼: ${transResponse.status}`);
       }
       
@@ -71,12 +123,11 @@ async function handlePokemonSearch(chatId, query) {
         return await sendMessage(chatId, `很抱歉，在翻譯資料中找不到 "${query}"。`);
       }
     } catch (e) {
-      console.error("讀取中文翻譯檔時出錯:", e.message); // 印出更詳細的錯誤訊息
+      console.error("讀取中文翻譯檔時出錯:", e.message);
       return await sendMessage(chatId, `讀取中文翻譯檔時發生錯誤: ${e.message}`);
     }
   }
 
-  // ... 後續的排名查詢邏輯保持不變 ...
   const leagues = [
     { name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
     { name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
@@ -129,58 +180,9 @@ async function handlePokemonSearch(chatId, query) {
   }
 }
 
-
-// --- 為了讓程式碼完整，將其他函式貼在下方 (這些都無需修改) ---
-
-async function handleWebhook(event) {
-  if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
-    return new Response('Unauthorized', { status: 403 });
-  }
-  const update = await event.request.json();
-  event.waitUntil(onUpdate(update));
-  return new Response('Ok');
-}
-
-async function onUpdate(update) {
-  let allowedUserIds = [];
-  try {
-    if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
-      allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
-    }
-  } catch (e) {
-    console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
-  }
-  
-  if ('message' in update && update.message.from) {
-    const user = update.message.from;
-    const userId = user.id;
-
-    if (!allowedUserIds.includes(userId)) {
-      let userInfo = user.first_name || '';
-      if (user.last_name) userInfo += ` ${user.last_name}`;
-      if (user.username) userInfo += ` (@${user.username})`;
-      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
-      return;
-    }
-    
-    if ('text' in update.message) {
-      await onMessage(update.message);
-    }
-  }
-}
-
-async function onMessage(message) {
-  const text = message.text.trim();
-  
-  if (text.startsWith('/ranking')) {
-    return await handleRankingCommand(message.chat.id);
-  } else if (text.startsWith('/')) {
-    return sendMessage(message.chat.id, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
-  } else if (text) {
-    return await handlePokemonSearch(message.chat.id, text);
-  }
-}
-
+/**
+ * 處理 /ranking 指令 (舊功能)
+ */
 async function handleRankingCommand(chatId) {
   const filePath = "data/rankings_1500.json";
   const fileUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filePath}`;
@@ -193,7 +195,7 @@ async function handleRankingCommand(chatId) {
     
     const rankings = await response.json();
     const top3 = rankings.slice(0, 3).map((p, index) => 
-      `${p.speciesName} (分數: ${p.score.toFixed(2)})`
+      `${index + 1}. ${p.speciesName} (分數: ${p.score.toFixed(2)})`
     ).join('\n');
     
     const replyMessage = `🏆 超級聯盟排名前三名 🏆\n====================\n${top3}`;
@@ -205,6 +207,7 @@ async function handleRankingCommand(chatId) {
   }
 }
 
+// --- 以下是 Telegram API 的輔助函式 ---
 async function sendMessage(chatId, text, parseMode = null) {
   const params = { chat_id: chatId, text };
   if (parseMode) {
