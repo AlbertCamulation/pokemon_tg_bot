@@ -1,15 +1,19 @@
 /**
- * 結合了 Telegram Bot 功能與從 GitHub 讀取資料功能的 Worker 腳本
- * - 支援 /ranking 指令來獲取 GitHub 上的 JSON 資料
- * - 對獲取的 GitHub 資料設定了 24 小時的快取
- * - 對其他訊息執行回音功能
+ * 結合了 Telegram Bot 功能、從 GitHub 讀取資料、並包含 IP 白名單限制的 Worker 腳本
  */
 
-// --- 請修改以下 GitHub 相關設定 ---
+// --- 請修改以下設定 ---
 const GITHUB_USERNAME = "AlbertCamulation";      // 您的 GitHub 使用者名稱
 const REPO_NAME = "pokemon_tg_bot";           // 您存放 /data 資料夾的專案名稱
-const BRANCH_NAME = "main";                   // 您的分支名稱 (通常是 main)
-// ------------------------------------
+const BRANCH_NAME = "main";                   // 您的分支名稱
+
+// 【安全設定】: IP 白名單列表
+// 只有列表中的 IP 位址才能觸發這個 Worker 的所有功能
+const ALLOWED_IPS = [
+  "223.140.33.20",
+  "104.30.161.187",
+];
+// --------------------
 
 // --- Telegram Bot 相關設定 (從環境變數讀取) ---
 const TOKEN = ENV_BOT_TOKEN;
@@ -20,6 +24,24 @@ const SECRET = ENV_BOT_SECRET;
  * 主監聽事件
  */
 addEventListener('fetch', event => {
+  // --- IP 限制邏輯 ---
+  // 取得訪客的真實 IP
+  const clientIP = event.request.headers.get('CF-Connecting-IP');
+  
+  // 如果訪客的 IP 不在白名單中，立即阻擋
+  if (!ALLOWED_IPS.includes(clientIP)) {
+    // 回傳 403 Forbidden 錯誤
+    event.respondWith(
+      new Response(`Access from your IP (${clientIP}) is denied.`, {
+        status: 403,
+        statusText: 'Forbidden'
+      })
+    );
+    return; // 終止後續所有操作
+  }
+  
+  // --- URL 路由邏輯 ---
+  // 如果 IP 驗證通過，才繼續執行原本的功能
   const url = new URL(event.request.url);
   if (url.pathname === WEBHOOK) {
     event.respondWith(handleWebhook(event));
@@ -28,7 +50,7 @@ addEventListener('fetch', event => {
   } else if (url.pathname === '/unRegisterWebhook') {
     event.respondWith(unRegisterWebhook(event));
   } else {
-    event.respondWith(new Response('Ok')); // 對於其他請求，回覆 Ok 即可
+    event.respondWith(new Response('Access Allowed, but no handler for this path.'));
   }
 });
 
@@ -59,12 +81,9 @@ async function onUpdate(update) {
 async function onMessage(message) {
   const text = message.text;
   
-  // 指令路由器
   if (text.startsWith('/ranking')) {
-    // 如果是 /ranking 指令，就去 GitHub 抓資料
     return await handleRankingCommand(message.chat.id);
   } else {
-    // 否則，執行原本的鸚鵡功能
     return sendPlainText(message.chat.id, '你說了：\n' + text);
   }
 }
@@ -73,16 +92,15 @@ async function onMessage(message) {
  * 處理 /ranking 指令的函式
  */
 async function handleRankingCommand(chatId) {
-  const filePath = "data/rankings_1500.json"; // 指定要讀取的檔案
+  const filePath = "data/rankings_1500.json";
   const fileUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filePath}`;
   
   await sendPlainText(chatId, '正在從 GitHub 獲取超級聯盟排名資料，請稍候...');
 
   try {
-    // 使用 fetch 向 GitHub 請求檔案內容
     const response = await fetch(fileUrl, {
       cf: {
-        cacheTtl: 86400, // 快取時長 (秒)，86400 秒 = 1 天
+        cacheTtl: 86400, // 快取 1 天
         cacheEverything: true,
       },
     });
@@ -92,7 +110,6 @@ async function handleRankingCommand(chatId) {
     }
     const rankings = await response.json();
     
-    // 從 JSON 資料中提取前三名並格式化
     const top3 = rankings.slice(0, 3).map((p, index) => 
       `${index + 1}. ${p.speciesName} (分數: ${p.score.toFixed(2)})`
     ).join('\n');
@@ -108,7 +125,7 @@ async function handleRankingCommand(chatId) {
 }
 
 
-// --- 以下是 Telegram API 的輔助函式 (與之前相同) ---
+// --- 以下是 Telegram API 的輔助函式 ---
 
 async function sendPlainText(chatId, text) {
   return (await fetch(apiUrl('sendMessage', { chat_id: chatId, text }))).json();
