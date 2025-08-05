@@ -48295,8 +48295,8 @@
     "thirdMoveCost": 50000,
     "released": true,
     "family": {
-      "id": "FAMILY_SHELLOS",
-       "parent": "shellos"
+      "id": "FAMILY_DRIFLOON",
+      "parent": "shellos"
     }
   },
   {
