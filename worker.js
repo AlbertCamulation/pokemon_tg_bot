@@ -165,7 +165,7 @@ async function handlePokemonSearch(chatId, query) {
         foundAnyResults = true;
         replyMessage += `\n*${league.name} (${league.cp}):*\n`;
         resultsInThisLeague.forEach(p => {
-          replyMessage += `${p.speciesName} #${p.rank} (${p.score.toFixed(2)})\n`;
+          replyMessage += `#${p.rank} ${p.speciesName} (${p.score.toFixed(2)})\n`;
         });
       }
     });
