@@ -86,21 +86,27 @@ async function onMessage(message) {
     return await handlePokemonSearch(message.chat.id, text);
   }
 }
+/**
+ * 【核心】: 處理寶可夢模糊搜尋，並按聯盟分組排序顯示
+ */
 async function handlePokemonSearch(chatId, query) {
   await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
 
   try {
+    // 1. 獲取中英文對照表，並加入快取清除機制
     const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
     const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
     const transResponse = await fetch(translationUrl);
     if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
     const allPokemonData = await transResponse.json();
     
+    // 2. 進行模糊搜尋，找出所有符合條件的寶可夢
     const isChinese = /[\u4e00-\u9fa5]/.test(query);
     const lowerCaseQuery = query.toLowerCase();
     const initialMatches = allPokemonData.filter(p => isChinese ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lowerCaseQuery));
     if (initialMatches.length === 0) return await sendMessage(chatId, `很抱歉，找不到任何與 "${query}" 相關的寶可夢。`);
 
+    // 3. 擴展搜尋至整個家族
     const familyIds = new Set(initialMatches.map(p => p.family ? p.family.id : null).filter(id => id));
     const familyMatches = allPokemonData.filter(p => p.family && familyIds.has(p.family.id));
     const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
@@ -108,6 +114,7 @@ async function handlePokemonSearch(chatId, query) {
     const matchingIds = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
     const idToNameMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
+    // 4. 一次性獲取所有聯盟的排名資料
     const leagues = [
       { name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
       { name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
@@ -119,40 +126,34 @@ async function handlePokemonSearch(chatId, query) {
     );
     const allLeagueRanks = await Promise.all(fetchPromises);
 
+    // 5. 逐一聯盟處理，並彙總結果
     let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢家族排名結果 🏆\n`;
     let foundAnyResults = false;
-    const displayLimit = 5; 
 
-    finalMatches.slice(0, displayLimit).forEach(pokemon => {
-      replyMessage += `\n====================\n`;
-      replyMessage += `*${pokemon.speciesName}*\n`;
+    allLeagueRanks.forEach((rankings, index) => {
+      const league = leagues[index];
+      if (!rankings) return;
 
-      allLeagueRanks.forEach((rankings, index) => {
-        const league = leagues[index];
-        replyMessage += `\n*${league.name} (${league.cp})*:\n`;
-        if (!rankings) {
-          replyMessage += `  - 讀取資料失敗\n`;
-          return;
-        }
-        
-        const pokemonIndex = rankings.findIndex(p => p.speciesId.toLowerCase() === pokemon.speciesId.toLowerCase());
-        if (pokemonIndex !== -1) {
-          foundAnyResults = true;
-          const pokemonData = rankings[pokemonIndex];
-          const rank = pokemonIndex + 1;
-          const rating = getPokemonRating(rank); // 【新功能】 獲取評價
-          replyMessage += `  - 排名: #${rank}\n`;
-          replyMessage += `  - 評價: ${rating}\n`;   // 【新功能】 顯示評價
-          replyMessage += `  - 分數: ${pokemonData.score.toFixed(2)}\n`;
-        } else {
-          replyMessage += `  - 未在此聯盟找到排名資料\n`;
+      const resultsInThisLeague = [];
+      rankings.forEach((pokemon, rankIndex) => {
+        if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
+          resultsInThisLeague.push({
+            rank: rankIndex + 1,
+            speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
+            score: pokemon.score,
+          });
         }
       });
+      
+      if (resultsInThisLeague.length > 0) {
+        foundAnyResults = true;
+        replyMessage += `\n*${league.name} (${league.cp}):*\n`;
+        resultsInThisLeague.forEach(p => {
+          const rating = getPokemonRating(p.rank);
+          replyMessage += `${p.speciesName} #${p.rank} (${p.score.toFixed(2)}) - ${rating}\n`;
+        });
+      }
     });
-
-    if (finalMatches.length > displayLimit) {
-        replyMessage += `\n====================\n...還有 ${finalMatches.length - displayLimit} 筆相關寶可夢未顯示。`;
-    }
 
     if (!foundAnyResults) {
       replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
@@ -167,7 +168,7 @@ async function handlePokemonSearch(chatId, query) {
 }
 
 /**
- * 【新功能】: 根據排名給予評價的函式
+ * 根據排名給予評價的函式
  */
 function getPokemonRating(rank) {
   if (rank <= 20) return "🥇 S+ | Meta 核心";
@@ -176,6 +177,7 @@ function getPokemonRating(rank) {
   if (rank <= 400) return "👍 C | 非主流選擇";
   return "🤔 D | 待開發";
 }
+
 
 // --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
 async function handleWebhook(event) {
