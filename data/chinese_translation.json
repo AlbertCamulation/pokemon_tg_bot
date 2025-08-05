@@ -48293,11 +48293,7 @@
     "searchPriority": 7,
     "buddyDistance": 3,
     "thirdMoveCost": 50000,
-    "released": true,
-    "family": {
-      "id": "FAMILY_SHELLOS",
-      "parent": "shellos"
-    }
+    "released": true
   },
   {
     "dex": 424,
