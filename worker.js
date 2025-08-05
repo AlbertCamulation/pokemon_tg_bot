@@ -171,11 +171,11 @@ async function handlePokemonSearch(chatId, query) {
  * 根據排名給予評價的函式
  */
 function getPokemonRating(rank) {
-  if (rank <= 20) return "🥇 S+ | Meta 核心";
-  if (rank <= 75) return "🥈 A | Meta 相關";
-  if (rank <= 200) return "🥉 B | 環境可用";
-  if (rank <= 400) return "👍 C | 非主流選擇";
-  return "🤔 D | 待開發";
+  if (rank <= 10) return "🥇白金";
+  if (rank <= 25) return "🥇金";
+  if (rank <= 50) return "🥈銀";
+  if (rank <= 100) return "🥉銅";
+  return "垃圾";
 }
 
 
