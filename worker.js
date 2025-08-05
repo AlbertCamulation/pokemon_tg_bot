@@ -1,6 +1,7 @@
 /**
  * 整合了 Telegram Bot、從 GitHub 讀取資料、User ID 白名單、
  * 以及中英文寶可夢模糊搜尋並按聯盟分組顯示結果的 Worker 腳本
+ * (增加了針對翻譯檔的快取清除機制來解決部署問題)
  */
 
 // --- GitHub 相關設定 ---
@@ -89,21 +90,24 @@ async function onMessage(message) {
 }
 
 /**
- * 處理寶可夢模糊搜尋，並按聯盟分組排序顯示
+ * 處理寶可夢模糊搜尋並直接顯示所有結果
  */
 async function handlePokemonSearch(chatId, query) {
   await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢排名，請稍候...`);
 
   try {
     // 1. 獲取中英文對照表
-    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json`;
-    // 【新增的除錯步驟】: 讓機器人直接回傳它要存取的網址
-    await sendMessage(chatId, `[除錯] 正在嘗試讀取此 URL:\n${translationUrl}`);
-    const transResponse = await fetch(translationUrl, { cf: { cacheTtl: 86400 } });
+    // --- 【核心修正點】: 在 URL 後面加上一個隨機參數來強制繞過快取 ---
+    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+
+    // 我們不使用 Cloudflare 的 cf 快取，直接請求最新版本
+    const transResponse = await fetch(translationUrl); 
     if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
+    
     const allPokemonData = await transResponse.json();
     
-    // 2. 進行模糊搜尋，找出所有符合條件的寶可夢
+    // 2. 進行模糊搜尋
     const isChinese = /[\u4e00-\u9fa5]/.test(query);
     const lowerCaseQuery = query.toLowerCase();
     const matches = allPokemonData.filter(p => 
@@ -132,37 +136,35 @@ async function handlePokemonSearch(chatId, query) {
     );
     const allLeagueRanks = await Promise.all(fetchPromises);
 
-    // 4. 逐一聯盟處理，並彙總結果
+    // 4. 彙總所有匹配結果的排名資訊
     let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢排名結果 🏆\n`;
-    let foundAnyResults = false;
+    const displayLimit = 5;
+    
+    matches.slice(0, displayLimit).forEach(pokemon => {
+      replyMessage += `\n====================\n`;
+      replyMessage += `*${pokemon.speciesName}*\n`;
 
-    allLeagueRanks.forEach((rankings, index) => {
-      const league = leagues[index];
-      if (!rankings) return;
+      allLeagueRanks.forEach((rankings, index) => {
+        const league = leagues[index];
+        replyMessage += `\n*${league.name} (${league.cp})*:\n`;
 
-      const resultsInThisLeague = [];
-      rankings.forEach((pokemon, rankIndex) => {
-        if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
-          resultsInThisLeague.push({
-            rank: rankIndex + 1,
-            speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
-            score: pokemon.score,
-          });
+        if (!rankings) {
+          replyMessage += `  - 讀取資料失敗\n`;
+          return;
+        }
+        
+        const pokemonIndex = rankings.findIndex(p => p.speciesId.toLowerCase() === pokemon.speciesId.toLowerCase());
+        if (pokemonIndex !== -1) {
+          const pokemonData = rankings[pokemonIndex];
+          replyMessage += `  - 排名: #${pokemonIndex + 1}\n  - 分數: ${pokemonData.score.toFixed(2)}\n`;
+        } else {
+          replyMessage += `  - 未在此聯盟找到排名資料\n`;
         }
       });
-      
-      if (resultsInThisLeague.length > 0) {
-        foundAnyResults = true;
-        replyMessage += `\n====================\n`;
-        replyMessage += `*${league.name} (${league.cp}):*\n`;
-        resultsInThisLeague.forEach(p => {
-          replyMessage += `${p.speciesName} #${p.rank} (${p.score.toFixed(2)})\n`;
-        });
-      }
     });
 
-    if (!foundAnyResults) {
-      replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
+    if (matches.length > displayLimit) {
+      replyMessage += `\n====================\n...還有 ${matches.length - displayLimit} 筆結果未顯示，請使用更精準的關鍵字查詢。`;
     }
 
     return await sendMessage(chatId, replyMessage.trim(), 'Markdown');
@@ -173,9 +175,51 @@ async function handlePokemonSearch(chatId, query) {
   }
 }
 
-/**
- * 處理 /ranking 指令 (舊功能)
- */
+
+// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
+async function handleWebhook(event) {
+  if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
+    return new Response('Unauthorized', { status: 403 });
+  }
+  const update = await event.request.json();
+  event.waitUntil(onUpdate(update));
+  return new Response('Ok');
+}
+async function onUpdate(update) {
+  let allowedUserIds = [];
+  try {
+    if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
+      allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
+    }
+  } catch (e) {
+    console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
+  }
+  
+  if ('message' in update && update.message.from) {
+    const user = update.message.from;
+    const userId = user.id;
+    if (!allowedUserIds.includes(userId)) {
+      let userInfo = user.first_name || '';
+      if (user.last_name) userInfo += ` ${user.last_name}`;
+      if (user.username) userInfo += ` (@${user.username})`;
+      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
+      return;
+    }
+    if ('text' in update.message) {
+      await onMessage(update.message);
+    }
+  }
+}
+async function onMessage(message) {
+  const text = message.text.trim();
+  if (text.startsWith('/ranking')) {
+    return await handleRankingCommand(message.chat.id);
+  } else if (text.startsWith('/')) {
+    return sendMessage(message.chat.id, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
+  } else if (text) {
+    return await handlePokemonSearch(message.chat.id, text);
+  }
+}
 async function handleRankingCommand(chatId) {
   const filePath = "data/rankings_1500.json";
   const fileUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filePath}`;
@@ -192,10 +236,6 @@ async function handleRankingCommand(chatId) {
     return await sendMessage(chatId, '抱歉，獲取排名資料時發生錯誤。');
   }
 }
-
-/**
- * 傳送訊息的輔助函式，支援 Markdown
- */
 async function sendMessage(chatId, text, parseMode = null) {
   const params = { chat_id: chatId, text };
   if (parseMode) {
@@ -203,27 +243,15 @@ async function sendMessage(chatId, text, parseMode = null) {
   }
   return (await fetch(apiUrl('sendMessage', params))).json();
 }
-
-/**
- * 註冊 Webhook
- */
 async function registerWebhook(event, requestUrl, suffix, secret) {
   const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
   const r = await (await fetch(apiUrl('setWebhook', { url: webhookUrl, secret_token: secret }))).json();
   return new Response('ok' in r && r.ok ? 'Ok' : JSON.stringify(r, null, 2));
 }
-
-/**
- * 移除 Webhook
- */
 async function unRegisterWebhook(event) {
   const r = await (await fetch(apiUrl('setWebhook', { url: '' }))).json();
   return new Response('ok' in r && r.ok ? 'Ok' : JSON.stringify(r, null, 2));
 }
-
-/**
- * 組合 Telegram API 的網址
- */
 function apiUrl(methodName, params = null) {
   let query = '';
   if (params) {
