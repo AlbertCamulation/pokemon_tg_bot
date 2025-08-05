@@ -1,0 +1,4415 @@
+[
+  {
+    "speciesId": "383-Primal",
+    "speciesName": "Primal Groudon",
+    "rank": 1,
+    "types": [
+      "Ground",
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "384-Mega",
+    "speciesName": "Mega Rayquaza",
+    "rank": 2,
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "150-Shadow",
+    "speciesName": "Shadow Mewtwo",
+    "rank": 3,
+    "types": [
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "382-Primal",
+    "speciesName": "Primal Kyogre",
+    "rank": 4,
+    "types": [
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "646-Black",
+    "speciesName": "Black Kyurem",
+    "rank": 5,
+    "types": [
+      "Dragon",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "800-Dawn_Wings",
+    "speciesName": "Dawn Wings Necrozma",
+    "rank": 6,
+    "types": [
+      "Psychic",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "888-Crowned_Sword",
+    "speciesName": "Crowned Sword Zacian",
+    "rank": 7,
+    "types": [
+      "Fairy",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "257-Mega",
+    "speciesName": "Mega Blaziken",
+    "rank": 8,
+    "types": [
+      "Fire",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "646-White",
+    "speciesName": "White Kyurem",
+    "rank": 9,
+    "types": [
+      "Dragon",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "373-Shadow",
+    "speciesName": "Shadow Salamence",
+    "rank": 10,
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "448-Mega",
+    "speciesName": "Mega Lucario",
+    "rank": 11,
+    "types": [
+      "Fighting",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "464-Shadow",
+    "speciesName": "Shadow Rhyperior",
+    "rank": 12,
+    "types": [
+      "Ground",
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "486-Shadow",
+    "speciesName": "Shadow Regigigas",
+    "rank": 13,
+    "types": [
+      "Normal"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "800-Dusk_Mane",
+    "speciesName": "Dusk Mane Necrozma",
+    "rank": 14,
+    "types": [
+      "Psychic",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "445-Mega",
+    "speciesName": "Mega Garchomp",
+    "rank": 15,
+    "types": [
+      "Dragon",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "609-Shadow",
+    "speciesName": "Shadow Chandelure",
+    "rank": 16,
+    "types": [
+      "Ghost",
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "282-Mega",
+    "speciesName": "Mega Gardevoir",
+    "rank": 17,
+    "types": [
+      "Psychic",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "248-Mega",
+    "speciesName": "Mega Tyranitar",
+    "rank": 18,
+    "types": [
+      "Rock",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "889-Crowned_Shield",
+    "speciesName": "Crowned Shield Zamazenta",
+    "rank": 19,
+    "types": [
+      "Fighting",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "94-Mega",
+    "speciesName": "Mega Gengar",
+    "rank": 20,
+    "types": [
+      "Ghost",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "373-Mega",
+    "speciesName": "Mega Salamence",
+    "rank": 21,
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "248-Shadow",
+    "speciesName": "Shadow Tyranitar",
+    "rank": 22,
+    "types": [
+      "Rock",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "473-Shadow",
+    "speciesName": "Shadow Mamoswine",
+    "rank": 23,
+    "types": [
+      "Ice",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "214-Mega",
+    "speciesName": "Mega Heracross",
+    "rank": 24,
+    "types": [
+      "Bug",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "445-Shadow",
+    "speciesName": "Shadow Garchomp",
+    "rank": 25,
+    "types": [
+      "Dragon",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "475-Mega",
+    "speciesName": "Mega Gallade",
+    "rank": 26,
+    "types": [
+      "Psychic",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "384",
+    "speciesName": "Rayquaza",
+    "rank": 27,
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "383-Shadow",
+    "speciesName": "Shadow Groudon",
+    "rank": 28,
+    "types": [
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "6-Mega_Y",
+    "speciesName": "Mega Y Charizard",
+    "rank": 29,
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "257-Shadow",
+    "speciesName": "Shadow Blaziken",
+    "rank": 30,
+    "types": [
+      "Fire",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "376-Shadow",
+    "speciesName": "Shadow Metagross",
+    "rank": 31,
+    "types": [
+      "Steel",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "530-Shadow",
+    "speciesName": "Shadow Excadrill",
+    "rank": 32,
+    "types": [
+      "Ground",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "254-Mega",
+    "speciesName": "Mega Sceptile",
+    "rank": 33,
+    "types": [
+      "Grass",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "146-Shadow",
+    "speciesName": "Shadow Moltres",
+    "rank": 34,
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "65-Mega",
+    "speciesName": "Mega Alakazam",
+    "rank": 35,
+    "types": [
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "719-Mega",
+    "speciesName": "Mega Diancie",
+    "rank": 36,
+    "types": [
+      "Rock",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "639",
+    "speciesName": "Terrakion",
+    "rank": 37,
+    "types": [
+      "Rock",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "485-Shadow",
+    "speciesName": "Shadow Heatran",
+    "rank": 38,
+    "types": [
+      "Fire",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "409-Shadow",
+    "speciesName": "Shadow Rampardos",
+    "rank": 39,
+    "types": [
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "260-Mega",
+    "speciesName": "Mega Swampert",
+    "rank": 40,
+    "types": [
+      "Water",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "461-Shadow",
+    "speciesName": "Shadow Weavile",
+    "rank": 41,
+    "types": [
+      "Dark",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "145-Shadow",
+    "speciesName": "Shadow Zapdos",
+    "rank": 42,
+    "types": [
+      "Electric",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "500-Shadow",
+    "speciesName": "Shadow Emboar",
+    "rank": 43,
+    "types": [
+      "Fire",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "645-Therian",
+    "speciesName": "Therian Forme Landorus",
+    "rank": 44,
+    "types": [
+      "Ground",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "806",
+    "speciesName": "Blacephalon",
+    "rank": 45,
+    "types": [
+      "Fire",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "697-Shadow",
+    "speciesName": "Shadow Tyrantrum",
+    "rank": 46,
+    "types": [
+      "Rock",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "555-Standard_Shadow",
+    "speciesName": "Standard Mode Shadow Darmanitan",
+    "rank": 47,
+    "types": [
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "796",
+    "speciesName": "Xurkitree",
+    "rank": 48,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "229-Mega",
+    "speciesName": "Mega Houndoom",
+    "rank": 49,
+    "types": [
+      "Dark",
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "534-Shadow",
+    "speciesName": "Shadow Conkeldurr",
+    "rank": 50,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "448",
+    "speciesName": "Lucario",
+    "rank": 51,
+    "types": [
+      "Fighting",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "381-Mega",
+    "speciesName": "Mega Latios",
+    "rank": 52,
+    "types": [
+      "Dragon",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "643",
+    "speciesName": "Reshiram",
+    "rank": 53,
+    "types": [
+      "Dragon",
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "243-Shadow",
+    "speciesName": "Shadow Raikou",
+    "rank": 54,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "894",
+    "speciesName": "Regieleki",
+    "rank": 55,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "250-Apex_Shadow",
+    "speciesName": "Apex Shadow Ho-Oh",
+    "rank": 56,
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "483-Shadow",
+    "speciesName": "Shadow Dialga",
+    "rank": 57,
+    "types": [
+      "Steel",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "150",
+    "speciesName": "Mewtwo",
+    "rank": 58,
+    "types": [
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "644",
+    "speciesName": "Zekrom",
+    "rank": 59,
+    "types": [
+      "Dragon",
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "250-Shadow",
+    "speciesName": "Shadow Ho-Oh",
+    "rank": 60,
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "526-Shadow",
+    "speciesName": "Shadow Gigalith",
+    "rank": 61,
+    "types": [
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "382-Shadow",
+    "speciesName": "Shadow Kyogre",
+    "rank": 62,
+    "types": [
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "798",
+    "speciesName": "Kartana",
+    "rank": 63,
+    "types": [
+      "Grass",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "6-Mega_X",
+    "speciesName": "Mega X Charizard",
+    "rank": 64,
+    "types": [
+      "Fire",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "466-Shadow",
+    "speciesName": "Shadow Electivire",
+    "rank": 65,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "142-Mega",
+    "speciesName": "Mega Aerodactyl",
+    "rank": 66,
+    "types": [
+      "Rock",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "68-Shadow",
+    "speciesName": "Shadow Machamp",
+    "rank": 67,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "359-Mega",
+    "speciesName": "Mega Absol",
+    "rank": 68,
+    "types": [
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "462-Shadow",
+    "speciesName": "Shadow Magnezone",
+    "rank": 69,
+    "types": [
+      "Electric",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "642-Therian",
+    "speciesName": "Therian Forme Thundurus",
+    "rank": 70,
+    "types": [
+      "Electric",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "398-Shadow",
+    "speciesName": "Shadow Staraptor",
+    "rank": 71,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "647-Ordinary",
+    "speciesName": "Keldeo (Ordinary Forme)",
+    "rank": 72,
+    "types": [
+      "Water",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "130-Mega",
+    "speciesName": "Mega Gyarados",
+    "rank": 73,
+    "types": [
+      "Water",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "6-Shadow",
+    "speciesName": "Shadow Charizard",
+    "rank": 74,
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "383",
+    "speciesName": "Groudon",
+    "rank": 75,
+    "types": [
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "244-Shadow",
+    "speciesName": "Shadow Entei",
+    "rank": 76,
+    "types": [
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "905-Incarnate",
+    "speciesName": "Incarnate Forme Enamorus",
+    "rank": 77,
+    "types": [
+      "Fairy",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "310-Mega",
+    "speciesName": "Mega Manectric",
+    "rank": 78,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "464",
+    "speciesName": "Rhyperior",
+    "rank": 79,
+    "types": [
+      "Ground",
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "297-Shadow",
+    "speciesName": "Shadow Hariyama",
+    "rank": 80,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "792",
+    "speciesName": "Lunala",
+    "rank": 81,
+    "types": [
+      "Psychic",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "484-Shadow",
+    "speciesName": "Shadow Palkia",
+    "rank": 82,
+    "types": [
+      "Water",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "430-Shadow",
+    "speciesName": "Shadow Honchkrow",
+    "rank": 83,
+    "types": [
+      "Dark",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "282-Shadow",
+    "speciesName": "Shadow Gardevoir",
+    "rank": 84,
+    "types": [
+      "Psychic",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "381-Shadow",
+    "speciesName": "Shadow Latios",
+    "rank": 85,
+    "types": [
+      "Dragon",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "94-Shadow",
+    "speciesName": "Shadow Gengar",
+    "rank": 86,
+    "types": [
+      "Ghost",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "609",
+    "speciesName": "Chandelure",
+    "rank": 87,
+    "types": [
+      "Ghost",
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "354-Mega",
+    "speciesName": "Mega Banette",
+    "rank": 88,
+    "types": [
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "181-Mega",
+    "speciesName": "Mega Ampharos",
+    "rank": 89,
+    "types": [
+      "Electric",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "492-Sky",
+    "speciesName": "Sky Forme Shaymin",
+    "rank": 90,
+    "types": [
+      "Grass",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "65-Shadow",
+    "speciesName": "Shadow Alakazam",
+    "rank": 91,
+    "types": [
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "260-Shadow",
+    "speciesName": "Shadow Swampert",
+    "rank": 92,
+    "types": [
+      "Water",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "720-Unbound",
+    "speciesName": "Hoopa Unbound",
+    "rank": 93,
+    "types": [
+      "Psychic",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "3-Mega",
+    "speciesName": "Mega Venusaur",
+    "rank": 94,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "254-Shadow",
+    "speciesName": "Shadow Sceptile",
+    "rank": 95,
+    "types": [
+      "Grass"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "373",
+    "speciesName": "Salamence",
+    "rank": 96,
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "9-Mega",
+    "speciesName": "Mega Blastoise",
+    "rank": 97,
+    "types": [
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "359-Shadow",
+    "speciesName": "Shadow Absol",
+    "rank": 98,
+    "types": [
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "15-Mega",
+    "speciesName": "Mega Beedrill",
+    "rank": 99,
+    "types": [
+      "Bug",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "483-Origin",
+    "speciesName": "Origin Forme Dialga",
+    "rank": 100,
+    "types": [
+      "Steel",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "465-Shadow",
+    "speciesName": "Shadow Tangrowth",
+    "rank": 101,
+    "types": [
+      "Grass"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "392-Shadow",
+    "speciesName": "Shadow Infernape",
+    "rank": 102,
+    "types": [
+      "Fire",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "637",
+    "speciesName": "Volcarona",
+    "rank": 103,
+    "types": [
+      "Bug",
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "248",
+    "speciesName": "Tyranitar",
+    "rank": 104,
+    "types": [
+      "Rock",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "3-Shadow",
+    "speciesName": "Shadow Venusaur",
+    "rank": 105,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "717",
+    "speciesName": "Yveltal",
+    "rank": 106,
+    "types": [
+      "Dark",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "892-Rapid_Strike",
+    "speciesName": "Urshifu (Rapid Strike Style)",
+    "rank": 107,
+    "types": [
+      "Fighting",
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "127-Mega",
+    "speciesName": "Mega Pinsir",
+    "rank": 108,
+    "types": [
+      "Bug",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "157-Shadow",
+    "speciesName": "Shadow Typhlosion",
+    "rank": 109,
+    "types": [
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "409",
+    "speciesName": "Rampardos",
+    "rank": 110,
+    "types": [
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "76-Alola_Shadow",
+    "speciesName": "Shadow Alolan Golem",
+    "rank": 111,
+    "types": [
+      "Rock",
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "892-Single_Strike",
+    "speciesName": "Urshifu (Single Strike Style)",
+    "rank": 112,
+    "types": [
+      "Fighting",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "428-Mega",
+    "speciesName": "Mega Lopunny",
+    "rank": 113,
+    "types": [
+      "Normal",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "893",
+    "speciesName": "Zarude",
+    "rank": 114,
+    "types": [
+      "Dark",
+      "Grass"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "445",
+    "speciesName": "Garchomp",
+    "rank": 115,
+    "types": [
+      "Dragon",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "473",
+    "speciesName": "Mamoswine",
+    "rank": 116,
+    "types": [
+      "Ice",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "99-Shadow",
+    "speciesName": "Shadow Kingler",
+    "rank": 117,
+    "types": [
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "376",
+    "speciesName": "Metagross",
+    "rank": 118,
+    "types": [
+      "Steel",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "103-Shadow",
+    "speciesName": "Shadow Exeggutor",
+    "rank": 119,
+    "types": [
+      "Grass",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "405-Shadow",
+    "speciesName": "Shadow Luxray",
+    "rank": 120,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "491",
+    "speciesName": "Darkrai",
+    "rank": 121,
+    "types": [
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "623-Shadow",
+    "speciesName": "Shadow Golurk",
+    "rank": 122,
+    "types": [
+      "Ground",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "864-Shadow",
+    "speciesName": "Shadow Cursola",
+    "rank": 123,
+    "types": [
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "530",
+    "speciesName": "Excadrill",
+    "rank": 124,
+    "types": [
+      "Ground",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "380-Mega",
+    "speciesName": "Mega Latias",
+    "rank": 125,
+    "types": [
+      "Dragon",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "699-Shadow",
+    "speciesName": "Shadow Aurorus",
+    "rank": 126,
+    "types": [
+      "Rock",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "865-Shadow",
+    "speciesName": "Shadow Sirfetch'd",
+    "rank": 127,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "18-Mega",
+    "speciesName": "Mega Pidgeot",
+    "rank": 128,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "112-Shadow",
+    "speciesName": "Shadow Rhydon",
+    "rank": 129,
+    "types": [
+      "Ground",
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "795",
+    "speciesName": "Pheromosa",
+    "rank": 130,
+    "types": [
+      "Bug",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "467-Shadow",
+    "speciesName": "Shadow Magmortar",
+    "rank": 131,
+    "types": [
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "76-Shadow",
+    "speciesName": "Shadow Golem",
+    "rank": 132,
+    "types": [
+      "Rock",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "149-Shadow",
+    "speciesName": "Shadow Dragonite",
+    "rank": 133,
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "887",
+    "speciesName": "Dragapult",
+    "rank": 134,
+    "types": [
+      "Dragon",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "407",
+    "speciesName": "Roserade",
+    "rank": 135,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "229-Shadow",
+    "speciesName": "Shadow Houndoom",
+    "rank": 136,
+    "types": [
+      "Dark",
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "475-Shadow",
+    "speciesName": "Shadow Gallade",
+    "rank": 137,
+    "types": [
+      "Psychic",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "382",
+    "speciesName": "Kyogre",
+    "rank": 138,
+    "types": [
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "389-Shadow",
+    "speciesName": "Shadow Torterra",
+    "rank": 139,
+    "types": [
+      "Grass",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "635",
+    "speciesName": "Hydreigon",
+    "rank": 140,
+    "types": [
+      "Dark",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "503-Shadow",
+    "speciesName": "Shadow Samurott",
+    "rank": 141,
+    "types": [
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "454-Shadow",
+    "speciesName": "Shadow Toxicroak",
+    "rank": 142,
+    "types": [
+      "Poison",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "645-Incarnate",
+    "speciesName": "Incarnate Forme Landorus",
+    "rank": 143,
+    "types": [
+      "Ground",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "395-Shadow",
+    "speciesName": "Shadow Empoleon",
+    "rank": 144,
+    "types": [
+      "Water",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "998",
+    "speciesName": "Baxcalibur",
+    "rank": 145,
+    "types": [
+      "Dragon",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "286",
+    "speciesName": "Breloom",
+    "rank": 146,
+    "types": [
+      "Grass",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "484-Origin",
+    "speciesName": "Origin Forme Palkia",
+    "rank": 147,
+    "types": [
+      "Water",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "212-Mega",
+    "speciesName": "Mega Scizor",
+    "rank": 148,
+    "types": [
+      "Bug",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "243",
+    "speciesName": "Raikou",
+    "rank": 149,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "212-Shadow",
+    "speciesName": "Shadow Scizor",
+    "rank": 150,
+    "types": [
+      "Bug",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "483",
+    "speciesName": "Dialga",
+    "rank": 151,
+    "types": [
+      "Steel",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "534",
+    "speciesName": "Conkeldurr",
+    "rank": 152,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "306-Shadow",
+    "speciesName": "Shadow Aggron",
+    "rank": 153,
+    "types": [
+      "Steel",
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "474-Shadow",
+    "speciesName": "Shadow Porygon-Z",
+    "rank": 154,
+    "types": [
+      "Normal"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "567-Shadow",
+    "speciesName": "Shadow Archeops",
+    "rank": 155,
+    "types": [
+      "Rock",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "103-Alola_Shadow",
+    "speciesName": "Shadow Alolan Exeggutor",
+    "rank": 156,
+    "types": [
+      "Grass",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "466",
+    "speciesName": "Electivire",
+    "rank": 157,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "232-Shadow",
+    "speciesName": "Shadow Donphan",
+    "rank": 158,
+    "types": [
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "160-Shadow",
+    "speciesName": "Shadow Feraligatr",
+    "rank": 159,
+    "types": [
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "979-Shadow",
+    "speciesName": "Shadow Annihilape",
+    "rank": 160,
+    "types": [
+      "Fighting",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "144-Galarian",
+    "speciesName": "Galarian Articuno",
+    "rank": 161,
+    "types": [
+      "Psychic",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "450-Shadow",
+    "speciesName": "Shadow Hippowdon",
+    "rank": 162,
+    "types": [
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "787",
+    "speciesName": "Tapu Bulu",
+    "rank": 163,
+    "types": [
+      "Grass",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "257",
+    "speciesName": "Blaziken",
+    "rank": 164,
+    "types": [
+      "Fire",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "903-Shadow",
+    "speciesName": "Shadow Sneasler",
+    "rank": 165,
+    "types": [
+      "Fighting",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "697",
+    "speciesName": "Tyrantrum",
+    "rank": 166,
+    "types": [
+      "Rock",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "130-Shadow",
+    "speciesName": "Shadow Gyarados",
+    "rank": 167,
+    "types": [
+      "Water",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "146",
+    "speciesName": "Moltres",
+    "rank": 168,
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "1000",
+    "speciesName": "Gholdengo",
+    "rank": 169,
+    "types": [
+      "Steel",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "802",
+    "speciesName": "Marshadow",
+    "rank": 170,
+    "types": [
+      "Fighting",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "555-Galarian_Standard",
+    "speciesName": "Galarian Standard Mode Darmanitan",
+    "rank": 171,
+    "types": [
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "786",
+    "speciesName": "Tapu Lele",
+    "rank": 172,
+    "types": [
+      "Psychic",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "310-Shadow",
+    "speciesName": "Shadow Manectric",
+    "rank": 173,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "142-Shadow",
+    "speciesName": "Shadow Aerodactyl",
+    "rank": 174,
+    "types": [
+      "Rock",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "460-Mega",
+    "speciesName": "Mega Abomasnow",
+    "rank": 175,
+    "types": [
+      "Grass",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "866-Shadow",
+    "speciesName": "Shadow Mr. Rime",
+    "rank": 176,
+    "types": [
+      "Ice",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "249-Apex_Shadow",
+    "speciesName": "Apex Shadow Lugia",
+    "rank": 177,
+    "types": [
+      "Psychic",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "71-Shadow",
+    "speciesName": "Shadow Victreebel",
+    "rank": 178,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "908",
+    "speciesName": "Meowscarada",
+    "rank": 179,
+    "types": [
+      "Grass",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "485",
+    "speciesName": "Heatran",
+    "rank": 180,
+    "types": [
+      "Fire",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "720-Confined",
+    "speciesName": "Hoopa Confined",
+    "rank": 181,
+    "types": [
+      "Psychic",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "461",
+    "speciesName": "Weavile",
+    "rank": 182,
+    "types": [
+      "Dark",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "812",
+    "speciesName": "Rillaboom",
+    "rank": 183,
+    "types": [
+      "Grass"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "785",
+    "speciesName": "Tapu Koko",
+    "rank": 184,
+    "types": [
+      "Electric",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "380-Shadow",
+    "speciesName": "Shadow Latias",
+    "rank": 185,
+    "types": [
+      "Dragon",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "793",
+    "speciesName": "Nihilego",
+    "rank": 186,
+    "types": [
+      "Rock",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "59-Shadow",
+    "speciesName": "Shadow Arcanine",
+    "rank": 187,
+    "types": [
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "342-Shadow",
+    "speciesName": "Shadow Crawdaunt",
+    "rank": 188,
+    "types": [
+      "Water",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "804",
+    "speciesName": "Naganadel",
+    "rank": 189,
+    "types": [
+      "Poison",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "555-Standard",
+    "speciesName": "Standard Mode Darmanitan",
+    "rank": 190,
+    "types": [
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "724-Hisuian",
+    "speciesName": "Hisuian Decidueye",
+    "rank": 191,
+    "types": [
+      "Grass",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "145-Galarian",
+    "speciesName": "Galarian Zapdos",
+    "rank": 192,
+    "types": [
+      "Fighting",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "362-Mega",
+    "speciesName": "Mega Glalie",
+    "rank": 193,
+    "types": [
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "330-Shadow",
+    "speciesName": "Shadow Flygon",
+    "rank": 194,
+    "types": [
+      "Ground",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "462",
+    "speciesName": "Magnezone",
+    "rank": 195,
+    "types": [
+      "Electric",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "145",
+    "speciesName": "Zapdos",
+    "rank": 196,
+    "types": [
+      "Electric",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "649-Chill",
+    "speciesName": "Genesect (Chill Drive)",
+    "rank": 197,
+    "types": [
+      "Bug",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "68",
+    "speciesName": "Machamp",
+    "rank": 198,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "895",
+    "speciesName": "Regidrago",
+    "rank": 199,
+    "types": [
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "555",
+    "speciesName": "Darmanitan",
+    "rank": 200,
+    "types": [
+      "Fire"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "649-Shock",
+    "speciesName": "Genesect (Shock Drive)",
+    "rank": 201,
+    "types": [
+      "Bug",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "983",
+    "speciesName": "Kingambit",
+    "rank": 202,
+    "types": [
+      "Dark",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "306-Mega",
+    "speciesName": "Mega Aggron",
+    "rank": 203,
+    "types": [
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "646",
+    "speciesName": "Kyurem",
+    "rank": 204,
+    "types": [
+      "Dragon",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "127-Shadow",
+    "speciesName": "Shadow Pinsir",
+    "rank": 205,
+    "types": [
+      "Bug"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "649-Normal",
+    "speciesName": "Genesect",
+    "rank": 206,
+    "types": [
+      "Bug",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "144-Shadow",
+    "speciesName": "Shadow Articuno",
+    "rank": 207,
+    "types": [
+      "Ice",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "359",
+    "speciesName": "Absol",
+    "rank": 208,
+    "types": [
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "730",
+    "speciesName": "Primarina",
+    "rank": 209,
+    "types": [
+      "Water",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "486",
+    "speciesName": "Regigigas",
+    "rank": 210,
+    "types": [
+      "Normal"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "487-Origin",
+    "speciesName": "Giratina (Origin Forme)",
+    "rank": 211,
+    "types": [
+      "Ghost",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "612",
+    "speciesName": "Haxorus",
+    "rank": 212,
+    "types": [
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "526",
+    "speciesName": "Gigalith",
+    "rank": 213,
+    "types": [
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "649-Douse",
+    "speciesName": "Genesect (Douse Drive)",
+    "rank": 214,
+    "types": [
+      "Bug",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "901-Shadow",
+    "speciesName": "Shadow Ursaluna",
+    "rank": 215,
+    "types": [
+      "Ground",
+      "Normal"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "724",
+    "speciesName": "Decidueye",
+    "rank": 216,
+    "types": [
+      "Grass",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "914",
+    "speciesName": "Quaquaval",
+    "rank": 217,
+    "types": [
+      "Water",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "521-Shadow",
+    "speciesName": "Shadow Unfezant",
+    "rank": 218,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "398",
+    "speciesName": "Staraptor",
+    "rank": 219,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "471",
+    "speciesName": "Glaceon",
+    "rank": 220,
+    "types": [
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "82-Shadow",
+    "speciesName": "Shadow Magneton",
+    "rank": 221,
+    "types": [
+      "Electric",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "139-Shadow",
+    "speciesName": "Shadow Omastar",
+    "rank": 222,
+    "types": [
+      "Rock",
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "649-Burn",
+    "speciesName": "Genesect (Burn Drive)",
+    "rank": 223,
+    "types": [
+      "Bug",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "975",
+    "speciesName": "Cetitan",
+    "rank": 224,
+    "types": [
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "539-Shadow",
+    "speciesName": "Shadow Sawk",
+    "rank": 225,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "94",
+    "speciesName": "Gengar",
+    "rank": 226,
+    "types": [
+      "Ghost",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "249-Shadow",
+    "speciesName": "Shadow Lugia",
+    "rank": 227,
+    "types": [
+      "Psychic",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "727",
+    "speciesName": "Incineroar",
+    "rank": 228,
+    "types": [
+      "Fire",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "484",
+    "speciesName": "Palkia",
+    "rank": 229,
+    "types": [
+      "Water",
+      "Dragon"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "297",
+    "speciesName": "Hariyama",
+    "rank": 230,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "589-Shadow",
+    "speciesName": "Shadow Escavalier",
+    "rank": 231,
+    "types": [
+      "Bug",
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "658",
+    "speciesName": "Greninja",
+    "rank": 232,
+    "types": [
+      "Water",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "699",
+    "speciesName": "Aurorus",
+    "rank": 233,
+    "types": [
+      "Rock",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "652",
+    "speciesName": "Chesnaught",
+    "rank": 234,
+    "types": [
+      "Grass",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "794",
+    "speciesName": "Buzzwole",
+    "rank": 235,
+    "types": [
+      "Bug",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "45-Shadow",
+    "speciesName": "Shadow Vileplume",
+    "rank": 236,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "34-Shadow",
+    "speciesName": "Shadow Nidoking",
+    "rank": 237,
+    "types": [
+      "Poison",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "523-Shadow",
+    "speciesName": "Shadow Zebstrika",
+    "rank": 238,
+    "types": [
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "545-Shadow",
+    "speciesName": "Shadow Scolipede",
+    "rank": 239,
+    "types": [
+      "Bug",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "99",
+    "speciesName": "Kingler",
+    "rank": 240,
+    "types": [
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "332-Shadow",
+    "speciesName": "Shadow Cacturne",
+    "rank": 241,
+    "types": [
+      "Grass",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "275-Shadow",
+    "speciesName": "Shadow Shiftry",
+    "rank": 242,
+    "types": [
+      "Grass",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "655",
+    "speciesName": "Delphox",
+    "rank": 243,
+    "types": [
+      "Fire",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "154-Shadow",
+    "speciesName": "Shadow Meganium",
+    "rank": 244,
+    "types": [
+      "Grass"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "553",
+    "speciesName": "Krookodile",
+    "rank": 245,
+    "types": [
+      "Ground",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "254",
+    "speciesName": "Sceptile",
+    "rank": 246,
+    "types": [
+      "Grass"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "641-Therian",
+    "speciesName": "Therian Forme Tornadus",
+    "rank": 247,
+    "types": [
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "381",
+    "speciesName": "Latios",
+    "rank": 248,
+    "types": [
+      "Dragon",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "763",
+    "speciesName": "Tsareena",
+    "rank": 249,
+    "types": [
+      "Grass"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "874",
+    "speciesName": "Stonjourner",
+    "rank": 250,
+    "types": [
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "638",
+    "speciesName": "Cobalion",
+    "rank": 251,
+    "types": [
+      "Steel",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "65",
+    "speciesName": "Alakazam",
+    "rank": 252,
+    "types": [
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "38-Alola_Shadow",
+    "speciesName": "Shadow Alolan Ninetales",
+    "rank": 253,
+    "types": [
+      "Ice",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "571-Hisuian",
+    "speciesName": "Hisuian Zoroark",
+    "rank": 254,
+    "types": [
+      "Normal",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "623",
+    "speciesName": "Golurk",
+    "rank": 255,
+    "types": [
+      "Ground",
+      "Ghost"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "112",
+    "speciesName": "Rhydon",
+    "rank": 256,
+    "types": [
+      "Ground",
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "716",
+    "speciesName": "Xerneas",
+    "rank": 257,
+    "types": [
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "460-Shadow",
+    "speciesName": "Shadow Abomasnow",
+    "rank": 258,
+    "types": [
+      "Grass",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "365-Shadow",
+    "speciesName": "Shadow Walrein",
+    "rank": 259,
+    "types": [
+      "Ice",
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "378-Shadow",
+    "speciesName": "Shadow Regice",
+    "rank": 260,
+    "types": [
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "721",
+    "speciesName": "Volcanion",
+    "rank": 261,
+    "types": [
+      "Fire",
+      "Water"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "640",
+    "speciesName": "Virizion",
+    "rank": 262,
+    "types": [
+      "Grass",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "584",
+    "speciesName": "Vanilluxe",
+    "rank": 263,
+    "types": [
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "701",
+    "speciesName": "Hawlucha",
+    "rank": 264,
+    "types": [
+      "Fighting",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "123-Shadow",
+    "speciesName": "Shadow Scyther",
+    "rank": 265,
+    "types": [
+      "Bug",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "713",
+    "speciesName": "Avalugg",
+    "rank": 266,
+    "types": [
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "500",
+    "speciesName": "Emboar",
+    "rank": 267,
+    "types": [
+      "Fire",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "91-Shadow",
+    "speciesName": "Shadow Cloyster",
+    "rank": 268,
+    "types": [
+      "Water",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "809",
+    "speciesName": "Melmetal",
+    "rank": 269,
+    "types": [
+      "Steel"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "465",
+    "speciesName": "Tangrowth",
+    "rank": 270,
+    "types": [
+      "Grass"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "196",
+    "speciesName": "Espeon",
+    "rank": 271,
+    "types": [
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "62-Shadow",
+    "speciesName": "Shadow Poliwrath",
+    "rank": 272,
+    "types": [
+      "Water",
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "866",
+    "speciesName": "Mr. Rime",
+    "rank": 273,
+    "types": [
+      "Ice",
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "210-Shadow",
+    "speciesName": "Shadow Granbull",
+    "rank": 274,
+    "types": [
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "76",
+    "speciesName": "Golem",
+    "rank": 275,
+    "types": [
+      "Rock",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "3",
+    "speciesName": "Venusaur",
+    "rank": 276,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "149",
+    "speciesName": "Dragonite",
+    "rank": 277,
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "221-Shadow",
+    "speciesName": "Shadow Piloswine",
+    "rank": 278,
+    "types": [
+      "Ice",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "142",
+    "speciesName": "Aerodactyl",
+    "rank": 279,
+    "types": [
+      "Rock",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "472-Shadow",
+    "speciesName": "Shadow Gliscor",
+    "rank": 280,
+    "types": [
+      "Ground",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "306",
+    "speciesName": "Aggron",
+    "rank": 281,
+    "types": [
+      "Steel",
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "131-Shadow",
+    "speciesName": "Shadow Lapras",
+    "rank": 282,
+    "types": [
+      "Water",
+      "Ice"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "558-Shadow",
+    "speciesName": "Shadow Crustle",
+    "rank": 283,
+    "types": [
+      "Bug",
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "260",
+    "speciesName": "Swampert",
+    "rank": 284,
+    "types": [
+      "Water",
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "377-Shadow",
+    "speciesName": "Shadow Regirock",
+    "rank": 285,
+    "types": [
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "571",
+    "speciesName": "Zoroark",
+    "rank": 286,
+    "types": [
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "232",
+    "speciesName": "Donphan",
+    "rank": 287,
+    "types": [
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "89-Alola_Shadow",
+    "speciesName": "Shadow Alolan Muk",
+    "rank": 288,
+    "types": [
+      "Poison",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "282",
+    "speciesName": "Gardevoir",
+    "rank": 289,
+    "types": [
+      "Psychic",
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "738",
+    "speciesName": "Vikavolt",
+    "rank": 290,
+    "types": [
+      "Bug",
+      "Electric"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "28-Shadow",
+    "speciesName": "Shadow Sandslash",
+    "rank": 291,
+    "types": [
+      "Ground"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "144",
+    "speciesName": "Articuno",
+    "rank": 292,
+    "types": [
+      "Ice",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "468",
+    "speciesName": "Togekiss",
+    "rank": 293,
+    "types": [
+      "Fairy",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "628",
+    "speciesName": "Braviary",
+    "rank": 294,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "6",
+    "speciesName": "Charizard",
+    "rank": 295,
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "319-Shadow",
+    "speciesName": "Shadow Sharpedo",
+    "rank": 296,
+    "types": [
+      "Water",
+      "Dark"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "386-Normal",
+    "speciesName": "Deoxys",
+    "rank": 297,
+    "types": [
+      "Psychic"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "888-Hero",
+    "speciesName": "Zacian (Hero of Many Battles)",
+    "rank": 298,
+    "types": [
+      "Fairy"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "745-Dusk",
+    "speciesName": "Lycanroc (Dusk Form)",
+    "rank": 299,
+    "types": [
+      "Rock"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  },
+  {
+    "speciesId": "106-Shadow",
+    "speciesName": "Shadow Hitmonlee",
+    "rank": 300,
+    "types": [
+      "Fighting"
+    ],
+    "rating": null,
+    "matchups": [],
+    "counters": [],
+    "moveset": [],
+    "score": null,
+    "stats": {}
+  }
+]
