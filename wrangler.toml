@@ -9,3 +9,6 @@ main = "worker.js"
 
 # 相容性日期
 compatibility_date = "2025-08-05"
+
+[observability.logs]
+enabled = true
