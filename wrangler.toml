@@ -2,7 +2,8 @@
 
 # 您的 Worker 名稱，請確保這與您在 Cloudflare 儀表板上設定的名稱一致
 # 根據日誌提示，您的 Worker 名稱應該是 "odd-queen-86d1"
-name = "odd-queen-86d1"
+# wrangler.toml
+name = 'cool-bread-8c9a'
 
 # 相容性日期，這是本次錯誤的關鍵
 compatibility_date = "2025-08-04"
