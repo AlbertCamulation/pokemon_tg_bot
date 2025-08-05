@@ -97,6 +97,8 @@ async function handlePokemonSearch(chatId, query) {
   try {
     // 1. 獲取中英文對照表
     const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json`;
+    // 【新增的除錯步驟】: 讓機器人直接回傳它要存取的網址
+    await sendMessage(chatId, `[除錯] 正在嘗試讀取此 URL:\n${translationUrl}`);
     const transResponse = await fetch(translationUrl, { cf: { cacheTtl: 86400 } });
     if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
     const allPokemonData = await transResponse.json();
