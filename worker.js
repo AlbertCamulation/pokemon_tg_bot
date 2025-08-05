@@ -1,5 +1,6 @@
 /**
- * 整合了 Telegram Bot 功能、從 GitHub 讀取資料、並從環境變數讀取 User ID 白名單的 Worker 腳本
+ * 結合了 Telegram Bot 功能、從 GitHub 讀取資料、並從環境變數讀取 User ID 白名單的 Worker 腳本
+ * (已修正為 Service Worker 語法)
  */
 
 // --- GitHub 相關設定 ---
@@ -8,7 +9,7 @@ const REPO_NAME = "pokemon_tg_bot";
 const BRANCH_NAME = "main";
 // --------------------
 
-// --- Telegram Bot 相關設定 (從環境變數讀取) ---
+// --- Telegram Bot 相關設定 (直接從全域變數讀取) ---
 const TOKEN = ENV_BOT_TOKEN;
 const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
@@ -19,8 +20,8 @@ const SECRET = ENV_BOT_SECRET;
 addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.pathname === WEBHOOK) {
-    // 【修改點 1】: 將 env 物件傳遞給下一個函式
-    event.respondWith(handleWebhook(event, env));
+    // 【修正點】: 不再傳遞不存在的 env 物件
+    event.respondWith(handleWebhook(event));
   } else if (url.pathname === '/registerWebhook') {
     event.respondWith(registerWebhook(event, url, WEBHOOK, SECRET));
   } else if (url.pathname === '/unRegisterWebhook') {
@@ -33,45 +34,41 @@ addEventListener('fetch', event => {
 /**
  * 處理來自 Telegram 的 Webhook 請求
  */
-async function handleWebhook(event, env) { // 【修改點 2】: 接收 env 物件
+async function handleWebhook(event) {
   if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
     return new Response('Unauthorized', { status: 403 });
   }
   const update = await event.request.json();
-  // 【修改點 3】: 將 env 物件繼續傳遞
-  event.waitUntil(onUpdate(update, env));
+  event.waitUntil(onUpdate(update));
   return new Response('Ok');
 }
 
 /**
  * 處理收到的訊息更新，並進行 User ID 驗證
  */
-async function onUpdate(update, env) { // 【修改點 4】: 接收 env 物件
-  // --- 【核心修改】: 從環境變數讀取並解析 User ID 白名單 ---
-  let allowedUserIds = []; // 預設為空陣列，即不允許任何人
+async function onUpdate(update) {
+  // --- 【核心修正】: 直接從全域變數讀取並解析 User ID 白名單 ---
+  let allowedUserIds = [];
   try {
-    // env.ALLOWED_USER_IDS_JSON 就是我們在儀表板上設定的變數
-    if (env.ALLOWED_USER_IDS_JSON) {
-      // 將 JSON 字串解析成真正的 JavaScript 陣列
-      allowedUserIds = JSON.parse(env.ALLOWED_USER_IDS_JSON);
+    // `ALLOWED_USER_IDS_JSON` 現在是一個全域可用的常數
+    if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
+      allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
     }
   } catch (e) {
     console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
-    // 如果解析失敗，allowedUserIds 依然是空陣列，確保安全
   }
   
   if ('message' in update && update.message.from) {
     const userId = update.message.from.id;
 
-    // 使用從環境變數讀取來的列表進行檢查
+    // 使用從全域變數讀取來的列表進行檢查
     if (!allowedUserIds.includes(userId)) {
       console.log(`Blocked access for unauthorized user ID: ${userId}`);
-      return; // 終止執行
+      return;
     }
     
-    // ID 驗證通過，才繼續處理訊息內容
     if ('text' in update.message) {
-      await onMessage(update.message, env); // 將 env 傳遞下去，以備未來之需
+      await onMessage(update.message);
     }
   }
 }
@@ -79,11 +76,11 @@ async function onUpdate(update, env) { // 【修改點 4】: 接收 env 物件
 /**
  * 根據訊息內容進行路由
  */
-async function onMessage(message, env) { // 接收 env
+async function onMessage(message) {
   const text = message.text;
   
   if (text.startsWith('/ranking')) {
-    return await handleRankingCommand(message.chat.id, env); // 將 env 傳遞下去
+    return await handleRankingCommand(message.chat.id);
   } else {
     return sendPlainText(message.chat.id, '你說了：\n' + text);
   }
@@ -92,24 +89,7 @@ async function onMessage(message, env) { // 接收 env
 /**
  * 處理 /ranking 指令
  */
-async function handleRankingCommand(chatId, env) { // 接收 env
-  const filePath = "data/rankings_1500.json";
-  const fileUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filePath}`;
-  
-  await sendPlainText(chatId, '正在從 GitHub 獲取超級聯盟排名資料，請稍候...');
-  // ... (後續程式碼不變) ...
-  // ...
-}
-
-// --- 以下是 Telegram API 的輔助函式 (無需變動) ---
-// ... (所有 API 輔助函式保持原樣) ...
-async function sendPlainText(chatId, text) { /* ... */ }
-async function registerWebhook(event, requestUrl, suffix, secret) { /* ... */ }
-async function unRegisterWebhook(event) { /* ... */ }
-function apiUrl(methodName, params = null) { /* ... */ }
-
-// --- 為了讓程式碼完整，將輔助函式貼在下方 ---
-async function handleRankingCommand(chatId, env) {
+async function handleRankingCommand(chatId) {
   const filePath = "data/rankings_1500.json";
   const fileUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filePath}`;
   
@@ -141,6 +121,8 @@ async function handleRankingCommand(chatId, env) {
     return await sendPlainText(chatId, '抱歉，獲取排名資料時發生錯誤。');
   }
 }
+
+// --- 以下是 Telegram API 的輔助函式 ---
 
 async function sendPlainText(chatId, text) {
   return (await fetch(apiUrl('sendMessage', { chat_id: chatId, text }))).json();
