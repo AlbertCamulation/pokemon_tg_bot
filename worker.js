@@ -51,8 +51,10 @@ async function handlePokemonSearch(chatId, query) {
 
   try {
     // 1. 獲取中英文對照表
-    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json`;
-    const transResponse = await fetch(translationUrl, { cf: { cacheTtl: 86400 } });
+    // 1. 獲取中英文對照表，並加入快取清除機制
+    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+    const transResponse = await fetch(translationUrl);
     if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
     const allPokemonData = await transResponse.json();
     const pokemonMetaMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p]));
