@@ -46,11 +46,13 @@ async function handleWebhook(event) {
 /**
  * 處理收到的訊息更新，並進行 User ID 驗證
  */
+/**
+ * 處理收到的訊息更新，並進行 User ID 驗證
+ */
 async function onUpdate(update) {
-  // --- 【核心修正】: 直接從全域變數讀取並解析 User ID 白名單 ---
+  // 從全域變數讀取並解析 User ID 白名單
   let allowedUserIds = [];
   try {
-    // `ALLOWED_USER_IDS_JSON` 現在是一個全域可用的常數
     if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
       allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
     }
@@ -59,12 +61,26 @@ async function onUpdate(update) {
   }
   
   if ('message' in update && update.message.from) {
-    const userId = update.message.from.id;
+    // 【修改點 1】: 取得完整的使用者物件
+    const user = update.message.from;
+    const userId = user.id;
 
     // 使用從全域變數讀取來的列表進行檢查
     if (!allowedUserIds.includes(userId)) {
-      console.log(`Blocked access for unauthorized user ID: ${userId}`);
-      return;
+      // --- 【核心修改】: 組合更詳細的使用者資訊用於日誌 ---
+      let userInfo = user.first_name || '';
+      if (user.last_name) {
+        userInfo += ` ${user.last_name}`;
+      }
+      if (user.username) {
+        userInfo += ` (@${user.username})`;
+      }
+      
+      // 印出包含 ID 和名稱的日誌
+      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
+      // --- 修改結束 ---
+      
+      return; // 終止執行
     }
     
     if ('text' in update.message) {
