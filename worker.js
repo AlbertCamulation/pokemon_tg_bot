@@ -32,61 +32,6 @@ addEventListener('fetch', event => {
 });
 
 /**
- * 處理來自 Telegram 的 Webhook 請求
- */
-async function handleWebhook(event) {
-  if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
-    return new Response('Unauthorized', { status: 403 });
-  }
-  const update = await event.request.json();
-  event.waitUntil(onUpdate(update));
-  return new Response('Ok');
-}
-
-/**
- * 處理收到的訊息更新，並進行 User ID 驗證
- */
-async function onUpdate(update) {
-  let allowedUserIds = [];
-  try {
-    if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
-      allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
-    }
-  } catch (e) {
-    console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
-  }
-  
-  if ('message' in update && update.message.from) {
-    const user = update.message.from;
-    const userId = user.id;
-
-    if (!allowedUserIds.includes(userId)) {
-      let userInfo = user.first_name || '';
-      if (user.last_name) userInfo += ` ${user.last_name}`;
-      if (user.username) userInfo += ` (@${user.username})`;
-      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
-      return;
-    }
-    
-    if ('text' in update.message) {
-      await onMessage(update.message);
-    }
-  }
-}
-
-/**
- * 根據訊息內容進行路由
- */
-async function onMessage(message) {
-  const text = message.text.trim();
-  
-  if (text.startsWith('/')) {
-    return sendMessage(message.chat.id, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
-  } else if (text) {
-    return await handlePokemonSearch(message.chat.id, text);
-  }
-}
-/**
  * 【核心】: 處理寶可夢模糊搜尋，並按聯盟分組排序顯示
  */
 async function handlePokemonSearch(chatId, query) {
@@ -180,6 +125,15 @@ function getPokemonRating(rank) {
 
 
 // --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
+async function onMessage(message) {
+  const text = message.text.trim();
+  
+  if (text.startsWith('/')) {
+    return sendMessage(message.chat.id, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
+  } else if (text) {
+    return await handlePokemonSearch(message.chat.id, text);
+  }
+}
 async function handleWebhook(event) {
   if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
     return new Response('Unauthorized', { status: 403 });
