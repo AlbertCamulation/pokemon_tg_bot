@@ -1,0 +1,1752 @@
+[
+  {
+    "speciesId": "242",
+    "speciesName": "Blissey",
+    "rank": null,
+    "types": [],
+    "cp": "83.8k"
+  },
+  {
+    "speciesId": "113",
+    "speciesName": "Chansey",
+    "rank": null,
+    "types": [],
+    "cp": "62.3k"
+  },
+  {
+    "speciesId": "143-Gigantamax",
+    "speciesName": "Gigantamax Snorlax",
+    "rank": null,
+    "types": [],
+    "cp": "55.8k"
+  },
+  {
+    "speciesId": "143",
+    "speciesName": "Snorlax",
+    "rank": null,
+    "types": [],
+    "cp": "55.8k"
+  },
+  {
+    "speciesId": "197",
+    "speciesName": "Umbreon",
+    "rank": null,
+    "types": [],
+    "cp": "51.8k"
+  },
+  {
+    "speciesId": "713",
+    "speciesName": "Avalugg",
+    "rank": null,
+    "types": [],
+    "cp": "51.8k"
+  },
+  {
+    "speciesId": "713-Hisuian",
+    "speciesName": "Hisuian Avalugg",
+    "rank": null,
+    "types": [],
+    "cp": "51.4k"
+  },
+  {
+    "speciesId": "809",
+    "speciesName": "Melmetal",
+    "rank": null,
+    "types": [],
+    "cp": "50.2k"
+  },
+  {
+    "speciesId": "901",
+    "speciesName": "Ursaluna",
+    "rank": null,
+    "types": [],
+    "cp": "50.1k"
+  },
+  {
+    "speciesId": "706",
+    "speciesName": "Goodra",
+    "rank": null,
+    "types": [],
+    "cp": "50.1k"
+  },
+  {
+    "speciesId": "630",
+    "speciesName": "Mandibuzz",
+    "rank": null,
+    "types": [],
+    "cp": "49.6k"
+  },
+  {
+    "speciesId": "208",
+    "speciesName": "Steelix",
+    "rank": null,
+    "types": [],
+    "cp": "49.2k"
+  },
+  {
+    "speciesId": "131-Gigantamax",
+    "speciesName": "Gigantamax Lapras",
+    "rank": null,
+    "types": [],
+    "cp": "48.2k"
+  },
+  {
+    "speciesId": "131",
+    "speciesName": "Lapras",
+    "rank": null,
+    "types": [],
+    "cp": "48.2k"
+  },
+  {
+    "speciesId": "464",
+    "speciesName": "Rhyperior",
+    "rank": null,
+    "types": [],
+    "cp": "47.7k"
+  },
+  {
+    "speciesId": "350",
+    "speciesName": "Milotic",
+    "rank": null,
+    "types": [],
+    "cp": "47.3k"
+  },
+  {
+    "speciesId": "289",
+    "speciesName": "Slaking",
+    "rank": null,
+    "types": [],
+    "cp": "47.1k"
+  },
+  {
+    "speciesId": "248",
+    "speciesName": "Tyranitar",
+    "rank": null,
+    "types": [],
+    "cp": "46.6k"
+  },
+  {
+    "speciesId": "445",
+    "speciesName": "Garchomp",
+    "rank": null,
+    "types": [],
+    "cp": "46.1k"
+  },
+  {
+    "speciesId": "369",
+    "speciesName": "Relicanth",
+    "rank": null,
+    "types": [],
+    "cp": "45.7k"
+  },
+  {
+    "speciesId": "983",
+    "speciesName": "Kingambit",
+    "rank": null,
+    "types": [],
+    "cp": "45.7k"
+  },
+  {
+    "speciesId": "450",
+    "speciesName": "Hippowdon",
+    "rank": null,
+    "types": [],
+    "cp": "45.6k"
+  },
+  {
+    "speciesId": "671",
+    "speciesName": "Florges",
+    "rank": null,
+    "types": [],
+    "cp": "45.4k"
+  },
+  {
+    "speciesId": "134",
+    "speciesName": "Vaporeon",
+    "rank": null,
+    "types": [],
+    "cp": "44.6k"
+  },
+  {
+    "speciesId": "411",
+    "speciesName": "Bastiodon",
+    "rank": null,
+    "types": [],
+    "cp": "44.3k"
+  },
+  {
+    "speciesId": "700",
+    "speciesName": "Sylveon",
+    "rank": null,
+    "types": [],
+    "cp": "44.3k"
+  },
+  {
+    "speciesId": "594",
+    "speciesName": "Alomomola",
+    "rank": null,
+    "types": [],
+    "cp": "44.3k"
+  },
+  {
+    "speciesId": "306",
+    "speciesName": "Aggron",
+    "rank": null,
+    "types": [],
+    "cp": "44.2k"
+  },
+  {
+    "speciesId": "463",
+    "speciesName": "Lickilicky",
+    "rank": null,
+    "types": [],
+    "cp": "43.8k"
+  },
+  {
+    "speciesId": "784",
+    "speciesName": "Kommo-o",
+    "rank": null,
+    "types": [],
+    "cp": "43.4k"
+  },
+  {
+    "speciesId": "376",
+    "speciesName": "Metagross",
+    "rank": null,
+    "types": [],
+    "cp": "43.3k"
+  },
+  {
+    "speciesId": "699",
+    "speciesName": "Aurorus",
+    "rank": null,
+    "types": [],
+    "cp": "43.2k"
+  },
+  {
+    "speciesId": "979",
+    "speciesName": "Annihilape",
+    "rank": null,
+    "types": [],
+    "cp": "43.1k"
+  },
+  {
+    "speciesId": "468",
+    "speciesName": "Togekiss",
+    "rank": null,
+    "types": [],
+    "cp": "43k"
+  },
+  {
+    "speciesId": "975",
+    "speciesName": "Cetitan",
+    "rank": null,
+    "types": [],
+    "cp": "42.7k"
+  },
+  {
+    "speciesId": "476",
+    "speciesName": "Probopass",
+    "rank": null,
+    "types": [],
+    "cp": "42.6k"
+  },
+  {
+    "speciesId": "365",
+    "speciesName": "Walrein",
+    "rank": null,
+    "types": [],
+    "cp": "42.6k"
+  },
+  {
+    "speciesId": "823",
+    "speciesName": "Corviknight",
+    "rank": null,
+    "types": [],
+    "cp": "42.4k"
+  },
+  {
+    "speciesId": "681-Shield_Form",
+    "speciesName": "Aegislash Shield Forme",
+    "rank": null,
+    "types": [],
+    "cp": "42.2k"
+  },
+  {
+    "speciesId": "518",
+    "speciesName": "Musharna",
+    "rank": null,
+    "types": [],
+    "cp": "42k"
+  },
+  {
+    "speciesId": "980",
+    "speciesName": "Clodsire",
+    "rank": null,
+    "types": [],
+    "cp": "41.8k"
+  },
+  {
+    "speciesId": "241",
+    "speciesName": "Miltank",
+    "rank": null,
+    "types": [],
+    "cp": "41.7k"
+  },
+  {
+    "speciesId": "652",
+    "speciesName": "Chesnaught",
+    "rank": null,
+    "types": [],
+    "cp": "41.6k"
+  },
+  {
+    "speciesId": "538",
+    "speciesName": "Throh",
+    "rank": null,
+    "types": [],
+    "cp": "41.6k"
+  },
+  {
+    "speciesId": "615",
+    "speciesName": "Cryogonal",
+    "rank": null,
+    "types": [],
+    "cp": "41.4k"
+  },
+  {
+    "speciesId": "465",
+    "speciesName": "Tangrowth",
+    "rank": null,
+    "types": [],
+    "cp": "41.4k"
+  },
+  {
+    "speciesId": "149",
+    "speciesName": "Dragonite",
+    "rank": null,
+    "types": [],
+    "cp": "41.4k"
+  },
+  {
+    "speciesId": "911",
+    "speciesName": "Skeledirge",
+    "rank": null,
+    "types": [],
+    "cp": "41.3k"
+  },
+  {
+    "speciesId": "862",
+    "speciesName": "Obstagoon",
+    "rank": null,
+    "types": [],
+    "cp": "41.1k"
+  },
+  {
+    "speciesId": "618",
+    "speciesName": "Stunfisk",
+    "rank": null,
+    "types": [],
+    "cp": "41k"
+  },
+  {
+    "speciesId": "618-Galarian",
+    "speciesName": "Galarian Stunfisk",
+    "rank": null,
+    "types": [],
+    "cp": "41k"
+  },
+  {
+    "speciesId": "874",
+    "speciesName": "Stonjourner",
+    "rank": null,
+    "types": [],
+    "cp": "41k"
+  },
+  {
+    "speciesId": "768",
+    "speciesName": "Golisopod",
+    "rank": null,
+    "types": [],
+    "cp": "40.9k"
+  },
+  {
+    "speciesId": "916-Female",
+    "speciesName": "Oinkologne (Female)",
+    "rank": null,
+    "types": [],
+    "cp": "40.7k"
+  },
+  {
+    "speciesId": "389",
+    "speciesName": "Torterra",
+    "rank": null,
+    "types": [],
+    "cp": "40.6k"
+  },
+  {
+    "speciesId": "820",
+    "speciesName": "Greedent",
+    "rank": null,
+    "types": [],
+    "cp": "40.6k"
+  },
+  {
+    "speciesId": "202",
+    "speciesName": "Wobbuffet",
+    "rank": null,
+    "types": [],
+    "cp": "40.5k"
+  },
+  {
+    "speciesId": "472",
+    "speciesName": "Gliscor",
+    "rank": null,
+    "types": [],
+    "cp": "40.2k"
+  },
+  {
+    "speciesId": "130",
+    "speciesName": "Gyarados",
+    "rank": null,
+    "types": [],
+    "cp": "40.2k"
+  },
+  {
+    "speciesId": "89",
+    "speciesName": "Muk",
+    "rank": null,
+    "types": [],
+    "cp": "40.1k"
+  },
+  {
+    "speciesId": "89-Alola",
+    "speciesName": "Alolan Muk",
+    "rank": null,
+    "types": [],
+    "cp": "40.1k"
+  },
+  {
+    "speciesId": "89-Alola_Shadow",
+    "speciesName": "Shadow Alolan Muk",
+    "rank": null,
+    "types": [],
+    "cp": "40.1k"
+  },
+  {
+    "speciesId": "593",
+    "speciesName": "Jellicent",
+    "rank": null,
+    "types": [],
+    "cp": "40k"
+  },
+  {
+    "speciesId": "593-Female",
+    "speciesName": "Jellicent (Female)",
+    "rank": null,
+    "types": [],
+    "cp": "40k"
+  },
+  {
+    "speciesId": "598",
+    "speciesName": "Ferrothorn",
+    "rank": null,
+    "types": [],
+    "cp": "39.9k"
+  },
+  {
+    "speciesId": "112",
+    "speciesName": "Rhydon",
+    "rank": null,
+    "types": [],
+    "cp": "39.8k"
+  },
+  {
+    "speciesId": "526",
+    "speciesName": "Gigalith",
+    "rank": null,
+    "types": [],
+    "cp": "39.8k"
+  },
+  {
+    "speciesId": "765",
+    "speciesName": "Oranguru",
+    "rank": null,
+    "types": [],
+    "cp": "39.7k"
+  },
+  {
+    "speciesId": "73",
+    "speciesName": "Tentacruel",
+    "rank": null,
+    "types": [],
+    "cp": "39.7k"
+  },
+  {
+    "speciesId": "949",
+    "speciesName": "Toedscruel",
+    "rank": null,
+    "types": [],
+    "cp": "39.7k"
+  },
+  {
+    "speciesId": "635",
+    "speciesName": "Hydreigon",
+    "rank": null,
+    "types": [],
+    "cp": "39.7k"
+  },
+  {
+    "speciesId": "711-Super",
+    "speciesName": "Gourgeist (Super size)",
+    "rank": null,
+    "types": [],
+    "cp": "39.6k"
+  },
+  {
+    "speciesId": "939",
+    "speciesName": "Bellibolt",
+    "rank": null,
+    "types": [],
+    "cp": "39.6k"
+  },
+  {
+    "speciesId": "260",
+    "speciesName": "Swampert",
+    "rank": null,
+    "types": [],
+    "cp": "39.4k"
+  },
+  {
+    "speciesId": "626",
+    "speciesName": "Bouffalant",
+    "rank": null,
+    "types": [],
+    "cp": "39.3k"
+  },
+  {
+    "speciesId": "703",
+    "speciesName": "Carbink",
+    "rank": null,
+    "types": [],
+    "cp": "39k"
+  },
+  {
+    "speciesId": "9-Gigantamax",
+    "speciesName": "Gigantamax Blastoise",
+    "rank": null,
+    "types": [],
+    "cp": "38.9k"
+  },
+  {
+    "speciesId": "9",
+    "speciesName": "Blastoise",
+    "rank": null,
+    "types": [],
+    "cp": "38.9k"
+  },
+  {
+    "speciesId": "80",
+    "speciesName": "Slowbro",
+    "rank": null,
+    "types": [],
+    "cp": "38.9k"
+  },
+  {
+    "speciesId": "199",
+    "speciesName": "Slowking",
+    "rank": null,
+    "types": [],
+    "cp": "38.9k"
+  },
+  {
+    "speciesId": "199-Galarian",
+    "speciesName": "Galarian Slowking",
+    "rank": null,
+    "types": [],
+    "cp": "38.9k"
+  },
+  {
+    "speciesId": "959",
+    "speciesName": "Tinkaton",
+    "rank": null,
+    "types": [],
+    "cp": "38.8k"
+  },
+  {
+    "speciesId": "346",
+    "speciesName": "Cradily",
+    "rank": null,
+    "types": [],
+    "cp": "38.8k"
+  },
+  {
+    "speciesId": "673",
+    "speciesName": "Gogoat",
+    "rank": null,
+    "types": [],
+    "cp": "38.7k"
+  },
+  {
+    "speciesId": "998",
+    "speciesName": "Baxcalibur",
+    "rank": null,
+    "types": [],
+    "cp": "38.5k"
+  },
+  {
+    "speciesId": "115",
+    "speciesName": "Kangaskhan",
+    "rank": null,
+    "types": [],
+    "cp": "38.4k"
+  },
+  {
+    "speciesId": "154",
+    "speciesName": "Meganium",
+    "rank": null,
+    "types": [],
+    "cp": "38.4k"
+  },
+  {
+    "speciesId": "1000",
+    "speciesName": "Gholdengo",
+    "rank": null,
+    "types": [],
+    "cp": "38.4k"
+  },
+  {
+    "speciesId": "232",
+    "speciesName": "Donphan",
+    "rank": null,
+    "types": [],
+    "cp": "38.3k"
+  },
+  {
+    "speciesId": "97",
+    "speciesName": "Hypno",
+    "rank": null,
+    "types": [],
+    "cp": "38.2k"
+  },
+  {
+    "speciesId": "62",
+    "speciesName": "Poliwrath",
+    "rank": null,
+    "types": [],
+    "cp": "38.1k"
+  },
+  {
+    "speciesId": "812-Gigantamax",
+    "speciesName": "Gigantamax Rillaboom",
+    "rank": null,
+    "types": [],
+    "cp": "37.8k"
+  },
+  {
+    "speciesId": "727",
+    "speciesName": "Incineroar",
+    "rank": null,
+    "types": [],
+    "cp": "37.8k"
+  },
+  {
+    "speciesId": "812",
+    "speciesName": "Rillaboom",
+    "rank": null,
+    "types": [],
+    "cp": "37.8k"
+  },
+  {
+    "speciesId": "76",
+    "speciesName": "Golem",
+    "rank": null,
+    "types": [],
+    "cp": "37.6k"
+  },
+  {
+    "speciesId": "76-Alola",
+    "speciesName": "Alolan Golem",
+    "rank": null,
+    "types": [],
+    "cp": "37.6k"
+  },
+  {
+    "speciesId": "76-Alola_Shadow",
+    "speciesName": "Shadow Alolan Golem",
+    "rank": null,
+    "types": [],
+    "cp": "37.6k"
+  },
+  {
+    "speciesId": "531",
+    "speciesName": "Audino",
+    "rank": null,
+    "types": [],
+    "cp": "37.5k"
+  },
+  {
+    "speciesId": "637",
+    "speciesName": "Volcarona",
+    "rank": null,
+    "types": [],
+    "cp": "37.4k"
+  },
+  {
+    "speciesId": "748",
+    "speciesName": "Toxapex",
+    "rank": null,
+    "types": [],
+    "cp": "37.4k"
+  },
+  {
+    "speciesId": "711-Large",
+    "speciesName": "Gourgeist (Large size)",
+    "rank": null,
+    "types": [],
+    "cp": "37.3k"
+  },
+  {
+    "speciesId": "160",
+    "speciesName": "Feraligatr",
+    "rank": null,
+    "types": [],
+    "cp": "37.2k"
+  },
+  {
+    "speciesId": "205",
+    "speciesName": "Forretress",
+    "rank": null,
+    "types": [],
+    "cp": "37.1k"
+  },
+  {
+    "speciesId": "186",
+    "speciesName": "Politoed",
+    "rank": null,
+    "types": [],
+    "cp": "37.1k"
+  },
+  {
+    "speciesId": "730",
+    "speciesName": "Primarina",
+    "rank": null,
+    "types": [],
+    "cp": "37k"
+  },
+  {
+    "speciesId": "916",
+    "speciesName": "Oinkologne",
+    "rank": null,
+    "types": [],
+    "cp": "37k"
+  },
+  {
+    "speciesId": "752",
+    "speciesName": "Araquanid",
+    "rank": null,
+    "types": [],
+    "cp": "37k"
+  },
+  {
+    "speciesId": "497",
+    "speciesName": "Serperior",
+    "rank": null,
+    "types": [],
+    "cp": "36.9k"
+  },
+  {
+    "speciesId": "697",
+    "speciesName": "Tyrantrum",
+    "rank": null,
+    "types": [],
+    "cp": "36.9k"
+  },
+  {
+    "speciesId": "226",
+    "speciesName": "Mantine",
+    "rank": null,
+    "types": [],
+    "cp": "36.8k"
+  },
+  {
+    "speciesId": "227",
+    "speciesName": "Skarmory",
+    "rank": null,
+    "types": [],
+    "cp": "36.8k"
+  },
+  {
+    "speciesId": "534",
+    "speciesName": "Conkeldurr",
+    "rank": null,
+    "types": [],
+    "cp": "36.8k"
+  },
+  {
+    "speciesId": "171",
+    "speciesName": "Lanturn",
+    "rank": null,
+    "types": [],
+    "cp": "36.7k"
+  },
+  {
+    "speciesId": "760",
+    "speciesName": "Bewear",
+    "rank": null,
+    "types": [],
+    "cp": "36.7k"
+  },
+  {
+    "speciesId": "395",
+    "speciesName": "Empoleon",
+    "rank": null,
+    "types": [],
+    "cp": "36.6k"
+  },
+  {
+    "speciesId": "87",
+    "speciesName": "Dewgong",
+    "rank": null,
+    "types": [],
+    "cp": "36.6k"
+  },
+  {
+    "speciesId": "936",
+    "speciesName": "Armarouge",
+    "rank": null,
+    "types": [],
+    "cp": "36.6k"
+  },
+  {
+    "speciesId": "334",
+    "speciesName": "Altaria",
+    "rank": null,
+    "types": [],
+    "cp": "36.4k"
+  },
+  {
+    "speciesId": "357",
+    "speciesName": "Tropius",
+    "rank": null,
+    "types": [],
+    "cp": "36.3k"
+  },
+  {
+    "speciesId": "373",
+    "speciesName": "Salamence",
+    "rank": null,
+    "types": [],
+    "cp": "36.3k"
+  },
+  {
+    "speciesId": "560",
+    "speciesName": "Scrafty",
+    "rank": null,
+    "types": [],
+    "cp": "36.2k"
+  },
+  {
+    "speciesId": "689",
+    "speciesName": "Barbaracle",
+    "rank": null,
+    "types": [],
+    "cp": "36.1k"
+  },
+  {
+    "speciesId": "508",
+    "speciesName": "Stoutland",
+    "rank": null,
+    "types": [],
+    "cp": "36k"
+  },
+  {
+    "speciesId": "766",
+    "speciesName": "Passimian",
+    "rank": null,
+    "types": [],
+    "cp": "36k"
+  },
+  {
+    "speciesId": "3-Gigantamax",
+    "speciesName": "Gigantamax Venusaur",
+    "rank": null,
+    "types": [],
+    "cp": "35.9k"
+  },
+  {
+    "speciesId": "3",
+    "speciesName": "Venusaur",
+    "rank": null,
+    "types": [],
+    "cp": "35.9k"
+  },
+  {
+    "speciesId": "579",
+    "speciesName": "Reuniclus",
+    "rank": null,
+    "types": [],
+    "cp": "35.8k"
+  },
+  {
+    "speciesId": "31",
+    "speciesName": "Nidoqueen",
+    "rank": null,
+    "types": [],
+    "cp": "35.8k"
+  },
+  {
+    "speciesId": "563",
+    "speciesName": "Cofagrigus",
+    "rank": null,
+    "types": [],
+    "cp": "35.8k"
+  },
+  {
+    "speciesId": "867",
+    "speciesName": "Runerigus",
+    "rank": null,
+    "types": [],
+    "cp": "35.8k"
+  },
+  {
+    "speciesId": "317",
+    "speciesName": "Swalot",
+    "rank": null,
+    "types": [],
+    "cp": "35.8k"
+  },
+  {
+    "speciesId": "326",
+    "speciesName": "Grumpig",
+    "rank": null,
+    "types": [],
+    "cp": "35.7k"
+  },
+  {
+    "speciesId": "470",
+    "speciesName": "Leafeon",
+    "rank": null,
+    "types": [],
+    "cp": "35.7k"
+  },
+  {
+    "speciesId": "59-Hisuian",
+    "speciesName": "Hisuian Arcanine",
+    "rank": null,
+    "types": [],
+    "cp": "35.6k"
+  },
+  {
+    "speciesId": "233",
+    "speciesName": "Porygon2",
+    "rank": null,
+    "types": [],
+    "cp": "35.6k"
+  },
+  {
+    "speciesId": "437",
+    "speciesName": "Bronzong",
+    "rank": null,
+    "types": [],
+    "cp": "35.6k"
+  },
+  {
+    "speciesId": "724-Hisuian",
+    "speciesName": "Hisuian Decidueye",
+    "rank": null,
+    "types": [],
+    "cp": "35.5k"
+  },
+  {
+    "speciesId": "344",
+    "speciesName": "Claydol",
+    "rank": null,
+    "types": [],
+    "cp": "35.5k"
+  },
+  {
+    "speciesId": "473",
+    "speciesName": "Mamoswine",
+    "rank": null,
+    "types": [],
+    "cp": "35.3k"
+  },
+  {
+    "speciesId": "842",
+    "speciesName": "Appletun",
+    "rank": null,
+    "types": [],
+    "cp": "35.3k"
+  },
+  {
+    "speciesId": "28-Alola",
+    "speciesName": "Alolan Sandslash",
+    "rank": null,
+    "types": [],
+    "cp": "35.3k"
+  },
+  {
+    "speciesId": "28-Alola_Shadow",
+    "speciesName": "Shadow Alolan Sandslash",
+    "rank": null,
+    "types": [],
+    "cp": "35.3k"
+  },
+  {
+    "speciesId": "565",
+    "speciesName": "Carracosta",
+    "rank": null,
+    "types": [],
+    "cp": "35.3k"
+  },
+  {
+    "speciesId": "462",
+    "speciesName": "Magnezone",
+    "rank": null,
+    "types": [],
+    "cp": "35.3k"
+  },
+  {
+    "speciesId": "576",
+    "speciesName": "Gothitelle",
+    "rank": null,
+    "types": [],
+    "cp": "35.3k"
+  },
+  {
+    "speciesId": "169",
+    "speciesName": "Crobat",
+    "rank": null,
+    "types": [],
+    "cp": "35.2k"
+  },
+  {
+    "speciesId": "770",
+    "speciesName": "Palossand",
+    "rank": null,
+    "types": [],
+    "cp": "35.2k"
+  },
+  {
+    "speciesId": "930",
+    "speciesName": "Arboliva",
+    "rank": null,
+    "types": [],
+    "cp": "35.2k"
+  },
+  {
+    "speciesId": "230",
+    "speciesName": "Kingdra",
+    "rank": null,
+    "types": [],
+    "cp": "35.1k"
+  },
+  {
+    "speciesId": "164",
+    "speciesName": "Noctowl",
+    "rank": null,
+    "types": [],
+    "cp": "35.1k"
+  },
+  {
+    "speciesId": "91",
+    "speciesName": "Cloyster",
+    "rank": null,
+    "types": [],
+    "cp": "35.1k"
+  },
+  {
+    "speciesId": "36",
+    "speciesName": "Clefable",
+    "rank": null,
+    "types": [],
+    "cp": "35k"
+  },
+  {
+    "speciesId": "181",
+    "speciesName": "Ampharos",
+    "rank": null,
+    "types": [],
+    "cp": "35k"
+  },
+  {
+    "speciesId": "537",
+    "speciesName": "Seismitoad",
+    "rank": null,
+    "types": [],
+    "cp": "35k"
+  },
+  {
+    "speciesId": "324",
+    "speciesName": "Torkoal",
+    "rank": null,
+    "types": [],
+    "cp": "34.9k"
+  },
+  {
+    "speciesId": "423-East_Sea",
+    "speciesName": "Gastrodon (East Sea)",
+    "rank": null,
+    "types": [],
+    "cp": "34.9k"
+  },
+  {
+    "speciesId": "423-West_Sea",
+    "speciesName": "Gastrodon (West Sea)",
+    "rank": null,
+    "types": [],
+    "cp": "34.9k"
+  },
+  {
+    "speciesId": "832",
+    "speciesName": "Dubwool",
+    "rank": null,
+    "types": [],
+    "cp": "34.8k"
+  },
+  {
+    "speciesId": "452",
+    "speciesName": "Drapion",
+    "rank": null,
+    "types": [],
+    "cp": "34.7k"
+  },
+  {
+    "speciesId": "711-Average",
+    "speciesName": "Gourgeist (Average size)",
+    "rank": null,
+    "types": [],
+    "cp": "34.7k"
+  },
+  {
+    "speciesId": "887",
+    "speciesName": "Dragapult",
+    "rank": null,
+    "types": [],
+    "cp": "34.7k"
+  },
+  {
+    "speciesId": "715",
+    "speciesName": "Noivern",
+    "rank": null,
+    "types": [],
+    "cp": "34.6k"
+  },
+  {
+    "speciesId": "591",
+    "speciesName": "Amoonguss",
+    "rank": null,
+    "types": [],
+    "cp": "34.6k"
+  },
+  {
+    "speciesId": "139",
+    "speciesName": "Omastar",
+    "rank": null,
+    "types": [],
+    "cp": "34.6k"
+  },
+  {
+    "speciesId": "297",
+    "speciesName": "Hariyama",
+    "rank": null,
+    "types": [],
+    "cp": "34.4k"
+  },
+  {
+    "speciesId": "558",
+    "speciesName": "Crustle",
+    "rank": null,
+    "types": [],
+    "cp": "34.4k"
+  },
+  {
+    "speciesId": "59",
+    "speciesName": "Arcanine",
+    "rank": null,
+    "types": [],
+    "cp": "34.4k"
+  },
+  {
+    "speciesId": "763",
+    "speciesName": "Tsareena",
+    "rank": null,
+    "types": [],
+    "cp": "34.3k"
+  },
+  {
+    "speciesId": "972",
+    "speciesName": "Houndstone",
+    "rank": null,
+    "types": [],
+    "cp": "34.3k"
+  },
+  {
+    "speciesId": "655",
+    "speciesName": "Delphox",
+    "rank": null,
+    "types": [],
+    "cp": "34.2k"
+  },
+  {
+    "speciesId": "937",
+    "speciesName": "Ceruledge",
+    "rank": null,
+    "types": [],
+    "cp": "34.2k"
+  },
+  {
+    "speciesId": "184",
+    "speciesName": "Azumarill",
+    "rank": null,
+    "types": [],
+    "cp": "34.2k"
+  },
+  {
+    "speciesId": "628",
+    "speciesName": "Braviary",
+    "rank": null,
+    "types": [],
+    "cp": "34.2k"
+  },
+  {
+    "speciesId": "38-Alola",
+    "speciesName": "Alolan Ninetales",
+    "rank": null,
+    "types": [],
+    "cp": "34.2k"
+  },
+  {
+    "speciesId": "38-Alola_Shadow",
+    "speciesName": "Shadow Alolan Ninetales",
+    "rank": null,
+    "types": [],
+    "cp": "34.2k"
+  },
+  {
+    "speciesId": "553",
+    "speciesName": "Krookodile",
+    "rank": null,
+    "types": [],
+    "cp": "34.1k"
+  },
+  {
+    "speciesId": "340",
+    "speciesName": "Whiscash",
+    "rank": null,
+    "types": [],
+    "cp": "34.1k"
+  },
+  {
+    "speciesId": "214",
+    "speciesName": "Heracross",
+    "rank": null,
+    "types": [],
+    "cp": "34k"
+  },
+  {
+    "speciesId": "866",
+    "speciesName": "Mr. Rime",
+    "rank": null,
+    "types": [],
+    "cp": "34k"
+  },
+  {
+    "speciesId": "503",
+    "speciesName": "Samurott",
+    "rank": null,
+    "types": [],
+    "cp": "33.9k"
+  },
+  {
+    "speciesId": "683",
+    "speciesName": "Aromatisse",
+    "rank": null,
+    "types": [],
+    "cp": "33.9k"
+  },
+  {
+    "speciesId": "904",
+    "speciesName": "Overqwil",
+    "rank": null,
+    "types": [],
+    "cp": "33.9k"
+  },
+  {
+    "speciesId": "691",
+    "speciesName": "Dragalge",
+    "rank": null,
+    "types": [],
+    "cp": "33.7k"
+  },
+  {
+    "speciesId": "80-Galarian",
+    "speciesName": "Galarian Slowbro",
+    "rank": null,
+    "types": [],
+    "cp": "33.7k"
+  },
+  {
+    "speciesId": "182",
+    "speciesName": "Bellossom",
+    "rank": null,
+    "types": [],
+    "cp": "33.7k"
+  },
+  {
+    "speciesId": "213",
+    "speciesName": "Shuckle",
+    "rank": null,
+    "types": [],
+    "cp": "33.7k"
+  },
+  {
+    "speciesId": "38",
+    "speciesName": "Ninetales",
+    "rank": null,
+    "types": [],
+    "cp": "33.6k"
+  },
+  {
+    "speciesId": "446",
+    "speciesName": "Munchlax",
+    "rank": null,
+    "types": [],
+    "cp": "33.5k"
+  },
+  {
+    "speciesId": "272",
+    "speciesName": "Ludicolo",
+    "rank": null,
+    "types": [],
+    "cp": "33.4k"
+  },
+  {
+    "speciesId": "471",
+    "speciesName": "Glaceon",
+    "rank": null,
+    "types": [],
+    "cp": "33.4k"
+  },
+  {
+    "speciesId": "899",
+    "speciesName": "Wyrdeer",
+    "rank": null,
+    "types": [],
+    "cp": "33.4k"
+  },
+  {
+    "speciesId": "776",
+    "speciesName": "Turtonator",
+    "rank": null,
+    "types": [],
+    "cp": "33.3k"
+  },
+  {
+    "speciesId": "724",
+    "speciesName": "Decidueye",
+    "rank": null,
+    "types": [],
+    "cp": "33.3k"
+  },
+  {
+    "speciesId": "601",
+    "speciesName": "Klinklang",
+    "rank": null,
+    "types": [],
+    "cp": "33.2k"
+  },
+  {
+    "speciesId": "628-Hisuian",
+    "speciesName": "Hisuian Braviary",
+    "rank": null,
+    "types": [],
+    "cp": "33.2k"
+  },
+  {
+    "speciesId": "128",
+    "speciesName": "Tauros",
+    "rank": null,
+    "types": [],
+    "cp": "33.1k"
+  },
+  {
+    "speciesId": "189",
+    "speciesName": "Jumpluff",
+    "rank": null,
+    "types": [],
+    "cp": "33.1k"
+  },
+  {
+    "speciesId": "103-Alola",
+    "speciesName": "Alolan Exeggutor",
+    "rank": null,
+    "types": [],
+    "cp": "33k"
+  },
+  {
+    "speciesId": "103-Alola_Shadow",
+    "speciesName": "Shadow Alolan Exeggutor",
+    "rank": null,
+    "types": [],
+    "cp": "33k"
+  },
+  {
+    "speciesId": "687",
+    "speciesName": "Malamar",
+    "rank": null,
+    "types": [],
+    "cp": "33k"
+  },
+  {
+    "speciesId": "660",
+    "speciesName": "Diggersby",
+    "rank": null,
+    "types": [],
+    "cp": "30.7k"
+  },
+  {
+    "speciesId": "780",
+    "speciesName": "Drampa",
+    "rank": null,
+    "types": [],
+    "cp": "30.5k"
+  },
+  {
+    "speciesId": "709",
+    "speciesName": "Trevenant",
+    "rank": null,
+    "types": [],
+    "cp": "30.5k"
+  },
+  {
+    "speciesId": "157-Hisuian",
+    "speciesName": "Hisuian Typhlosion",
+    "rank": null,
+    "types": [],
+    "cp": "30.4k"
+  },
+  {
+    "speciesId": "435",
+    "speciesName": "Skuntank",
+    "rank": null,
+    "types": [],
+    "cp": "30.4k"
+  },
+  {
+    "speciesId": "185",
+    "speciesName": "Sudowoodo",
+    "rank": null,
+    "types": [],
+    "cp": "30.3k"
+  },
+  {
+    "speciesId": "45",
+    "speciesName": "Vileplume",
+    "rank": null,
+    "types": [],
+    "cp": "30.2k"
+  },
+  {
+    "speciesId": "676",
+    "speciesName": "Furfrou",
+    "rank": null,
+    "types": [],
+    "cp": "30.2k"
+  },
+  {
+    "speciesId": "740",
+    "speciesName": "Crabominable",
+    "rank": null,
+    "types": [],
+    "cp": "30.2k"
+  },
+  {
+    "speciesId": "142",
+    "speciesName": "Aerodactyl",
+    "rank": null,
+    "types": [],
+    "cp": "30.2k"
+  },
+  {
+    "speciesId": "321",
+    "speciesName": "Wailord",
+    "rank": null,
+    "types": [],
+    "cp": "30.2k"
+  },
+  {
+    "speciesId": "604",
+    "speciesName": "Eelektross",
+    "rank": null,
+    "types": [],
+    "cp": "30.1k"
+  },
+  {
+    "speciesId": "745-Midnight",
+    "speciesName": "Lycanroc (Midnight Form)",
+    "rank": null,
+    "types": [],
+    "cp": "30.1k"
+  },
+  {
+    "speciesId": "18",
+    "speciesName": "Pidgeot",
+    "rank": null,
+    "types": [],
+    "cp": "30k"
+  },
+  {
+    "speciesId": "903",
+    "speciesName": "Sneasler",
+    "rank": null,
+    "types": [],
+    "cp": "30k"
+  },
+  {
+    "speciesId": "479-Frost",
+    "speciesName": "Frost Rotom",
+    "rank": null,
+    "types": [],
+    "cp": "30k"
+  },
+  {
+    "speciesId": "479-Heat",
+    "speciesName": "Heat Rotom",
+    "rank": null,
+    "types": [],
+    "cp": "30k"
+  },
+  {
+    "speciesId": "479-Mow",
+    "speciesName": "Mow Rotom",
+    "rank": null,
+    "types": [],
+    "cp": "30k"
+  },
+  {
+    "speciesId": "479-Wash",
+    "speciesName": "Wash Rotom",
+    "rank": null,
+    "types": [],
+    "cp": "30k"
+  },
+  {
+    "speciesId": "207",
+    "speciesName": "Gligar",
+    "rank": null,
+    "types": [],
+    "cp": "30k"
+  },
+  {
+    "speciesId": "900",
+    "speciesName": "Kleavor",
+    "rank": null,
+    "types": [],
+    "cp": "29.9k"
+  },
+  {
+    "speciesId": "678",
+    "speciesName": "Meowstic",
+    "rank": null,
+    "types": [],
+    "cp": "29.9k"
+  },
+  {
+    "speciesId": "678-Female",
+    "speciesName": "Meowstic (Female)",
+    "rank": null,
+    "types": [],
+    "cp": "29.9k"
+  },
+  {
+    "speciesId": "764",
+    "speciesName": "Comfey",
+    "rank": null,
+    "types": [],
+    "cp": "29.9k"
+  },
+  {
+    "speciesId": "542",
+    "speciesName": "Leavanny",
+    "rank": null,
+    "types": [],
+    "cp": "29.9k"
+  },
+  {
+    "speciesId": "217",
+    "speciesName": "Ursaring",
+    "rank": null,
+    "types": [],
+    "cp": "29.8k"
+  },
+  {
+    "speciesId": "668",
+    "speciesName": "Pyroar",
+    "rank": null,
+    "types": [],
+    "cp": "29.8k"
+  },
+  {
+    "speciesId": "668-Female",
+    "speciesName": "Pyroar (Female)",
+    "rank": null,
+    "types": [],
+    "cp": "29.8k"
+  },
+  {
+    "speciesId": "34",
+    "speciesName": "Nidoking",
+    "rank": null,
+    "types": [],
+    "cp": "29.8k"
+  },
+  {
+    "speciesId": "693",
+    "speciesName": "Clawitzer",
+    "rank": null,
+    "types": [],
+    "cp": "29.8k"
+  },
+  {
+    "speciesId": "705",
+    "speciesName": "Sliggoo",
+    "rank": null,
+    "types": [],
+    "cp": "29.7k"
+  },
+  {
+    "speciesId": "474",
+    "speciesName": "Porygon-Z",
+    "rank": null,
+    "types": [],
+    "cp": "29.7k"
+  },
+  {
+    "speciesId": "127",
+    "speciesName": "Pinsir",
+    "rank": null,
+    "types": [],
+    "cp": "29.7k"
+  },
+  {
+    "speciesId": "135",
+    "speciesName": "Jolteon",
+    "rank": null,
+    "types": [],
+    "cp": "29.7k"
+  },
+  {
+    "speciesId": "405",
+    "speciesName": "Luxray",
+    "rank": null,
+    "types": [],
+    "cp": "29.6k"
+  },
+  {
+    "speciesId": "962",
+    "speciesName": "Bombirdier",
+    "rank": null,
+    "types": [],
+    "cp": "29.6k"
+  },
+  {
+    "speciesId": "466",
+    "speciesName": "Electivire",
+    "rank": null,
+    "types": [],
+    "cp": "29.5k"
+  },
+  {
+    "speciesId": "606",
+    "speciesName": "Beheeyem",
+    "rank": null,
+    "types": [],
+    "cp": "29.5k"
+  },
+  {
+    "speciesId": "461",
+    "speciesName": "Weavile",
+    "rank": null,
+    "types": [],
+    "cp": "29.4k"
+  },
+  {
+    "speciesId": "561",
+    "speciesName": "Sigilyph",
+    "rank": null,
+    "types": [],
+    "cp": "29.4k"
+  },
+  {
+    "speciesId": "352",
+    "speciesName": "Kecleon",
+    "rank": null,
+    "types": [],
+    "cp": "29.3k"
+  },
+  {
+    "speciesId": "855",
+    "speciesName": "Polteageist",
+    "rank": null,
+    "types": [],
+    "cp": "29.3k"
+  },
+  {
+    "speciesId": "855-Antique",
+    "speciesName": "Polteageist (Antique)",
+    "rank": null,
+    "types": [],
+    "cp": "29.3k"
+  },
+  {
+    "speciesId": "855-Phony",
+    "speciesName": "Polteageist (Phony)",
+    "rank": null,
+    "types": [],
+    "cp": "29.3k"
+  },
+  {
+    "speciesId": "123",
+    "speciesName": "Scyther",
+    "rank": null,
+    "types": [],
+    "cp": "29.2k"
+  },
+  {
+    "speciesId": "136",
+    "speciesName": "Flareon",
+    "rank": null,
+    "types": [],
+    "cp": "29.2k"
+  },
+  {
+    "speciesId": "738",
+    "speciesName": "Vikavolt",
+    "rank": null,
+    "types": [],
+    "cp": "29.1k"
+  },
+  {
+    "speciesId": "254",
+    "speciesName": "Sceptile",
+    "rank": null,
+    "types": [],
+    "cp": "29.1k"
+  },
+  {
+    "speciesId": "754",
+    "speciesName": "Lurantis",
+    "rank": null,
+    "types": [],
+    "cp": "29.1k"
+  },
+  {
+    "speciesId": "429",
+    "speciesName": "Mismagius",
+    "rank": null,
+    "types": [],
+    "cp": "29k"
+  }
+]
