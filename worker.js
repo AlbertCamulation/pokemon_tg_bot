@@ -1,11 +1,14 @@
 /**
  * 結合了 Telegram Bot 功能與從 GitHub 讀取資料功能的 Worker 腳本
+ * - 支援 /ranking 指令來獲取 GitHub 上的 JSON 資料
+ * - 對獲取的 GitHub 資料設定了 24 小時的快取
+ * - 對其他訊息執行回音功能
  */
 
 // --- 請修改以下 GitHub 相關設定 ---
 const GITHUB_USERNAME = "AlbertCamulation";      // 您的 GitHub 使用者名稱
 const REPO_NAME = "pokemon_tg_bot";           // 您存放 /data 資料夾的專案名稱
-const BRANCH_NAME = "main";                   // 您的分支名稱
+const BRANCH_NAME = "main";                   // 您的分支名稱 (通常是 main)
 // ------------------------------------
 
 // --- Telegram Bot 相關設定 (從環境變數讀取) ---
@@ -76,7 +79,14 @@ async function handleRankingCommand(chatId) {
   await sendPlainText(chatId, '正在從 GitHub 獲取超級聯盟排名資料，請稍候...');
 
   try {
-    const response = await fetch(fileUrl);
+    // 使用 fetch 向 GitHub 請求檔案內容
+    const response = await fetch(fileUrl, {
+      cf: {
+        cacheTtl: 86400, // 快取時長 (秒)，86400 秒 = 1 天
+        cacheEverything: true,
+      },
+    });
+
     if (!response.ok) {
       throw new Error(`無法獲取檔案，狀態碼: ${response.status}`);
     }
