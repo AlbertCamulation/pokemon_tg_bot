@@ -90,37 +90,42 @@ async function onMessage(message) {
 }
 
 /**
- * 【核心修改】: 處理寶可夢模糊搜尋，並按聯盟分組排序顯示
+ * 【核心修改】: 處理寶可夢模糊搜尋，並自動擴展至整個進化鏈
  */
 async function handlePokemonSearch(chatId, query) {
-  await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢排名，請稍候...`);
+  await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
 
   try {
-    // 1. 獲取中英文對照表，並加入快取清除機制
-    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
-    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
-    const transResponse = await fetch(translationUrl);
+    // 1. 獲取中英文對照表
+    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json`;
+    const transResponse = await fetch(translationUrl, { cf: { cacheTtl: 86400 } });
     if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
     const allPokemonData = await transResponse.json();
     
     // 2. 進行模糊搜尋，找出所有符合條件的寶可夢
     const isChinese = /[\u4e00-\u9fa5]/.test(query);
     const lowerCaseQuery = query.toLowerCase();
-    const matches = allPokemonData.filter(p => 
+    const initialMatches = allPokemonData.filter(p => 
       isChinese 
         ? p.speciesName.includes(query)
         : p.speciesId.toLowerCase().includes(lowerCaseQuery)
     );
 
-    if (matches.length === 0) {
+    if (initialMatches.length === 0) {
       return await sendMessage(chatId, `很抱歉，找不到任何與 "${query}" 相關的寶可夢。`);
     }
 
-    // 建立一個從英文 id 快速查找中文名的 map，和一個包含所有匹配 id 的 Set
-    const matchingIds = new Set(matches.map(p => p.speciesId.toLowerCase()));
-    const idToNameMap = new Map(matches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+    // 3. 擴展搜尋至整個家族
+    const familyIds = new Set(initialMatches.map(p => p.family ? p.family.id : null).filter(id => id));
+    const familyMatches = allPokemonData.filter(p => p.family && familyIds.has(p.family.id));
+    
+    // 如果找不到家族，就退回使用初始匹配結果
+    const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
 
-    // 3. 一次性獲取所有聯盟的排名資料
+    const matchingIds = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
+    const idToNameMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+
+    // 4. 一次性獲取所有聯盟的排名資料
     const leagues = [
       { name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
       { name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
@@ -132,8 +137,8 @@ async function handlePokemonSearch(chatId, query) {
     );
     const allLeagueRanks = await Promise.all(fetchPromises);
 
-    // 4. 逐一聯盟處理，並彙總結果
-    let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢排名結果 🏆\n`;
+    // 5. 逐一聯盟處理，並彙總結果
+    let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢家族排名結果 🏆\n`;
     let foundAnyResults = false;
 
     allLeagueRanks.forEach((rankings, index) => {
