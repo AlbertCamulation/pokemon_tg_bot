@@ -97,9 +97,14 @@ async function handlePokemonSearch(chatId, query) {
 
   try {
     // 1. 獲取中英文對照表
-    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json`;
-    const transResponse = await fetch(translationUrl, { cf: { cacheTtl: 86400 } });
+    // --- 【核心修正】: 重新加入快取清除機制，強制不快取翻譯檔 ---
+    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+
+    // 移除 cf 快取設定，確保每次都請求最新版本
+    const transResponse = await fetch(translationUrl);
     if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
+    
     const allPokemonData = await transResponse.json();
     
     // 2. 進行模糊搜尋，找出所有符合條件的寶可夢
