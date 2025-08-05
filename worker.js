@@ -37,38 +37,46 @@ async function onMessage(message) { /* ... */ }
 
 
 /**
- * 【核心修改】: 處理寶可夢名稱搜尋的函式，支援中英文
+ * 【核心修改】: 處理寶可夢名稱搜尋的函式，增加了快取清除機制
  */
 async function handlePokemonSearch(chatId, query) {
   await sendMessage(chatId, `🔍 正在查詢 ${query} 的排名資料，請稍候...`);
 
-  let searchTerm = query.toLowerCase(); // 預設的搜尋詞 (英文 ID)
-  let displayName = query; // 用於最終顯示的名稱
+  let searchTerm = query.toLowerCase();
+  let displayName = query;
   
-  // 1. 判斷是否為中文輸入，若是，則進行翻譯
-  const isChinese = /[\u4e00-\u9fa5]/.test(query);
+  const isChinese = /[\u4e-0-9fa5]/.test(query);
   if (isChinese) {
     try {
-      const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json`;
-      const transResponse = await fetch(translationUrl, { cf: { cacheTtl: 86400 } });
-      if (!transResponse.ok) throw new Error('無法載入中文翻譯檔');
+      // --- 【修改點】: 在 URL 後面加上一個隨機參數來強制繞過快取 ---
+      const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+      const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+      
+      console.log(`Fetching translation from: ${translationUrl}`); // 增加日誌，方便除錯
+
+      const transResponse = await fetch(translationUrl); // 暫時移除 cf 快取設定，直接請求最新版
+      
+      if (!transResponse.ok) {
+        // 拋出更詳細的錯誤，方便我們看到 HTTP 狀態碼
+        throw new Error(`無法載入中文翻譯檔，HTTP 狀態碼: ${transResponse.status}`);
+      }
       
       const translations = await transResponse.json();
       const foundTranslation = translations.find(p => p.speciesName === query);
       
       if (foundTranslation) {
-        searchTerm = foundTranslation.speciesId.toLowerCase(); // 找到對應的英文 ID
-        displayName = query; // 顯示名稱維持中文
+        searchTerm = foundTranslation.speciesId.toLowerCase();
+        displayName = query;
       } else {
         return await sendMessage(chatId, `很抱歉，在翻譯資料中找不到 "${query}"。`);
       }
     } catch (e) {
-      console.error("讀取中文翻譯檔時出錯:", e);
-      return await sendMessage(chatId, "讀取中文翻譯檔時發生錯誤。");
+      console.error("讀取中文翻譯檔時出錯:", e.message); // 印出更詳細的錯誤訊息
+      return await sendMessage(chatId, `讀取中文翻譯檔時發生錯誤: ${e.message}`);
     }
   }
 
-  // 2. 使用 searchTerm (現在一定是英文 ID) 進行排名查詢
+  // ... 後續的排名查詢邏輯保持不變 ...
   const leagues = [
     { name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
     { name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
@@ -85,7 +93,6 @@ async function handlePokemonSearch(chatId, query) {
   try {
     const results = await Promise.all(fetchPromises);
     
-    // 將顯示名稱首字母大寫（如果它是英文的話）
     displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
     let replyMessage = `🏆 *${displayName}* 的各聯盟排名 🏆\n====================\n`;
     let foundAny = false;
@@ -99,7 +106,6 @@ async function handlePokemonSearch(chatId, query) {
         return;
       }
       
-      // 【修正點】: 搜尋的 key 應為 speciesId
       const pokemonIndex = rankings.findIndex(p => p.speciesId.toLowerCase() === searchTerm);
 
       if (pokemonIndex !== -1) {
@@ -111,7 +117,7 @@ async function handlePokemonSearch(chatId, query) {
       }
     });
 
-    if (!foundAny && !isChinese) { // 如果是英文輸入且找不到
+    if (!foundAny && !isChinese) {
       replyMessage = `很抱歉，在所有聯盟中都找不到 "${displayName}" 的排名資料。\n請檢查寶可夢英文ID拼寫是否正確。`;
     }
 
