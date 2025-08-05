@@ -1,19 +1,15 @@
 /**
- * 結合了 Telegram Bot 功能、從 GitHub 讀取資料、並包含 IP 白名單限制的 Worker 腳本
+ * 結合了 Telegram Bot 功能與從 GitHub 讀取資料功能的 Worker 腳本
+ * - 支援 /ranking 指令來獲取 GitHub 上的 JSON 資料
+ * - 對獲取的 GitHub 資料設定了 24 小時的快取
+ * - 對其他訊息執行回音功能
  */
 
-// --- 請修改以下設定 ---
+// --- 請修改以下 GitHub 相關設定 ---
 const GITHUB_USERNAME = "AlbertCamulation";      // 您的 GitHub 使用者名稱
 const REPO_NAME = "pokemon_tg_bot";           // 您存放 /data 資料夾的專案名稱
 const BRANCH_NAME = "main";                   // 您的分支名稱
-
-// 【安全設定】: IP 白名單列表
-// 只有列表中的 IP 位址才能觸發這個 Worker 的所有功能
-const ALLOWED_IPS = [
-  "162.120.184.61",
-  "104.30.161.187",
-];
-// --------------------
+// ------------------------------------
 
 // --- Telegram Bot 相關設定 (從環境變數讀取) ---
 const TOKEN = ENV_BOT_TOKEN;
@@ -24,24 +20,6 @@ const SECRET = ENV_BOT_SECRET;
  * 主監聽事件
  */
 addEventListener('fetch', event => {
-  // --- IP 限制邏輯 ---
-  // 取得訪客的真實 IP
-  const clientIP = event.request.headers.get('CF-Connecting-IP');
-  
-  // 如果訪客的 IP 不在白名單中，立即阻擋
-  if (!ALLOWED_IPS.includes(clientIP)) {
-    // 回傳 403 Forbidden 錯誤
-    event.respondWith(
-      new Response(`Access from your IP (${clientIP}) is denied.`, {
-        status: 403,
-        statusText: 'Forbidden'
-      })
-    );
-    return; // 終止後續所有操作
-  }
-  
-  // --- URL 路由邏輯 ---
-  // 如果 IP 驗證通過，才繼續執行原本的功能
   const url = new URL(event.request.url);
   if (url.pathname === WEBHOOK) {
     event.respondWith(handleWebhook(event));
@@ -50,7 +28,7 @@ addEventListener('fetch', event => {
   } else if (url.pathname === '/unRegisterWebhook') {
     event.respondWith(unRegisterWebhook(event));
   } else {
-    event.respondWith(new Response('Access Allowed, but no handler for this path.'));
+    event.respondWith(new Response('Ok'));
   }
 });
 
