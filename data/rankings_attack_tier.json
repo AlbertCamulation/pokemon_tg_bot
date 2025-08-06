@@ -1,6 +1,6 @@
 [
   {
-    "speciesId": "primal_groudon",
+    "speciesId": "groudon_primal",
     "speciesName": "Primal Groudon",
     "rank": 1,
     "types": [
@@ -9,7 +9,7 @@
     ]
   },
   {
-    "speciesId": "mega_rayquaza",
+    "speciesId": "rayquaza_mega",
     "speciesName": "Mega Rayquaza",
     "rank": 2,
     "types": [
@@ -18,7 +18,7 @@
     ]
   },
   {
-    "speciesId": "shadow_mewtwo",
+    "speciesId": "mewtwo_shadow",
     "speciesName": "Shadow Mewtwo",
     "rank": 3,
     "types": [
@@ -26,7 +26,7 @@
     ]
   },
   {
-    "speciesId": "primal_kyogre",
+    "speciesId": "kyogre_primal",
     "speciesName": "Primal Kyogre",
     "rank": 4,
     "types": [
@@ -34,7 +34,7 @@
     ]
   },
   {
-    "speciesId": "black_kyurem",
+    "speciesId": "kyurem_black",
     "speciesName": "Black Kyurem",
     "rank": 5,
     "types": [
@@ -43,7 +43,7 @@
     ]
   },
   {
-    "speciesId": "dawn_wings_necrozma",
+    "speciesId": "necrozma_dawn_wings",
     "speciesName": "Dawn Wings Necrozma",
     "rank": 6,
     "types": [
@@ -52,7 +52,7 @@
     ]
   },
   {
-    "speciesId": "crowned_sword_zacian",
+    "speciesId": "zacian_crowned_sword",
     "speciesName": "Crowned Sword Zacian",
     "rank": 7,
     "types": [
@@ -61,7 +61,7 @@
     ]
   },
   {
-    "speciesId": "mega_blaziken",
+    "speciesId": "blaziken_mega",
     "speciesName": "Mega Blaziken",
     "rank": 8,
     "types": [
@@ -70,7 +70,7 @@
     ]
   },
   {
-    "speciesId": "white_kyurem",
+    "speciesId": "kyurem_white",
     "speciesName": "White Kyurem",
     "rank": 9,
     "types": [
@@ -79,7 +79,7 @@
     ]
   },
   {
-    "speciesId": "shadow_salamence",
+    "speciesId": "salamence_shadow",
     "speciesName": "Shadow Salamence",
     "rank": 10,
     "types": [
@@ -88,7 +88,7 @@
     ]
   },
   {
-    "speciesId": "mega_lucario",
+    "speciesId": "lucario_mega",
     "speciesName": "Mega Lucario",
     "rank": 11,
     "types": [
@@ -97,7 +97,7 @@
     ]
   },
   {
-    "speciesId": "shadow_rhyperior",
+    "speciesId": "rhyperior_shadow",
     "speciesName": "Shadow Rhyperior",
     "rank": 12,
     "types": [
@@ -106,7 +106,7 @@
     ]
   },
   {
-    "speciesId": "shadow_regigigas",
+    "speciesId": "regigigas_shadow",
     "speciesName": "Shadow Regigigas",
     "rank": 13,
     "types": [
@@ -114,7 +114,7 @@
     ]
   },
   {
-    "speciesId": "dusk_mane_necrozma",
+    "speciesId": "necrozma_dusk_mane",
     "speciesName": "Dusk Mane Necrozma",
     "rank": 14,
     "types": [
@@ -123,7 +123,7 @@
     ]
   },
   {
-    "speciesId": "mega_garchomp",
+    "speciesId": "garchomp_mega",
     "speciesName": "Mega Garchomp",
     "rank": 15,
     "types": [
@@ -132,7 +132,7 @@
     ]
   },
   {
-    "speciesId": "shadow_chandelure",
+    "speciesId": "chandelure_shadow",
     "speciesName": "Shadow Chandelure",
     "rank": 16,
     "types": [
@@ -141,7 +141,7 @@
     ]
   },
   {
-    "speciesId": "mega_gardevoir",
+    "speciesId": "gardevoir_mega",
     "speciesName": "Mega Gardevoir",
     "rank": 17,
     "types": [
@@ -150,7 +150,7 @@
     ]
   },
   {
-    "speciesId": "mega_tyranitar",
+    "speciesId": "tyranitar_mega",
     "speciesName": "Mega Tyranitar",
     "rank": 18,
     "types": [
@@ -159,7 +159,7 @@
     ]
   },
   {
-    "speciesId": "crowned_shield_zamazenta",
+    "speciesId": "zamazenta_crowned_shield",
     "speciesName": "Crowned Shield Zamazenta",
     "rank": 19,
     "types": [
@@ -168,7 +168,7 @@
     ]
   },
   {
-    "speciesId": "mega_gengar",
+    "speciesId": "gengar_mega",
     "speciesName": "Mega Gengar",
     "rank": 20,
     "types": [
@@ -177,7 +177,7 @@
     ]
   },
   {
-    "speciesId": "mega_salamence",
+    "speciesId": "salamence_mega",
     "speciesName": "Mega Salamence",
     "rank": 21,
     "types": [
@@ -186,7 +186,7 @@
     ]
   },
   {
-    "speciesId": "shadow_tyranitar",
+    "speciesId": "tyranitar_shadow",
     "speciesName": "Shadow Tyranitar",
     "rank": 22,
     "types": [
@@ -195,7 +195,7 @@
     ]
   },
   {
-    "speciesId": "shadow_mamoswine",
+    "speciesId": "mamoswine_shadow",
     "speciesName": "Shadow Mamoswine",
     "rank": 23,
     "types": [
@@ -204,7 +204,7 @@
     ]
   },
   {
-    "speciesId": "mega_heracross",
+    "speciesId": "heracross_mega",
     "speciesName": "Mega Heracross",
     "rank": 24,
     "types": [
@@ -213,7 +213,7 @@
     ]
   },
   {
-    "speciesId": "shadow_garchomp",
+    "speciesId": "garchomp_shadow",
     "speciesName": "Shadow Garchomp",
     "rank": 25,
     "types": [
@@ -222,7 +222,7 @@
     ]
   },
   {
-    "speciesId": "mega_gallade",
+    "speciesId": "gallade_mega",
     "speciesName": "Mega Gallade",
     "rank": 26,
     "types": [
@@ -240,7 +240,7 @@
     ]
   },
   {
-    "speciesId": "shadow_groudon",
+    "speciesId": "groudon_shadow",
     "speciesName": "Shadow Groudon",
     "rank": 28,
     "types": [
@@ -248,7 +248,7 @@
     ]
   },
   {
-    "speciesId": "mega_y_charizard",
+    "speciesId": "charizard_mega_y",
     "speciesName": "Mega Y Charizard",
     "rank": 29,
     "types": [
@@ -257,7 +257,7 @@
     ]
   },
   {
-    "speciesId": "shadow_blaziken",
+    "speciesId": "blaziken_shadow",
     "speciesName": "Shadow Blaziken",
     "rank": 30,
     "types": [
@@ -266,7 +266,7 @@
     ]
   },
   {
-    "speciesId": "shadow_metagross",
+    "speciesId": "metagross_shadow",
     "speciesName": "Shadow Metagross",
     "rank": 31,
     "types": [
@@ -275,7 +275,7 @@
     ]
   },
   {
-    "speciesId": "shadow_excadrill",
+    "speciesId": "excadrill_shadow",
     "speciesName": "Shadow Excadrill",
     "rank": 32,
     "types": [
@@ -284,7 +284,7 @@
     ]
   },
   {
-    "speciesId": "mega_sceptile",
+    "speciesId": "sceptile_mega",
     "speciesName": "Mega Sceptile",
     "rank": 33,
     "types": [
@@ -293,7 +293,7 @@
     ]
   },
   {
-    "speciesId": "shadow_moltres",
+    "speciesId": "moltres_shadow",
     "speciesName": "Shadow Moltres",
     "rank": 34,
     "types": [
@@ -302,7 +302,7 @@
     ]
   },
   {
-    "speciesId": "mega_alakazam",
+    "speciesId": "alakazam_mega",
     "speciesName": "Mega Alakazam",
     "rank": 35,
     "types": [
@@ -310,7 +310,7 @@
     ]
   },
   {
-    "speciesId": "mega_diancie",
+    "speciesId": "diancie_mega",
     "speciesName": "Mega Diancie",
     "rank": 36,
     "types": [
@@ -328,7 +328,7 @@
     ]
   },
   {
-    "speciesId": "shadow_heatran",
+    "speciesId": "heatran_shadow",
     "speciesName": "Shadow Heatran",
     "rank": 38,
     "types": [
@@ -337,7 +337,7 @@
     ]
   },
   {
-    "speciesId": "shadow_rampardos",
+    "speciesId": "rampardos_shadow",
     "speciesName": "Shadow Rampardos",
     "rank": 39,
     "types": [
@@ -345,7 +345,7 @@
     ]
   },
   {
-    "speciesId": "mega_swampert",
+    "speciesId": "swampert_mega",
     "speciesName": "Mega Swampert",
     "rank": 40,
     "types": [
@@ -354,7 +354,7 @@
     ]
   },
   {
-    "speciesId": "shadow_weavile",
+    "speciesId": "weavile_shadow",
     "speciesName": "Shadow Weavile",
     "rank": 41,
     "types": [
@@ -363,7 +363,7 @@
     ]
   },
   {
-    "speciesId": "shadow_zapdos",
+    "speciesId": "zapdos_shadow",
     "speciesName": "Shadow Zapdos",
     "rank": 42,
     "types": [
@@ -372,7 +372,7 @@
     ]
   },
   {
-    "speciesId": "shadow_emboar",
+    "speciesId": "emboar_shadow",
     "speciesName": "Shadow Emboar",
     "rank": 43,
     "types": [
@@ -381,7 +381,7 @@
     ]
   },
   {
-    "speciesId": "therian_forme_landorus",
+    "speciesId": "landorus_therian",
     "speciesName": "Therian Forme Landorus",
     "rank": 44,
     "types": [
@@ -399,7 +399,7 @@
     ]
   },
   {
-    "speciesId": "shadow_tyrantrum",
+    "speciesId": "tyrantrum_shadow",
     "speciesName": "Shadow Tyrantrum",
     "rank": 46,
     "types": [
@@ -408,7 +408,7 @@
     ]
   },
   {
-    "speciesId": "standard_mode_shadow_darmanitan",
+    "speciesId": "darmanitan_standard_shadow",
     "speciesName": "Standard Mode Shadow Darmanitan",
     "rank": 47,
     "types": [
@@ -424,7 +424,7 @@
     ]
   },
   {
-    "speciesId": "mega_houndoom",
+    "speciesId": "houndoom_mega",
     "speciesName": "Mega Houndoom",
     "rank": 49,
     "types": [
@@ -433,7 +433,7 @@
     ]
   },
   {
-    "speciesId": "shadow_conkeldurr",
+    "speciesId": "conkeldurr_shadow",
     "speciesName": "Shadow Conkeldurr",
     "rank": 50,
     "types": [
@@ -450,7 +450,7 @@
     ]
   },
   {
-    "speciesId": "mega_latios",
+    "speciesId": "latios_mega",
     "speciesName": "Mega Latios",
     "rank": 52,
     "types": [
@@ -468,7 +468,7 @@
     ]
   },
   {
-    "speciesId": "shadow_raikou",
+    "speciesId": "raikou_shadow",
     "speciesName": "Shadow Raikou",
     "rank": 54,
     "types": [
@@ -493,7 +493,7 @@
     ]
   },
   {
-    "speciesId": "shadow_dialga",
+    "speciesId": "dialga_shadow",
     "speciesName": "Shadow Dialga",
     "rank": 57,
     "types": [
@@ -519,7 +519,7 @@
     ]
   },
   {
-    "speciesId": "shadow_ho_oh",
+    "speciesId": "ho_oh_shadow",
     "speciesName": "Shadow Ho-Oh",
     "rank": 60,
     "types": [
@@ -528,7 +528,7 @@
     ]
   },
   {
-    "speciesId": "shadow_gigalith",
+    "speciesId": "gigalith_shadow",
     "speciesName": "Shadow Gigalith",
     "rank": 61,
     "types": [
@@ -536,7 +536,7 @@
     ]
   },
   {
-    "speciesId": "shadow_kyogre",
+    "speciesId": "kyogre_shadow",
     "speciesName": "Shadow Kyogre",
     "rank": 62,
     "types": [
@@ -553,7 +553,7 @@
     ]
   },
   {
-    "speciesId": "mega_x_charizard",
+    "speciesId": "charizard_mega_x",
     "speciesName": "Mega X Charizard",
     "rank": 64,
     "types": [
@@ -562,7 +562,7 @@
     ]
   },
   {
-    "speciesId": "shadow_electivire",
+    "speciesId": "electivire_shadow",
     "speciesName": "Shadow Electivire",
     "rank": 65,
     "types": [
@@ -570,7 +570,7 @@
     ]
   },
   {
-    "speciesId": "mega_aerodactyl",
+    "speciesId": "aerodactyl_mega",
     "speciesName": "Mega Aerodactyl",
     "rank": 66,
     "types": [
@@ -579,7 +579,7 @@
     ]
   },
   {
-    "speciesId": "shadow_machamp",
+    "speciesId": "machamp_shadow",
     "speciesName": "Shadow Machamp",
     "rank": 67,
     "types": [
@@ -587,7 +587,7 @@
     ]
   },
   {
-    "speciesId": "mega_absol",
+    "speciesId": "absol_mega",
     "speciesName": "Mega Absol",
     "rank": 68,
     "types": [
@@ -595,7 +595,7 @@
     ]
   },
   {
-    "speciesId": "shadow_magnezone",
+    "speciesId": "magnezone_shadow",
     "speciesName": "Shadow Magnezone",
     "rank": 69,
     "types": [
@@ -604,7 +604,7 @@
     ]
   },
   {
-    "speciesId": "therian_forme_thundurus",
+    "speciesId": "thundurus_therian",
     "speciesName": "Therian Forme Thundurus",
     "rank": 70,
     "types": [
@@ -613,7 +613,7 @@
     ]
   },
   {
-    "speciesId": "shadow_staraptor",
+    "speciesId": "staraptor_shadow",
     "speciesName": "Shadow Staraptor",
     "rank": 71,
     "types": [
@@ -631,7 +631,7 @@
     ]
   },
   {
-    "speciesId": "mega_gyarados",
+    "speciesId": "gyarados_mega",
     "speciesName": "Mega Gyarados",
     "rank": 73,
     "types": [
@@ -640,7 +640,7 @@
     ]
   },
   {
-    "speciesId": "shadow_charizard",
+    "speciesId": "charizard_shadow",
     "speciesName": "Shadow Charizard",
     "rank": 74,
     "types": [
@@ -657,7 +657,7 @@
     ]
   },
   {
-    "speciesId": "shadow_entei",
+    "speciesId": "entei_shadow",
     "speciesName": "Shadow Entei",
     "rank": 76,
     "types": [
@@ -665,7 +665,7 @@
     ]
   },
   {
-    "speciesId": "incarnate_forme_enamorus",
+    "speciesId": "enamorus_incarnate",
     "speciesName": "Incarnate Forme Enamorus",
     "rank": 77,
     "types": [
@@ -674,7 +674,7 @@
     ]
   },
   {
-    "speciesId": "mega_manectric",
+    "speciesId": "manectric_mega",
     "speciesName": "Mega Manectric",
     "rank": 78,
     "types": [
@@ -691,7 +691,7 @@
     ]
   },
   {
-    "speciesId": "shadow_hariyama",
+    "speciesId": "hariyama_shadow",
     "speciesName": "Shadow Hariyama",
     "rank": 80,
     "types": [
@@ -708,7 +708,7 @@
     ]
   },
   {
-    "speciesId": "shadow_palkia",
+    "speciesId": "palkia_shadow",
     "speciesName": "Shadow Palkia",
     "rank": 82,
     "types": [
@@ -717,7 +717,7 @@
     ]
   },
   {
-    "speciesId": "shadow_honchkrow",
+    "speciesId": "honchkrow_shadow",
     "speciesName": "Shadow Honchkrow",
     "rank": 83,
     "types": [
@@ -726,7 +726,7 @@
     ]
   },
   {
-    "speciesId": "shadow_gardevoir",
+    "speciesId": "gardevoir_shadow",
     "speciesName": "Shadow Gardevoir",
     "rank": 84,
     "types": [
@@ -735,7 +735,7 @@
     ]
   },
   {
-    "speciesId": "shadow_latios",
+    "speciesId": "latios_shadow",
     "speciesName": "Shadow Latios",
     "rank": 85,
     "types": [
@@ -744,7 +744,7 @@
     ]
   },
   {
-    "speciesId": "shadow_gengar",
+    "speciesId": "gengar_shadow",
     "speciesName": "Shadow Gengar",
     "rank": 86,
     "types": [
@@ -762,7 +762,7 @@
     ]
   },
   {
-    "speciesId": "mega_banette",
+    "speciesId": "banette_mega",
     "speciesName": "Mega Banette",
     "rank": 88,
     "types": [
@@ -770,7 +770,7 @@
     ]
   },
   {
-    "speciesId": "mega_ampharos",
+    "speciesId": "ampharos_mega",
     "speciesName": "Mega Ampharos",
     "rank": 89,
     "types": [
@@ -788,7 +788,7 @@
     ]
   },
   {
-    "speciesId": "shadow_alakazam",
+    "speciesId": "alakazam_shadow",
     "speciesName": "Shadow Alakazam",
     "rank": 91,
     "types": [
@@ -796,7 +796,7 @@
     ]
   },
   {
-    "speciesId": "shadow_swampert",
+    "speciesId": "swampert_shadow",
     "speciesName": "Shadow Swampert",
     "rank": 92,
     "types": [
@@ -814,7 +814,7 @@
     ]
   },
   {
-    "speciesId": "mega_venusaur",
+    "speciesId": "venusaur_mega",
     "speciesName": "Mega Venusaur",
     "rank": 94,
     "types": [
@@ -823,7 +823,7 @@
     ]
   },
   {
-    "speciesId": "shadow_sceptile",
+    "speciesId": "sceptile_shadow",
     "speciesName": "Shadow Sceptile",
     "rank": 95,
     "types": [
@@ -840,7 +840,7 @@
     ]
   },
   {
-    "speciesId": "mega_blastoise",
+    "speciesId": "blastoise_mega",
     "speciesName": "Mega Blastoise",
     "rank": 97,
     "types": [
@@ -848,7 +848,7 @@
     ]
   },
   {
-    "speciesId": "shadow_absol",
+    "speciesId": "absol_shadow",
     "speciesName": "Shadow Absol",
     "rank": 98,
     "types": [
@@ -856,7 +856,7 @@
     ]
   },
   {
-    "speciesId": "mega_beedrill",
+    "speciesId": "beedrill_mega",
     "speciesName": "Mega Beedrill",
     "rank": 99,
     "types": [
@@ -874,7 +874,7 @@
     ]
   },
   {
-    "speciesId": "shadow_tangrowth",
+    "speciesId": "tangrowth_shadow",
     "speciesName": "Shadow Tangrowth",
     "rank": 101,
     "types": [
@@ -882,7 +882,7 @@
     ]
   },
   {
-    "speciesId": "shadow_infernape",
+    "speciesId": "infernape_shadow",
     "speciesName": "Shadow Infernape",
     "rank": 102,
     "types": [
@@ -909,7 +909,7 @@
     ]
   },
   {
-    "speciesId": "shadow_venusaur",
+    "speciesId": "venusaur_shadow",
     "speciesName": "Shadow Venusaur",
     "rank": 105,
     "types": [
@@ -936,7 +936,7 @@
     ]
   },
   {
-    "speciesId": "mega_pinsir",
+    "speciesId": "pinsir_mega",
     "speciesName": "Mega Pinsir",
     "rank": 108,
     "types": [
@@ -945,7 +945,7 @@
     ]
   },
   {
-    "speciesId": "shadow_typhlosion",
+    "speciesId": "typhlosion_shadow",
     "speciesName": "Shadow Typhlosion",
     "rank": 109,
     "types": [
@@ -961,7 +961,7 @@
     ]
   },
   {
-    "speciesId": "shadow_alolan_golem",
+    "speciesId": "golem_alolan_shadow",
     "speciesName": "Shadow Alolan Golem",
     "rank": 111,
     "types": [
@@ -979,7 +979,7 @@
     ]
   },
   {
-    "speciesId": "mega_lopunny",
+    "speciesId": "lopunny_mega",
     "speciesName": "Mega Lopunny",
     "rank": 113,
     "types": [
@@ -1015,7 +1015,7 @@
     ]
   },
   {
-    "speciesId": "shadow_kingler",
+    "speciesId": "kingler_shadow",
     "speciesName": "Shadow Kingler",
     "rank": 117,
     "types": [
@@ -1032,7 +1032,7 @@
     ]
   },
   {
-    "speciesId": "shadow_exeggutor",
+    "speciesId": "exeggutor_shadow",
     "speciesName": "Shadow Exeggutor",
     "rank": 119,
     "types": [
@@ -1041,7 +1041,7 @@
     ]
   },
   {
-    "speciesId": "shadow_luxray",
+    "speciesId": "luxray_shadow",
     "speciesName": "Shadow Luxray",
     "rank": 120,
     "types": [
@@ -1057,7 +1057,7 @@
     ]
   },
   {
-    "speciesId": "shadow_golurk",
+    "speciesId": "golurk_shadow",
     "speciesName": "Shadow Golurk",
     "rank": 122,
     "types": [
@@ -1066,7 +1066,7 @@
     ]
   },
   {
-    "speciesId": "shadow_cursola",
+    "speciesId": "cursola_shadow",
     "speciesName": "Shadow Cursola",
     "rank": 123,
     "types": [
@@ -1083,7 +1083,7 @@
     ]
   },
   {
-    "speciesId": "mega_latias",
+    "speciesId": "latias_mega",
     "speciesName": "Mega Latias",
     "rank": 125,
     "types": [
@@ -1092,7 +1092,7 @@
     ]
   },
   {
-    "speciesId": "shadow_aurorus",
+    "speciesId": "aurorus_shadow",
     "speciesName": "Shadow Aurorus",
     "rank": 126,
     "types": [
@@ -1101,7 +1101,7 @@
     ]
   },
   {
-    "speciesId": "shadow_sirfetch_d",
+    "speciesId": "sirfetch_d_shadow",
     "speciesName": "Shadow Sirfetch'd",
     "rank": 127,
     "types": [
@@ -1109,7 +1109,7 @@
     ]
   },
   {
-    "speciesId": "mega_pidgeot",
+    "speciesId": "pidgeot_mega",
     "speciesName": "Mega Pidgeot",
     "rank": 128,
     "types": [
@@ -1118,7 +1118,7 @@
     ]
   },
   {
-    "speciesId": "shadow_rhydon",
+    "speciesId": "rhydon_shadow",
     "speciesName": "Shadow Rhydon",
     "rank": 129,
     "types": [
@@ -1136,7 +1136,7 @@
     ]
   },
   {
-    "speciesId": "shadow_magmortar",
+    "speciesId": "magmortar_shadow",
     "speciesName": "Shadow Magmortar",
     "rank": 131,
     "types": [
@@ -1144,7 +1144,7 @@
     ]
   },
   {
-    "speciesId": "shadow_golem",
+    "speciesId": "golem_shadow",
     "speciesName": "Shadow Golem",
     "rank": 132,
     "types": [
@@ -1153,7 +1153,7 @@
     ]
   },
   {
-    "speciesId": "shadow_dragonite",
+    "speciesId": "dragonite_shadow",
     "speciesName": "Shadow Dragonite",
     "rank": 133,
     "types": [
@@ -1180,7 +1180,7 @@
     ]
   },
   {
-    "speciesId": "shadow_houndoom",
+    "speciesId": "houndoom_shadow",
     "speciesName": "Shadow Houndoom",
     "rank": 136,
     "types": [
@@ -1189,7 +1189,7 @@
     ]
   },
   {
-    "speciesId": "shadow_gallade",
+    "speciesId": "gallade_shadow",
     "speciesName": "Shadow Gallade",
     "rank": 137,
     "types": [
@@ -1206,7 +1206,7 @@
     ]
   },
   {
-    "speciesId": "shadow_torterra",
+    "speciesId": "torterra_shadow",
     "speciesName": "Shadow Torterra",
     "rank": 139,
     "types": [
@@ -1224,7 +1224,7 @@
     ]
   },
   {
-    "speciesId": "shadow_samurott",
+    "speciesId": "samurott_shadow",
     "speciesName": "Shadow Samurott",
     "rank": 141,
     "types": [
@@ -1232,7 +1232,7 @@
     ]
   },
   {
-    "speciesId": "shadow_toxicroak",
+    "speciesId": "toxicroak_shadow",
     "speciesName": "Shadow Toxicroak",
     "rank": 142,
     "types": [
@@ -1241,7 +1241,7 @@
     ]
   },
   {
-    "speciesId": "incarnate_forme_landorus",
+    "speciesId": "landorus_incarnate",
     "speciesName": "Incarnate Forme Landorus",
     "rank": 143,
     "types": [
@@ -1250,7 +1250,7 @@
     ]
   },
   {
-    "speciesId": "shadow_empoleon",
+    "speciesId": "empoleon_shadow",
     "speciesName": "Shadow Empoleon",
     "rank": 144,
     "types": [
@@ -1286,7 +1286,7 @@
     ]
   },
   {
-    "speciesId": "mega_scizor",
+    "speciesId": "scizor_mega",
     "speciesName": "Mega Scizor",
     "rank": 148,
     "types": [
@@ -1303,7 +1303,7 @@
     ]
   },
   {
-    "speciesId": "shadow_scizor",
+    "speciesId": "scizor_shadow",
     "speciesName": "Shadow Scizor",
     "rank": 150,
     "types": [
@@ -1329,7 +1329,7 @@
     ]
   },
   {
-    "speciesId": "shadow_aggron",
+    "speciesId": "aggron_shadow",
     "speciesName": "Shadow Aggron",
     "rank": 153,
     "types": [
@@ -1338,7 +1338,7 @@
     ]
   },
   {
-    "speciesId": "shadow_porygon_z",
+    "speciesId": "porygon_z_shadow",
     "speciesName": "Shadow Porygon-Z",
     "rank": 154,
     "types": [
@@ -1346,7 +1346,7 @@
     ]
   },
   {
-    "speciesId": "shadow_archeops",
+    "speciesId": "archeops_shadow",
     "speciesName": "Shadow Archeops",
     "rank": 155,
     "types": [
@@ -1355,7 +1355,7 @@
     ]
   },
   {
-    "speciesId": "shadow_alolan_exeggutor",
+    "speciesId": "exeggutor_alolan_shadow",
     "speciesName": "Shadow Alolan Exeggutor",
     "rank": 156,
     "types": [
@@ -1372,7 +1372,7 @@
     ]
   },
   {
-    "speciesId": "shadow_donphan",
+    "speciesId": "donphan_shadow",
     "speciesName": "Shadow Donphan",
     "rank": 158,
     "types": [
@@ -1380,7 +1380,7 @@
     ]
   },
   {
-    "speciesId": "shadow_feraligatr",
+    "speciesId": "feraligatr_shadow",
     "speciesName": "Shadow Feraligatr",
     "rank": 159,
     "types": [
@@ -1388,7 +1388,7 @@
     ]
   },
   {
-    "speciesId": "shadow_annihilape",
+    "speciesId": "annihilape_shadow",
     "speciesName": "Shadow Annihilape",
     "rank": 160,
     "types": [
@@ -1406,7 +1406,7 @@
     ]
   },
   {
-    "speciesId": "shadow_hippowdon",
+    "speciesId": "hippowdon_shadow",
     "speciesName": "Shadow Hippowdon",
     "rank": 162,
     "types": [
@@ -1432,7 +1432,7 @@
     ]
   },
   {
-    "speciesId": "shadow_sneasler",
+    "speciesId": "sneasler_shadow",
     "speciesName": "Shadow Sneasler",
     "rank": 165,
     "types": [
@@ -1450,7 +1450,7 @@
     ]
   },
   {
-    "speciesId": "shadow_gyarados",
+    "speciesId": "gyarados_shadow",
     "speciesName": "Shadow Gyarados",
     "rank": 167,
     "types": [
@@ -1486,7 +1486,7 @@
     ]
   },
   {
-    "speciesId": "galarian_standard_mode_darmanitan",
+    "speciesId": "darmanitan_galarian_standard",
     "speciesName": "Galarian Standard Mode Darmanitan",
     "rank": 171,
     "types": [
@@ -1503,7 +1503,7 @@
     ]
   },
   {
-    "speciesId": "shadow_manectric",
+    "speciesId": "manectric_shadow",
     "speciesName": "Shadow Manectric",
     "rank": 173,
     "types": [
@@ -1511,7 +1511,7 @@
     ]
   },
   {
-    "speciesId": "shadow_aerodactyl",
+    "speciesId": "aerodactyl_shadow",
     "speciesName": "Shadow Aerodactyl",
     "rank": 174,
     "types": [
@@ -1520,7 +1520,7 @@
     ]
   },
   {
-    "speciesId": "mega_abomasnow",
+    "speciesId": "abomasnow_mega",
     "speciesName": "Mega Abomasnow",
     "rank": 175,
     "types": [
@@ -1529,7 +1529,7 @@
     ]
   },
   {
-    "speciesId": "shadow_mr_rime",
+    "speciesId": "mr_rime_shadow",
     "speciesName": "Shadow Mr. Rime",
     "rank": 176,
     "types": [
@@ -1547,7 +1547,7 @@
     ]
   },
   {
-    "speciesId": "shadow_victreebel",
+    "speciesId": "victreebel_shadow",
     "speciesName": "Shadow Victreebel",
     "rank": 178,
     "types": [
@@ -1609,7 +1609,7 @@
     ]
   },
   {
-    "speciesId": "shadow_latias",
+    "speciesId": "latias_shadow",
     "speciesName": "Shadow Latias",
     "rank": 185,
     "types": [
@@ -1627,7 +1627,7 @@
     ]
   },
   {
-    "speciesId": "shadow_arcanine",
+    "speciesId": "arcanine_shadow",
     "speciesName": "Shadow Arcanine",
     "rank": 187,
     "types": [
@@ -1635,7 +1635,7 @@
     ]
   },
   {
-    "speciesId": "shadow_crawdaunt",
+    "speciesId": "crawdaunt_shadow",
     "speciesName": "Shadow Crawdaunt",
     "rank": 188,
     "types": [
@@ -1679,7 +1679,7 @@
     ]
   },
   {
-    "speciesId": "mega_glalie",
+    "speciesId": "glalie_mega",
     "speciesName": "Mega Glalie",
     "rank": 193,
     "types": [
@@ -1687,7 +1687,7 @@
     ]
   },
   {
-    "speciesId": "shadow_flygon",
+    "speciesId": "flygon_shadow",
     "speciesName": "Shadow Flygon",
     "rank": 194,
     "types": [
@@ -1765,7 +1765,7 @@
     ]
   },
   {
-    "speciesId": "mega_aggron",
+    "speciesId": "aggron_mega",
     "speciesName": "Mega Aggron",
     "rank": 203,
     "types": [
@@ -1782,7 +1782,7 @@
     ]
   },
   {
-    "speciesId": "shadow_pinsir",
+    "speciesId": "pinsir_shadow",
     "speciesName": "Shadow Pinsir",
     "rank": 205,
     "types": [
@@ -1799,7 +1799,7 @@
     ]
   },
   {
-    "speciesId": "shadow_articuno",
+    "speciesId": "articuno_shadow",
     "speciesName": "Shadow Articuno",
     "rank": 207,
     "types": [
@@ -1867,7 +1867,7 @@
     ]
   },
   {
-    "speciesId": "shadow_ursaluna",
+    "speciesId": "ursaluna_shadow",
     "speciesName": "Shadow Ursaluna",
     "rank": 215,
     "types": [
@@ -1894,7 +1894,7 @@
     ]
   },
   {
-    "speciesId": "shadow_unfezant",
+    "speciesId": "unfezant_shadow",
     "speciesName": "Shadow Unfezant",
     "rank": 218,
     "types": [
@@ -1920,7 +1920,7 @@
     ]
   },
   {
-    "speciesId": "shadow_magneton",
+    "speciesId": "magneton_shadow",
     "speciesName": "Shadow Magneton",
     "rank": 221,
     "types": [
@@ -1929,7 +1929,7 @@
     ]
   },
   {
-    "speciesId": "shadow_omastar",
+    "speciesId": "omastar_shadow",
     "speciesName": "Shadow Omastar",
     "rank": 222,
     "types": [
@@ -1955,7 +1955,7 @@
     ]
   },
   {
-    "speciesId": "shadow_sawk",
+    "speciesId": "sawk_shadow",
     "speciesName": "Shadow Sawk",
     "rank": 225,
     "types": [
@@ -1972,7 +1972,7 @@
     ]
   },
   {
-    "speciesId": "shadow_lugia",
+    "speciesId": "lugia_shadow",
     "speciesName": "Shadow Lugia",
     "rank": 227,
     "types": [
@@ -2007,7 +2007,7 @@
     ]
   },
   {
-    "speciesId": "shadow_escavalier",
+    "speciesId": "escavalier_shadow",
     "speciesName": "Shadow Escavalier",
     "rank": 231,
     "types": [
@@ -2052,7 +2052,7 @@
     ]
   },
   {
-    "speciesId": "shadow_vileplume",
+    "speciesId": "vileplume_shadow",
     "speciesName": "Shadow Vileplume",
     "rank": 236,
     "types": [
@@ -2061,7 +2061,7 @@
     ]
   },
   {
-    "speciesId": "shadow_nidoking",
+    "speciesId": "nidoking_shadow",
     "speciesName": "Shadow Nidoking",
     "rank": 237,
     "types": [
@@ -2070,7 +2070,7 @@
     ]
   },
   {
-    "speciesId": "shadow_zebstrika",
+    "speciesId": "zebstrika_shadow",
     "speciesName": "Shadow Zebstrika",
     "rank": 238,
     "types": [
@@ -2078,7 +2078,7 @@
     ]
   },
   {
-    "speciesId": "shadow_scolipede",
+    "speciesId": "scolipede_shadow",
     "speciesName": "Shadow Scolipede",
     "rank": 239,
     "types": [
@@ -2095,7 +2095,7 @@
     ]
   },
   {
-    "speciesId": "shadow_cacturne",
+    "speciesId": "cacturne_shadow",
     "speciesName": "Shadow Cacturne",
     "rank": 241,
     "types": [
@@ -2104,7 +2104,7 @@
     ]
   },
   {
-    "speciesId": "shadow_shiftry",
+    "speciesId": "shiftry_shadow",
     "speciesName": "Shadow Shiftry",
     "rank": 242,
     "types": [
@@ -2122,7 +2122,7 @@
     ]
   },
   {
-    "speciesId": "shadow_meganium",
+    "speciesId": "meganium_shadow",
     "speciesName": "Shadow Meganium",
     "rank": 244,
     "types": [
@@ -2147,7 +2147,7 @@
     ]
   },
   {
-    "speciesId": "therian_forme_tornadus",
+    "speciesId": "tornadus_therian",
     "speciesName": "Therian Forme Tornadus",
     "rank": 247,
     "types": [
@@ -2197,7 +2197,7 @@
     ]
   },
   {
-    "speciesId": "shadow_alolan_ninetales",
+    "speciesId": "ninetales_alolan_shadow",
     "speciesName": "Shadow Alolan Ninetales",
     "rank": 253,
     "types": [
@@ -2241,7 +2241,7 @@
     ]
   },
   {
-    "speciesId": "shadow_abomasnow",
+    "speciesId": "abomasnow_shadow",
     "speciesName": "Shadow Abomasnow",
     "rank": 258,
     "types": [
@@ -2250,7 +2250,7 @@
     ]
   },
   {
-    "speciesId": "shadow_walrein",
+    "speciesId": "walrein_shadow",
     "speciesName": "Shadow Walrein",
     "rank": 259,
     "types": [
@@ -2259,7 +2259,7 @@
     ]
   },
   {
-    "speciesId": "shadow_regice",
+    "speciesId": "regice_shadow",
     "speciesName": "Shadow Regice",
     "rank": 260,
     "types": [
@@ -2302,7 +2302,7 @@
     ]
   },
   {
-    "speciesId": "shadow_scyther",
+    "speciesId": "scyther_shadow",
     "speciesName": "Shadow Scyther",
     "rank": 265,
     "types": [
@@ -2328,7 +2328,7 @@
     ]
   },
   {
-    "speciesId": "shadow_cloyster",
+    "speciesId": "cloyster_shadow",
     "speciesName": "Shadow Cloyster",
     "rank": 268,
     "types": [
@@ -2361,7 +2361,7 @@
     ]
   },
   {
-    "speciesId": "shadow_poliwrath",
+    "speciesId": "poliwrath_shadow",
     "speciesName": "Shadow Poliwrath",
     "rank": 272,
     "types": [
@@ -2379,7 +2379,7 @@
     ]
   },
   {
-    "speciesId": "shadow_granbull",
+    "speciesId": "granbull_shadow",
     "speciesName": "Shadow Granbull",
     "rank": 274,
     "types": [
@@ -2414,7 +2414,7 @@
     ]
   },
   {
-    "speciesId": "shadow_piloswine",
+    "speciesId": "piloswine_shadow",
     "speciesName": "Shadow Piloswine",
     "rank": 278,
     "types": [
@@ -2432,7 +2432,7 @@
     ]
   },
   {
-    "speciesId": "shadow_gliscor",
+    "speciesId": "gliscor_shadow",
     "speciesName": "Shadow Gliscor",
     "rank": 280,
     "types": [
@@ -2450,7 +2450,7 @@
     ]
   },
   {
-    "speciesId": "shadow_lapras",
+    "speciesId": "lapras_shadow",
     "speciesName": "Shadow Lapras",
     "rank": 282,
     "types": [
@@ -2459,7 +2459,7 @@
     ]
   },
   {
-    "speciesId": "shadow_crustle",
+    "speciesId": "crustle_shadow",
     "speciesName": "Shadow Crustle",
     "rank": 283,
     "types": [
@@ -2477,7 +2477,7 @@
     ]
   },
   {
-    "speciesId": "shadow_regirock",
+    "speciesId": "regirock_shadow",
     "speciesName": "Shadow Regirock",
     "rank": 285,
     "types": [
@@ -2501,7 +2501,7 @@
     ]
   },
   {
-    "speciesId": "shadow_alolan_muk",
+    "speciesId": "muk_alolan_shadow",
     "speciesName": "Shadow Alolan Muk",
     "rank": 288,
     "types": [
@@ -2528,7 +2528,7 @@
     ]
   },
   {
-    "speciesId": "shadow_sandslash",
+    "speciesId": "sandslash_shadow",
     "speciesName": "Shadow Sandslash",
     "rank": 291,
     "types": [
@@ -2572,7 +2572,7 @@
     ]
   },
   {
-    "speciesId": "shadow_sharpedo",
+    "speciesId": "sharpedo_shadow",
     "speciesName": "Shadow Sharpedo",
     "rank": 296,
     "types": [
@@ -2605,7 +2605,7 @@
     ]
   },
   {
-    "speciesId": "shadow_hitmonlee",
+    "speciesId": "hitmonlee_shadow",
     "speciesName": "Shadow Hitmonlee",
     "rank": 300,
     "types": [
