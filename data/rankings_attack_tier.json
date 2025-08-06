@@ -6,7 +6,8 @@
     "types": [
       "Ground",
       "Fire"
-    ]
+    ],
+    "score": 125.0
   },
   {
     "speciesId": "rayquaza_mega",
@@ -15,7 +16,8 @@
     "types": [
       "Dragon",
       "Flying"
-    ]
+    ],
+    "score": 119.67
   },
   {
     "speciesId": "mewtwo_shadow",
@@ -23,7 +25,8 @@
     "rank": 3,
     "types": [
       "Psychic"
-    ]
+    ],
+    "score": 114.33
   },
   {
     "speciesId": "kyogre_primal",
@@ -31,7 +34,8 @@
     "rank": 4,
     "types": [
       "Water"
-    ]
+    ],
+    "score": 124.0
   },
   {
     "speciesId": "kyurem_black",
@@ -40,7 +44,8 @@
     "types": [
       "Dragon",
       "Ice"
-    ]
+    ],
+    "score": 98.67
   },
   {
     "speciesId": "necrozma_dawn_wings",
@@ -49,7 +54,8 @@
     "types": [
       "Psychic",
       "Ghost"
-    ]
+    ],
+    "score": 98.33
   },
   {
     "speciesId": "zacian_crowned_sword",
@@ -58,7 +64,8 @@
     "types": [
       "Fairy",
       "Steel"
-    ]
+    ],
+    "score": 98.0
   },
   {
     "speciesId": "blaziken_mega",
@@ -67,7 +74,8 @@
     "types": [
       "Fire",
       "Fighting"
-    ]
+    ],
+    "score": 117.67
   },
   {
     "speciesId": "kyurem_white",
@@ -76,7 +84,8 @@
     "types": [
       "Dragon",
       "Ice"
-    ]
+    ],
+    "score": 97.33
   },
   {
     "speciesId": "salamence_shadow",
@@ -85,7 +94,8 @@
     "types": [
       "Dragon",
       "Flying"
-    ]
+    ],
+    "score": 112.0
   },
   {
     "speciesId": "lucario_mega",
@@ -94,7 +104,8 @@
     "types": [
       "Fighting",
       "Steel"
-    ]
+    ],
+    "score": 116.67
   },
   {
     "speciesId": "rhyperior_shadow",
@@ -103,7 +114,8 @@
     "types": [
       "Ground",
       "Rock"
-    ]
+    ],
+    "score": 111.33
   },
   {
     "speciesId": "regigigas_shadow",
@@ -111,7 +123,8 @@
     "rank": 13,
     "types": [
       "Normal"
-    ]
+    ],
+    "score": 111.0
   },
   {
     "speciesId": "necrozma_dusk_mane",
@@ -120,7 +133,8 @@
     "types": [
       "Psychic",
       "Steel"
-    ]
+    ],
+    "score": 95.67
   },
   {
     "speciesId": "garchomp_mega",
@@ -129,7 +143,8 @@
     "types": [
       "Dragon",
       "Ground"
-    ]
+    ],
+    "score": 115.33
   },
   {
     "speciesId": "chandelure_shadow",
@@ -138,7 +153,8 @@
     "types": [
       "Ghost",
       "Fire"
-    ]
+    ],
+    "score": 110.0
   },
   {
     "speciesId": "gardevoir_mega",
@@ -147,7 +163,8 @@
     "types": [
       "Psychic",
       "Fairy"
-    ]
+    ],
+    "score": 114.67
   },
   {
     "speciesId": "tyranitar_mega",
@@ -156,7 +173,8 @@
     "types": [
       "Rock",
       "Dark"
-    ]
+    ],
+    "score": 114.33
   },
   {
     "speciesId": "zamazenta_crowned_shield",
@@ -165,7 +183,8 @@
     "types": [
       "Fighting",
       "Steel"
-    ]
+    ],
+    "score": 94.0
   },
   {
     "speciesId": "gengar_mega",
@@ -174,7 +193,8 @@
     "types": [
       "Ghost",
       "Poison"
-    ]
+    ],
+    "score": 113.67
   },
   {
     "speciesId": "salamence_mega",
@@ -183,7 +203,8 @@
     "types": [
       "Dragon",
       "Flying"
-    ]
+    ],
+    "score": 113.33
   },
   {
     "speciesId": "tyranitar_shadow",
@@ -192,7 +213,8 @@
     "types": [
       "Rock",
       "Dark"
-    ]
+    ],
+    "score": 108.0
   },
   {
     "speciesId": "mamoswine_shadow",
@@ -201,7 +223,8 @@
     "types": [
       "Ice",
       "Ground"
-    ]
+    ],
+    "score": 107.67
   },
   {
     "speciesId": "heracross_mega",
@@ -210,7 +233,8 @@
     "types": [
       "Bug",
       "Fighting"
-    ]
+    ],
+    "score": 112.33
   },
   {
     "speciesId": "garchomp_shadow",
@@ -219,7 +243,8 @@
     "types": [
       "Dragon",
       "Ground"
-    ]
+    ],
+    "score": 107.0
   },
   {
     "speciesId": "gallade_mega",
@@ -228,7 +253,8 @@
     "types": [
       "Psychic",
       "Fighting"
-    ]
+    ],
+    "score": 111.67
   },
   {
     "speciesId": "rayquaza",
@@ -237,7 +263,8 @@
     "types": [
       "Dragon",
       "Flying"
-    ]
+    ],
+    "score": 91.33
   },
   {
     "speciesId": "groudon_shadow",
@@ -245,7 +272,8 @@
     "rank": 28,
     "types": [
       "Ground"
-    ]
+    ],
+    "score": 106.0
   },
   {
     "speciesId": "charizard_mega_y",
@@ -254,7 +282,8 @@
     "types": [
       "Fire",
       "Flying"
-    ]
+    ],
+    "score": 110.67
   },
   {
     "speciesId": "blaziken_shadow",
@@ -263,7 +292,8 @@
     "types": [
       "Fire",
       "Fighting"
-    ]
+    ],
+    "score": 105.33
   },
   {
     "speciesId": "metagross_shadow",
@@ -272,7 +302,8 @@
     "types": [
       "Steel",
       "Psychic"
-    ]
+    ],
+    "score": 105.0
   },
   {
     "speciesId": "excadrill_shadow",
@@ -281,7 +312,8 @@
     "types": [
       "Ground",
       "Steel"
-    ]
+    ],
+    "score": 104.67
   },
   {
     "speciesId": "sceptile_mega",
@@ -290,7 +322,8 @@
     "types": [
       "Grass",
       "Dragon"
-    ]
+    ],
+    "score": 109.33
   },
   {
     "speciesId": "moltres_shadow",
@@ -299,7 +332,8 @@
     "types": [
       "Fire",
       "Flying"
-    ]
+    ],
+    "score": 104.0
   },
   {
     "speciesId": "alakazam_mega",
@@ -307,7 +341,8 @@
     "rank": 35,
     "types": [
       "Psychic"
-    ]
+    ],
+    "score": 108.67
   },
   {
     "speciesId": "diancie_mega",
@@ -316,7 +351,8 @@
     "types": [
       "Rock",
       "Fairy"
-    ]
+    ],
+    "score": 108.33
   },
   {
     "speciesId": "terrakion",
@@ -325,7 +361,8 @@
     "types": [
       "Rock",
       "Fighting"
-    ]
+    ],
+    "score": 88.0
   },
   {
     "speciesId": "heatran_shadow",
@@ -334,7 +371,8 @@
     "types": [
       "Fire",
       "Steel"
-    ]
+    ],
+    "score": 102.67
   },
   {
     "speciesId": "rampardos_shadow",
@@ -342,7 +380,8 @@
     "rank": 39,
     "types": [
       "Rock"
-    ]
+    ],
+    "score": 102.33
   },
   {
     "speciesId": "swampert_mega",
@@ -351,7 +390,8 @@
     "types": [
       "Water",
       "Ground"
-    ]
+    ],
+    "score": 107.0
   },
   {
     "speciesId": "weavile_shadow",
@@ -360,7 +400,8 @@
     "types": [
       "Dark",
       "Ice"
-    ]
+    ],
+    "score": 101.67
   },
   {
     "speciesId": "zapdos_shadow",
@@ -369,7 +410,8 @@
     "types": [
       "Electric",
       "Flying"
-    ]
+    ],
+    "score": 101.33
   },
   {
     "speciesId": "emboar_shadow",
@@ -378,7 +420,8 @@
     "types": [
       "Fire",
       "Fighting"
-    ]
+    ],
+    "score": 101.0
   },
   {
     "speciesId": "landorus_therian",
@@ -387,7 +430,8 @@
     "types": [
       "Ground",
       "Flying"
-    ]
+    ],
+    "score": 85.67
   },
   {
     "speciesId": "blacephalon",
@@ -396,7 +440,8 @@
     "types": [
       "Fire",
       "Ghost"
-    ]
+    ],
+    "score": 85.33
   },
   {
     "speciesId": "tyrantrum_shadow",
@@ -405,7 +450,8 @@
     "types": [
       "Rock",
       "Dragon"
-    ]
+    ],
+    "score": 100.0
   },
   {
     "speciesId": "darmanitan_standard_shadow",
@@ -413,7 +459,8 @@
     "rank": 47,
     "types": [
       "Fire"
-    ]
+    ],
+    "score": 99.67
   },
   {
     "speciesId": "xurkitree",
@@ -421,7 +468,8 @@
     "rank": 48,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 84.33
   },
   {
     "speciesId": "houndoom_mega",
@@ -430,7 +478,8 @@
     "types": [
       "Dark",
       "Fire"
-    ]
+    ],
+    "score": 104.0
   },
   {
     "speciesId": "conkeldurr_shadow",
@@ -438,7 +487,8 @@
     "rank": 50,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 98.67
   },
   {
     "speciesId": "lucario",
@@ -447,7 +497,8 @@
     "types": [
       "Fighting",
       "Steel"
-    ]
+    ],
+    "score": 83.33
   },
   {
     "speciesId": "latios_mega",
@@ -456,7 +507,8 @@
     "types": [
       "Dragon",
       "Psychic"
-    ]
+    ],
+    "score": 103.0
   },
   {
     "speciesId": "reshiram",
@@ -465,7 +517,8 @@
     "types": [
       "Dragon",
       "Fire"
-    ]
+    ],
+    "score": 82.67
   },
   {
     "speciesId": "raikou_shadow",
@@ -473,7 +526,8 @@
     "rank": 54,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 97.33
   },
   {
     "speciesId": "regieleki",
@@ -481,7 +535,8 @@
     "rank": 55,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 82.0
   },
   {
     "speciesId": "apex_shadow_ho_oh",
@@ -490,7 +545,8 @@
     "types": [
       "Fire",
       "Flying"
-    ]
+    ],
+    "score": 96.67
   },
   {
     "speciesId": "dialga_shadow",
@@ -499,7 +555,8 @@
     "types": [
       "Steel",
       "Dragon"
-    ]
+    ],
+    "score": 96.33
   },
   {
     "speciesId": "mewtwo",
@@ -507,7 +564,8 @@
     "rank": 58,
     "types": [
       "Psychic"
-    ]
+    ],
+    "score": 81.0
   },
   {
     "speciesId": "zekrom",
@@ -516,7 +574,8 @@
     "types": [
       "Dragon",
       "Electric"
-    ]
+    ],
+    "score": 80.67
   },
   {
     "speciesId": "ho_oh_shadow",
@@ -525,7 +584,8 @@
     "types": [
       "Fire",
       "Flying"
-    ]
+    ],
+    "score": 95.33
   },
   {
     "speciesId": "gigalith_shadow",
@@ -533,7 +593,8 @@
     "rank": 61,
     "types": [
       "Rock"
-    ]
+    ],
+    "score": 95.0
   },
   {
     "speciesId": "kyogre_shadow",
@@ -541,7 +602,8 @@
     "rank": 62,
     "types": [
       "Water"
-    ]
+    ],
+    "score": 94.67
   },
   {
     "speciesId": "kartana",
@@ -550,7 +612,8 @@
     "types": [
       "Grass",
       "Steel"
-    ]
+    ],
+    "score": 79.33
   },
   {
     "speciesId": "charizard_mega_x",
@@ -559,7 +622,8 @@
     "types": [
       "Fire",
       "Dragon"
-    ]
+    ],
+    "score": 99.0
   },
   {
     "speciesId": "electivire_shadow",
@@ -567,7 +631,8 @@
     "rank": 65,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 93.67
   },
   {
     "speciesId": "aerodactyl_mega",
@@ -576,7 +641,8 @@
     "types": [
       "Rock",
       "Flying"
-    ]
+    ],
+    "score": 98.33
   },
   {
     "speciesId": "machamp_shadow",
@@ -584,7 +650,8 @@
     "rank": 67,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 93.0
   },
   {
     "speciesId": "absol_mega",
@@ -592,7 +659,8 @@
     "rank": 68,
     "types": [
       "Dark"
-    ]
+    ],
+    "score": 97.67
   },
   {
     "speciesId": "magnezone_shadow",
@@ -601,7 +669,8 @@
     "types": [
       "Electric",
       "Steel"
-    ]
+    ],
+    "score": 92.33
   },
   {
     "speciesId": "thundurus_therian",
@@ -610,7 +679,8 @@
     "types": [
       "Electric",
       "Flying"
-    ]
+    ],
+    "score": 77.0
   },
   {
     "speciesId": "staraptor_shadow",
@@ -619,7 +689,8 @@
     "types": [
       "Normal",
       "Flying"
-    ]
+    ],
+    "score": 91.67
   },
   {
     "speciesId": "keldeo",
@@ -628,7 +699,8 @@
     "types": [
       "Water",
       "Fighting"
-    ]
+    ],
+    "score": 76.33
   },
   {
     "speciesId": "gyarados_mega",
@@ -637,7 +709,8 @@
     "types": [
       "Water",
       "Dark"
-    ]
+    ],
+    "score": 96.0
   },
   {
     "speciesId": "charizard_shadow",
@@ -646,7 +719,8 @@
     "types": [
       "Fire",
       "Flying"
-    ]
+    ],
+    "score": 90.67
   },
   {
     "speciesId": "groudon",
@@ -654,7 +728,8 @@
     "rank": 75,
     "types": [
       "Ground"
-    ]
+    ],
+    "score": 75.33
   },
   {
     "speciesId": "entei_shadow",
@@ -662,7 +737,8 @@
     "rank": 76,
     "types": [
       "Fire"
-    ]
+    ],
+    "score": 90.0
   },
   {
     "speciesId": "enamorus_incarnate",
@@ -671,7 +747,8 @@
     "types": [
       "Fairy",
       "Flying"
-    ]
+    ],
+    "score": 74.67
   },
   {
     "speciesId": "manectric_mega",
@@ -679,7 +756,8 @@
     "rank": 78,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 94.33
   },
   {
     "speciesId": "rhyperior",
@@ -688,7 +766,8 @@
     "types": [
       "Ground",
       "Rock"
-    ]
+    ],
+    "score": 74.0
   },
   {
     "speciesId": "hariyama_shadow",
@@ -696,7 +775,8 @@
     "rank": 80,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 88.67
   },
   {
     "speciesId": "lunala",
@@ -705,7 +785,8 @@
     "types": [
       "Psychic",
       "Ghost"
-    ]
+    ],
+    "score": 73.33
   },
   {
     "speciesId": "palkia_shadow",
@@ -714,7 +795,8 @@
     "types": [
       "Water",
       "Dragon"
-    ]
+    ],
+    "score": 88.0
   },
   {
     "speciesId": "honchkrow_shadow",
@@ -723,7 +805,8 @@
     "types": [
       "Dark",
       "Flying"
-    ]
+    ],
+    "score": 87.67
   },
   {
     "speciesId": "gardevoir_shadow",
@@ -732,7 +815,8 @@
     "types": [
       "Psychic",
       "Fairy"
-    ]
+    ],
+    "score": 87.33
   },
   {
     "speciesId": "latios_shadow",
@@ -741,7 +825,8 @@
     "types": [
       "Dragon",
       "Psychic"
-    ]
+    ],
+    "score": 87.0
   },
   {
     "speciesId": "gengar_shadow",
@@ -750,7 +835,8 @@
     "types": [
       "Ghost",
       "Poison"
-    ]
+    ],
+    "score": 86.67
   },
   {
     "speciesId": "chandelure",
@@ -759,7 +845,8 @@
     "types": [
       "Ghost",
       "Fire"
-    ]
+    ],
+    "score": 71.33
   },
   {
     "speciesId": "banette_mega",
@@ -767,7 +854,8 @@
     "rank": 88,
     "types": [
       "Ghost"
-    ]
+    ],
+    "score": 91.0
   },
   {
     "speciesId": "ampharos_mega",
@@ -776,7 +864,8 @@
     "types": [
       "Electric",
       "Dragon"
-    ]
+    ],
+    "score": 90.67
   },
   {
     "speciesId": "sky_forme_shaymin",
@@ -785,7 +874,8 @@
     "types": [
       "Grass",
       "Flying"
-    ]
+    ],
+    "score": 70.33
   },
   {
     "speciesId": "alakazam_shadow",
@@ -793,7 +883,8 @@
     "rank": 91,
     "types": [
       "Psychic"
-    ]
+    ],
+    "score": 85.0
   },
   {
     "speciesId": "swampert_shadow",
@@ -802,7 +893,8 @@
     "types": [
       "Water",
       "Ground"
-    ]
+    ],
+    "score": 84.67
   },
   {
     "speciesId": "hoopa_unbound",
@@ -811,7 +903,8 @@
     "types": [
       "Psychic",
       "Dark"
-    ]
+    ],
+    "score": 69.33
   },
   {
     "speciesId": "venusaur_mega",
@@ -820,7 +913,8 @@
     "types": [
       "Grass",
       "Poison"
-    ]
+    ],
+    "score": 89.0
   },
   {
     "speciesId": "sceptile_shadow",
@@ -828,7 +922,8 @@
     "rank": 95,
     "types": [
       "Grass"
-    ]
+    ],
+    "score": 83.67
   },
   {
     "speciesId": "salamence",
@@ -837,7 +932,8 @@
     "types": [
       "Dragon",
       "Flying"
-    ]
+    ],
+    "score": 68.33
   },
   {
     "speciesId": "blastoise_mega",
@@ -845,7 +941,8 @@
     "rank": 97,
     "types": [
       "Water"
-    ]
+    ],
+    "score": 88.0
   },
   {
     "speciesId": "absol_shadow",
@@ -853,7 +950,8 @@
     "rank": 98,
     "types": [
       "Dark"
-    ]
+    ],
+    "score": 82.67
   },
   {
     "speciesId": "beedrill_mega",
@@ -862,7 +960,8 @@
     "types": [
       "Bug",
       "Poison"
-    ]
+    ],
+    "score": 87.33
   },
   {
     "speciesId": "origin_forme_dialga",
@@ -871,7 +970,8 @@
     "types": [
       "Steel",
       "Dragon"
-    ]
+    ],
+    "score": 67.0
   },
   {
     "speciesId": "tangrowth_shadow",
@@ -879,7 +979,8 @@
     "rank": 101,
     "types": [
       "Grass"
-    ]
+    ],
+    "score": 81.67
   },
   {
     "speciesId": "infernape_shadow",
@@ -888,7 +989,8 @@
     "types": [
       "Fire",
       "Fighting"
-    ]
+    ],
+    "score": 81.33
   },
   {
     "speciesId": "volcarona",
@@ -897,7 +999,8 @@
     "types": [
       "Bug",
       "Fire"
-    ]
+    ],
+    "score": 66.0
   },
   {
     "speciesId": "tyranitar",
@@ -906,7 +1009,8 @@
     "types": [
       "Rock",
       "Dark"
-    ]
+    ],
+    "score": 65.67
   },
   {
     "speciesId": "venusaur_shadow",
@@ -915,7 +1019,8 @@
     "types": [
       "Grass",
       "Poison"
-    ]
+    ],
+    "score": 80.33
   },
   {
     "speciesId": "yveltal",
@@ -924,7 +1029,8 @@
     "types": [
       "Dark",
       "Flying"
-    ]
+    ],
+    "score": 65.0
   },
   {
     "speciesId": "urshifu",
@@ -933,7 +1039,8 @@
     "types": [
       "Fighting",
       "Water"
-    ]
+    ],
+    "score": 64.67
   },
   {
     "speciesId": "pinsir_mega",
@@ -942,7 +1049,8 @@
     "types": [
       "Bug",
       "Flying"
-    ]
+    ],
+    "score": 84.33
   },
   {
     "speciesId": "typhlosion_shadow",
@@ -950,7 +1058,8 @@
     "rank": 109,
     "types": [
       "Fire"
-    ]
+    ],
+    "score": 79.0
   },
   {
     "speciesId": "rampardos",
@@ -958,7 +1067,8 @@
     "rank": 110,
     "types": [
       "Rock"
-    ]
+    ],
+    "score": 63.67
   },
   {
     "speciesId": "golem_alolan_shadow",
@@ -967,7 +1077,8 @@
     "types": [
       "Rock",
       "Electric"
-    ]
+    ],
+    "score": 78.33
   },
   {
     "speciesId": "urshifu",
@@ -976,7 +1087,8 @@
     "types": [
       "Fighting",
       "Dark"
-    ]
+    ],
+    "score": 63.0
   },
   {
     "speciesId": "lopunny_mega",
@@ -985,7 +1097,8 @@
     "types": [
       "Normal",
       "Fighting"
-    ]
+    ],
+    "score": 82.67
   },
   {
     "speciesId": "zarude",
@@ -994,7 +1107,8 @@
     "types": [
       "Dark",
       "Grass"
-    ]
+    ],
+    "score": 62.33
   },
   {
     "speciesId": "garchomp",
@@ -1003,7 +1117,8 @@
     "types": [
       "Dragon",
       "Ground"
-    ]
+    ],
+    "score": 62.0
   },
   {
     "speciesId": "mamoswine",
@@ -1012,7 +1127,8 @@
     "types": [
       "Ice",
       "Ground"
-    ]
+    ],
+    "score": 61.67
   },
   {
     "speciesId": "kingler_shadow",
@@ -1020,7 +1136,8 @@
     "rank": 117,
     "types": [
       "Water"
-    ]
+    ],
+    "score": 76.33
   },
   {
     "speciesId": "metagross",
@@ -1029,7 +1146,8 @@
     "types": [
       "Steel",
       "Psychic"
-    ]
+    ],
+    "score": 61.0
   },
   {
     "speciesId": "exeggutor_shadow",
@@ -1038,7 +1156,8 @@
     "types": [
       "Grass",
       "Psychic"
-    ]
+    ],
+    "score": 75.67
   },
   {
     "speciesId": "luxray_shadow",
@@ -1046,7 +1165,8 @@
     "rank": 120,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 75.33
   },
   {
     "speciesId": "darkrai",
@@ -1054,7 +1174,8 @@
     "rank": 121,
     "types": [
       "Dark"
-    ]
+    ],
+    "score": 60.0
   },
   {
     "speciesId": "golurk_shadow",
@@ -1063,7 +1184,8 @@
     "types": [
       "Ground",
       "Ghost"
-    ]
+    ],
+    "score": 74.67
   },
   {
     "speciesId": "cursola_shadow",
@@ -1071,7 +1193,8 @@
     "rank": 123,
     "types": [
       "Ghost"
-    ]
+    ],
+    "score": 74.33
   },
   {
     "speciesId": "excadrill",
@@ -1080,7 +1203,8 @@
     "types": [
       "Ground",
       "Steel"
-    ]
+    ],
+    "score": 59.0
   },
   {
     "speciesId": "latias_mega",
@@ -1089,7 +1213,8 @@
     "types": [
       "Dragon",
       "Psychic"
-    ]
+    ],
+    "score": 78.67
   },
   {
     "speciesId": "aurorus_shadow",
@@ -1098,7 +1223,8 @@
     "types": [
       "Rock",
       "Ice"
-    ]
+    ],
+    "score": 73.33
   },
   {
     "speciesId": "sirfetch_d_shadow",
@@ -1106,7 +1232,8 @@
     "rank": 127,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 73.0
   },
   {
     "speciesId": "pidgeot_mega",
@@ -1115,7 +1242,8 @@
     "types": [
       "Normal",
       "Flying"
-    ]
+    ],
+    "score": 77.67
   },
   {
     "speciesId": "rhydon_shadow",
@@ -1124,7 +1252,8 @@
     "types": [
       "Ground",
       "Rock"
-    ]
+    ],
+    "score": 72.33
   },
   {
     "speciesId": "pheromosa",
@@ -1133,7 +1262,8 @@
     "types": [
       "Bug",
       "Fighting"
-    ]
+    ],
+    "score": 57.0
   },
   {
     "speciesId": "magmortar_shadow",
@@ -1141,7 +1271,8 @@
     "rank": 131,
     "types": [
       "Fire"
-    ]
+    ],
+    "score": 71.67
   },
   {
     "speciesId": "golem_shadow",
@@ -1150,7 +1281,8 @@
     "types": [
       "Rock",
       "Ground"
-    ]
+    ],
+    "score": 71.33
   },
   {
     "speciesId": "dragonite_shadow",
@@ -1159,7 +1291,8 @@
     "types": [
       "Dragon",
       "Flying"
-    ]
+    ],
+    "score": 71.0
   },
   {
     "speciesId": "dragapult",
@@ -1168,7 +1301,8 @@
     "types": [
       "Dragon",
       "Ghost"
-    ]
+    ],
+    "score": 55.67
   },
   {
     "speciesId": "roserade",
@@ -1177,7 +1311,8 @@
     "types": [
       "Grass",
       "Poison"
-    ]
+    ],
+    "score": 55.33
   },
   {
     "speciesId": "houndoom_shadow",
@@ -1186,7 +1321,8 @@
     "types": [
       "Dark",
       "Fire"
-    ]
+    ],
+    "score": 70.0
   },
   {
     "speciesId": "gallade_shadow",
@@ -1195,7 +1331,8 @@
     "types": [
       "Psychic",
       "Fighting"
-    ]
+    ],
+    "score": 69.67
   },
   {
     "speciesId": "kyogre",
@@ -1203,7 +1340,8 @@
     "rank": 138,
     "types": [
       "Water"
-    ]
+    ],
+    "score": 54.33
   },
   {
     "speciesId": "torterra_shadow",
@@ -1212,7 +1350,8 @@
     "types": [
       "Grass",
       "Ground"
-    ]
+    ],
+    "score": 69.0
   },
   {
     "speciesId": "hydreigon",
@@ -1221,7 +1360,8 @@
     "types": [
       "Dark",
       "Dragon"
-    ]
+    ],
+    "score": 53.67
   },
   {
     "speciesId": "samurott_shadow",
@@ -1229,7 +1369,8 @@
     "rank": 141,
     "types": [
       "Water"
-    ]
+    ],
+    "score": 68.33
   },
   {
     "speciesId": "toxicroak_shadow",
@@ -1238,7 +1379,8 @@
     "types": [
       "Poison",
       "Fighting"
-    ]
+    ],
+    "score": 68.0
   },
   {
     "speciesId": "landorus_incarnate",
@@ -1247,7 +1389,8 @@
     "types": [
       "Ground",
       "Flying"
-    ]
+    ],
+    "score": 52.67
   },
   {
     "speciesId": "empoleon_shadow",
@@ -1256,7 +1399,8 @@
     "types": [
       "Water",
       "Steel"
-    ]
+    ],
+    "score": 67.33
   },
   {
     "speciesId": "baxcalibur",
@@ -1265,7 +1409,8 @@
     "types": [
       "Dragon",
       "Ice"
-    ]
+    ],
+    "score": 52.0
   },
   {
     "speciesId": "breloom",
@@ -1274,7 +1419,8 @@
     "types": [
       "Grass",
       "Fighting"
-    ]
+    ],
+    "score": 51.67
   },
   {
     "speciesId": "origin_forme_palkia",
@@ -1283,7 +1429,8 @@
     "types": [
       "Water",
       "Dragon"
-    ]
+    ],
+    "score": 51.33
   },
   {
     "speciesId": "scizor_mega",
@@ -1292,7 +1439,8 @@
     "types": [
       "Bug",
       "Steel"
-    ]
+    ],
+    "score": 71.0
   },
   {
     "speciesId": "raikou",
@@ -1300,7 +1448,8 @@
     "rank": 149,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 50.67
   },
   {
     "speciesId": "scizor_shadow",
@@ -1309,7 +1458,8 @@
     "types": [
       "Bug",
       "Steel"
-    ]
+    ],
+    "score": 65.33
   },
   {
     "speciesId": "dialga",
@@ -1318,7 +1468,8 @@
     "types": [
       "Steel",
       "Dragon"
-    ]
+    ],
+    "score": 50.0
   },
   {
     "speciesId": "conkeldurr",
@@ -1326,7 +1477,8 @@
     "rank": 152,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 49.67
   },
   {
     "speciesId": "aggron_shadow",
@@ -1335,7 +1487,8 @@
     "types": [
       "Steel",
       "Rock"
-    ]
+    ],
+    "score": 64.33
   },
   {
     "speciesId": "porygon_z_shadow",
@@ -1343,7 +1496,8 @@
     "rank": 154,
     "types": [
       "Normal"
-    ]
+    ],
+    "score": 64.0
   },
   {
     "speciesId": "archeops_shadow",
@@ -1352,7 +1506,8 @@
     "types": [
       "Rock",
       "Flying"
-    ]
+    ],
+    "score": 63.67
   },
   {
     "speciesId": "exeggutor_alolan_shadow",
@@ -1361,7 +1516,8 @@
     "types": [
       "Grass",
       "Dragon"
-    ]
+    ],
+    "score": 63.33
   },
   {
     "speciesId": "electivire",
@@ -1369,7 +1525,8 @@
     "rank": 157,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 48.0
   },
   {
     "speciesId": "donphan_shadow",
@@ -1377,7 +1534,8 @@
     "rank": 158,
     "types": [
       "Ground"
-    ]
+    ],
+    "score": 62.67
   },
   {
     "speciesId": "feraligatr_shadow",
@@ -1385,7 +1543,8 @@
     "rank": 159,
     "types": [
       "Water"
-    ]
+    ],
+    "score": 62.33
   },
   {
     "speciesId": "annihilape_shadow",
@@ -1394,7 +1553,8 @@
     "types": [
       "Fighting",
       "Ghost"
-    ]
+    ],
+    "score": 62.0
   },
   {
     "speciesId": "galarian_articuno",
@@ -1403,7 +1563,8 @@
     "types": [
       "Psychic",
       "Flying"
-    ]
+    ],
+    "score": 46.67
   },
   {
     "speciesId": "hippowdon_shadow",
@@ -1411,7 +1572,8 @@
     "rank": 162,
     "types": [
       "Ground"
-    ]
+    ],
+    "score": 61.33
   },
   {
     "speciesId": "tapu_bulu",
@@ -1420,7 +1582,8 @@
     "types": [
       "Grass",
       "Fairy"
-    ]
+    ],
+    "score": 46.0
   },
   {
     "speciesId": "blaziken",
@@ -1429,7 +1592,8 @@
     "types": [
       "Fire",
       "Fighting"
-    ]
+    ],
+    "score": 45.67
   },
   {
     "speciesId": "sneasler_shadow",
@@ -1438,7 +1602,8 @@
     "types": [
       "Fighting",
       "Poison"
-    ]
+    ],
+    "score": 60.33
   },
   {
     "speciesId": "tyrantrum",
@@ -1447,7 +1612,8 @@
     "types": [
       "Rock",
       "Dragon"
-    ]
+    ],
+    "score": 45.0
   },
   {
     "speciesId": "gyarados_shadow",
@@ -1456,7 +1622,8 @@
     "types": [
       "Water",
       "Flying"
-    ]
+    ],
+    "score": 59.67
   },
   {
     "speciesId": "moltres",
@@ -1465,7 +1632,8 @@
     "types": [
       "Fire",
       "Flying"
-    ]
+    ],
+    "score": 44.33
   },
   {
     "speciesId": "gholdengo",
@@ -1474,7 +1642,8 @@
     "types": [
       "Steel",
       "Ghost"
-    ]
+    ],
+    "score": 44.0
   },
   {
     "speciesId": "marshadow",
@@ -1483,7 +1652,8 @@
     "types": [
       "Fighting",
       "Ghost"
-    ]
+    ],
+    "score": 58.67
   },
   {
     "speciesId": "darmanitan_galarian_standard",
@@ -1491,7 +1661,8 @@
     "rank": 171,
     "types": [
       "Ice"
-    ]
+    ],
+    "score": 43.33
   },
   {
     "speciesId": "tapu_lele",
@@ -1500,7 +1671,8 @@
     "types": [
       "Psychic",
       "Fairy"
-    ]
+    ],
+    "score": 43.0
   },
   {
     "speciesId": "manectric_shadow",
@@ -1508,7 +1680,8 @@
     "rank": 173,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 57.67
   },
   {
     "speciesId": "aerodactyl_shadow",
@@ -1517,7 +1690,8 @@
     "types": [
       "Rock",
       "Flying"
-    ]
+    ],
+    "score": 57.33
   },
   {
     "speciesId": "abomasnow_mega",
@@ -1526,7 +1700,8 @@
     "types": [
       "Grass",
       "Ice"
-    ]
+    ],
+    "score": 62.0
   },
   {
     "speciesId": "mr_rime_shadow",
@@ -1535,7 +1710,8 @@
     "types": [
       "Ice",
       "Psychic"
-    ]
+    ],
+    "score": 56.67
   },
   {
     "speciesId": "apex_shadow_lugia",
@@ -1544,7 +1720,8 @@
     "types": [
       "Psychic",
       "Flying"
-    ]
+    ],
+    "score": 56.33
   },
   {
     "speciesId": "victreebel_shadow",
@@ -1553,7 +1730,8 @@
     "types": [
       "Grass",
       "Poison"
-    ]
+    ],
+    "score": 56.0
   },
   {
     "speciesId": "meowscarada",
@@ -1562,7 +1740,8 @@
     "types": [
       "Grass",
       "Dark"
-    ]
+    ],
+    "score": 40.67
   },
   {
     "speciesId": "heatran",
@@ -1571,7 +1750,8 @@
     "types": [
       "Fire",
       "Steel"
-    ]
+    ],
+    "score": 40.33
   },
   {
     "speciesId": "hoopa_confined",
@@ -1580,7 +1760,8 @@
     "types": [
       "Psychic",
       "Ghost"
-    ]
+    ],
+    "score": 40.0
   },
   {
     "speciesId": "weavile",
@@ -1589,7 +1770,8 @@
     "types": [
       "Dark",
       "Ice"
-    ]
+    ],
+    "score": 39.67
   },
   {
     "speciesId": "rillaboom",
@@ -1597,7 +1779,8 @@
     "rank": 183,
     "types": [
       "Grass"
-    ]
+    ],
+    "score": 39.33
   },
   {
     "speciesId": "tapu_koko",
@@ -1606,7 +1789,8 @@
     "types": [
       "Electric",
       "Fairy"
-    ]
+    ],
+    "score": 39.0
   },
   {
     "speciesId": "latias_shadow",
@@ -1615,7 +1799,8 @@
     "types": [
       "Dragon",
       "Psychic"
-    ]
+    ],
+    "score": 53.67
   },
   {
     "speciesId": "nihilego",
@@ -1624,7 +1809,8 @@
     "types": [
       "Rock",
       "Poison"
-    ]
+    ],
+    "score": 38.33
   },
   {
     "speciesId": "arcanine_shadow",
@@ -1632,7 +1818,8 @@
     "rank": 187,
     "types": [
       "Fire"
-    ]
+    ],
+    "score": 53.0
   },
   {
     "speciesId": "crawdaunt_shadow",
@@ -1641,7 +1828,8 @@
     "types": [
       "Water",
       "Dark"
-    ]
+    ],
+    "score": 52.67
   },
   {
     "speciesId": "naganadel",
@@ -1650,7 +1838,8 @@
     "types": [
       "Poison",
       "Dragon"
-    ]
+    ],
+    "score": 37.33
   },
   {
     "speciesId": "standard_mode_darmanitan",
@@ -1658,7 +1847,8 @@
     "rank": 190,
     "types": [
       "Fire"
-    ]
+    ],
+    "score": 37.0
   },
   {
     "speciesId": "hisuian_decidueye",
@@ -1667,7 +1857,8 @@
     "types": [
       "Grass",
       "Fighting"
-    ]
+    ],
+    "score": 36.67
   },
   {
     "speciesId": "galarian_zapdos",
@@ -1676,7 +1867,8 @@
     "types": [
       "Fighting",
       "Flying"
-    ]
+    ],
+    "score": 36.33
   },
   {
     "speciesId": "glalie_mega",
@@ -1684,7 +1876,8 @@
     "rank": 193,
     "types": [
       "Ice"
-    ]
+    ],
+    "score": 56.0
   },
   {
     "speciesId": "flygon_shadow",
@@ -1693,7 +1886,8 @@
     "types": [
       "Ground",
       "Dragon"
-    ]
+    ],
+    "score": 50.67
   },
   {
     "speciesId": "magnezone",
@@ -1702,7 +1896,8 @@
     "types": [
       "Electric",
       "Steel"
-    ]
+    ],
+    "score": 35.33
   },
   {
     "speciesId": "zapdos",
@@ -1711,7 +1906,8 @@
     "types": [
       "Electric",
       "Flying"
-    ]
+    ],
+    "score": 35.0
   },
   {
     "speciesId": "genesect",
@@ -1720,7 +1916,8 @@
     "types": [
       "Bug",
       "Steel"
-    ]
+    ],
+    "score": 34.67
   },
   {
     "speciesId": "machamp",
@@ -1728,7 +1925,8 @@
     "rank": 198,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 34.33
   },
   {
     "speciesId": "regidrago",
@@ -1736,7 +1934,8 @@
     "rank": 199,
     "types": [
       "Dragon"
-    ]
+    ],
+    "score": 34.0
   },
   {
     "speciesId": "darmanitan",
@@ -1744,7 +1943,8 @@
     "rank": 200,
     "types": [
       "Fire"
-    ]
+    ],
+    "score": 33.67
   },
   {
     "speciesId": "genesect",
@@ -1753,7 +1953,8 @@
     "types": [
       "Bug",
       "Steel"
-    ]
+    ],
+    "score": 33.33
   },
   {
     "speciesId": "kingambit",
@@ -1762,7 +1963,8 @@
     "types": [
       "Dark",
       "Steel"
-    ]
+    ],
+    "score": 33.0
   },
   {
     "speciesId": "aggron_mega",
@@ -1770,7 +1972,8 @@
     "rank": 203,
     "types": [
       "Steel"
-    ]
+    ],
+    "score": 52.67
   },
   {
     "speciesId": "kyurem",
@@ -1779,7 +1982,8 @@
     "types": [
       "Dragon",
       "Ice"
-    ]
+    ],
+    "score": 32.33
   },
   {
     "speciesId": "pinsir_shadow",
@@ -1787,7 +1991,8 @@
     "rank": 205,
     "types": [
       "Bug"
-    ]
+    ],
+    "score": 47.0
   },
   {
     "speciesId": "genesect",
@@ -1796,7 +2001,8 @@
     "types": [
       "Bug",
       "Steel"
-    ]
+    ],
+    "score": 31.67
   },
   {
     "speciesId": "articuno_shadow",
@@ -1805,7 +2011,8 @@
     "types": [
       "Ice",
       "Flying"
-    ]
+    ],
+    "score": 46.33
   },
   {
     "speciesId": "absol",
@@ -1813,7 +2020,8 @@
     "rank": 208,
     "types": [
       "Dark"
-    ]
+    ],
+    "score": 31.0
   },
   {
     "speciesId": "primarina",
@@ -1822,7 +2030,8 @@
     "types": [
       "Water",
       "Fairy"
-    ]
+    ],
+    "score": 30.67
   },
   {
     "speciesId": "regigigas",
@@ -1830,7 +2039,8 @@
     "rank": 210,
     "types": [
       "Normal"
-    ]
+    ],
+    "score": 30.33
   },
   {
     "speciesId": "giratina",
@@ -1839,7 +2049,8 @@
     "types": [
       "Ghost",
       "Dragon"
-    ]
+    ],
+    "score": 30.0
   },
   {
     "speciesId": "haxorus",
@@ -1847,7 +2058,8 @@
     "rank": 212,
     "types": [
       "Dragon"
-    ]
+    ],
+    "score": 29.67
   },
   {
     "speciesId": "gigalith",
@@ -1855,7 +2067,8 @@
     "rank": 213,
     "types": [
       "Rock"
-    ]
+    ],
+    "score": 29.33
   },
   {
     "speciesId": "genesect",
@@ -1864,7 +2077,8 @@
     "types": [
       "Bug",
       "Steel"
-    ]
+    ],
+    "score": 29.0
   },
   {
     "speciesId": "ursaluna_shadow",
@@ -1873,7 +2087,8 @@
     "types": [
       "Ground",
       "Normal"
-    ]
+    ],
+    "score": 43.67
   },
   {
     "speciesId": "decidueye",
@@ -1882,7 +2097,8 @@
     "types": [
       "Grass",
       "Ghost"
-    ]
+    ],
+    "score": 28.33
   },
   {
     "speciesId": "quaquaval",
@@ -1891,7 +2107,8 @@
     "types": [
       "Water",
       "Fighting"
-    ]
+    ],
+    "score": 28.0
   },
   {
     "speciesId": "unfezant_shadow",
@@ -1900,7 +2117,8 @@
     "types": [
       "Normal",
       "Flying"
-    ]
+    ],
+    "score": 42.67
   },
   {
     "speciesId": "staraptor",
@@ -1909,7 +2127,8 @@
     "types": [
       "Normal",
       "Flying"
-    ]
+    ],
+    "score": 27.33
   },
   {
     "speciesId": "glaceon",
@@ -1917,7 +2136,8 @@
     "rank": 220,
     "types": [
       "Ice"
-    ]
+    ],
+    "score": 27.0
   },
   {
     "speciesId": "magneton_shadow",
@@ -1926,7 +2146,8 @@
     "types": [
       "Electric",
       "Steel"
-    ]
+    ],
+    "score": 41.67
   },
   {
     "speciesId": "omastar_shadow",
@@ -1935,7 +2156,8 @@
     "types": [
       "Rock",
       "Water"
-    ]
+    ],
+    "score": 41.33
   },
   {
     "speciesId": "genesect",
@@ -1944,7 +2166,8 @@
     "types": [
       "Bug",
       "Steel"
-    ]
+    ],
+    "score": 26.0
   },
   {
     "speciesId": "cetitan",
@@ -1952,7 +2175,8 @@
     "rank": 224,
     "types": [
       "Ice"
-    ]
+    ],
+    "score": 25.67
   },
   {
     "speciesId": "sawk_shadow",
@@ -1960,7 +2184,8 @@
     "rank": 225,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 40.33
   },
   {
     "speciesId": "gengar",
@@ -1969,7 +2194,8 @@
     "types": [
       "Ghost",
       "Poison"
-    ]
+    ],
+    "score": 25.0
   },
   {
     "speciesId": "lugia_shadow",
@@ -1978,7 +2204,8 @@
     "types": [
       "Psychic",
       "Flying"
-    ]
+    ],
+    "score": 39.67
   },
   {
     "speciesId": "incineroar",
@@ -1987,7 +2214,8 @@
     "types": [
       "Fire",
       "Dark"
-    ]
+    ],
+    "score": 24.33
   },
   {
     "speciesId": "palkia",
@@ -1996,7 +2224,8 @@
     "types": [
       "Water",
       "Dragon"
-    ]
+    ],
+    "score": 24.0
   },
   {
     "speciesId": "hariyama",
@@ -2004,7 +2233,8 @@
     "rank": 230,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 23.67
   },
   {
     "speciesId": "escavalier_shadow",
@@ -2013,7 +2243,8 @@
     "types": [
       "Bug",
       "Steel"
-    ]
+    ],
+    "score": 38.33
   },
   {
     "speciesId": "greninja",
@@ -2022,7 +2253,8 @@
     "types": [
       "Water",
       "Dark"
-    ]
+    ],
+    "score": 23.0
   },
   {
     "speciesId": "aurorus",
@@ -2031,7 +2263,8 @@
     "types": [
       "Rock",
       "Ice"
-    ]
+    ],
+    "score": 22.67
   },
   {
     "speciesId": "chesnaught",
@@ -2040,7 +2273,8 @@
     "types": [
       "Grass",
       "Fighting"
-    ]
+    ],
+    "score": 22.33
   },
   {
     "speciesId": "buzzwole",
@@ -2049,7 +2283,8 @@
     "types": [
       "Bug",
       "Fighting"
-    ]
+    ],
+    "score": 22.0
   },
   {
     "speciesId": "vileplume_shadow",
@@ -2058,7 +2293,8 @@
     "types": [
       "Grass",
       "Poison"
-    ]
+    ],
+    "score": 36.67
   },
   {
     "speciesId": "nidoking_shadow",
@@ -2067,7 +2303,8 @@
     "types": [
       "Poison",
       "Ground"
-    ]
+    ],
+    "score": 36.33
   },
   {
     "speciesId": "zebstrika_shadow",
@@ -2075,7 +2312,8 @@
     "rank": 238,
     "types": [
       "Electric"
-    ]
+    ],
+    "score": 36.0
   },
   {
     "speciesId": "scolipede_shadow",
@@ -2084,7 +2322,8 @@
     "types": [
       "Bug",
       "Poison"
-    ]
+    ],
+    "score": 35.67
   },
   {
     "speciesId": "kingler",
@@ -2092,7 +2331,8 @@
     "rank": 240,
     "types": [
       "Water"
-    ]
+    ],
+    "score": 20.33
   },
   {
     "speciesId": "cacturne_shadow",
@@ -2101,7 +2341,8 @@
     "types": [
       "Grass",
       "Dark"
-    ]
+    ],
+    "score": 35.0
   },
   {
     "speciesId": "shiftry_shadow",
@@ -2110,7 +2351,8 @@
     "types": [
       "Grass",
       "Dark"
-    ]
+    ],
+    "score": 34.67
   },
   {
     "speciesId": "delphox",
@@ -2119,7 +2361,8 @@
     "types": [
       "Fire",
       "Psychic"
-    ]
+    ],
+    "score": 19.33
   },
   {
     "speciesId": "meganium_shadow",
@@ -2127,7 +2370,8 @@
     "rank": 244,
     "types": [
       "Grass"
-    ]
+    ],
+    "score": 54.0
   },
   {
     "speciesId": "krookodile",
@@ -2136,7 +2380,8 @@
     "types": [
       "Ground",
       "Dark"
-    ]
+    ],
+    "score": 18.67
   },
   {
     "speciesId": "sceptile",
@@ -2144,7 +2389,8 @@
     "rank": 246,
     "types": [
       "Grass"
-    ]
+    ],
+    "score": 18.33
   },
   {
     "speciesId": "tornadus_therian",
@@ -2152,7 +2398,8 @@
     "rank": 247,
     "types": [
       "Flying"
-    ]
+    ],
+    "score": 18.0
   },
   {
     "speciesId": "latios",
@@ -2161,7 +2408,8 @@
     "types": [
       "Dragon",
       "Psychic"
-    ]
+    ],
+    "score": 17.67
   },
   {
     "speciesId": "tsareena",
@@ -2169,7 +2417,8 @@
     "rank": 249,
     "types": [
       "Grass"
-    ]
+    ],
+    "score": 17.33
   },
   {
     "speciesId": "stonjourner",
@@ -2177,7 +2426,8 @@
     "rank": 250,
     "types": [
       "Rock"
-    ]
+    ],
+    "score": 17.0
   },
   {
     "speciesId": "cobalion",
@@ -2186,7 +2436,8 @@
     "types": [
       "Steel",
       "Fighting"
-    ]
+    ],
+    "score": 16.67
   },
   {
     "speciesId": "alakazam",
@@ -2194,7 +2445,8 @@
     "rank": 252,
     "types": [
       "Psychic"
-    ]
+    ],
+    "score": 16.33
   },
   {
     "speciesId": "ninetales_alolan_shadow",
@@ -2203,7 +2455,8 @@
     "types": [
       "Ice",
       "Fairy"
-    ]
+    ],
+    "score": 31.0
   },
   {
     "speciesId": "hisuian_zoroark",
@@ -2212,7 +2465,8 @@
     "types": [
       "Normal",
       "Ghost"
-    ]
+    ],
+    "score": 15.67
   },
   {
     "speciesId": "golurk",
@@ -2221,7 +2475,8 @@
     "types": [
       "Ground",
       "Ghost"
-    ]
+    ],
+    "score": 15.33
   },
   {
     "speciesId": "rhydon",
@@ -2230,7 +2485,8 @@
     "types": [
       "Ground",
       "Rock"
-    ]
+    ],
+    "score": 15.0
   },
   {
     "speciesId": "xerneas",
@@ -2238,7 +2494,8 @@
     "rank": 257,
     "types": [
       "Fairy"
-    ]
+    ],
+    "score": 14.67
   },
   {
     "speciesId": "abomasnow_shadow",
@@ -2247,7 +2504,8 @@
     "types": [
       "Grass",
       "Ice"
-    ]
+    ],
+    "score": 29.33
   },
   {
     "speciesId": "walrein_shadow",
@@ -2256,7 +2514,8 @@
     "types": [
       "Ice",
       "Water"
-    ]
+    ],
+    "score": 29.0
   },
   {
     "speciesId": "regice_shadow",
@@ -2264,7 +2523,8 @@
     "rank": 260,
     "types": [
       "Ice"
-    ]
+    ],
+    "score": 28.67
   },
   {
     "speciesId": "volcanion",
@@ -2273,7 +2533,8 @@
     "types": [
       "Fire",
       "Water"
-    ]
+    ],
+    "score": 13.33
   },
   {
     "speciesId": "virizion",
@@ -2282,7 +2543,8 @@
     "types": [
       "Grass",
       "Fighting"
-    ]
+    ],
+    "score": 13.0
   },
   {
     "speciesId": "vanilluxe",
@@ -2290,7 +2552,8 @@
     "rank": 263,
     "types": [
       "Ice"
-    ]
+    ],
+    "score": 12.67
   },
   {
     "speciesId": "hawlucha",
@@ -2299,7 +2562,8 @@
     "types": [
       "Fighting",
       "Flying"
-    ]
+    ],
+    "score": 12.33
   },
   {
     "speciesId": "scyther_shadow",
@@ -2308,7 +2572,8 @@
     "types": [
       "Bug",
       "Flying"
-    ]
+    ],
+    "score": 27.0
   },
   {
     "speciesId": "avalugg",
@@ -2316,7 +2581,8 @@
     "rank": 266,
     "types": [
       "Ice"
-    ]
+    ],
+    "score": 11.67
   },
   {
     "speciesId": "emboar",
@@ -2325,7 +2591,8 @@
     "types": [
       "Fire",
       "Fighting"
-    ]
+    ],
+    "score": 11.33
   },
   {
     "speciesId": "cloyster_shadow",
@@ -2334,7 +2601,8 @@
     "types": [
       "Water",
       "Ice"
-    ]
+    ],
+    "score": 26.0
   },
   {
     "speciesId": "melmetal",
@@ -2342,7 +2610,8 @@
     "rank": 269,
     "types": [
       "Steel"
-    ]
+    ],
+    "score": 10.67
   },
   {
     "speciesId": "tangrowth",
@@ -2350,7 +2619,8 @@
     "rank": 270,
     "types": [
       "Grass"
-    ]
+    ],
+    "score": 10.33
   },
   {
     "speciesId": "espeon",
@@ -2358,7 +2628,8 @@
     "rank": 271,
     "types": [
       "Psychic"
-    ]
+    ],
+    "score": 10.0
   },
   {
     "speciesId": "poliwrath_shadow",
@@ -2367,7 +2638,8 @@
     "types": [
       "Water",
       "Fighting"
-    ]
+    ],
+    "score": 24.67
   },
   {
     "speciesId": "mr_rime",
@@ -2376,7 +2648,8 @@
     "types": [
       "Ice",
       "Psychic"
-    ]
+    ],
+    "score": 9.33
   },
   {
     "speciesId": "granbull_shadow",
@@ -2384,7 +2657,8 @@
     "rank": 274,
     "types": [
       "Fairy"
-    ]
+    ],
+    "score": 24.0
   },
   {
     "speciesId": "golem",
@@ -2393,7 +2667,8 @@
     "types": [
       "Rock",
       "Ground"
-    ]
+    ],
+    "score": 8.67
   },
   {
     "speciesId": "venusaur",
@@ -2402,7 +2677,8 @@
     "types": [
       "Grass",
       "Poison"
-    ]
+    ],
+    "score": 8.33
   },
   {
     "speciesId": "dragonite",
@@ -2411,7 +2687,8 @@
     "types": [
       "Dragon",
       "Flying"
-    ]
+    ],
+    "score": 8.0
   },
   {
     "speciesId": "piloswine_shadow",
@@ -2420,7 +2697,8 @@
     "types": [
       "Ice",
       "Ground"
-    ]
+    ],
+    "score": 22.67
   },
   {
     "speciesId": "aerodactyl",
@@ -2429,7 +2707,8 @@
     "types": [
       "Rock",
       "Flying"
-    ]
+    ],
+    "score": 7.33
   },
   {
     "speciesId": "gliscor_shadow",
@@ -2438,7 +2717,8 @@
     "types": [
       "Ground",
       "Flying"
-    ]
+    ],
+    "score": 22.0
   },
   {
     "speciesId": "aggron",
@@ -2447,7 +2727,8 @@
     "types": [
       "Steel",
       "Rock"
-    ]
+    ],
+    "score": 6.67
   },
   {
     "speciesId": "lapras_shadow",
@@ -2456,7 +2737,8 @@
     "types": [
       "Water",
       "Ice"
-    ]
+    ],
+    "score": 21.33
   },
   {
     "speciesId": "crustle_shadow",
@@ -2465,7 +2747,8 @@
     "types": [
       "Bug",
       "Rock"
-    ]
+    ],
+    "score": 21.0
   },
   {
     "speciesId": "swampert",
@@ -2474,7 +2757,8 @@
     "types": [
       "Water",
       "Ground"
-    ]
+    ],
+    "score": 5.67
   },
   {
     "speciesId": "regirock_shadow",
@@ -2482,7 +2766,8 @@
     "rank": 285,
     "types": [
       "Rock"
-    ]
+    ],
+    "score": 20.33
   },
   {
     "speciesId": "zoroark",
@@ -2490,7 +2775,8 @@
     "rank": 286,
     "types": [
       "Dark"
-    ]
+    ],
+    "score": 5.0
   },
   {
     "speciesId": "donphan",
@@ -2498,7 +2784,8 @@
     "rank": 287,
     "types": [
       "Ground"
-    ]
+    ],
+    "score": 4.67
   },
   {
     "speciesId": "muk_alolan_shadow",
@@ -2507,7 +2794,8 @@
     "types": [
       "Poison",
       "Dark"
-    ]
+    ],
+    "score": 19.33
   },
   {
     "speciesId": "gardevoir",
@@ -2516,7 +2804,8 @@
     "types": [
       "Psychic",
       "Fairy"
-    ]
+    ],
+    "score": 4.0
   },
   {
     "speciesId": "vikavolt",
@@ -2525,7 +2814,8 @@
     "types": [
       "Bug",
       "Electric"
-    ]
+    ],
+    "score": 3.67
   },
   {
     "speciesId": "sandslash_shadow",
@@ -2533,7 +2823,8 @@
     "rank": 291,
     "types": [
       "Ground"
-    ]
+    ],
+    "score": 18.33
   },
   {
     "speciesId": "articuno",
@@ -2542,7 +2833,8 @@
     "types": [
       "Ice",
       "Flying"
-    ]
+    ],
+    "score": 3.0
   },
   {
     "speciesId": "togekiss",
@@ -2551,7 +2843,8 @@
     "types": [
       "Fairy",
       "Flying"
-    ]
+    ],
+    "score": 2.67
   },
   {
     "speciesId": "braviary",
@@ -2560,7 +2853,8 @@
     "types": [
       "Normal",
       "Flying"
-    ]
+    ],
+    "score": 2.33
   },
   {
     "speciesId": "charizard",
@@ -2569,7 +2863,8 @@
     "types": [
       "Fire",
       "Flying"
-    ]
+    ],
+    "score": 2.0
   },
   {
     "speciesId": "sharpedo_shadow",
@@ -2578,7 +2873,8 @@
     "types": [
       "Water",
       "Dark"
-    ]
+    ],
+    "score": 16.67
   },
   {
     "speciesId": "deoxys",
@@ -2586,7 +2882,8 @@
     "rank": 297,
     "types": [
       "Psychic"
-    ]
+    ],
+    "score": 1.33
   },
   {
     "speciesId": "zacian",
@@ -2594,7 +2891,8 @@
     "rank": 298,
     "types": [
       "Fairy"
-    ]
+    ],
+    "score": 1.0
   },
   {
     "speciesId": "lycanroc",
@@ -2602,7 +2900,8 @@
     "rank": 299,
     "types": [
       "Rock"
-    ]
+    ],
+    "score": 0.67
   },
   {
     "speciesId": "hitmonlee_shadow",
@@ -2610,6 +2909,7 @@
     "rank": 300,
     "types": [
       "Fighting"
-    ]
+    ],
+    "score": 15.33
   }
 ]
