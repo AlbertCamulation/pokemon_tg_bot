@@ -63,9 +63,9 @@ async function handlePokemonSearch(chatId, query) {
     const leagues = [
       { name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
       { name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
-      { name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
-      { name: "最佳攻擊", cp: "10000", path: "data/rankings_attack_tier.json" },
-      { name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
+      { name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" }
+      //{ name: "最佳攻擊", cp: "10000", path: "data/rankings_attack_tier.json" },
+      //{ name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
     ];
     const fetchPromises = leagues.map(league => 
       fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}`, { cf: { cacheTtl: 86400 } })
@@ -118,7 +118,12 @@ async function handlePokemonSearch(chatId, query) {
  * 根據排名給予評價的函式
  */
 function getPokemonRating(rank) {
-  if (typeof rank === 'number' && !isNaN(rank)) {
+  if (rank <= 10) return "🥇白金";
+  if (rank <= 25) return "🥇金";
+  if (rank <= 50) return "🥈銀";
+  if (rank <= 100) return "🥉銅";
+  return "垃圾";
+  /*if (typeof rank === 'number' && !isNaN(rank)) {
     if (rank <= 10) return "🥇白金";
     if (rank <= 25) return "🥇金";
     if (rank <= 50) return "🥈銀";
@@ -138,7 +143,7 @@ function getPokemonRating(rank) {
     };
     // 使用 .get() 的方式來查找，如果找不到就回傳預設值
     return ratingMap[rank] || "垃圾";
-  }
+  }*/
 }
 
 
