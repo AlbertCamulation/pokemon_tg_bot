@@ -2,7 +2,7 @@
   {
     "speciesId": "groudon_primal",
     "speciesName": "Primal Groudon",
-    "rank": 1,
+    "rank": "S",
     "types": [
       "Ground",
       "Fire"
@@ -12,7 +12,7 @@
   {
     "speciesId": "rayquaza_mega",
     "speciesName": "Mega Rayquaza",
-    "rank": 2,
+    "rank": "S",
     "types": [
       "Dragon",
       "Flying"
@@ -22,7 +22,7 @@
   {
     "speciesId": "mewtwo_shadow",
     "speciesName": "Shadow Mewtwo",
-    "rank": 3,
+    "rank": "S",
     "types": [
       "Psychic"
     ],
@@ -31,7 +31,7 @@
   {
     "speciesId": "kyogre_primal",
     "speciesName": "Primal Kyogre",
-    "rank": 4,
+    "rank": "S",
     "types": [
       "Water"
     ],
@@ -40,7 +40,7 @@
   {
     "speciesId": "kyurem_black",
     "speciesName": "Black Kyurem",
-    "rank": 5,
+    "rank": "S",
     "types": [
       "Dragon",
       "Ice"
@@ -50,7 +50,7 @@
   {
     "speciesId": "necrozma_dawn_wings",
     "speciesName": "Dawn Wings Necrozma",
-    "rank": 6,
+    "rank": "S",
     "types": [
       "Psychic",
       "Ghost"
@@ -60,7 +60,7 @@
   {
     "speciesId": "zacian_crowned_sword",
     "speciesName": "Crowned Sword Zacian",
-    "rank": 7,
+    "rank": "S",
     "types": [
       "Fairy",
       "Steel"
@@ -70,7 +70,7 @@
   {
     "speciesId": "blaziken_mega",
     "speciesName": "Mega Blaziken",
-    "rank": 8,
+    "rank": "S",
     "types": [
       "Fire",
       "Fighting"
@@ -80,7 +80,7 @@
   {
     "speciesId": "kyurem_white",
     "speciesName": "White Kyurem",
-    "rank": 9,
+    "rank": "S",
     "types": [
       "Dragon",
       "Ice"
@@ -90,7 +90,7 @@
   {
     "speciesId": "salamence_shadow",
     "speciesName": "Shadow Salamence",
-    "rank": 10,
+    "rank": "S",
     "types": [
       "Dragon",
       "Flying"
@@ -100,7 +100,7 @@
   {
     "speciesId": "lucario_mega",
     "speciesName": "Mega Lucario",
-    "rank": 11,
+    "rank": "S",
     "types": [
       "Fighting",
       "Steel"
@@ -110,7 +110,7 @@
   {
     "speciesId": "rhyperior_shadow",
     "speciesName": "Shadow Rhyperior",
-    "rank": 12,
+    "rank": "S",
     "types": [
       "Ground",
       "Rock"
@@ -120,7 +120,7 @@
   {
     "speciesId": "regigigas_shadow",
     "speciesName": "Shadow Regigigas",
-    "rank": 13,
+    "rank": "S",
     "types": [
       "Normal"
     ],
@@ -129,7 +129,7 @@
   {
     "speciesId": "necrozma_dusk_mane",
     "speciesName": "Dusk Mane Necrozma",
-    "rank": 14,
+    "rank": "S",
     "types": [
       "Psychic",
       "Steel"
@@ -139,7 +139,7 @@
   {
     "speciesId": "garchomp_mega",
     "speciesName": "Mega Garchomp",
-    "rank": 15,
+    "rank": "S",
     "types": [
       "Dragon",
       "Ground"
@@ -149,7 +149,7 @@
   {
     "speciesId": "chandelure_shadow",
     "speciesName": "Shadow Chandelure",
-    "rank": 16,
+    "rank": "S",
     "types": [
       "Ghost",
       "Fire"
@@ -159,7 +159,7 @@
   {
     "speciesId": "gardevoir_mega",
     "speciesName": "Mega Gardevoir",
-    "rank": 17,
+    "rank": "S",
     "types": [
       "Psychic",
       "Fairy"
@@ -169,7 +169,7 @@
   {
     "speciesId": "tyranitar_mega",
     "speciesName": "Mega Tyranitar",
-    "rank": 18,
+    "rank": "S",
     "types": [
       "Rock",
       "Dark"
@@ -179,7 +179,7 @@
   {
     "speciesId": "zamazenta_crowned_shield",
     "speciesName": "Crowned Shield Zamazenta",
-    "rank": 19,
+    "rank": "S",
     "types": [
       "Fighting",
       "Steel"
@@ -189,7 +189,7 @@
   {
     "speciesId": "gengar_mega",
     "speciesName": "Mega Gengar",
-    "rank": 20,
+    "rank": "S",
     "types": [
       "Ghost",
       "Poison"
@@ -199,7 +199,7 @@
   {
     "speciesId": "salamence_mega",
     "speciesName": "Mega Salamence",
-    "rank": 21,
+    "rank": "A+",
     "types": [
       "Dragon",
       "Flying"
@@ -209,7 +209,7 @@
   {
     "speciesId": "tyranitar_shadow",
     "speciesName": "Shadow Tyranitar",
-    "rank": 22,
+    "rank": "A+",
     "types": [
       "Rock",
       "Dark"
@@ -219,7 +219,7 @@
   {
     "speciesId": "mamoswine_shadow",
     "speciesName": "Shadow Mamoswine",
-    "rank": 23,
+    "rank": "A+",
     "types": [
       "Ice",
       "Ground"
@@ -229,7 +229,7 @@
   {
     "speciesId": "heracross_mega",
     "speciesName": "Mega Heracross",
-    "rank": 24,
+    "rank": "A+",
     "types": [
       "Bug",
       "Fighting"
@@ -239,7 +239,7 @@
   {
     "speciesId": "garchomp_shadow",
     "speciesName": "Shadow Garchomp",
-    "rank": 25,
+    "rank": "A+",
     "types": [
       "Dragon",
       "Ground"
@@ -249,7 +249,7 @@
   {
     "speciesId": "gallade_mega",
     "speciesName": "Mega Gallade",
-    "rank": 26,
+    "rank": "A+",
     "types": [
       "Psychic",
       "Fighting"
@@ -259,7 +259,7 @@
   {
     "speciesId": "rayquaza",
     "speciesName": "Rayquaza",
-    "rank": 27,
+    "rank": "A+",
     "types": [
       "Dragon",
       "Flying"
@@ -269,7 +269,7 @@
   {
     "speciesId": "groudon_shadow",
     "speciesName": "Shadow Groudon",
-    "rank": 28,
+    "rank": "A+",
     "types": [
       "Ground"
     ],
@@ -278,7 +278,7 @@
   {
     "speciesId": "charizard_mega_y",
     "speciesName": "Mega Y Charizard",
-    "rank": 29,
+    "rank": "A+",
     "types": [
       "Fire",
       "Flying"
@@ -288,7 +288,7 @@
   {
     "speciesId": "blaziken_shadow",
     "speciesName": "Shadow Blaziken",
-    "rank": 30,
+    "rank": "A+",
     "types": [
       "Fire",
       "Fighting"
@@ -298,7 +298,7 @@
   {
     "speciesId": "metagross_shadow",
     "speciesName": "Shadow Metagross",
-    "rank": 31,
+    "rank": "A+",
     "types": [
       "Steel",
       "Psychic"
@@ -308,7 +308,7 @@
   {
     "speciesId": "excadrill_shadow",
     "speciesName": "Shadow Excadrill",
-    "rank": 32,
+    "rank": "A+",
     "types": [
       "Ground",
       "Steel"
@@ -318,7 +318,7 @@
   {
     "speciesId": "sceptile_mega",
     "speciesName": "Mega Sceptile",
-    "rank": 33,
+    "rank": "A+",
     "types": [
       "Grass",
       "Dragon"
@@ -328,7 +328,7 @@
   {
     "speciesId": "moltres_shadow",
     "speciesName": "Shadow Moltres",
-    "rank": 34,
+    "rank": "A+",
     "types": [
       "Fire",
       "Flying"
@@ -338,7 +338,7 @@
   {
     "speciesId": "alakazam_mega",
     "speciesName": "Mega Alakazam",
-    "rank": 35,
+    "rank": "A+",
     "types": [
       "Psychic"
     ],
@@ -347,7 +347,7 @@
   {
     "speciesId": "diancie_mega",
     "speciesName": "Mega Diancie",
-    "rank": 36,
+    "rank": "A+",
     "types": [
       "Rock",
       "Fairy"
@@ -357,7 +357,7 @@
   {
     "speciesId": "terrakion",
     "speciesName": "Terrakion",
-    "rank": 37,
+    "rank": "A+",
     "types": [
       "Rock",
       "Fighting"
@@ -367,7 +367,7 @@
   {
     "speciesId": "heatran_shadow",
     "speciesName": "Shadow Heatran",
-    "rank": 38,
+    "rank": "A+",
     "types": [
       "Fire",
       "Steel"
@@ -377,7 +377,7 @@
   {
     "speciesId": "rampardos_shadow",
     "speciesName": "Shadow Rampardos",
-    "rank": 39,
+    "rank": "A+",
     "types": [
       "Rock"
     ],
@@ -386,7 +386,7 @@
   {
     "speciesId": "swampert_mega",
     "speciesName": "Mega Swampert",
-    "rank": 40,
+    "rank": "A+",
     "types": [
       "Water",
       "Ground"
@@ -396,7 +396,7 @@
   {
     "speciesId": "weavile_shadow",
     "speciesName": "Shadow Weavile",
-    "rank": 41,
+    "rank": "A+",
     "types": [
       "Dark",
       "Ice"
@@ -406,7 +406,7 @@
   {
     "speciesId": "zapdos_shadow",
     "speciesName": "Shadow Zapdos",
-    "rank": 42,
+    "rank": "A+",
     "types": [
       "Electric",
       "Flying"
@@ -416,7 +416,7 @@
   {
     "speciesId": "emboar_shadow",
     "speciesName": "Shadow Emboar",
-    "rank": 43,
+    "rank": "A+",
     "types": [
       "Fire",
       "Fighting"
@@ -426,7 +426,7 @@
   {
     "speciesId": "landorus_therian",
     "speciesName": "Therian Forme Landorus",
-    "rank": 44,
+    "rank": "A+",
     "types": [
       "Ground",
       "Flying"
@@ -436,7 +436,7 @@
   {
     "speciesId": "blacephalon",
     "speciesName": "Blacephalon",
-    "rank": 45,
+    "rank": "A+",
     "types": [
       "Fire",
       "Ghost"
@@ -446,7 +446,7 @@
   {
     "speciesId": "tyrantrum_shadow",
     "speciesName": "Shadow Tyrantrum",
-    "rank": 46,
+    "rank": "A+",
     "types": [
       "Rock",
       "Dragon"
@@ -456,7 +456,7 @@
   {
     "speciesId": "darmanitan_standard_shadow",
     "speciesName": "Standard Mode Shadow Darmanitan",
-    "rank": 47,
+    "rank": "A+",
     "types": [
       "Fire"
     ],
@@ -465,7 +465,7 @@
   {
     "speciesId": "xurkitree",
     "speciesName": "Xurkitree",
-    "rank": 48,
+    "rank": "A+",
     "types": [
       "Electric"
     ],
@@ -474,7 +474,7 @@
   {
     "speciesId": "houndoom_mega",
     "speciesName": "Mega Houndoom",
-    "rank": 49,
+    "rank": "A+",
     "types": [
       "Dark",
       "Fire"
@@ -484,7 +484,7 @@
   {
     "speciesId": "conkeldurr_shadow",
     "speciesName": "Shadow Conkeldurr",
-    "rank": 50,
+    "rank": "A+",
     "types": [
       "Fighting"
     ],
@@ -493,7 +493,7 @@
   {
     "speciesId": "lucario",
     "speciesName": "Lucario",
-    "rank": 51,
+    "rank": "A",
     "types": [
       "Fighting",
       "Steel"
@@ -503,7 +503,7 @@
   {
     "speciesId": "latios_mega",
     "speciesName": "Mega Latios",
-    "rank": 52,
+    "rank": "A",
     "types": [
       "Dragon",
       "Psychic"
@@ -513,7 +513,7 @@
   {
     "speciesId": "reshiram",
     "speciesName": "Reshiram",
-    "rank": 53,
+    "rank": "A",
     "types": [
       "Dragon",
       "Fire"
@@ -523,7 +523,7 @@
   {
     "speciesId": "raikou_shadow",
     "speciesName": "Shadow Raikou",
-    "rank": 54,
+    "rank": "A",
     "types": [
       "Electric"
     ],
@@ -532,7 +532,7 @@
   {
     "speciesId": "regieleki",
     "speciesName": "Regieleki",
-    "rank": 55,
+    "rank": "A",
     "types": [
       "Electric"
     ],
@@ -541,7 +541,7 @@
   {
     "speciesId": "apex_shadow_ho_oh",
     "speciesName": "Apex Shadow Ho-Oh",
-    "rank": 56,
+    "rank": "A",
     "types": [
       "Fire",
       "Flying"
@@ -551,7 +551,7 @@
   {
     "speciesId": "dialga_shadow",
     "speciesName": "Shadow Dialga",
-    "rank": 57,
+    "rank": "A",
     "types": [
       "Steel",
       "Dragon"
@@ -561,7 +561,7 @@
   {
     "speciesId": "mewtwo",
     "speciesName": "Mewtwo",
-    "rank": 58,
+    "rank": "A",
     "types": [
       "Psychic"
     ],
@@ -570,7 +570,7 @@
   {
     "speciesId": "zekrom",
     "speciesName": "Zekrom",
-    "rank": 59,
+    "rank": "A",
     "types": [
       "Dragon",
       "Electric"
@@ -580,7 +580,7 @@
   {
     "speciesId": "ho_oh_shadow",
     "speciesName": "Shadow Ho-Oh",
-    "rank": 60,
+    "rank": "A",
     "types": [
       "Fire",
       "Flying"
@@ -590,7 +590,7 @@
   {
     "speciesId": "gigalith_shadow",
     "speciesName": "Shadow Gigalith",
-    "rank": 61,
+    "rank": "A",
     "types": [
       "Rock"
     ],
@@ -599,7 +599,7 @@
   {
     "speciesId": "kyogre_shadow",
     "speciesName": "Shadow Kyogre",
-    "rank": 62,
+    "rank": "A",
     "types": [
       "Water"
     ],
@@ -608,7 +608,7 @@
   {
     "speciesId": "kartana",
     "speciesName": "Kartana",
-    "rank": 63,
+    "rank": "A",
     "types": [
       "Grass",
       "Steel"
@@ -618,7 +618,7 @@
   {
     "speciesId": "charizard_mega_x",
     "speciesName": "Mega X Charizard",
-    "rank": 64,
+    "rank": "A",
     "types": [
       "Fire",
       "Dragon"
@@ -628,7 +628,7 @@
   {
     "speciesId": "electivire_shadow",
     "speciesName": "Shadow Electivire",
-    "rank": 65,
+    "rank": "A",
     "types": [
       "Electric"
     ],
@@ -637,7 +637,7 @@
   {
     "speciesId": "aerodactyl_mega",
     "speciesName": "Mega Aerodactyl",
-    "rank": 66,
+    "rank": "A",
     "types": [
       "Rock",
       "Flying"
@@ -647,7 +647,7 @@
   {
     "speciesId": "machamp_shadow",
     "speciesName": "Shadow Machamp",
-    "rank": 67,
+    "rank": "A",
     "types": [
       "Fighting"
     ],
@@ -656,7 +656,7 @@
   {
     "speciesId": "absol_mega",
     "speciesName": "Mega Absol",
-    "rank": 68,
+    "rank": "A",
     "types": [
       "Dark"
     ],
@@ -665,7 +665,7 @@
   {
     "speciesId": "magnezone_shadow",
     "speciesName": "Shadow Magnezone",
-    "rank": 69,
+    "rank": "A",
     "types": [
       "Electric",
       "Steel"
@@ -675,7 +675,7 @@
   {
     "speciesId": "thundurus_therian",
     "speciesName": "Therian Forme Thundurus",
-    "rank": 70,
+    "rank": "A",
     "types": [
       "Electric",
       "Flying"
@@ -685,7 +685,7 @@
   {
     "speciesId": "staraptor_shadow",
     "speciesName": "Shadow Staraptor",
-    "rank": 71,
+    "rank": "A",
     "types": [
       "Normal",
       "Flying"
@@ -695,7 +695,7 @@
   {
     "speciesId": "keldeo",
     "speciesName": "Keldeo (Ordinary Forme)",
-    "rank": 72,
+    "rank": "A",
     "types": [
       "Water",
       "Fighting"
@@ -705,7 +705,7 @@
   {
     "speciesId": "gyarados_mega",
     "speciesName": "Mega Gyarados",
-    "rank": 73,
+    "rank": "A",
     "types": [
       "Water",
       "Dark"
@@ -715,7 +715,7 @@
   {
     "speciesId": "charizard_shadow",
     "speciesName": "Shadow Charizard",
-    "rank": 74,
+    "rank": "A",
     "types": [
       "Fire",
       "Flying"
@@ -725,7 +725,7 @@
   {
     "speciesId": "groudon",
     "speciesName": "Groudon",
-    "rank": 75,
+    "rank": "A",
     "types": [
       "Ground"
     ],
@@ -734,7 +734,7 @@
   {
     "speciesId": "entei_shadow",
     "speciesName": "Shadow Entei",
-    "rank": 76,
+    "rank": "A",
     "types": [
       "Fire"
     ],
@@ -743,7 +743,7 @@
   {
     "speciesId": "enamorus_incarnate",
     "speciesName": "Incarnate Forme Enamorus",
-    "rank": 77,
+    "rank": "A",
     "types": [
       "Fairy",
       "Flying"
@@ -753,7 +753,7 @@
   {
     "speciesId": "manectric_mega",
     "speciesName": "Mega Manectric",
-    "rank": 78,
+    "rank": "A",
     "types": [
       "Electric"
     ],
@@ -762,7 +762,7 @@
   {
     "speciesId": "rhyperior",
     "speciesName": "Rhyperior",
-    "rank": 79,
+    "rank": "A",
     "types": [
       "Ground",
       "Rock"
@@ -772,7 +772,7 @@
   {
     "speciesId": "hariyama_shadow",
     "speciesName": "Shadow Hariyama",
-    "rank": 80,
+    "rank": "A",
     "types": [
       "Fighting"
     ],
@@ -781,7 +781,7 @@
   {
     "speciesId": "lunala",
     "speciesName": "Lunala",
-    "rank": 81,
+    "rank": "A",
     "types": [
       "Psychic",
       "Ghost"
@@ -791,7 +791,7 @@
   {
     "speciesId": "palkia_shadow",
     "speciesName": "Shadow Palkia",
-    "rank": 82,
+    "rank": "A",
     "types": [
       "Water",
       "Dragon"
@@ -801,7 +801,7 @@
   {
     "speciesId": "honchkrow_shadow",
     "speciesName": "Shadow Honchkrow",
-    "rank": 83,
+    "rank": "A",
     "types": [
       "Dark",
       "Flying"
@@ -811,7 +811,7 @@
   {
     "speciesId": "gardevoir_shadow",
     "speciesName": "Shadow Gardevoir",
-    "rank": 84,
+    "rank": "A",
     "types": [
       "Psychic",
       "Fairy"
@@ -821,7 +821,7 @@
   {
     "speciesId": "latios_shadow",
     "speciesName": "Shadow Latios",
-    "rank": 85,
+    "rank": "A",
     "types": [
       "Dragon",
       "Psychic"
@@ -831,7 +831,7 @@
   {
     "speciesId": "gengar_shadow",
     "speciesName": "Shadow Gengar",
-    "rank": 86,
+    "rank": "A",
     "types": [
       "Ghost",
       "Poison"
@@ -841,7 +841,7 @@
   {
     "speciesId": "chandelure",
     "speciesName": "Chandelure",
-    "rank": 87,
+    "rank": "A",
     "types": [
       "Ghost",
       "Fire"
@@ -851,7 +851,7 @@
   {
     "speciesId": "banette_mega",
     "speciesName": "Mega Banette",
-    "rank": 88,
+    "rank": "A",
     "types": [
       "Ghost"
     ],
@@ -860,7 +860,7 @@
   {
     "speciesId": "ampharos_mega",
     "speciesName": "Mega Ampharos",
-    "rank": 89,
+    "rank": "A",
     "types": [
       "Electric",
       "Dragon"
@@ -870,7 +870,7 @@
   {
     "speciesId": "sky_forme_shaymin",
     "speciesName": "Sky Forme Shaymin",
-    "rank": 90,
+    "rank": "A",
     "types": [
       "Grass",
       "Flying"
@@ -880,7 +880,7 @@
   {
     "speciesId": "alakazam_shadow",
     "speciesName": "Shadow Alakazam",
-    "rank": 91,
+    "rank": "A",
     "types": [
       "Psychic"
     ],
@@ -889,7 +889,7 @@
   {
     "speciesId": "swampert_shadow",
     "speciesName": "Shadow Swampert",
-    "rank": 92,
+    "rank": "A",
     "types": [
       "Water",
       "Ground"
@@ -899,7 +899,7 @@
   {
     "speciesId": "hoopa_unbound",
     "speciesName": "Hoopa Unbound",
-    "rank": 93,
+    "rank": "A",
     "types": [
       "Psychic",
       "Dark"
@@ -909,7 +909,7 @@
   {
     "speciesId": "venusaur_mega",
     "speciesName": "Mega Venusaur",
-    "rank": 94,
+    "rank": "A",
     "types": [
       "Grass",
       "Poison"
@@ -919,7 +919,7 @@
   {
     "speciesId": "sceptile_shadow",
     "speciesName": "Shadow Sceptile",
-    "rank": 95,
+    "rank": "A",
     "types": [
       "Grass"
     ],
@@ -928,7 +928,7 @@
   {
     "speciesId": "salamence",
     "speciesName": "Salamence",
-    "rank": 96,
+    "rank": "A",
     "types": [
       "Dragon",
       "Flying"
@@ -938,7 +938,7 @@
   {
     "speciesId": "blastoise_mega",
     "speciesName": "Mega Blastoise",
-    "rank": 97,
+    "rank": "A",
     "types": [
       "Water"
     ],
@@ -947,7 +947,7 @@
   {
     "speciesId": "absol_shadow",
     "speciesName": "Shadow Absol",
-    "rank": 98,
+    "rank": "A",
     "types": [
       "Dark"
     ],
@@ -956,7 +956,7 @@
   {
     "speciesId": "beedrill_mega",
     "speciesName": "Mega Beedrill",
-    "rank": 99,
+    "rank": "A",
     "types": [
       "Bug",
       "Poison"
@@ -966,7 +966,7 @@
   {
     "speciesId": "origin_forme_dialga",
     "speciesName": "Origin Forme Dialga",
-    "rank": 100,
+    "rank": "A",
     "types": [
       "Steel",
       "Dragon"
@@ -976,7 +976,7 @@
   {
     "speciesId": "tangrowth_shadow",
     "speciesName": "Shadow Tangrowth",
-    "rank": 101,
+    "rank": "B",
     "types": [
       "Grass"
     ],
@@ -985,7 +985,7 @@
   {
     "speciesId": "infernape_shadow",
     "speciesName": "Shadow Infernape",
-    "rank": 102,
+    "rank": "B",
     "types": [
       "Fire",
       "Fighting"
@@ -995,7 +995,7 @@
   {
     "speciesId": "volcarona",
     "speciesName": "Volcarona",
-    "rank": 103,
+    "rank": "B",
     "types": [
       "Bug",
       "Fire"
@@ -1005,7 +1005,7 @@
   {
     "speciesId": "tyranitar",
     "speciesName": "Tyranitar",
-    "rank": 104,
+    "rank": "B",
     "types": [
       "Rock",
       "Dark"
@@ -1015,7 +1015,7 @@
   {
     "speciesId": "venusaur_shadow",
     "speciesName": "Shadow Venusaur",
-    "rank": 105,
+    "rank": "B",
     "types": [
       "Grass",
       "Poison"
@@ -1025,7 +1025,7 @@
   {
     "speciesId": "yveltal",
     "speciesName": "Yveltal",
-    "rank": 106,
+    "rank": "B",
     "types": [
       "Dark",
       "Flying"
@@ -1035,7 +1035,7 @@
   {
     "speciesId": "urshifu",
     "speciesName": "Urshifu (Rapid Strike Style)",
-    "rank": 107,
+    "rank": "B",
     "types": [
       "Fighting",
       "Water"
@@ -1045,7 +1045,7 @@
   {
     "speciesId": "pinsir_mega",
     "speciesName": "Mega Pinsir",
-    "rank": 108,
+    "rank": "B",
     "types": [
       "Bug",
       "Flying"
@@ -1055,7 +1055,7 @@
   {
     "speciesId": "typhlosion_shadow",
     "speciesName": "Shadow Typhlosion",
-    "rank": 109,
+    "rank": "B",
     "types": [
       "Fire"
     ],
@@ -1064,7 +1064,7 @@
   {
     "speciesId": "rampardos",
     "speciesName": "Rampardos",
-    "rank": 110,
+    "rank": "B",
     "types": [
       "Rock"
     ],
@@ -1073,7 +1073,7 @@
   {
     "speciesId": "golem_alolan_shadow",
     "speciesName": "Shadow Alolan Golem",
-    "rank": 111,
+    "rank": "B",
     "types": [
       "Rock",
       "Electric"
@@ -1083,7 +1083,7 @@
   {
     "speciesId": "urshifu",
     "speciesName": "Urshifu (Single Strike Style)",
-    "rank": 112,
+    "rank": "B",
     "types": [
       "Fighting",
       "Dark"
@@ -1093,7 +1093,7 @@
   {
     "speciesId": "lopunny_mega",
     "speciesName": "Mega Lopunny",
-    "rank": 113,
+    "rank": "B",
     "types": [
       "Normal",
       "Fighting"
@@ -1103,7 +1103,7 @@
   {
     "speciesId": "zarude",
     "speciesName": "Zarude",
-    "rank": 114,
+    "rank": "B",
     "types": [
       "Dark",
       "Grass"
@@ -1113,7 +1113,7 @@
   {
     "speciesId": "garchomp",
     "speciesName": "Garchomp",
-    "rank": 115,
+    "rank": "B",
     "types": [
       "Dragon",
       "Ground"
@@ -1123,7 +1123,7 @@
   {
     "speciesId": "mamoswine",
     "speciesName": "Mamoswine",
-    "rank": 116,
+    "rank": "B",
     "types": [
       "Ice",
       "Ground"
@@ -1133,7 +1133,7 @@
   {
     "speciesId": "kingler_shadow",
     "speciesName": "Shadow Kingler",
-    "rank": 117,
+    "rank": "B",
     "types": [
       "Water"
     ],
@@ -1142,7 +1142,7 @@
   {
     "speciesId": "metagross",
     "speciesName": "Metagross",
-    "rank": 118,
+    "rank": "B",
     "types": [
       "Steel",
       "Psychic"
@@ -1152,7 +1152,7 @@
   {
     "speciesId": "exeggutor_shadow",
     "speciesName": "Shadow Exeggutor",
-    "rank": 119,
+    "rank": "B",
     "types": [
       "Grass",
       "Psychic"
@@ -1162,7 +1162,7 @@
   {
     "speciesId": "luxray_shadow",
     "speciesName": "Shadow Luxray",
-    "rank": 120,
+    "rank": "B",
     "types": [
       "Electric"
     ],
@@ -1171,7 +1171,7 @@
   {
     "speciesId": "darkrai",
     "speciesName": "Darkrai",
-    "rank": 121,
+    "rank": "B",
     "types": [
       "Dark"
     ],
@@ -1180,7 +1180,7 @@
   {
     "speciesId": "golurk_shadow",
     "speciesName": "Shadow Golurk",
-    "rank": 122,
+    "rank": "B",
     "types": [
       "Ground",
       "Ghost"
@@ -1190,7 +1190,7 @@
   {
     "speciesId": "cursola_shadow",
     "speciesName": "Shadow Cursola",
-    "rank": 123,
+    "rank": "B",
     "types": [
       "Ghost"
     ],
@@ -1199,7 +1199,7 @@
   {
     "speciesId": "excadrill",
     "speciesName": "Excadrill",
-    "rank": 124,
+    "rank": "B",
     "types": [
       "Ground",
       "Steel"
@@ -1209,7 +1209,7 @@
   {
     "speciesId": "latias_mega",
     "speciesName": "Mega Latias",
-    "rank": 125,
+    "rank": "B",
     "types": [
       "Dragon",
       "Psychic"
@@ -1219,7 +1219,7 @@
   {
     "speciesId": "aurorus_shadow",
     "speciesName": "Shadow Aurorus",
-    "rank": 126,
+    "rank": "B",
     "types": [
       "Rock",
       "Ice"
@@ -1229,7 +1229,7 @@
   {
     "speciesId": "sirfetch_d_shadow",
     "speciesName": "Shadow Sirfetch'd",
-    "rank": 127,
+    "rank": "B",
     "types": [
       "Fighting"
     ],
@@ -1238,7 +1238,7 @@
   {
     "speciesId": "pidgeot_mega",
     "speciesName": "Mega Pidgeot",
-    "rank": 128,
+    "rank": "B",
     "types": [
       "Normal",
       "Flying"
@@ -1248,7 +1248,7 @@
   {
     "speciesId": "rhydon_shadow",
     "speciesName": "Shadow Rhydon",
-    "rank": 129,
+    "rank": "B",
     "types": [
       "Ground",
       "Rock"
@@ -1258,7 +1258,7 @@
   {
     "speciesId": "pheromosa",
     "speciesName": "Pheromosa",
-    "rank": 130,
+    "rank": "B",
     "types": [
       "Bug",
       "Fighting"
@@ -1268,7 +1268,7 @@
   {
     "speciesId": "magmortar_shadow",
     "speciesName": "Shadow Magmortar",
-    "rank": 131,
+    "rank": "B",
     "types": [
       "Fire"
     ],
@@ -1277,7 +1277,7 @@
   {
     "speciesId": "golem_shadow",
     "speciesName": "Shadow Golem",
-    "rank": 132,
+    "rank": "B",
     "types": [
       "Rock",
       "Ground"
@@ -1287,7 +1287,7 @@
   {
     "speciesId": "dragonite_shadow",
     "speciesName": "Shadow Dragonite",
-    "rank": 133,
+    "rank": "B",
     "types": [
       "Dragon",
       "Flying"
@@ -1297,7 +1297,7 @@
   {
     "speciesId": "dragapult",
     "speciesName": "Dragapult",
-    "rank": 134,
+    "rank": "B",
     "types": [
       "Dragon",
       "Ghost"
@@ -1307,7 +1307,7 @@
   {
     "speciesId": "roserade",
     "speciesName": "Roserade",
-    "rank": 135,
+    "rank": "B",
     "types": [
       "Grass",
       "Poison"
@@ -1317,7 +1317,7 @@
   {
     "speciesId": "houndoom_shadow",
     "speciesName": "Shadow Houndoom",
-    "rank": 136,
+    "rank": "B",
     "types": [
       "Dark",
       "Fire"
@@ -1327,7 +1327,7 @@
   {
     "speciesId": "gallade_shadow",
     "speciesName": "Shadow Gallade",
-    "rank": 137,
+    "rank": "B",
     "types": [
       "Psychic",
       "Fighting"
@@ -1337,7 +1337,7 @@
   {
     "speciesId": "kyogre",
     "speciesName": "Kyogre",
-    "rank": 138,
+    "rank": "B",
     "types": [
       "Water"
     ],
@@ -1346,7 +1346,7 @@
   {
     "speciesId": "torterra_shadow",
     "speciesName": "Shadow Torterra",
-    "rank": 139,
+    "rank": "B",
     "types": [
       "Grass",
       "Ground"
@@ -1356,7 +1356,7 @@
   {
     "speciesId": "hydreigon",
     "speciesName": "Hydreigon",
-    "rank": 140,
+    "rank": "B",
     "types": [
       "Dark",
       "Dragon"
@@ -1366,7 +1366,7 @@
   {
     "speciesId": "samurott_shadow",
     "speciesName": "Shadow Samurott",
-    "rank": 141,
+    "rank": "B",
     "types": [
       "Water"
     ],
@@ -1375,7 +1375,7 @@
   {
     "speciesId": "toxicroak_shadow",
     "speciesName": "Shadow Toxicroak",
-    "rank": 142,
+    "rank": "B",
     "types": [
       "Poison",
       "Fighting"
@@ -1385,7 +1385,7 @@
   {
     "speciesId": "landorus_incarnate",
     "speciesName": "Incarnate Forme Landorus",
-    "rank": 143,
+    "rank": "B",
     "types": [
       "Ground",
       "Flying"
@@ -1395,7 +1395,7 @@
   {
     "speciesId": "empoleon_shadow",
     "speciesName": "Shadow Empoleon",
-    "rank": 144,
+    "rank": "B",
     "types": [
       "Water",
       "Steel"
@@ -1405,7 +1405,7 @@
   {
     "speciesId": "baxcalibur",
     "speciesName": "Baxcalibur",
-    "rank": 145,
+    "rank": "B",
     "types": [
       "Dragon",
       "Ice"
@@ -1415,7 +1415,7 @@
   {
     "speciesId": "breloom",
     "speciesName": "Breloom",
-    "rank": 146,
+    "rank": "B",
     "types": [
       "Grass",
       "Fighting"
@@ -1425,7 +1425,7 @@
   {
     "speciesId": "origin_forme_palkia",
     "speciesName": "Origin Forme Palkia",
-    "rank": 147,
+    "rank": "B",
     "types": [
       "Water",
       "Dragon"
@@ -1435,7 +1435,7 @@
   {
     "speciesId": "scizor_mega",
     "speciesName": "Mega Scizor",
-    "rank": 148,
+    "rank": "B",
     "types": [
       "Bug",
       "Steel"
@@ -1445,7 +1445,7 @@
   {
     "speciesId": "raikou",
     "speciesName": "Raikou",
-    "rank": 149,
+    "rank": "B",
     "types": [
       "Electric"
     ],
@@ -1454,7 +1454,7 @@
   {
     "speciesId": "scizor_shadow",
     "speciesName": "Shadow Scizor",
-    "rank": 150,
+    "rank": "B",
     "types": [
       "Bug",
       "Steel"
@@ -1464,7 +1464,7 @@
   {
     "speciesId": "dialga",
     "speciesName": "Dialga",
-    "rank": 151,
+    "rank": "C",
     "types": [
       "Steel",
       "Dragon"
@@ -1474,7 +1474,7 @@
   {
     "speciesId": "conkeldurr",
     "speciesName": "Conkeldurr",
-    "rank": 152,
+    "rank": "C",
     "types": [
       "Fighting"
     ],
@@ -1483,7 +1483,7 @@
   {
     "speciesId": "aggron_shadow",
     "speciesName": "Shadow Aggron",
-    "rank": 153,
+    "rank": "C",
     "types": [
       "Steel",
       "Rock"
@@ -1493,7 +1493,7 @@
   {
     "speciesId": "porygon_z_shadow",
     "speciesName": "Shadow Porygon-Z",
-    "rank": 154,
+    "rank": "C",
     "types": [
       "Normal"
     ],
@@ -1502,7 +1502,7 @@
   {
     "speciesId": "archeops_shadow",
     "speciesName": "Shadow Archeops",
-    "rank": 155,
+    "rank": "C",
     "types": [
       "Rock",
       "Flying"
@@ -1512,7 +1512,7 @@
   {
     "speciesId": "exeggutor_alolan_shadow",
     "speciesName": "Shadow Alolan Exeggutor",
-    "rank": 156,
+    "rank": "C",
     "types": [
       "Grass",
       "Dragon"
@@ -1522,7 +1522,7 @@
   {
     "speciesId": "electivire",
     "speciesName": "Electivire",
-    "rank": 157,
+    "rank": "C",
     "types": [
       "Electric"
     ],
@@ -1531,7 +1531,7 @@
   {
     "speciesId": "donphan_shadow",
     "speciesName": "Shadow Donphan",
-    "rank": 158,
+    "rank": "C",
     "types": [
       "Ground"
     ],
@@ -1540,7 +1540,7 @@
   {
     "speciesId": "feraligatr_shadow",
     "speciesName": "Shadow Feraligatr",
-    "rank": 159,
+    "rank": "C",
     "types": [
       "Water"
     ],
@@ -1549,7 +1549,7 @@
   {
     "speciesId": "annihilape_shadow",
     "speciesName": "Shadow Annihilape",
-    "rank": 160,
+    "rank": "C",
     "types": [
       "Fighting",
       "Ghost"
@@ -1559,7 +1559,7 @@
   {
     "speciesId": "galarian_articuno",
     "speciesName": "Galarian Articuno",
-    "rank": 161,
+    "rank": "C",
     "types": [
       "Psychic",
       "Flying"
@@ -1569,7 +1569,7 @@
   {
     "speciesId": "hippowdon_shadow",
     "speciesName": "Shadow Hippowdon",
-    "rank": 162,
+    "rank": "C",
     "types": [
       "Ground"
     ],
@@ -1578,7 +1578,7 @@
   {
     "speciesId": "tapu_bulu",
     "speciesName": "Tapu Bulu",
-    "rank": 163,
+    "rank": "C",
     "types": [
       "Grass",
       "Fairy"
@@ -1588,7 +1588,7 @@
   {
     "speciesId": "blaziken",
     "speciesName": "Blaziken",
-    "rank": 164,
+    "rank": "C",
     "types": [
       "Fire",
       "Fighting"
@@ -1598,7 +1598,7 @@
   {
     "speciesId": "sneasler_shadow",
     "speciesName": "Shadow Sneasler",
-    "rank": 165,
+    "rank": "C",
     "types": [
       "Fighting",
       "Poison"
@@ -1608,7 +1608,7 @@
   {
     "speciesId": "tyrantrum",
     "speciesName": "Tyrantrum",
-    "rank": 166,
+    "rank": "C",
     "types": [
       "Rock",
       "Dragon"
@@ -1618,7 +1618,7 @@
   {
     "speciesId": "gyarados_shadow",
     "speciesName": "Shadow Gyarados",
-    "rank": 167,
+    "rank": "C",
     "types": [
       "Water",
       "Flying"
@@ -1628,7 +1628,7 @@
   {
     "speciesId": "moltres",
     "speciesName": "Moltres",
-    "rank": 168,
+    "rank": "C",
     "types": [
       "Fire",
       "Flying"
@@ -1638,7 +1638,7 @@
   {
     "speciesId": "gholdengo",
     "speciesName": "Gholdengo",
-    "rank": 169,
+    "rank": "C",
     "types": [
       "Steel",
       "Ghost"
@@ -1648,7 +1648,7 @@
   {
     "speciesId": "marshadow",
     "speciesName": "Marshadow",
-    "rank": 170,
+    "rank": "C",
     "types": [
       "Fighting",
       "Ghost"
@@ -1658,7 +1658,7 @@
   {
     "speciesId": "darmanitan_galarian_standard",
     "speciesName": "Galarian Standard Mode Darmanitan",
-    "rank": 171,
+    "rank": "C",
     "types": [
       "Ice"
     ],
@@ -1667,7 +1667,7 @@
   {
     "speciesId": "tapu_lele",
     "speciesName": "Tapu Lele",
-    "rank": 172,
+    "rank": "C",
     "types": [
       "Psychic",
       "Fairy"
@@ -1677,7 +1677,7 @@
   {
     "speciesId": "manectric_shadow",
     "speciesName": "Shadow Manectric",
-    "rank": 173,
+    "rank": "C",
     "types": [
       "Electric"
     ],
@@ -1686,7 +1686,7 @@
   {
     "speciesId": "aerodactyl_shadow",
     "speciesName": "Shadow Aerodactyl",
-    "rank": 174,
+    "rank": "C",
     "types": [
       "Rock",
       "Flying"
@@ -1696,7 +1696,7 @@
   {
     "speciesId": "abomasnow_mega",
     "speciesName": "Mega Abomasnow",
-    "rank": 175,
+    "rank": "C",
     "types": [
       "Grass",
       "Ice"
@@ -1706,7 +1706,7 @@
   {
     "speciesId": "mr_rime_shadow",
     "speciesName": "Shadow Mr. Rime",
-    "rank": 176,
+    "rank": "C",
     "types": [
       "Ice",
       "Psychic"
@@ -1716,7 +1716,7 @@
   {
     "speciesId": "apex_shadow_lugia",
     "speciesName": "Apex Shadow Lugia",
-    "rank": 177,
+    "rank": "C",
     "types": [
       "Psychic",
       "Flying"
@@ -1726,7 +1726,7 @@
   {
     "speciesId": "victreebel_shadow",
     "speciesName": "Shadow Victreebel",
-    "rank": 178,
+    "rank": "C",
     "types": [
       "Grass",
       "Poison"
@@ -1736,7 +1736,7 @@
   {
     "speciesId": "meowscarada",
     "speciesName": "Meowscarada",
-    "rank": 179,
+    "rank": "C",
     "types": [
       "Grass",
       "Dark"
@@ -1746,7 +1746,7 @@
   {
     "speciesId": "heatran",
     "speciesName": "Heatran",
-    "rank": 180,
+    "rank": "C",
     "types": [
       "Fire",
       "Steel"
@@ -1756,7 +1756,7 @@
   {
     "speciesId": "hoopa_confined",
     "speciesName": "Hoopa Confined",
-    "rank": 181,
+    "rank": "C",
     "types": [
       "Psychic",
       "Ghost"
@@ -1766,7 +1766,7 @@
   {
     "speciesId": "weavile",
     "speciesName": "Weavile",
-    "rank": 182,
+    "rank": "C",
     "types": [
       "Dark",
       "Ice"
@@ -1776,7 +1776,7 @@
   {
     "speciesId": "rillaboom",
     "speciesName": "Rillaboom",
-    "rank": 183,
+    "rank": "C",
     "types": [
       "Grass"
     ],
@@ -1785,7 +1785,7 @@
   {
     "speciesId": "tapu_koko",
     "speciesName": "Tapu Koko",
-    "rank": 184,
+    "rank": "C",
     "types": [
       "Electric",
       "Fairy"
@@ -1795,7 +1795,7 @@
   {
     "speciesId": "latias_shadow",
     "speciesName": "Shadow Latias",
-    "rank": 185,
+    "rank": "C",
     "types": [
       "Dragon",
       "Psychic"
@@ -1805,7 +1805,7 @@
   {
     "speciesId": "nihilego",
     "speciesName": "Nihilego",
-    "rank": 186,
+    "rank": "C",
     "types": [
       "Rock",
       "Poison"
@@ -1815,7 +1815,7 @@
   {
     "speciesId": "arcanine_shadow",
     "speciesName": "Shadow Arcanine",
-    "rank": 187,
+    "rank": "C",
     "types": [
       "Fire"
     ],
@@ -1824,7 +1824,7 @@
   {
     "speciesId": "crawdaunt_shadow",
     "speciesName": "Shadow Crawdaunt",
-    "rank": 188,
+    "rank": "C",
     "types": [
       "Water",
       "Dark"
@@ -1834,7 +1834,7 @@
   {
     "speciesId": "naganadel",
     "speciesName": "Naganadel",
-    "rank": 189,
+    "rank": "C",
     "types": [
       "Poison",
       "Dragon"
@@ -1844,7 +1844,7 @@
   {
     "speciesId": "standard_mode_darmanitan",
     "speciesName": "Standard Mode Darmanitan",
-    "rank": 190,
+    "rank": "C",
     "types": [
       "Fire"
     ],
@@ -1853,7 +1853,7 @@
   {
     "speciesId": "hisuian_decidueye",
     "speciesName": "Hisuian Decidueye",
-    "rank": 191,
+    "rank": "C",
     "types": [
       "Grass",
       "Fighting"
@@ -1863,7 +1863,7 @@
   {
     "speciesId": "galarian_zapdos",
     "speciesName": "Galarian Zapdos",
-    "rank": 192,
+    "rank": "C",
     "types": [
       "Fighting",
       "Flying"
@@ -1873,7 +1873,7 @@
   {
     "speciesId": "glalie_mega",
     "speciesName": "Mega Glalie",
-    "rank": 193,
+    "rank": "C",
     "types": [
       "Ice"
     ],
@@ -1882,7 +1882,7 @@
   {
     "speciesId": "flygon_shadow",
     "speciesName": "Shadow Flygon",
-    "rank": 194,
+    "rank": "C",
     "types": [
       "Ground",
       "Dragon"
@@ -1892,7 +1892,7 @@
   {
     "speciesId": "magnezone",
     "speciesName": "Magnezone",
-    "rank": 195,
+    "rank": "C",
     "types": [
       "Electric",
       "Steel"
@@ -1902,7 +1902,7 @@
   {
     "speciesId": "zapdos",
     "speciesName": "Zapdos",
-    "rank": 196,
+    "rank": "C",
     "types": [
       "Electric",
       "Flying"
@@ -1912,7 +1912,7 @@
   {
     "speciesId": "genesect",
     "speciesName": "Genesect (Chill Drive)",
-    "rank": 197,
+    "rank": "C",
     "types": [
       "Bug",
       "Steel"
@@ -1922,7 +1922,7 @@
   {
     "speciesId": "machamp",
     "speciesName": "Machamp",
-    "rank": 198,
+    "rank": "C",
     "types": [
       "Fighting"
     ],
@@ -1931,7 +1931,7 @@
   {
     "speciesId": "regidrago",
     "speciesName": "Regidrago",
-    "rank": 199,
+    "rank": "C",
     "types": [
       "Dragon"
     ],
@@ -1940,7 +1940,7 @@
   {
     "speciesId": "darmanitan",
     "speciesName": "Darmanitan",
-    "rank": 200,
+    "rank": "C",
     "types": [
       "Fire"
     ],
@@ -1949,7 +1949,7 @@
   {
     "speciesId": "genesect",
     "speciesName": "Genesect (Shock Drive)",
-    "rank": 201,
+    "rank": "D",
     "types": [
       "Bug",
       "Steel"
@@ -1959,7 +1959,7 @@
   {
     "speciesId": "kingambit",
     "speciesName": "Kingambit",
-    "rank": 202,
+    "rank": "D",
     "types": [
       "Dark",
       "Steel"
@@ -1969,7 +1969,7 @@
   {
     "speciesId": "aggron_mega",
     "speciesName": "Mega Aggron",
-    "rank": 203,
+    "rank": "D",
     "types": [
       "Steel"
     ],
@@ -1978,7 +1978,7 @@
   {
     "speciesId": "kyurem",
     "speciesName": "Kyurem",
-    "rank": 204,
+    "rank": "D",
     "types": [
       "Dragon",
       "Ice"
@@ -1988,7 +1988,7 @@
   {
     "speciesId": "pinsir_shadow",
     "speciesName": "Shadow Pinsir",
-    "rank": 205,
+    "rank": "D",
     "types": [
       "Bug"
     ],
@@ -1997,7 +1997,7 @@
   {
     "speciesId": "genesect",
     "speciesName": "Genesect",
-    "rank": 206,
+    "rank": "D",
     "types": [
       "Bug",
       "Steel"
@@ -2007,7 +2007,7 @@
   {
     "speciesId": "articuno_shadow",
     "speciesName": "Shadow Articuno",
-    "rank": 207,
+    "rank": "D",
     "types": [
       "Ice",
       "Flying"
@@ -2017,7 +2017,7 @@
   {
     "speciesId": "absol",
     "speciesName": "Absol",
-    "rank": 208,
+    "rank": "D",
     "types": [
       "Dark"
     ],
@@ -2026,7 +2026,7 @@
   {
     "speciesId": "primarina",
     "speciesName": "Primarina",
-    "rank": 209,
+    "rank": "D",
     "types": [
       "Water",
       "Fairy"
@@ -2036,7 +2036,7 @@
   {
     "speciesId": "regigigas",
     "speciesName": "Regigigas",
-    "rank": 210,
+    "rank": "D",
     "types": [
       "Normal"
     ],
@@ -2045,7 +2045,7 @@
   {
     "speciesId": "giratina",
     "speciesName": "Giratina (Origin Forme)",
-    "rank": 211,
+    "rank": "D",
     "types": [
       "Ghost",
       "Dragon"
@@ -2055,7 +2055,7 @@
   {
     "speciesId": "haxorus",
     "speciesName": "Haxorus",
-    "rank": 212,
+    "rank": "D",
     "types": [
       "Dragon"
     ],
@@ -2064,7 +2064,7 @@
   {
     "speciesId": "gigalith",
     "speciesName": "Gigalith",
-    "rank": 213,
+    "rank": "D",
     "types": [
       "Rock"
     ],
@@ -2073,7 +2073,7 @@
   {
     "speciesId": "genesect",
     "speciesName": "Genesect (Douse Drive)",
-    "rank": 214,
+    "rank": "D",
     "types": [
       "Bug",
       "Steel"
@@ -2083,7 +2083,7 @@
   {
     "speciesId": "ursaluna_shadow",
     "speciesName": "Shadow Ursaluna",
-    "rank": 215,
+    "rank": "D",
     "types": [
       "Ground",
       "Normal"
@@ -2093,7 +2093,7 @@
   {
     "speciesId": "decidueye",
     "speciesName": "Decidueye",
-    "rank": 216,
+    "rank": "D",
     "types": [
       "Grass",
       "Ghost"
@@ -2103,7 +2103,7 @@
   {
     "speciesId": "quaquaval",
     "speciesName": "Quaquaval",
-    "rank": 217,
+    "rank": "D",
     "types": [
       "Water",
       "Fighting"
@@ -2113,7 +2113,7 @@
   {
     "speciesId": "unfezant_shadow",
     "speciesName": "Shadow Unfezant",
-    "rank": 218,
+    "rank": "D",
     "types": [
       "Normal",
       "Flying"
@@ -2123,7 +2123,7 @@
   {
     "speciesId": "staraptor",
     "speciesName": "Staraptor",
-    "rank": 219,
+    "rank": "D",
     "types": [
       "Normal",
       "Flying"
@@ -2133,7 +2133,7 @@
   {
     "speciesId": "glaceon",
     "speciesName": "Glaceon",
-    "rank": 220,
+    "rank": "D",
     "types": [
       "Ice"
     ],
@@ -2142,7 +2142,7 @@
   {
     "speciesId": "magneton_shadow",
     "speciesName": "Shadow Magneton",
-    "rank": 221,
+    "rank": "D",
     "types": [
       "Electric",
       "Steel"
@@ -2152,7 +2152,7 @@
   {
     "speciesId": "omastar_shadow",
     "speciesName": "Shadow Omastar",
-    "rank": 222,
+    "rank": "D",
     "types": [
       "Rock",
       "Water"
@@ -2162,7 +2162,7 @@
   {
     "speciesId": "genesect",
     "speciesName": "Genesect (Burn Drive)",
-    "rank": 223,
+    "rank": "D",
     "types": [
       "Bug",
       "Steel"
@@ -2172,7 +2172,7 @@
   {
     "speciesId": "cetitan",
     "speciesName": "Cetitan",
-    "rank": 224,
+    "rank": "D",
     "types": [
       "Ice"
     ],
@@ -2181,7 +2181,7 @@
   {
     "speciesId": "sawk_shadow",
     "speciesName": "Shadow Sawk",
-    "rank": 225,
+    "rank": "D",
     "types": [
       "Fighting"
     ],
@@ -2190,7 +2190,7 @@
   {
     "speciesId": "gengar",
     "speciesName": "Gengar",
-    "rank": 226,
+    "rank": "D",
     "types": [
       "Ghost",
       "Poison"
@@ -2200,7 +2200,7 @@
   {
     "speciesId": "lugia_shadow",
     "speciesName": "Shadow Lugia",
-    "rank": 227,
+    "rank": "D",
     "types": [
       "Psychic",
       "Flying"
@@ -2210,7 +2210,7 @@
   {
     "speciesId": "incineroar",
     "speciesName": "Incineroar",
-    "rank": 228,
+    "rank": "D",
     "types": [
       "Fire",
       "Dark"
@@ -2220,7 +2220,7 @@
   {
     "speciesId": "palkia",
     "speciesName": "Palkia",
-    "rank": 229,
+    "rank": "D",
     "types": [
       "Water",
       "Dragon"
@@ -2230,7 +2230,7 @@
   {
     "speciesId": "hariyama",
     "speciesName": "Hariyama",
-    "rank": 230,
+    "rank": "D",
     "types": [
       "Fighting"
     ],
@@ -2239,7 +2239,7 @@
   {
     "speciesId": "escavalier_shadow",
     "speciesName": "Shadow Escavalier",
-    "rank": 231,
+    "rank": "D",
     "types": [
       "Bug",
       "Steel"
@@ -2249,7 +2249,7 @@
   {
     "speciesId": "greninja",
     "speciesName": "Greninja",
-    "rank": 232,
+    "rank": "D",
     "types": [
       "Water",
       "Dark"
@@ -2259,7 +2259,7 @@
   {
     "speciesId": "aurorus",
     "speciesName": "Aurorus",
-    "rank": 233,
+    "rank": "D",
     "types": [
       "Rock",
       "Ice"
@@ -2269,7 +2269,7 @@
   {
     "speciesId": "chesnaught",
     "speciesName": "Chesnaught",
-    "rank": 234,
+    "rank": "D",
     "types": [
       "Grass",
       "Fighting"
@@ -2279,7 +2279,7 @@
   {
     "speciesId": "buzzwole",
     "speciesName": "Buzzwole",
-    "rank": 235,
+    "rank": "D",
     "types": [
       "Bug",
       "Fighting"
@@ -2289,7 +2289,7 @@
   {
     "speciesId": "vileplume_shadow",
     "speciesName": "Shadow Vileplume",
-    "rank": 236,
+    "rank": "D",
     "types": [
       "Grass",
       "Poison"
@@ -2299,7 +2299,7 @@
   {
     "speciesId": "nidoking_shadow",
     "speciesName": "Shadow Nidoking",
-    "rank": 237,
+    "rank": "D",
     "types": [
       "Poison",
       "Ground"
@@ -2309,7 +2309,7 @@
   {
     "speciesId": "zebstrika_shadow",
     "speciesName": "Shadow Zebstrika",
-    "rank": 238,
+    "rank": "D",
     "types": [
       "Electric"
     ],
@@ -2318,7 +2318,7 @@
   {
     "speciesId": "scolipede_shadow",
     "speciesName": "Shadow Scolipede",
-    "rank": 239,
+    "rank": "D",
     "types": [
       "Bug",
       "Poison"
@@ -2328,7 +2328,7 @@
   {
     "speciesId": "kingler",
     "speciesName": "Kingler",
-    "rank": 240,
+    "rank": "D",
     "types": [
       "Water"
     ],
@@ -2337,7 +2337,7 @@
   {
     "speciesId": "cacturne_shadow",
     "speciesName": "Shadow Cacturne",
-    "rank": 241,
+    "rank": "D",
     "types": [
       "Grass",
       "Dark"
@@ -2347,7 +2347,7 @@
   {
     "speciesId": "shiftry_shadow",
     "speciesName": "Shadow Shiftry",
-    "rank": 242,
+    "rank": "D",
     "types": [
       "Grass",
       "Dark"
@@ -2357,7 +2357,7 @@
   {
     "speciesId": "delphox",
     "speciesName": "Delphox",
-    "rank": 243,
+    "rank": "D",
     "types": [
       "Fire",
       "Psychic"
@@ -2367,7 +2367,7 @@
   {
     "speciesId": "meganium_shadow",
     "speciesName": "Shadow Meganium",
-    "rank": 244,
+    "rank": "D",
     "types": [
       "Grass"
     ],
@@ -2376,7 +2376,7 @@
   {
     "speciesId": "krookodile",
     "speciesName": "Krookodile",
-    "rank": 245,
+    "rank": "D",
     "types": [
       "Ground",
       "Dark"
@@ -2386,7 +2386,7 @@
   {
     "speciesId": "sceptile",
     "speciesName": "Sceptile",
-    "rank": 246,
+    "rank": "D",
     "types": [
       "Grass"
     ],
@@ -2395,7 +2395,7 @@
   {
     "speciesId": "tornadus_therian",
     "speciesName": "Therian Forme Tornadus",
-    "rank": 247,
+    "rank": "D",
     "types": [
       "Flying"
     ],
@@ -2404,7 +2404,7 @@
   {
     "speciesId": "latios",
     "speciesName": "Latios",
-    "rank": 248,
+    "rank": "D",
     "types": [
       "Dragon",
       "Psychic"
@@ -2414,7 +2414,7 @@
   {
     "speciesId": "tsareena",
     "speciesName": "Tsareena",
-    "rank": 249,
+    "rank": "D",
     "types": [
       "Grass"
     ],
@@ -2423,7 +2423,7 @@
   {
     "speciesId": "stonjourner",
     "speciesName": "Stonjourner",
-    "rank": 250,
+    "rank": "D",
     "types": [
       "Rock"
     ],
@@ -2432,7 +2432,7 @@
   {
     "speciesId": "cobalion",
     "speciesName": "Cobalion",
-    "rank": 251,
+    "rank": "F",
     "types": [
       "Steel",
       "Fighting"
@@ -2442,7 +2442,7 @@
   {
     "speciesId": "alakazam",
     "speciesName": "Alakazam",
-    "rank": 252,
+    "rank": "F",
     "types": [
       "Psychic"
     ],
@@ -2451,7 +2451,7 @@
   {
     "speciesId": "ninetales_alolan_shadow",
     "speciesName": "Shadow Alolan Ninetales",
-    "rank": 253,
+    "rank": "F",
     "types": [
       "Ice",
       "Fairy"
@@ -2461,7 +2461,7 @@
   {
     "speciesId": "hisuian_zoroark",
     "speciesName": "Hisuian Zoroark",
-    "rank": 254,
+    "rank": "F",
     "types": [
       "Normal",
       "Ghost"
@@ -2471,7 +2471,7 @@
   {
     "speciesId": "golurk",
     "speciesName": "Golurk",
-    "rank": 255,
+    "rank": "F",
     "types": [
       "Ground",
       "Ghost"
@@ -2481,7 +2481,7 @@
   {
     "speciesId": "rhydon",
     "speciesName": "Rhydon",
-    "rank": 256,
+    "rank": "F",
     "types": [
       "Ground",
       "Rock"
@@ -2491,7 +2491,7 @@
   {
     "speciesId": "xerneas",
     "speciesName": "Xerneas",
-    "rank": 257,
+    "rank": "F",
     "types": [
       "Fairy"
     ],
@@ -2500,7 +2500,7 @@
   {
     "speciesId": "abomasnow_shadow",
     "speciesName": "Shadow Abomasnow",
-    "rank": 258,
+    "rank": "F",
     "types": [
       "Grass",
       "Ice"
@@ -2510,7 +2510,7 @@
   {
     "speciesId": "walrein_shadow",
     "speciesName": "Shadow Walrein",
-    "rank": 259,
+    "rank": "F",
     "types": [
       "Ice",
       "Water"
@@ -2520,7 +2520,7 @@
   {
     "speciesId": "regice_shadow",
     "speciesName": "Shadow Regice",
-    "rank": 260,
+    "rank": "F",
     "types": [
       "Ice"
     ],
@@ -2529,7 +2529,7 @@
   {
     "speciesId": "volcanion",
     "speciesName": "Volcanion",
-    "rank": 261,
+    "rank": "F",
     "types": [
       "Fire",
       "Water"
@@ -2539,7 +2539,7 @@
   {
     "speciesId": "virizion",
     "speciesName": "Virizion",
-    "rank": 262,
+    "rank": "F",
     "types": [
       "Grass",
       "Fighting"
@@ -2549,7 +2549,7 @@
   {
     "speciesId": "vanilluxe",
     "speciesName": "Vanilluxe",
-    "rank": 263,
+    "rank": "F",
     "types": [
       "Ice"
     ],
@@ -2558,7 +2558,7 @@
   {
     "speciesId": "hawlucha",
     "speciesName": "Hawlucha",
-    "rank": 264,
+    "rank": "F",
     "types": [
       "Fighting",
       "Flying"
@@ -2568,7 +2568,7 @@
   {
     "speciesId": "scyther_shadow",
     "speciesName": "Shadow Scyther",
-    "rank": 265,
+    "rank": "F",
     "types": [
       "Bug",
       "Flying"
@@ -2578,7 +2578,7 @@
   {
     "speciesId": "avalugg",
     "speciesName": "Avalugg",
-    "rank": 266,
+    "rank": "F",
     "types": [
       "Ice"
     ],
@@ -2587,7 +2587,7 @@
   {
     "speciesId": "emboar",
     "speciesName": "Emboar",
-    "rank": 267,
+    "rank": "F",
     "types": [
       "Fire",
       "Fighting"
@@ -2597,7 +2597,7 @@
   {
     "speciesId": "cloyster_shadow",
     "speciesName": "Shadow Cloyster",
-    "rank": 268,
+    "rank": "F",
     "types": [
       "Water",
       "Ice"
@@ -2607,7 +2607,7 @@
   {
     "speciesId": "melmetal",
     "speciesName": "Melmetal",
-    "rank": 269,
+    "rank": "F",
     "types": [
       "Steel"
     ],
@@ -2616,7 +2616,7 @@
   {
     "speciesId": "tangrowth",
     "speciesName": "Tangrowth",
-    "rank": 270,
+    "rank": "F",
     "types": [
       "Grass"
     ],
@@ -2625,7 +2625,7 @@
   {
     "speciesId": "espeon",
     "speciesName": "Espeon",
-    "rank": 271,
+    "rank": "F",
     "types": [
       "Psychic"
     ],
@@ -2634,7 +2634,7 @@
   {
     "speciesId": "poliwrath_shadow",
     "speciesName": "Shadow Poliwrath",
-    "rank": 272,
+    "rank": "F",
     "types": [
       "Water",
       "Fighting"
@@ -2644,7 +2644,7 @@
   {
     "speciesId": "mr_rime",
     "speciesName": "Mr. Rime",
-    "rank": 273,
+    "rank": "F",
     "types": [
       "Ice",
       "Psychic"
@@ -2654,7 +2654,7 @@
   {
     "speciesId": "granbull_shadow",
     "speciesName": "Shadow Granbull",
-    "rank": 274,
+    "rank": "F",
     "types": [
       "Fairy"
     ],
@@ -2663,7 +2663,7 @@
   {
     "speciesId": "golem",
     "speciesName": "Golem",
-    "rank": 275,
+    "rank": "F",
     "types": [
       "Rock",
       "Ground"
@@ -2673,7 +2673,7 @@
   {
     "speciesId": "venusaur",
     "speciesName": "Venusaur",
-    "rank": 276,
+    "rank": "F",
     "types": [
       "Grass",
       "Poison"
@@ -2683,7 +2683,7 @@
   {
     "speciesId": "dragonite",
     "speciesName": "Dragonite",
-    "rank": 277,
+    "rank": "F",
     "types": [
       "Dragon",
       "Flying"
@@ -2693,7 +2693,7 @@
   {
     "speciesId": "piloswine_shadow",
     "speciesName": "Shadow Piloswine",
-    "rank": 278,
+    "rank": "F",
     "types": [
       "Ice",
       "Ground"
@@ -2703,7 +2703,7 @@
   {
     "speciesId": "aerodactyl",
     "speciesName": "Aerodactyl",
-    "rank": 279,
+    "rank": "F",
     "types": [
       "Rock",
       "Flying"
@@ -2713,7 +2713,7 @@
   {
     "speciesId": "gliscor_shadow",
     "speciesName": "Shadow Gliscor",
-    "rank": 280,
+    "rank": "F",
     "types": [
       "Ground",
       "Flying"
@@ -2723,7 +2723,7 @@
   {
     "speciesId": "aggron",
     "speciesName": "Aggron",
-    "rank": 281,
+    "rank": "F",
     "types": [
       "Steel",
       "Rock"
@@ -2733,7 +2733,7 @@
   {
     "speciesId": "lapras_shadow",
     "speciesName": "Shadow Lapras",
-    "rank": 282,
+    "rank": "F",
     "types": [
       "Water",
       "Ice"
@@ -2743,7 +2743,7 @@
   {
     "speciesId": "crustle_shadow",
     "speciesName": "Shadow Crustle",
-    "rank": 283,
+    "rank": "F",
     "types": [
       "Bug",
       "Rock"
@@ -2753,7 +2753,7 @@
   {
     "speciesId": "swampert",
     "speciesName": "Swampert",
-    "rank": 284,
+    "rank": "F",
     "types": [
       "Water",
       "Ground"
@@ -2763,7 +2763,7 @@
   {
     "speciesId": "regirock_shadow",
     "speciesName": "Shadow Regirock",
-    "rank": 285,
+    "rank": "F",
     "types": [
       "Rock"
     ],
@@ -2772,7 +2772,7 @@
   {
     "speciesId": "zoroark",
     "speciesName": "Zoroark",
-    "rank": 286,
+    "rank": "F",
     "types": [
       "Dark"
     ],
@@ -2781,7 +2781,7 @@
   {
     "speciesId": "donphan",
     "speciesName": "Donphan",
-    "rank": 287,
+    "rank": "F",
     "types": [
       "Ground"
     ],
@@ -2790,7 +2790,7 @@
   {
     "speciesId": "muk_alolan_shadow",
     "speciesName": "Shadow Alolan Muk",
-    "rank": 288,
+    "rank": "F",
     "types": [
       "Poison",
       "Dark"
@@ -2800,7 +2800,7 @@
   {
     "speciesId": "gardevoir",
     "speciesName": "Gardevoir",
-    "rank": 289,
+    "rank": "F",
     "types": [
       "Psychic",
       "Fairy"
@@ -2810,7 +2810,7 @@
   {
     "speciesId": "vikavolt",
     "speciesName": "Vikavolt",
-    "rank": 290,
+    "rank": "F",
     "types": [
       "Bug",
       "Electric"
@@ -2820,7 +2820,7 @@
   {
     "speciesId": "sandslash_shadow",
     "speciesName": "Shadow Sandslash",
-    "rank": 291,
+    "rank": "F",
     "types": [
       "Ground"
     ],
@@ -2829,7 +2829,7 @@
   {
     "speciesId": "articuno",
     "speciesName": "Articuno",
-    "rank": 292,
+    "rank": "F",
     "types": [
       "Ice",
       "Flying"
@@ -2839,7 +2839,7 @@
   {
     "speciesId": "togekiss",
     "speciesName": "Togekiss",
-    "rank": 293,
+    "rank": "F",
     "types": [
       "Fairy",
       "Flying"
@@ -2849,7 +2849,7 @@
   {
     "speciesId": "braviary",
     "speciesName": "Braviary",
-    "rank": 294,
+    "rank": "F",
     "types": [
       "Normal",
       "Flying"
@@ -2859,7 +2859,7 @@
   {
     "speciesId": "charizard",
     "speciesName": "Charizard",
-    "rank": 295,
+    "rank": "F",
     "types": [
       "Fire",
       "Flying"
@@ -2869,7 +2869,7 @@
   {
     "speciesId": "sharpedo_shadow",
     "speciesName": "Shadow Sharpedo",
-    "rank": 296,
+    "rank": "F",
     "types": [
       "Water",
       "Dark"
@@ -2879,7 +2879,7 @@
   {
     "speciesId": "deoxys",
     "speciesName": "Deoxys",
-    "rank": 297,
+    "rank": "F",
     "types": [
       "Psychic"
     ],
@@ -2888,7 +2888,7 @@
   {
     "speciesId": "zacian",
     "speciesName": "Zacian (Hero of Many Battles)",
-    "rank": 298,
+    "rank": "F",
     "types": [
       "Fairy"
     ],
@@ -2897,7 +2897,7 @@
   {
     "speciesId": "lycanroc",
     "speciesName": "Lycanroc (Dusk Form)",
-    "rank": 299,
+    "rank": "F",
     "types": [
       "Rock"
     ],
@@ -2906,7 +2906,7 @@
   {
     "speciesId": "hitmonlee_shadow",
     "speciesName": "Shadow Hitmonlee",
-    "rank": 300,
+    "rank": "F",
     "types": [
       "Fighting"
     ],
