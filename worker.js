@@ -68,7 +68,11 @@ async function handlePokemonSearch(chatId, query) {
       { name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
     ];
     const fetchPromises = leagues.map(league => 
-      fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}`, { cf: { cacheTtl: 86400 } })
+      //fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}`, { cf: { cacheTtl: 86400 } })
+      //  .then(res => res.ok ? res.json() : null)
+      
+      // 在 URL 後面加上 cacheBuster 來避免讀取到舊的快取資料
+      fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}?${cacheBuster}`, { cf: { cacheTtl: 86400 } })
         .then(res => res.ok ? res.json() : null)
     );
     const allLeagueRanks = await Promise.all(fetchPromises);
