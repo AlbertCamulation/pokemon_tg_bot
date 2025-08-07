@@ -4,1749 +4,1749 @@
     "speciesName": "Blissey",
     "rank": "S",
     "types": [],
-    "cp": "83.8k"
+    "score": "83.8"
   },
   {
     "speciesId": "chansey",
     "speciesName": "Chansey",
     "rank": "S",
     "types": [],
-    "cp": "62.3k"
+    "score": "62.3"
   },
   {
     "speciesId": "gigantamax_snorlax",
     "speciesName": "Gigantamax Snorlax",
     "rank": "A+",
     "types": [],
-    "cp": "55.8k"
+    "score": "55.8"
   },
   {
     "speciesId": "snorlax",
     "speciesName": "Snorlax",
     "rank": "A+",
     "types": [],
-    "cp": "55.8k"
+    "score": "55.8"
   },
   {
     "speciesId": "umbreon",
     "speciesName": "Umbreon",
     "rank": "A+",
     "types": [],
-    "cp": "51.8k"
+    "score": "51.8"
   },
   {
     "speciesId": "avalugg",
     "speciesName": "Avalugg",
     "rank": "A+",
     "types": [],
-    "cp": "51.8k"
+    "score": "51.8"
   },
   {
     "speciesId": "hisuian_avalugg",
     "speciesName": "Hisuian Avalugg",
     "rank": "D",
     "types": [],
-    "cp": "51.4k"
+    "score": "51.4"
   },
   {
     "speciesId": "melmetal",
     "speciesName": "Melmetal",
     "rank": "A+",
     "types": [],
-    "cp": "50.2k"
+    "score": "50.2"
   },
   {
     "speciesId": "ursaluna",
     "speciesName": "Ursaluna",
     "rank": "A+",
     "types": [],
-    "cp": "50.1k"
+    "score": "50.1"
   },
   {
     "speciesId": "goodra",
     "speciesName": "Goodra",
     "rank": "A+",
     "types": [],
-    "cp": "50.1k"
+    "score": "50.1"
   },
   {
     "speciesId": "mandibuzz",
     "speciesName": "Mandibuzz",
     "rank": "A+",
     "types": [],
-    "cp": "49.6k"
+    "score": "49.6"
   },
   {
     "speciesId": "steelix",
     "speciesName": "Steelix",
     "rank": "A+",
     "types": [],
-    "cp": "49.2k"
+    "score": "49.2"
   },
   {
     "speciesId": "gigantamax_lapras",
     "speciesName": "Gigantamax Lapras",
     "rank": "A+",
     "types": [],
-    "cp": "48.2k"
+    "score": "48.2"
   },
   {
     "speciesId": "lapras",
     "speciesName": "Lapras",
     "rank": "A+",
     "types": [],
-    "cp": "48.2k"
+    "score": "48.2"
   },
   {
     "speciesId": "rhyperior",
     "speciesName": "Rhyperior",
     "rank": "A+",
     "types": [],
-    "cp": "47.7k"
+    "score": "47.7"
   },
   {
     "speciesId": "milotic",
     "speciesName": "Milotic",
     "rank": "A+",
     "types": [],
-    "cp": "47.3k"
+    "score": "47.3"
   },
   {
     "speciesId": "slaking",
     "speciesName": "Slaking",
     "rank": "A+",
     "types": [],
-    "cp": "47.1k"
+    "score": "47.1"
   },
   {
     "speciesId": "tyranitar",
     "speciesName": "Tyranitar",
     "rank": "A+",
     "types": [],
-    "cp": "46.6k"
+    "score": "46.6"
   },
   {
     "speciesId": "garchomp",
     "speciesName": "Garchomp",
     "rank": "A+",
     "types": [],
-    "cp": "46.1k"
+    "score": "46.1"
   },
   {
     "speciesId": "relicanth",
     "speciesName": "Relicanth",
     "rank": "D",
     "types": [],
-    "cp": "45.7k"
+    "score": "45.7"
   },
   {
     "speciesId": "kingambit",
     "speciesName": "Kingambit",
     "rank": "A+",
     "types": [],
-    "cp": "45.7k"
+    "score": "45.7"
   },
   {
     "speciesId": "hippowdon",
     "speciesName": "Hippowdon",
     "rank": "A+",
     "types": [],
-    "cp": "45.6k"
+    "score": "45.6"
   },
   {
     "speciesId": "florges",
     "speciesName": "Florges",
     "rank": "A+",
     "types": [],
-    "cp": "45.4k"
+    "score": "45.4"
   },
   {
     "speciesId": "vaporeon",
     "speciesName": "Vaporeon",
     "rank": "A+",
     "types": [],
-    "cp": "44.6k"
+    "score": "44.6"
   },
   {
     "speciesId": "bastiodon",
     "speciesName": "Bastiodon",
     "rank": "A+",
     "types": [],
-    "cp": "44.3k"
+    "score": "44.3"
   },
   {
     "speciesId": "sylveon",
     "speciesName": "Sylveon",
     "rank": "A",
     "types": [],
-    "cp": "44.3k"
+    "score": "44.3"
   },
   {
     "speciesId": "alomomola",
     "speciesName": "Alomomola",
     "rank": "A",
     "types": [],
-    "cp": "44.3k"
+    "score": "44.3"
   },
   {
     "speciesId": "aggron",
     "speciesName": "Aggron",
     "rank": "A",
     "types": [],
-    "cp": "44.2k"
+    "score": "44.2"
   },
   {
     "speciesId": "lickilicky",
     "speciesName": "Lickilicky",
     "rank": "A",
     "types": [],
-    "cp": "43.8k"
+    "score": "43.8"
   },
   {
     "speciesId": "kommo_o",
     "speciesName": "Kommo-o",
     "rank": "A",
     "types": [],
-    "cp": "43.4k"
+    "score": "43.4"
   },
   {
     "speciesId": "metagross",
     "speciesName": "Metagross",
     "rank": "A",
     "types": [],
-    "cp": "43.3k"
+    "score": "43.3"
   },
   {
     "speciesId": "aurorus",
     "speciesName": "Aurorus",
     "rank": "A",
     "types": [],
-    "cp": "43.2k"
+    "score": "43.2"
   },
   {
     "speciesId": "annihilape",
     "speciesName": "Annihilape",
     "rank": "D",
     "types": [],
-    "cp": "43.1k"
+    "score": "43.1"
   },
   {
     "speciesId": "togekiss",
     "speciesName": "Togekiss",
     "rank": "A",
     "types": [],
-    "cp": "43k"
+    "score": "43"
   },
   {
     "speciesId": "cetitan",
     "speciesName": "Cetitan",
     "rank": "A",
     "types": [],
-    "cp": "42.7k"
+    "score": "42.7"
   },
   {
     "speciesId": "probopass",
     "speciesName": "Probopass",
     "rank": "A",
     "types": [],
-    "cp": "42.6k"
+    "score": "42.6"
   },
   {
     "speciesId": "walrein",
     "speciesName": "Walrein",
     "rank": "A",
     "types": [],
-    "cp": "42.6k"
+    "score": "42.6"
   },
   {
     "speciesId": "corviknight",
     "speciesName": "Corviknight",
     "rank": "A",
     "types": [],
-    "cp": "42.4k"
+    "score": "42.4"
   },
   {
     "speciesId": "aegislash_shield_forme",
     "speciesName": "Aegislash Shield Forme",
     "rank": "A",
     "types": [],
-    "cp": "42.2k"
+    "score": "42.2"
   },
   {
     "speciesId": "musharna",
     "speciesName": "Musharna",
     "rank": "A",
     "types": [],
-    "cp": "42k"
+    "score": "42"
   },
   {
     "speciesId": "clodsire",
     "speciesName": "Clodsire",
     "rank": "A",
     "types": [],
-    "cp": "41.8k"
+    "score": "41.8"
   },
   {
     "speciesId": "miltank",
     "speciesName": "Miltank",
     "rank": "A",
     "types": [],
-    "cp": "41.7k"
+    "score": "41.7"
   },
   {
     "speciesId": "chesnaught",
     "speciesName": "Chesnaught",
     "rank": "A",
     "types": [],
-    "cp": "41.6k"
+    "score": "41.6"
   },
   {
     "speciesId": "throh",
     "speciesName": "Throh",
     "rank": "A",
     "types": [],
-    "cp": "41.6k"
+    "score": "41.6"
   },
   {
     "speciesId": "cryogonal",
     "speciesName": "Cryogonal",
     "rank": "A",
     "types": [],
-    "cp": "41.4k"
+    "score": "41.4"
   },
   {
     "speciesId": "tangrowth",
     "speciesName": "Tangrowth",
     "rank": "A",
     "types": [],
-    "cp": "41.4k"
+    "score": "41.4"
   },
   {
     "speciesId": "dragonite",
     "speciesName": "Dragonite",
     "rank": "A",
     "types": [],
-    "cp": "41.4k"
+    "score": "41.4"
   },
   {
     "speciesId": "skeledirge",
     "speciesName": "Skeledirge",
     "rank": "A",
     "types": [],
-    "cp": "41.3k"
+    "score": "41.3"
   },
   {
     "speciesId": "obstagoon",
     "speciesName": "Obstagoon",
     "rank": "A",
     "types": [],
-    "cp": "41.1k"
+    "score": "41.1"
   },
   {
     "speciesId": "stunfisk",
     "speciesName": "Stunfisk",
     "rank": "A",
     "types": [],
-    "cp": "41k"
+    "score": "41"
   },
   {
     "speciesId": "galarian_stunfisk",
     "speciesName": "Galarian Stunfisk",
     "rank": "B",
     "types": [],
-    "cp": "41k"
+    "score": "41"
   },
   {
     "speciesId": "stonjourner",
     "speciesName": "Stonjourner",
     "rank": "B",
     "types": [],
-    "cp": "41k"
+    "score": "41"
   },
   {
     "speciesId": "golisopod",
     "speciesName": "Golisopod",
     "rank": "B",
     "types": [],
-    "cp": "40.9k"
+    "score": "40.9"
   },
   {
     "speciesId": "oinkologne",
     "speciesName": "Oinkologne (Female)",
     "rank": "B",
     "types": [],
-    "cp": "40.7k"
+    "score": "40.7"
   },
   {
     "speciesId": "torterra",
     "speciesName": "Torterra",
     "rank": "B",
     "types": [],
-    "cp": "40.6k"
+    "score": "40.6"
   },
   {
     "speciesId": "greedent",
     "speciesName": "Greedent",
     "rank": "B",
     "types": [],
-    "cp": "40.6k"
+    "score": "40.6"
   },
   {
     "speciesId": "wobbuffet",
     "speciesName": "Wobbuffet",
     "rank": "B",
     "types": [],
-    "cp": "40.5k"
+    "score": "40.5"
   },
   {
     "speciesId": "gliscor",
     "speciesName": "Gliscor",
     "rank": "B",
     "types": [],
-    "cp": "40.2k"
+    "score": "40.2"
   },
   {
     "speciesId": "gyarados",
     "speciesName": "Gyarados",
     "rank": "B",
     "types": [],
-    "cp": "40.2k"
+    "score": "40.2"
   },
   {
     "speciesId": "muk",
     "speciesName": "Muk",
     "rank": "B",
     "types": [],
-    "cp": "40.1k"
+    "score": "40.1"
   },
   {
     "speciesId": "muk_alolan",
     "speciesName": "Alolan Muk",
     "rank": "B",
     "types": [],
-    "cp": "40.1k"
+    "score": "40.1"
   },
   {
     "speciesId": "muk_alolan_shadow",
     "speciesName": "Shadow Alolan Muk",
     "rank": "B",
     "types": [],
-    "cp": "40.1k"
+    "score": "40.1"
   },
   {
     "speciesId": "jellicent",
     "speciesName": "Jellicent",
     "rank": "B",
     "types": [],
-    "cp": "40k"
+    "score": "40"
   },
   {
     "speciesId": "jellicent",
     "speciesName": "Jellicent (Female)",
     "rank": "B",
     "types": [],
-    "cp": "40k"
+    "score": "40"
   },
   {
     "speciesId": "ferrothorn",
     "speciesName": "Ferrothorn",
     "rank": "B",
     "types": [],
-    "cp": "39.9k"
+    "score": "39.9"
   },
   {
     "speciesId": "rhydon",
     "speciesName": "Rhydon",
     "rank": "B",
     "types": [],
-    "cp": "39.8k"
+    "score": "39.8"
   },
   {
     "speciesId": "gigalith",
     "speciesName": "Gigalith",
     "rank": "B",
     "types": [],
-    "cp": "39.8k"
+    "score": "39.8"
   },
   {
     "speciesId": "oranguru",
     "speciesName": "Oranguru",
     "rank": "B",
     "types": [],
-    "cp": "39.7k"
+    "score": "39.7"
   },
   {
     "speciesId": "tentacruel",
     "speciesName": "Tentacruel",
     "rank": "B",
     "types": [],
-    "cp": "39.7k"
+    "score": "39.7"
   },
   {
     "speciesId": "toedscruel",
     "speciesName": "Toedscruel",
     "rank": "B",
     "types": [],
-    "cp": "39.7k"
+    "score": "39.7"
   },
   {
     "speciesId": "hydreigon",
     "speciesName": "Hydreigon",
     "rank": "B",
     "types": [],
-    "cp": "39.7k"
+    "score": "39.7"
   },
   {
     "speciesId": "gourgeist",
     "speciesName": "Gourgeist (Super size)",
     "rank": "B",
     "types": [],
-    "cp": "39.6k"
+    "score": "39.6"
   },
   {
     "speciesId": "bellibolt",
     "speciesName": "Bellibolt",
     "rank": "B",
     "types": [],
-    "cp": "39.6k"
+    "score": "39.6"
   },
   {
     "speciesId": "swampert",
     "speciesName": "Swampert",
     "rank": "B",
     "types": [],
-    "cp": "39.4k"
+    "score": "39.4"
   },
   {
     "speciesId": "bouffalant",
     "speciesName": "Bouffalant",
     "rank": "B",
     "types": [],
-    "cp": "39.3k"
+    "score": "39.3"
   },
   {
     "speciesId": "carbink",
     "speciesName": "Carbink",
     "rank": "B",
     "types": [],
-    "cp": "39k"
+    "score": "39"
   },
   {
     "speciesId": "gigantamax_blastoise",
     "speciesName": "Gigantamax Blastoise",
     "rank": "B",
     "types": [],
-    "cp": "38.9k"
+    "score": "38.9"
   },
   {
     "speciesId": "blastoise",
     "speciesName": "Blastoise",
     "rank": "B",
     "types": [],
-    "cp": "38.9k"
+    "score": "38.9"
   },
   {
     "speciesId": "slowbro",
     "speciesName": "Slowbro",
     "rank": "B",
     "types": [],
-    "cp": "38.9k"
+    "score": "38.9"
   },
   {
     "speciesId": "slowking",
     "speciesName": "Slowking",
     "rank": "B",
     "types": [],
-    "cp": "38.9k"
+    "score": "38.9"
   },
   {
     "speciesId": "galarian_slowking",
     "speciesName": "Galarian Slowking",
     "rank": "B",
     "types": [],
-    "cp": "38.9k"
+    "score": "38.9"
   },
   {
     "speciesId": "tinkaton",
     "speciesName": "Tinkaton",
     "rank": "B",
     "types": [],
-    "cp": "38.8k"
+    "score": "38.8"
   },
   {
     "speciesId": "cradily",
     "speciesName": "Cradily",
     "rank": "B",
     "types": [],
-    "cp": "38.8k"
+    "score": "38.8"
   },
   {
     "speciesId": "gogoat",
     "speciesName": "Gogoat",
     "rank": "B",
     "types": [],
-    "cp": "38.7k"
+    "score": "38.7"
   },
   {
     "speciesId": "baxcalibur",
     "speciesName": "Baxcalibur",
     "rank": "B",
     "types": [],
-    "cp": "38.5k"
+    "score": "38.5"
   },
   {
     "speciesId": "kangaskhan",
     "speciesName": "Kangaskhan",
     "rank": "B",
     "types": [],
-    "cp": "38.4k"
+    "score": "38.4"
   },
   {
     "speciesId": "meganium",
     "speciesName": "Meganium",
     "rank": "B",
     "types": [],
-    "cp": "38.4k"
+    "score": "38.4"
   },
   {
     "speciesId": "gholdengo",
     "speciesName": "Gholdengo",
     "rank": "B",
     "types": [],
-    "cp": "38.4k"
+    "score": "38.4"
   },
   {
     "speciesId": "donphan",
     "speciesName": "Donphan",
     "rank": "B",
     "types": [],
-    "cp": "38.3k"
+    "score": "38.3"
   },
   {
     "speciesId": "hypno",
     "speciesName": "Hypno",
     "rank": "B",
     "types": [],
-    "cp": "38.2k"
+    "score": "38.2"
   },
   {
     "speciesId": "poliwrath",
     "speciesName": "Poliwrath",
     "rank": "B",
     "types": [],
-    "cp": "38.1k"
+    "score": "38.1"
   },
   {
     "speciesId": "gigantamax_rillaboom",
     "speciesName": "Gigantamax Rillaboom",
     "rank": "B",
     "types": [],
-    "cp": "37.8k"
+    "score": "37.8"
   },
   {
     "speciesId": "incineroar",
     "speciesName": "Incineroar",
     "rank": "B",
     "types": [],
-    "cp": "37.8k"
+    "score": "37.8"
   },
   {
     "speciesId": "rillaboom",
     "speciesName": "Rillaboom",
     "rank": "B",
     "types": [],
-    "cp": "37.8k"
+    "score": "37.8"
   },
   {
     "speciesId": "golem",
     "speciesName": "Golem",
     "rank": "B",
     "types": [],
-    "cp": "37.6k"
+    "score": "37.6"
   },
   {
     "speciesId": "golem_alolan",
     "speciesName": "Alolan Golem",
     "rank": "B",
     "types": [],
-    "cp": "37.6k"
+    "score": "37.6"
   },
   {
     "speciesId": "golem_alolan_shadow",
     "speciesName": "Shadow Alolan Golem",
     "rank": "B",
     "types": [],
-    "cp": "37.6k"
+    "score": "37.6"
   },
   {
     "speciesId": "audino",
     "speciesName": "Audino",
     "rank": "B",
     "types": [],
-    "cp": "37.5k"
+    "score": "37.5"
   },
   {
     "speciesId": "volcarona",
     "speciesName": "Volcarona",
     "rank": "B",
     "types": [],
-    "cp": "37.4k"
+    "score": "37.4"
   },
   {
     "speciesId": "toxapex",
     "speciesName": "Toxapex",
     "rank": "B",
     "types": [],
-    "cp": "37.4k"
+    "score": "37.4"
   },
   {
     "speciesId": "gourgeist",
     "speciesName": "Gourgeist (Large size)",
     "rank": "C",
     "types": [],
-    "cp": "37.3k"
+    "score": "37.3"
   },
   {
     "speciesId": "feraligatr",
     "speciesName": "Feraligatr",
     "rank": "C",
     "types": [],
-    "cp": "37.2k"
+    "score": "37.2"
   },
   {
     "speciesId": "forretress",
     "speciesName": "Forretress",
     "rank": "C",
     "types": [],
-    "cp": "37.1k"
+    "score": "37.1"
   },
   {
     "speciesId": "politoed",
     "speciesName": "Politoed",
     "rank": "C",
     "types": [],
-    "cp": "37.1k"
+    "score": "37.1"
   },
   {
     "speciesId": "primarina",
     "speciesName": "Primarina",
     "rank": "C",
     "types": [],
-    "cp": "37k"
+    "score": "37"
   },
   {
     "speciesId": "oinkologne",
     "speciesName": "Oinkologne",
     "rank": "C",
     "types": [],
-    "cp": "37k"
+    "score": "37"
   },
   {
     "speciesId": "araquanid",
     "speciesName": "Araquanid",
     "rank": "C",
     "types": [],
-    "cp": "37k"
+    "score": "37"
   },
   {
     "speciesId": "serperior",
     "speciesName": "Serperior",
     "rank": "C",
     "types": [],
-    "cp": "36.9k"
+    "score": "36.9"
   },
   {
     "speciesId": "tyrantrum",
     "speciesName": "Tyrantrum",
     "rank": "C",
     "types": [],
-    "cp": "36.9k"
+    "score": "36.9"
   },
   {
     "speciesId": "mantine",
     "speciesName": "Mantine",
     "rank": "C",
     "types": [],
-    "cp": "36.8k"
+    "score": "36.8"
   },
   {
     "speciesId": "skarmory",
     "speciesName": "Skarmory",
     "rank": "C",
     "types": [],
-    "cp": "36.8k"
+    "score": "36.8"
   },
   {
     "speciesId": "conkeldurr",
     "speciesName": "Conkeldurr",
     "rank": "C",
     "types": [],
-    "cp": "36.8k"
+    "score": "36.8"
   },
   {
     "speciesId": "lanturn",
     "speciesName": "Lanturn",
     "rank": "C",
     "types": [],
-    "cp": "36.7k"
+    "score": "36.7"
   },
   {
     "speciesId": "bewear",
     "speciesName": "Bewear",
     "rank": "C",
     "types": [],
-    "cp": "36.7k"
+    "score": "36.7"
   },
   {
     "speciesId": "empoleon",
     "speciesName": "Empoleon",
     "rank": "C",
     "types": [],
-    "cp": "36.6k"
+    "score": "36.6"
   },
   {
     "speciesId": "dewgong",
     "speciesName": "Dewgong",
     "rank": "C",
     "types": [],
-    "cp": "36.6k"
+    "score": "36.6"
   },
   {
     "speciesId": "armarouge",
     "speciesName": "Armarouge",
     "rank": "C",
     "types": [],
-    "cp": "36.6k"
+    "score": "36.6"
   },
   {
     "speciesId": "altaria",
     "speciesName": "Altaria",
     "rank": "C",
     "types": [],
-    "cp": "36.4k"
+    "score": "36.4"
   },
   {
     "speciesId": "tropius",
     "speciesName": "Tropius",
     "rank": "C",
     "types": [],
-    "cp": "36.3k"
+    "score": "36.3"
   },
   {
     "speciesId": "salamence",
     "speciesName": "Salamence",
     "rank": "C",
     "types": [],
-    "cp": "36.3k"
+    "score": "36.3"
   },
   {
     "speciesId": "scrafty",
     "speciesName": "Scrafty",
     "rank": "C",
     "types": [],
-    "cp": "36.2k"
+    "score": "36.2"
   },
   {
     "speciesId": "barbaracle",
     "speciesName": "Barbaracle",
     "rank": "C",
     "types": [],
-    "cp": "36.1k"
+    "score": "36.1"
   },
   {
     "speciesId": "stoutland",
     "speciesName": "Stoutland",
     "rank": "C",
     "types": [],
-    "cp": "36k"
+    "score": "36"
   },
   {
     "speciesId": "passimian",
     "speciesName": "Passimian",
     "rank": "C",
     "types": [],
-    "cp": "36k"
+    "score": "36"
   },
   {
     "speciesId": "gigantamax_venusaur",
     "speciesName": "Gigantamax Venusaur",
     "rank": "C",
     "types": [],
-    "cp": "35.9k"
+    "score": "35.9"
   },
   {
     "speciesId": "venusaur",
     "speciesName": "Venusaur",
     "rank": "C",
     "types": [],
-    "cp": "35.9k"
+    "score": "35.9"
   },
   {
     "speciesId": "reuniclus",
     "speciesName": "Reuniclus",
     "rank": "C",
     "types": [],
-    "cp": "35.8k"
+    "score": "35.8"
   },
   {
     "speciesId": "nidoqueen",
     "speciesName": "Nidoqueen",
     "rank": "C",
     "types": [],
-    "cp": "35.8k"
+    "score": "35.8"
   },
   {
     "speciesId": "cofagrigus",
     "speciesName": "Cofagrigus",
     "rank": "C",
     "types": [],
-    "cp": "35.8k"
+    "score": "35.8"
   },
   {
     "speciesId": "runerigus",
     "speciesName": "Runerigus",
     "rank": "C",
     "types": [],
-    "cp": "35.8k"
+    "score": "35.8"
   },
   {
     "speciesId": "swalot",
     "speciesName": "Swalot",
     "rank": "C",
     "types": [],
-    "cp": "35.8k"
+    "score": "35.8"
   },
   {
     "speciesId": "grumpig",
     "speciesName": "Grumpig",
     "rank": "C",
     "types": [],
-    "cp": "35.7k"
+    "score": "35.7"
   },
   {
     "speciesId": "leafeon",
     "speciesName": "Leafeon",
     "rank": "C",
     "types": [],
-    "cp": "35.7k"
+    "score": "35.7"
   },
   {
     "speciesId": "hisuian_arcanine",
     "speciesName": "Hisuian Arcanine",
     "rank": "C",
     "types": [],
-    "cp": "35.6k"
+    "score": "35.6"
   },
   {
     "speciesId": "porygon2",
     "speciesName": "Porygon2",
     "rank": "C",
     "types": [],
-    "cp": "35.6k"
+    "score": "35.6"
   },
   {
     "speciesId": "bronzong",
     "speciesName": "Bronzong",
     "rank": "C",
     "types": [],
-    "cp": "35.6k"
+    "score": "35.6"
   },
   {
     "speciesId": "hisuian_decidueye",
     "speciesName": "Hisuian Decidueye",
     "rank": "C",
     "types": [],
-    "cp": "35.5k"
+    "score": "35.5"
   },
   {
     "speciesId": "claydol",
     "speciesName": "Claydol",
     "rank": "C",
     "types": [],
-    "cp": "35.5k"
+    "score": "35.5"
   },
   {
     "speciesId": "mamoswine",
     "speciesName": "Mamoswine",
     "rank": "C",
     "types": [],
-    "cp": "35.3k"
+    "score": "35.3"
   },
   {
     "speciesId": "appletun",
     "speciesName": "Appletun",
     "rank": "C",
     "types": [],
-    "cp": "35.3k"
+    "score": "35.3"
   },
   {
     "speciesId": "sandslash_alolan",
     "speciesName": "Alolan Sandslash",
     "rank": "C",
     "types": [],
-    "cp": "35.3k"
+    "score": "35.3"
   },
   {
     "speciesId": "sandslash_alolan_shadow",
     "speciesName": "Shadow Alolan Sandslash",
     "rank": "C",
     "types": [],
-    "cp": "35.3k"
+    "score": "35.3"
   },
   {
     "speciesId": "carracosta",
     "speciesName": "Carracosta",
     "rank": "C",
     "types": [],
-    "cp": "35.3k"
+    "score": "35.3"
   },
   {
     "speciesId": "magnezone",
     "speciesName": "Magnezone",
     "rank": "C",
     "types": [],
-    "cp": "35.3k"
+    "score": "35.3"
   },
   {
     "speciesId": "gothitelle",
     "speciesName": "Gothitelle",
     "rank": "C",
     "types": [],
-    "cp": "35.3k"
+    "score": "35.3"
   },
   {
     "speciesId": "crobat",
     "speciesName": "Crobat",
     "rank": "C",
     "types": [],
-    "cp": "35.2k"
+    "score": "35.2"
   },
   {
     "speciesId": "palossand",
     "speciesName": "Palossand",
     "rank": "C",
     "types": [],
-    "cp": "35.2k"
+    "score": "35.2"
   },
   {
     "speciesId": "arboliva",
     "speciesName": "Arboliva",
     "rank": "C",
     "types": [],
-    "cp": "35.2k"
+    "score": "35.2"
   },
   {
     "speciesId": "kingdra",
     "speciesName": "Kingdra",
     "rank": "C",
     "types": [],
-    "cp": "35.1k"
+    "score": "35.1"
   },
   {
     "speciesId": "noctowl",
     "speciesName": "Noctowl",
     "rank": "C",
     "types": [],
-    "cp": "35.1k"
+    "score": "35.1"
   },
   {
     "speciesId": "cloyster",
     "speciesName": "Cloyster",
     "rank": "C",
     "types": [],
-    "cp": "35.1k"
+    "score": "35.1"
   },
   {
     "speciesId": "clefable",
     "speciesName": "Clefable",
     "rank": "C",
     "types": [],
-    "cp": "35k"
+    "score": "35"
   },
   {
     "speciesId": "ampharos",
     "speciesName": "Ampharos",
     "rank": "C",
     "types": [],
-    "cp": "35k"
+    "score": "35"
   },
   {
     "speciesId": "seismitoad",
     "speciesName": "Seismitoad",
     "rank": "C",
     "types": [],
-    "cp": "35k"
+    "score": "35"
   },
   {
     "speciesId": "torkoal",
     "speciesName": "Torkoal",
     "rank": "C",
     "types": [],
-    "cp": "34.9k"
+    "score": "34.9"
   },
   {
     "speciesId": "gastrodon",
     "speciesName": "Gastrodon (East Sea)",
     "rank": "C",
     "types": [],
-    "cp": "34.9k"
+    "score": "34.9"
   },
   {
     "speciesId": "gastrodon",
     "speciesName": "Gastrodon (West Sea)",
     "rank": "C",
     "types": [],
-    "cp": "34.9k"
+    "score": "34.9"
   },
   {
     "speciesId": "dubwool",
     "speciesName": "Dubwool",
     "rank": "C",
     "types": [],
-    "cp": "34.8k"
+    "score": "34.8"
   },
   {
     "speciesId": "drapion",
     "speciesName": "Drapion",
     "rank": "C",
     "types": [],
-    "cp": "34.7k"
+    "score": "34.7"
   },
   {
     "speciesId": "gourgeist",
     "speciesName": "Gourgeist (Average size)",
     "rank": "C",
     "types": [],
-    "cp": "34.7k"
+    "score": "34.7"
   },
   {
     "speciesId": "dragapult",
     "speciesName": "Dragapult",
     "rank": "C",
     "types": [],
-    "cp": "34.7k"
+    "score": "34.7"
   },
   {
     "speciesId": "noivern",
     "speciesName": "Noivern",
     "rank": "C",
     "types": [],
-    "cp": "34.6k"
+    "score": "34.6"
   },
   {
     "speciesId": "amoonguss",
     "speciesName": "Amoonguss",
     "rank": "C",
     "types": [],
-    "cp": "34.6k"
+    "score": "34.6"
   },
   {
     "speciesId": "omastar",
     "speciesName": "Omastar",
     "rank": "C",
     "types": [],
-    "cp": "34.6k"
+    "score": "34.6"
   },
   {
     "speciesId": "hariyama",
     "speciesName": "Hariyama",
     "rank": "C",
     "types": [],
-    "cp": "34.4k"
+    "score": "34.4"
   },
   {
     "speciesId": "crustle",
     "speciesName": "Crustle",
     "rank": "C",
     "types": [],
-    "cp": "34.4k"
+    "score": "34.4"
   },
   {
     "speciesId": "arcanine",
     "speciesName": "Arcanine",
     "rank": "C",
     "types": [],
-    "cp": "34.4k"
+    "score": "34.4"
   },
   {
     "speciesId": "tsareena",
     "speciesName": "Tsareena",
     "rank": "C",
     "types": [],
-    "cp": "34.3k"
+    "score": "34.3"
   },
   {
     "speciesId": "houndstone",
     "speciesName": "Houndstone",
     "rank": "C",
     "types": [],
-    "cp": "34.3k"
+    "score": "34.3"
   },
   {
     "speciesId": "delphox",
     "speciesName": "Delphox",
     "rank": "C",
     "types": [],
-    "cp": "34.2k"
+    "score": "34.2"
   },
   {
     "speciesId": "ceruledge",
     "speciesName": "Ceruledge",
     "rank": "C",
     "types": [],
-    "cp": "34.2k"
+    "score": "34.2"
   },
   {
     "speciesId": "azumarill",
     "speciesName": "Azumarill",
     "rank": "C",
     "types": [],
-    "cp": "34.2k"
+    "score": "34.2"
   },
   {
     "speciesId": "braviary",
     "speciesName": "Braviary",
     "rank": "C",
     "types": [],
-    "cp": "34.2k"
+    "score": "34.2"
   },
   {
     "speciesId": "ninetales_alolan",
     "speciesName": "Alolan Ninetales",
     "rank": "C",
     "types": [],
-    "cp": "34.2k"
+    "score": "34.2"
   },
   {
     "speciesId": "ninetales_alolan_shadow",
     "speciesName": "Shadow Alolan Ninetales",
     "rank": "C",
     "types": [],
-    "cp": "34.2k"
+    "score": "34.2"
   },
   {
     "speciesId": "krookodile",
     "speciesName": "Krookodile",
     "rank": "C",
     "types": [],
-    "cp": "34.1k"
+    "score": "34.1"
   },
   {
     "speciesId": "whiscash",
     "speciesName": "Whiscash",
     "rank": "C",
     "types": [],
-    "cp": "34.1k"
+    "score": "34.1"
   },
   {
     "speciesId": "heracross",
     "speciesName": "Heracross",
     "rank": "C",
     "types": [],
-    "cp": "34k"
+    "score": "34"
   },
   {
     "speciesId": "mr_rime",
     "speciesName": "Mr. Rime",
     "rank": "C",
     "types": [],
-    "cp": "34k"
+    "score": "34"
   },
   {
     "speciesId": "samurott",
     "speciesName": "Samurott",
     "rank": "C",
     "types": [],
-    "cp": "33.9k"
+    "score": "33.9"
   },
   {
     "speciesId": "aromatisse",
     "speciesName": "Aromatisse",
     "rank": "C",
     "types": [],
-    "cp": "33.9k"
+    "score": "33.9"
   },
   {
     "speciesId": "overqwil",
     "speciesName": "Overqwil",
     "rank": "C",
     "types": [],
-    "cp": "33.9k"
+    "score": "33.9"
   },
   {
     "speciesId": "dragalge",
     "speciesName": "Dragalge",
     "rank": "C",
     "types": [],
-    "cp": "33.7k"
+    "score": "33.7"
   },
   {
     "speciesId": "galarian_slowbro",
     "speciesName": "Galarian Slowbro",
     "rank": "C",
     "types": [],
-    "cp": "33.7k"
+    "score": "33.7"
   },
   {
     "speciesId": "bellossom",
     "speciesName": "Bellossom",
     "rank": "C",
     "types": [],
-    "cp": "33.7k"
+    "score": "33.7"
   },
   {
     "speciesId": "shuckle",
     "speciesName": "Shuckle",
     "rank": "C",
     "types": [],
-    "cp": "33.7k"
+    "score": "33.7"
   },
   {
     "speciesId": "ninetales",
     "speciesName": "Ninetales",
     "rank": "C",
     "types": [],
-    "cp": "33.6k"
+    "score": "33.6"
   },
   {
     "speciesId": "munchlax",
     "speciesName": "Munchlax",
     "rank": "C",
     "types": [],
-    "cp": "33.5k"
+    "score": "33.5"
   },
   {
     "speciesId": "ludicolo",
     "speciesName": "Ludicolo",
     "rank": "C",
     "types": [],
-    "cp": "33.4k"
+    "score": "33.4"
   },
   {
     "speciesId": "glaceon",
     "speciesName": "Glaceon",
     "rank": "C",
     "types": [],
-    "cp": "33.4k"
+    "score": "33.4"
   },
   {
     "speciesId": "wyrdeer",
     "speciesName": "Wyrdeer",
     "rank": "C",
     "types": [],
-    "cp": "33.4k"
+    "score": "33.4"
   },
   {
     "speciesId": "turtonator",
     "speciesName": "Turtonator",
     "rank": "C",
     "types": [],
-    "cp": "33.3k"
+    "score": "33.3"
   },
   {
     "speciesId": "decidueye",
     "speciesName": "Decidueye",
     "rank": "C",
     "types": [],
-    "cp": "33.3k"
+    "score": "33.3"
   },
   {
     "speciesId": "klinklang",
     "speciesName": "Klinklang",
     "rank": "C",
     "types": [],
-    "cp": "33.2k"
+    "score": "33.2"
   },
   {
     "speciesId": "hisuian_braviary",
     "speciesName": "Hisuian Braviary",
     "rank": "C",
     "types": [],
-    "cp": "33.2k"
+    "score": "33.2"
   },
   {
     "speciesId": "tauros",
     "speciesName": "Tauros",
     "rank": "C",
     "types": [],
-    "cp": "33.1k"
+    "score": "33.1"
   },
   {
     "speciesId": "jumpluff",
     "speciesName": "Jumpluff",
     "rank": "C",
     "types": [],
-    "cp": "33.1k"
+    "score": "33.1"
   },
   {
     "speciesId": "exeggutor_alolan",
     "speciesName": "Alolan Exeggutor",
     "rank": "C",
     "types": [],
-    "cp": "33k"
+    "score": "33"
   },
   {
     "speciesId": "exeggutor_alolan_shadow",
     "speciesName": "Shadow Alolan Exeggutor",
     "rank": "C",
     "types": [],
-    "cp": "33k"
+    "score": "33"
   },
   {
     "speciesId": "malamar",
     "speciesName": "Malamar",
     "rank": "C",
     "types": [],
-    "cp": "33k"
+    "score": "33"
   },
   {
     "speciesId": "diggersby",
     "speciesName": "Diggersby",
     "rank": "D",
     "types": [],
-    "cp": "30.7k"
+    "score": "30.7"
   },
   {
     "speciesId": "drampa",
     "speciesName": "Drampa",
     "rank": "D",
     "types": [],
-    "cp": "30.5k"
+    "score": "30.5"
   },
   {
     "speciesId": "trevenant",
     "speciesName": "Trevenant",
     "rank": "D",
     "types": [],
-    "cp": "30.5k"
+    "score": "30.5"
   },
   {
     "speciesId": "hisuian_typhlosion",
     "speciesName": "Hisuian Typhlosion",
     "rank": "D",
     "types": [],
-    "cp": "30.4k"
+    "score": "30.4"
   },
   {
     "speciesId": "skuntank",
     "speciesName": "Skuntank",
     "rank": "D",
     "types": [],
-    "cp": "30.4k"
+    "score": "30.4"
   },
   {
     "speciesId": "sudowoodo",
     "speciesName": "Sudowoodo",
     "rank": "D",
     "types": [],
-    "cp": "30.3k"
+    "score": "30.3"
   },
   {
     "speciesId": "vileplume",
     "speciesName": "Vileplume",
     "rank": "D",
     "types": [],
-    "cp": "30.2k"
+    "score": "30.2"
   },
   {
     "speciesId": "furfrou",
     "speciesName": "Furfrou",
     "rank": "D",
     "types": [],
-    "cp": "30.2k"
+    "score": "30.2"
   },
   {
     "speciesId": "crabominable",
     "speciesName": "Crabominable",
     "rank": "D",
     "types": [],
-    "cp": "30.2k"
+    "score": "30.2"
   },
   {
     "speciesId": "aerodactyl",
     "speciesName": "Aerodactyl",
     "rank": "D",
     "types": [],
-    "cp": "30.2k"
+    "score": "30.2"
   },
   {
     "speciesId": "wailord",
     "speciesName": "Wailord",
     "rank": "D",
     "types": [],
-    "cp": "30.2k"
+    "score": "30.2"
   },
   {
     "speciesId": "eelektross",
     "speciesName": "Eelektross",
     "rank": "D",
     "types": [],
-    "cp": "30.1k"
+    "score": "30.1"
   },
   {
     "speciesId": "lycanroc",
     "speciesName": "Lycanroc (Midnight Form)",
     "rank": "D",
     "types": [],
-    "cp": "30.1k"
+    "score": "30.1"
   },
   {
     "speciesId": "pidgeot",
     "speciesName": "Pidgeot",
     "rank": "D",
     "types": [],
-    "cp": "30k"
+    "score": "30"
   },
   {
     "speciesId": "sneasler",
     "speciesName": "Sneasler",
     "rank": "D",
     "types": [],
-    "cp": "30k"
+    "score": "30"
   },
   {
     "speciesId": "frost_rotom",
     "speciesName": "Frost Rotom",
     "rank": "D",
     "types": [],
-    "cp": "30k"
+    "score": "30"
   },
   {
     "speciesId": "heat_rotom",
     "speciesName": "Heat Rotom",
     "rank": "D",
     "types": [],
-    "cp": "30k"
+    "score": "30"
   },
   {
     "speciesId": "mow_rotom",
     "speciesName": "Mow Rotom",
     "rank": "D",
     "types": [],
-    "cp": "30k"
+    "score": "30"
   },
   {
     "speciesId": "wash_rotom",
     "speciesName": "Wash Rotom",
     "rank": "D",
     "types": [],
-    "cp": "30k"
+    "score": "30"
   },
   {
     "speciesId": "gligar",
     "speciesName": "Gligar",
     "rank": "D",
     "types": [],
-    "cp": "30k"
+    "score": "30"
   },
   {
     "speciesId": "kleavor",
     "speciesName": "Kleavor",
     "rank": "D",
     "types": [],
-    "cp": "29.9k"
+    "score": "29.9"
   },
   {
     "speciesId": "meowstic",
     "speciesName": "Meowstic",
     "rank": "D",
     "types": [],
-    "cp": "29.9k"
+    "score": "29.9"
   },
   {
     "speciesId": "meowstic",
     "speciesName": "Meowstic (Female)",
     "rank": "D",
     "types": [],
-    "cp": "29.9k"
+    "score": "29.9"
   },
   {
     "speciesId": "comfey",
     "speciesName": "Comfey",
     "rank": "D",
     "types": [],
-    "cp": "29.9k"
+    "score": "29.9"
   },
   {
     "speciesId": "leavanny",
     "speciesName": "Leavanny",
     "rank": "D",
     "types": [],
-    "cp": "29.9k"
+    "score": "29.9"
   },
   {
     "speciesId": "ursaring",
     "speciesName": "Ursaring",
     "rank": "D",
     "types": [],
-    "cp": "29.8k"
+    "score": "29.8"
   },
   {
     "speciesId": "pyroar",
     "speciesName": "Pyroar",
     "rank": "D",
     "types": [],
-    "cp": "29.8k"
+    "score": "29.8"
   },
   {
     "speciesId": "pyroar",
     "speciesName": "Pyroar (Female)",
     "rank": "D",
     "types": [],
-    "cp": "29.8k"
+    "score": "29.8"
   },
   {
     "speciesId": "nidoking",
     "speciesName": "Nidoking",
     "rank": "D",
     "types": [],
-    "cp": "29.8k"
+    "score": "29.8"
   },
   {
     "speciesId": "clawitzer",
     "speciesName": "Clawitzer",
     "rank": "D",
     "types": [],
-    "cp": "29.8k"
+    "score": "29.8"
   },
   {
     "speciesId": "sliggoo",
     "speciesName": "Sliggoo",
     "rank": "D",
     "types": [],
-    "cp": "29.7k"
+    "score": "29.7"
   },
   {
     "speciesId": "porygon_z",
     "speciesName": "Porygon-Z",
     "rank": "D",
     "types": [],
-    "cp": "29.7k"
+    "score": "29.7"
   },
   {
     "speciesId": "pinsir",
     "speciesName": "Pinsir",
     "rank": "D",
     "types": [],
-    "cp": "29.7k"
+    "score": "29.7"
   },
   {
     "speciesId": "jolteon",
     "speciesName": "Jolteon",
     "rank": "D",
     "types": [],
-    "cp": "29.7k"
+    "score": "29.7"
   },
   {
     "speciesId": "luxray",
     "speciesName": "Luxray",
     "rank": "D",
     "types": [],
-    "cp": "29.6k"
+    "score": "29.6"
   },
   {
     "speciesId": "bombirdier",
     "speciesName": "Bombirdier",
     "rank": "D",
     "types": [],
-    "cp": "29.6k"
+    "score": "29.6"
   },
   {
     "speciesId": "electivire",
     "speciesName": "Electivire",
     "rank": "D",
     "types": [],
-    "cp": "29.5k"
+    "score": "29.5"
   },
   {
     "speciesId": "beheeyem",
     "speciesName": "Beheeyem",
     "rank": "D",
     "types": [],
-    "cp": "29.5k"
+    "score": "29.5"
   },
   {
     "speciesId": "weavile",
     "speciesName": "Weavile",
     "rank": "D",
     "types": [],
-    "cp": "29.4k"
+    "score": "29.4"
   },
   {
     "speciesId": "sigilyph",
     "speciesName": "Sigilyph",
     "rank": "D",
     "types": [],
-    "cp": "29.4k"
+    "score": "29.4"
   },
   {
     "speciesId": "kecleon",
     "speciesName": "Kecleon",
     "rank": "D",
     "types": [],
-    "cp": "29.3k"
+    "score": "29.3"
   },
   {
     "speciesId": "polteageist",
     "speciesName": "Polteageist",
     "rank": "D",
     "types": [],
-    "cp": "29.3k"
+    "score": "29.3"
   },
   {
     "speciesId": "polteageist",
     "speciesName": "Polteageist (Antique)",
     "rank": "D",
     "types": [],
-    "cp": "29.3k"
+    "score": "29.3"
   },
   {
     "speciesId": "polteageist",
     "speciesName": "Polteageist (Phony)",
     "rank": "D",
     "types": [],
-    "cp": "29.3k"
+    "score": "29.3"
   },
   {
     "speciesId": "scyther",
     "speciesName": "Scyther",
     "rank": "D",
     "types": [],
-    "cp": "29.2k"
+    "score": "29.2"
   },
   {
     "speciesId": "flareon",
     "speciesName": "Flareon",
     "rank": "D",
     "types": [],
-    "cp": "29.2k"
+    "score": "29.2"
   },
   {
     "speciesId": "vikavolt",
     "speciesName": "Vikavolt",
     "rank": "D",
     "types": [],
-    "cp": "29.1k"
+    "score": "29.1"
   },
   {
     "speciesId": "sceptile",
     "speciesName": "Sceptile",
     "rank": "D",
     "types": [],
-    "cp": "29.1k"
+    "score": "29.1"
   },
   {
     "speciesId": "lurantis",
     "speciesName": "Lurantis",
     "rank": "D",
     "types": [],
-    "cp": "29.1k"
+    "score": "29.1"
   },
   {
     "speciesId": "mismagius",
     "speciesName": "Mismagius",
     "rank": "D",
     "types": [],
-    "cp": "29k"
+    "score": "29k"
   }
 ]
