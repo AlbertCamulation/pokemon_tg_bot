@@ -118,11 +118,27 @@ async function handlePokemonSearch(chatId, query) {
  * 根據排名給予評價的函式
  */
 function getPokemonRating(rank) {
-  if (rank <= 10) return "🥇白金";
-  if (rank <= 25) return "🥇金";
-  if (rank <= 50) return "🥈銀";
-  if (rank <= 100) return "🥉銅";
-  return "垃圾";
+  if (typeof rank === 'number' && !isNaN(rank)) {
+    if (rank <= 10) return "🥇白金";
+    if (rank <= 25) return "🥇金";
+    if (rank <= 50) return "🥈銀";
+    if (rank <= 100) return "🥉銅";
+    return "垃圾";
+  }
+  
+  // 如果不是數字，則當作文字處理
+  if (typeof rank === 'string') {
+    const ratingMap = {
+      "S": "🥇白金",
+      "A＋": "🥇金",
+      "A": "🥈銀",
+      "B": "🥉銅",
+      "C": "🥉銅",
+      "D": "🥉銅"
+    };
+    // 使用 .get() 的方式來查找，如果找不到就回傳預設值
+    return ratingMap[rank] || "垃圾";
+  }
 }
 
 
