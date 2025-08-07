@@ -64,7 +64,7 @@ async function handlePokemonSearch(chatId, query) {
       { name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
       { name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
       { name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
-      //{ name: "最佳攻擊", cp: "10000", path: "data/rankings_attack_tier.json" },
+      { name: "最佳攻擊", cp: "10000", path: "data/rankings_attack_tier.json" },
       { name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
     ];
     const fetchPromises = leagues.map(league => 
