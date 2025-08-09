@@ -69,7 +69,6 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       let typesDisplay = '';
       let cpDisplay = '';
       
-      // 處理不同的排名資料結構
       if (pokemon.rank) { // PvPoke 結構
         rankDisplay = `#${pokemon.rank}`;
       } else { // PogoHub 結構
@@ -84,7 +83,10 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
         cpDisplay = ` CP: ${pokemon.cp}`;
       }
       
-      replyMessage += `${rankDisplay} ${pokemon.speciesName} ${typesDisplay}${cpDisplay}\n`;
+      let rating = getPokemonRating(pokemon.rank || pokemon.tier);
+      let score = pokemon.score && typeof pokemon.score === 'number' ? `(${pokemon.score.toFixed(2)})` : '';
+      
+      replyMessage += `${rankDisplay} ${pokemon.speciesName} ${typesDisplay}${cpDisplay} ${score} - ${rating}\n`;
     });
 
     return sendMessage(chatId, replyMessage.trim(), 'Markdown');
@@ -119,7 +121,6 @@ async function handlePokemonSearch(chatId, query) {
     const matchingIds = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
     const idToNameMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
-    // 這裡的 leagues 列表已經更新為包含所有命令
     const fetchPromises = leagues.map(league =>
       fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}?${cacheBuster}`, { cf: { cacheTtl: 86400 } })
         .then(res => res.ok ? res.json() : null)
@@ -137,10 +138,12 @@ async function handlePokemonSearch(chatId, query) {
       rankings.forEach((pokemon, rankIndex) => {
         if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
           resultsInThisLeague.push({
-            rank: pokemon.rank || rankIndex + 1, // 如果沒有 rank 欄位，則手動生成
-            score: pokemon.score || pokemon.cp || 'N/A', // 處理不同資料來源的數值
+            rank: pokemon.rank || rankIndex + 1,
+            score: pokemon.score || pokemon.cp || 'N/A',
             speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
             types: pokemon.types,
+            tier: pokemon.tier, // Go Hub tier
+            cp: pokemon.cp, // Go Hub cp
           });
         }
       });
@@ -149,16 +152,19 @@ async function handlePokemonSearch(chatId, query) {
         foundAnyResults = true;
         replyMessage += `\n*${league.name} (${league.cp}):*\n`;
         resultsInThisLeague.forEach(p => {
-          const rating = getPokemonRating(p.rank || p.tier); // 假設有 tier 欄位
-          const score = p.score && typeof p.score === 'number' ? `(${p.score.toFixed(2)})` : '';
-          const cp = p.cp ? ` (${p.cp})` : '';
-
-          if (p.rank) { // PvPoke 類型的資料
-            replyMessage += `${p.speciesName} #${p.rank} ${score} - ${getPokemonRating(p.rank)}\n`;
-          } else { // Go Hub 類型的資料
-            const tier = p.tier || 'N/A';
-            replyMessage += `${p.speciesName} (${tier})${cp} - ${getPokemonRating(tier)}\n`;
+          let rankDisplay = '';
+          if (p.rank && typeof p.rank === 'number') {
+            rankDisplay = `#${p.rank}`;
+          } else {
+            rankDisplay = p.tier ? `(${p.tier})` : '';
           }
+          
+          const rating = getPokemonRating(p.rank || p.tier);
+          const score = p.score && typeof p.score === 'number' ? `(${p.score.toFixed(2)})` : '';
+          const cp = p.cp ? ` CP: ${p.cp}` : '';
+          const typesDisplay = p.types && p.types.length > 0 ? `(${p.types.join(', ')})` : '';
+
+          replyMessage += `${rankDisplay} ${p.speciesName} ${typesDisplay}${cp} ${score} - ${rating}\n`;
         });
       }
     });
