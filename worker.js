@@ -15,6 +15,15 @@ const TOKEN = ENV_BOT_TOKEN;
 const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
 
+const leagues = [
+  { command: "great_league_top", name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
+  { command: "ultra_league_top", name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
+  { command: "master_league_top", name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
+  { command: "attackers_top", name: "最佳攻擊", cp: "N/A", path: "data/rankings_attackers_tier.json" },
+  { command: "defenders_top", name: "最佳防禦", cp: "N/A", path: "data/rankings_defenders_tier.json" },
+  { command: "summer_cup_top", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" }
+];
+
 /**
  * 主監聽事件
  */
@@ -32,26 +41,77 @@ addEventListener('fetch', event => {
 });
 
 /**
- * 【核心】: 處理寶可夢模糊搜尋，並按聯盟分組排序顯示
+ * 處理所有聯盟排名的命令
+ */
+async function handleLeagueCommand(chatId, command, limit = 25) {
+  const leagueInfo = leagues.find(l => l.command === command);
+  if (!leagueInfo) {
+    return sendMessage(chatId, '未知的命令，請檢查指令。');
+  }
+
+  await sendMessage(chatId, `正在查詢 *${leagueInfo.name}* 的前 ${limit} 名寶可夢，請稍候...`, 'Markdown');
+
+  try {
+    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+    const dataUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${leagueInfo.path}?${cacheBuster}`;
+    const response = await fetch(dataUrl);
+    if (!response.ok) {
+      throw new Error(`無法載入 ${leagueInfo.name} 排名資料 (HTTP ${response.status})`);
+    }
+    const rankings = await response.json();
+
+    const topRankings = rankings.slice(0, limit);
+
+    let replyMessage = `🏆 *${leagueInfo.name}* (前 ${limit} 名) 🏆\n\n`;
+
+    topRankings.forEach(pokemon => {
+      let rankDisplay = '';
+      let typesDisplay = '';
+      let cpDisplay = '';
+      
+      // 處理不同的排名資料結構
+      if (pokemon.rank) { // PvPoke 結構
+        rankDisplay = `#${pokemon.rank}`;
+      } else { // PogoHub 結構
+        rankDisplay = pokemon.tier ? `(${pokemon.tier})` : '';
+      }
+      
+      if (pokemon.types && pokemon.types.length > 0) {
+        typesDisplay = `(${pokemon.types.join(', ')})`;
+      }
+
+      if (pokemon.cp) {
+        cpDisplay = ` CP: ${pokemon.cp}`;
+      }
+      
+      replyMessage += `${rankDisplay} ${pokemon.speciesName} ${typesDisplay}${cpDisplay}\n`;
+    });
+
+    return sendMessage(chatId, replyMessage.trim(), 'Markdown');
+  } catch (e) {
+    console.error(`查詢 ${leagueInfo.name} 時出錯:`, e);
+    return sendMessage(chatId, `處理查詢 *${leagueInfo.name}* 時發生錯誤: ${e.message}`, 'Markdown');
+  }
+}
+
+/**
+ * 處理寶可夢模糊搜尋，並按聯盟分組排序顯示結果
  */
 async function handlePokemonSearch(chatId, query) {
   await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
 
   try {
-    // 1. 獲取中英文對照表，並加入快取清除機制
     const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
     const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
     const transResponse = await fetch(translationUrl);
     if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
     const allPokemonData = await transResponse.json();
     
-    // 2. 進行模糊搜尋，找出所有符合條件的寶可夢
     const isChinese = /[\u4e00-\u9fa5]/.test(query);
     const lowerCaseQuery = query.toLowerCase();
     const initialMatches = allPokemonData.filter(p => isChinese ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lowerCaseQuery));
     if (initialMatches.length === 0) return await sendMessage(chatId, `很抱歉，找不到任何與 "${query}" 相關的寶可夢。`);
 
-    // 3. 擴展搜尋至整個家族
     const familyIds = new Set(initialMatches.map(p => p.family ? p.family.id : null).filter(id => id));
     const familyMatches = allPokemonData.filter(p => p.family && familyIds.has(p.family.id));
     const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
@@ -59,26 +119,13 @@ async function handlePokemonSearch(chatId, query) {
     const matchingIds = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
     const idToNameMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
-    // 4. 一次性獲取所有聯盟的排名資料
-    const leagues = [
-      { name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
-      { name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
-      { name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
-      { name: "最佳攻擊", cp: "10000", path: "data/rankings_attack_tier.json" },
-      { name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
-      { name: "夏日盃2500", cp: "10000", path: "data/rankings_2500_summer.json" },
-    ];
-    const fetchPromises = leagues.map(league => 
-      //fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}`, { cf: { cacheTtl: 86400 } })
-      //  .then(res => res.ok ? res.json() : null)
-      
-      // 在 URL 後面加上 cacheBuster 來避免讀取到舊的快取資料
+    // 這裡的 leagues 列表已經更新為包含所有命令
+    const fetchPromises = leagues.map(league =>
       fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}?${cacheBuster}`, { cf: { cacheTtl: 86400 } })
         .then(res => res.ok ? res.json() : null)
     );
     const allLeagueRanks = await Promise.all(fetchPromises);
 
-    // 5. 逐一聯盟處理，並彙總結果
     let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢家族排名結果 🏆\n`;
     let foundAnyResults = false;
 
@@ -90,9 +137,10 @@ async function handlePokemonSearch(chatId, query) {
       rankings.forEach((pokemon, rankIndex) => {
         if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
           resultsInThisLeague.push({
-            rank: rankIndex + 1,
+            rank: pokemon.rank || rankIndex + 1, // 如果沒有 rank 欄位，則手動生成
+            score: pokemon.score || pokemon.cp || 'N/A', // 處理不同資料來源的數值
             speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
-            score: pokemon.score,
+            types: pokemon.types,
           });
         }
       });
@@ -101,8 +149,16 @@ async function handlePokemonSearch(chatId, query) {
         foundAnyResults = true;
         replyMessage += `\n*${league.name} (${league.cp}):*\n`;
         resultsInThisLeague.forEach(p => {
-          const rating = getPokemonRating(p.rank);
-          replyMessage += `${p.speciesName} #${p.rank} (${p.score.toFixed(2)}) - ${rating}\n`;
+          const rating = getPokemonRating(p.rank || p.tier); // 假設有 tier 欄位
+          const score = p.score && typeof p.score === 'number' ? `(${p.score.toFixed(2)})` : '';
+          const cp = p.cp ? ` (${p.cp})` : '';
+
+          if (p.rank) { // PvPoke 類型的資料
+            replyMessage += `${p.speciesName} #${p.rank} ${score} - ${getPokemonRating(p.rank)}\n`;
+          } else { // Go Hub 類型的資料
+            const tier = p.tier || 'N/A';
+            replyMessage += `${p.speciesName} (${tier})${cp} - ${getPokemonRating(tier)}\n`;
+          }
         });
       }
     });
@@ -123,11 +179,6 @@ async function handlePokemonSearch(chatId, query) {
  * 根據排名給予評價的函式
  */
 function getPokemonRating(rank) {
-  /*if (rank <= 10) return "🥇白金";
-  if (rank <= 25) return "🥇金";
-  if (rank <= 50) return "🥈銀";
-  if (rank <= 100) return "🥉銅";
-  return "垃圾";*/
   if (typeof rank === 'number' && !isNaN(rank)) {
     if (rank <= 10) return "🥇白金";
     if (rank <= 25) return "🥇金";
@@ -136,32 +187,78 @@ function getPokemonRating(rank) {
     return "垃圾";
   }
   
-  // 如果不是數字，則當作文字處理
   if (typeof rank === 'string') {
     const ratingMap = {
       "S": "🥇白金",
-      "A＋": "🥇金",
+      "A+": "🥇金",
       "A": "🥈銀",
+      "B+": "🥈銀",
       "B": "🥉銅",
       "C": "🥉銅",
-      "D": "🥉銅"
+      "D": "垃圾",
+      "F": "垃圾"
     };
-    // 使用 .get() 的方式來查找，如果找不到就回傳預設值
     return ratingMap[rank] || "垃圾";
   }
+  return "N/A";
 }
 
 
-// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
+// --- 新增的命令處理函式，用於調用 handleLeagueCommand ---
+async function handleGreatLeagueTop(message) {
+  await handleLeagueCommand(message.chat.id, "great_league_top");
+}
+
+async function handleUltraLeagueTop(message) {
+  await handleLeagueCommand(message.chat.id, "ultra_league_top");
+}
+
+async function handleMasterLeagueTop(message) {
+  await handleLeagueCommand(message.chat.id, "master_league_top");
+}
+
+async function handleAttackersTop(message) {
+  await handleLeagueCommand(message.chat.id, "attackers_top");
+}
+
+async function handleDefendersTop(message) {
+  await handleLeagueCommand(message.chat.id, "defenders_top");
+}
+
+async function handleSummerCupTop(message) {
+  await handleLeagueCommand(message.chat.id, "summer_cup_top");
+}
+
 async function onMessage(message) {
   const text = message.text.trim();
-  
-  if (text.startsWith('/')) {
-    return sendMessage(message.chat.id, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
-  } else if (text) {
-    return await handlePokemonSearch(message.chat.id, text);
+  const command = text.split(' ')[0];
+
+  switch (command) {
+    case '/great_league_top':
+      return await handleGreatLeagueTop(message);
+    case '/ultra_league_top':
+      return await handleUltraLeagueTop(message);
+    case '/master_league_top':
+      return await handleMasterLeagueTop(message);
+    case '/attackers_top':
+      return await handleAttackersTop(message);
+    case '/defenders_top':
+      return await handleDefendersTop(message);
+    case '/summer_cup_top':
+      return await handleSummerCupTop(message);
+    case '/expert_training':
+      // 這裡應該調用您現有的極限特訓函數
+      return await show_expert_training_tasks(message, context); // 假設有 show_expert_training_tasks 函數
+    default:
+      if (text.startsWith('/')) {
+        return sendMessage(message.chat.id, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
+      } else {
+        return await handlePokemonSearch(message.chat.id, text);
+      }
   }
 }
+
+// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
 async function handleWebhook(event) {
   if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
     return new Response('Unauthorized', { status: 403 });
@@ -191,7 +288,33 @@ async function onUpdate(update) {
       return;
     }
     if ('text' in update.message) {
-      await onMessage(update.message);
+      // 處理新命令
+      const message = update.message;
+      const text = message.text.trim();
+      const command = text.split(' ')[0];
+      
+      switch (command) {
+        case '/great_league_top':
+          await handleGreatLeagueTop(message);
+          break;
+        case '/ultra_league_top':
+          await handleUltraLeagueTop(message);
+          break;
+        case '/master_league_top':
+          await handleMasterLeagueTop(message);
+          break;
+        case '/attackers_top':
+          await handleAttackersTop(message);
+          break;
+        case '/defenders_top':
+          await handleDefendersTop(message);
+          break;
+        case '/summer_cup_top':
+          await handleSummerCupTop(message);
+          break;
+        default:
+          await onMessage(message);
+      }
     }
   }
 }
