@@ -66,6 +66,7 @@ async function handlePokemonSearch(chatId, query) {
       { name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
       { name: "最佳攻擊", cp: "10000", path: "data/rankings_attack_tier.json" },
       { name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
+      { name: "夏日盃2500", cp: "10000", path: "data/rankings_2500_summer.json" },
     ];
     const fetchPromises = leagues.map(league => 
       //fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}`, { cf: { cacheTtl: 86400 } })
