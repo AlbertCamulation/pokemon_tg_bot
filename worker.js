@@ -280,40 +280,34 @@ function sendHelpMessage (chatId) {
  * 處理 incoming Message
  */
 async function onMessage(message) {
-  if (!message.text) {
-    return;
-  }
-  
-  const text = message.text.trim();
-  const command = text.split(' ')[0];
-  const chatId = message.chat.id;
+  if (!message.text) {
+    return;
+  }
+  
+  const text = message.text.trim();
+  const chatId = message.chat.id;
 
-  switch (command) {
-    case '/start':
-    case '/help':
-      return sendHelpMessage(chatId);
-    case '/list':
-      return sendHelpMessage(chatId);
-    case '/great_league_top':
-      return handleLeagueCommand(message, "great_league_top");
-    case '/ultra_league_top':
-      return handleLeagueCommand(message, "ultra_league_top");
-    case '/master_league_top':
-      return handleLeagueCommand(message, "master_league_top");
-    case '/attackers_top':
-      return handleLeagueCommand(message, "attackers_top");
-    case '/defenders_top':
-      return handleLeagueCommand(message, "defenders_top");
-    case '/summer_cup_top':
-      return handleLeagueCommand(message, "summer_cup_top");
-    default:
-      // 如果不是指令，則視為寶可夢搜尋
-      if (text.startsWith('/')) {
-        return sendMarkdownV2Text(chatId, escapeMarkdown('未知的指令。請使用 /help 或直接輸入寶可夢名稱進行查詢。'));
-      } else {
-        return handlePokemonSearch(message, text);
-      }
-  }
+  if (text.startsWith('/start') || text.startsWith('/help') || text.startsWith('/list')) {
+    return sendHelpMessage(chatId);
+  } else if (text.startsWith('/great_league_top')) {
+    return handleLeagueCommand(message, "great_league_top");
+  } else if (text.startsWith('/ultra_league_top')) {
+    return handleLeagueCommand(message, "ultra_league_top");
+  } else if (text.startsWith('/master_league_top')) {
+    return handleLeagueCommand(message, "master_league_top");
+  } else if (text.startsWith('/attackers_top')) {
+    return handleLeagueCommand(message, "attackers_top");
+  } else if (text.startsWith('/defenders_top')) {
+    return handleLeagueCommand(message, "defenders_top");
+  } else if (text.startsWith('/summer_cup_top')) {
+    return handleLeagueCommand(message, "summer_cup_top");
+  } else if (text.startsWith('/')) {
+    // 如果是以 / 開頭，但沒有匹配到任何已知指令
+    return sendMarkdownV2Text(chatId, escapeMarkdown('未知的指令。請使用 /help 或直接輸入寶可夢名稱進行查詢。'));
+  } else {
+    // 如果不是指令，則視為寶可夢搜尋
+    return handlePokemonSearch(message, text);
+  }
 }
 
 
