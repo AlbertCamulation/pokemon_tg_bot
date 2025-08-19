@@ -107,6 +107,7 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
     return sendMessage(chatId, replyMessage.trim(), 'Markdown');
   } catch (e) {
     console.error(`查詢 ${leagueInfo.name} 時出錯:`, e);
+    console.error(`URL: ${dataUrl}`);
     return sendMessage(chatId, `處理查詢 *${leagueInfo.name}* 時發生錯誤: ${e.message}`, 'Markdown');
   }
 }
