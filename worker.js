@@ -16,6 +16,7 @@ const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
 
 const leagues = [
+  { command: "little_league_top", name: "小小盃", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
   { command: "ultra_league_top", name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
   { command: "master_league_top", name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
