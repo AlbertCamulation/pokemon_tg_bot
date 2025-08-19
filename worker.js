@@ -199,9 +199,9 @@ function getPokemonRating(rank) {
       "S": "🥇白金",
       "A+": "🥇金",
       "A": "🥈銀",
-      "B+": "🥉銅",
-      "B": "垃圾",
-      "C": "垃圾",
+      "B+": "🥈銀",
+      "B": "🥉銅",
+      "C": "🥉銅",
       "D": "垃圾",
       "F": "垃圾"
     };
@@ -236,9 +236,16 @@ async function handleSummerCupTop(message) {
   await handleLeagueCommand(message.chat.id, "summer_cup_top");
 }
 
+async function handleLittleLeagueTop(message) {
+  await handleLeagueCommand(message.chat.id, "little_league_top");
+}
+
+
 async function onMessage(message) {
   const text = message.text.trim();
-  const command = text.split(' ')[0];
+  const commandText = text.split(' ')[0];
+  // 移除命令中的 @BotName 後綴
+  const command = commandText.split('@')[0];
 
   switch (command) {
     case '/great_league_top':
@@ -253,9 +260,8 @@ async function onMessage(message) {
       return await handleDefendersTop(message);
     case '/summer_cup_top':
       return await handleSummerCupTop(message);
-    case '/expert_training':
-      // 這裡應該調用您現有的極限特訓函數
-      return await show_expert_training_tasks(message, context); // 假設有 show_expert_training_tasks 函數
+    case '/little_league_top':
+      return await handleLittleLeagueTop(message);
     default:
       if (text.startsWith('/')) {
         return sendMessage(message.chat.id, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
@@ -298,7 +304,8 @@ async function onUpdate(update) {
       // 處理新命令
       const message = update.message;
       const text = message.text.trim();
-      const command = text.split(' ')[0];
+      const commandText = text.split(' ')[0];
+      const command = commandText.split('@')[0];
       
       switch (command) {
         case '/great_league_top':
@@ -318,6 +325,9 @@ async function onUpdate(update) {
           break;
         case '/summer_cup_top':
           await handleSummerCupTop(message);
+          break;
+        case '/little_league_top':
+          await handleLittleLeagueTop(message);
           break;
         default:
           await onMessage(message);
