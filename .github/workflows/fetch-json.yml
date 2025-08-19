@@ -32,7 +32,9 @@ jobs:
         run: |
           # 建立 data 資料夾
           mkdir -p data
-          
+           # 下載小小聯盟 (500) 的排名
+          echo "Fetching rankings for Little League (500)..."
+          curl -L -o data/rankings_500.json "https://pvpoke.com/data/rankings/all/overall/rankings-500.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
           # 下載超級聯盟 (1500) 的排名
           echo "Fetching rankings for Great League (1500)..."
           curl -L -o data/rankings_1500.json "https://pvpoke.com/data/rankings/all/overall/rankings-1500.json?v=${{ steps.extract_version.outputs.VERSION_NUMBER }}"
