@@ -55,11 +55,23 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
   try {
     const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
     const dataUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${leagueInfo.path}?${cacheBuster}`;
-    const response = await fetch(dataUrl);
+    const transUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+    
+    const [response, transResponse] = await Promise.all([
+      fetch(dataUrl),
+      fetch(transUrl)
+    ]);
+
     if (!response.ok) {
       throw new Error(`無法載入 ${leagueInfo.name} 排名資料 (HTTP ${response.status})`);
     }
+    if (!transResponse.ok) {
+      throw new Error(`無法載入寶可夢中英文對照表 (HTTP ${transResponse.status})`);
+    }
+
     const rankings = await response.json();
+    const allPokemonData = await transResponse.json();
+    const idToNameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
     const topRankings = rankings.slice(0, limit);
 
@@ -70,6 +82,8 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       let typesDisplay = '';
       let cpDisplay = '';
       
+      const speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
+
       if (pokemon.rank) { // PvPoke 結構
         rankDisplay = `#${pokemon.rank}`;
       } else { // PogoHub 結構
@@ -87,7 +101,7 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       let rating = getPokemonRating(pokemon.rank || pokemon.tier);
       let score = pokemon.score && typeof pokemon.score === 'number' ? `(${pokemon.score.toFixed(2)})` : '';
       
-      replyMessage += `${rankDisplay} ${pokemon.speciesName} ${typesDisplay}${cpDisplay} ${score} - ${rating}\n`;
+      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score} - ${rating}\n`;
     });
 
     return sendMessage(chatId, replyMessage.trim(), 'Markdown');
@@ -301,7 +315,6 @@ async function onUpdate(update) {
       return;
     }
     if ('text' in update.message) {
-      // 處理新命令
       const message = update.message;
       const text = message.text.trim();
       const commandText = text.split(' ')[0];
