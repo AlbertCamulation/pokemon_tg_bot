@@ -101,7 +101,7 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       let rating = getPokemonRating(pokemon.rank || pokemon.tier);
       let score = pokemon.score && typeof pokemon.score === 'number' ? `(${pokemon.score.toFixed(2)})` : '';
       
-      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score} - ${rating}\n`;
+      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}\n`;
     });
 
     return sendMessage(chatId, replyMessage.trim(), 'Markdown');
@@ -210,14 +210,14 @@ function getPokemonRating(rank) {
   
   if (typeof rank === 'string') {
     const ratingMap = {
-      "S": "🥇白金",
-      "A+": "🥇金",
-      "A": "🥈銀",
-      "B+": "🥈銀",
-      "B": "🥉銅",
-      "C": "🥉銅",
-      "D": "垃圾",
-      "F": "垃圾"
+      "S": "🥇白金S",
+      "A+": "🥇金A+",
+      "A": "🥈銀A",
+      "B+": "垃圾B+",
+      "B": "垃圾B",
+      "C": "垃圾C",
+      "D": "垃圾D",
+      "F": "垃圾F"
     };
     return ratingMap[rank] || "垃圾";
   }
