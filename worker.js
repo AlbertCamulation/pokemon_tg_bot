@@ -14,7 +14,7 @@ const BRANCH_NAME = "main";
 const TOKEN = ENV_BOT_TOKEN;
 const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
-const ALLOWED_USER_IDS_JSON = ENV_ALLOWED_USER_IDS_JSON;
+const ALLOWED_USER_IDS_JSON = ALLOWED_USER_IDS_JSON; // ✅ 這裡已修改
 const TRASH_LIST_KEY = 'trash_pokemon_list'; // KV 儲存的 key
 
 const leagues = [
@@ -118,7 +118,7 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
  * 處理寶可夢模糊搜尋，並按聯盟分組排序顯示結果
  */
 async function handlePokemonSearch(chatId, query) {
-    await sendMessage(chatId, `🔍 正在查詢與 "${query}"' 相關的寶可夢家族排名，請稍候...`);
+    await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
 
     try {
         const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
