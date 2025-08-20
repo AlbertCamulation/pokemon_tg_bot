@@ -118,7 +118,7 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
  * 處理寶可夢模糊搜尋，並按聯盟分組排序顯示結果
  */
 async function handlePokemonSearch(chatId, query) {
-    await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
+    await sendMessage(chatId, `🔍 正在查詢與 "${query}"' 相關的寶可夢家族排名，請稍候...`);
 
     try {
         const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
