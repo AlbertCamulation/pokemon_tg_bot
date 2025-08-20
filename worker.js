@@ -190,9 +190,8 @@ async function handlePokemonSearch(chatId, query) {
 
         if (!foundAnyResults) {
             replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
+            return await sendMessage(chatId, replyMessage.trim(), 'Markdown');
         }
-
-        await sendMessage(chatId, replyMessage.trim(), 'Markdown');
         
         // 取得搜尋結果中的第一個寶可夢
         const firstPokemon = finalMatches.length > 0 ? finalMatches[0] : null;
@@ -201,16 +200,19 @@ async function handlePokemonSearch(chatId, query) {
             const pokemonName = idToNameMap.get(firstPokemon.speciesId.toLowerCase()) || firstPokemon.speciesName;
             const buttonText = `加入 "${pokemonName}" 到垃圾清單`;
             const callbackData = `add_to_trash:${firstPokemon.speciesId}`;
-            await sendInlineButton(chatId, "需要將此寶可夢加入垃圾清單嗎？", { text: buttonText, callback_data: callbackData });
+            
+            // ✅ 將排名結果的文字和按鈕合併到同一則訊息
+            const combinedMessage = replyMessage.trim() + "\n\n需要將此寶可夢加入垃圾清單嗎？";
+            await sendInlineButton(chatId, combinedMessage, { text: buttonText, callback_data: callbackData });
+        } else {
+            return await sendMessage(chatId, replyMessage.trim(), 'Markdown');
         }
-
 
     } catch (e) {
         console.error("搜尋時出錯:", e);
         return await sendMessage(chatId, `處理搜尋時發生錯誤: ${e.message}`);
     }
 }
-
 /**
  * 根據排名給予評價的函式
  */
