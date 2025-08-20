@@ -240,7 +240,7 @@ async function handleTrashCommand(chatId) {
     // 格式化為逗號分隔的字串
     const pokemonNames = trashList.join(', ');
 
-    let replyMessage = `<code>垃圾清單</code>\n<code>${pokemonNames}</code>`;
+    let replyMessage = `<code>${pokemonNames}</code>`;
 
     return await sendMessage(chatId, replyMessage, 'HTML');
 }
