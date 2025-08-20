@@ -325,17 +325,14 @@ async function onMessage(message) {
     const command = commandText.split('@')[0];
     const chatId = message.chat.id;
 
-    // ✅ 新增：檢查是否為 "垃圾"
-    if (text === '垃圾') {
-        return handleTrashCommand(chatId);
-    }
-    
-    // ✅ 移除 /trash 的 case，並將 /start, /help, /list 的處理邏輯合併
     switch (command) {
         case '/start':
         case '/help':
+            return sendHelpMessage(chatId);
         case '/list':
             return sendHelpMessage(chatId);
+        case '/trash':
+            return handleTrashCommand(chatId);
         case '/great_league_top':
             return await handleGreatLeagueTop(message);
         case '/ultra_league_top':
@@ -469,7 +466,7 @@ function sendHelpMessage(chatId) {
       `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
       `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
       `*垃圾清單指令:*\n` +
-      `\`直接輸入 "垃圾"\` 來顯示垃圾清單\n\n` + // <-- 這裡已修改
+      `\` /trash \` - 顯示垃圾清單\n\n` +
       `*聯盟排名指令:*\n` +
       `${leagueCommands}\n\n` +
       `\` /list \` - 顯示所有聯盟排名查詢指令\n` +
