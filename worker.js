@@ -199,7 +199,6 @@ async function handlePokemonSearch(chatId, query) {
         return await sendMessage(chatId, `處理搜尋時發生錯誤: ${e.message}`);
     }
 }
-
 /**
  * 根據排名給予評價的函式
  */
@@ -240,7 +239,7 @@ async function handleTrashCommand(chatId) {
     // 格式化為逗號分隔的字串
     const pokemonNames = trashList.map(p => p.speciesName).join(', ');
 
-    let replyMessage = `<code>${pokemonNames}</code>`;
+    let replyMessage = `<code>垃圾清單</code>\n<code>${pokemonNames}</code>`;
 
     return await sendMessage(chatId, replyMessage, 'HTML');
 }
@@ -248,15 +247,15 @@ async function handleTrashCommand(chatId) {
 /**
  * 將寶可夢加入垃圾清單
  */
-async function addToTrashList(speciesName) {
+async function addToTrashList(pokemonName) {
     if (typeof POKEMON_KV === 'undefined') {
         console.error("錯誤：POKEMON_KV 命名空間未綁定。");
         return;
     }
     const list = await getTrashList();
     // 確保清單中沒有重複的寶可夢
-    if (!list.includes(speciesName)) {
-        list.push(speciesName);
+    if (!list.includes(pokemonName)) {
+        list.push(pokemonName);
     }
     await POKEMON_KV.put(TRASH_LIST_KEY, JSON.stringify(list));
 }
