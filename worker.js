@@ -190,29 +190,16 @@ async function handlePokemonSearch(chatId, query) {
 
         if (!foundAnyResults) {
             replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
-            return await sendMessage(chatId, replyMessage.trim(), 'Markdown');
         }
-        
-        // 取得搜尋結果中的第一個寶可夢
-        const firstPokemon = finalMatches.length > 0 ? finalMatches[0] : null;
 
-        if (firstPokemon) {
-            const pokemonName = idToNameMap.get(firstPokemon.speciesId.toLowerCase()) || firstPokemon.speciesName;
-            const buttonText = `加入 "${pokemonName}" 到垃圾清單`;
-            const callbackData = `add_to_trash:${firstPokemon.speciesId}`;
-            
-            // ✅ 將排名結果的文字和按鈕合併到同一則訊息
-            const combinedMessage = replyMessage.trim() + "\n\n需要將此寶可夢加入垃圾清單嗎？";
-            await sendInlineButton(chatId, combinedMessage, { text: buttonText, callback_data: callbackData });
-        } else {
-            return await sendMessage(chatId, replyMessage.trim(), 'Markdown');
-        }
+        return await sendMessage(chatId, replyMessage.trim(), 'Markdown');
 
     } catch (e) {
         console.error("搜尋時出錯:", e);
         return await sendMessage(chatId, `處理搜尋時發生錯誤: ${e.message}`);
     }
 }
+
 /**
  * 根據排名給予評價的函式
  */
@@ -250,37 +237,26 @@ async function handleTrashCommand(chatId) {
         return await sendMessage(chatId, "您的垃圾清單目前是空的。");
     }
 
-    let replyMessage = "<code>垃圾清單</code>\n<code>"
-    + trashList.join(', ')
-    + "</code>";
+    // 格式化為逗號分隔的字串
+    const pokemonNames = trashList.map(p => p.speciesName).join(', ');
+
+    let replyMessage = `<code>${pokemonNames}</code>`;
 
     return await sendMessage(chatId, replyMessage, 'HTML');
 }
 
 /**
- * 從 KV 取得垃圾清單
- */
-async function getTrashList() {
-    if (typeof POKEMON_KV === 'undefined') {
-        console.error("錯誤：POKEMON_KV 命名空間未綁定。");
-        return [];
-    }
-    const list = await POKEMON_KV.get(TRASH_LIST_KEY, 'json');
-    return list || [];
-}
-
-/**
  * 將寶可夢加入垃圾清單
  */
-async function addToTrashList(speciesId, speciesName) {
+async function addToTrashList(speciesName) {
     if (typeof POKEMON_KV === 'undefined') {
         console.error("錯誤：POKEMON_KV 命名空間未綁定。");
         return;
     }
     const list = await getTrashList();
     // 確保清單中沒有重複的寶可夢
-    if (!list.find(p => p.speciesId === speciesId)) {
-        list.push({ speciesId, speciesName });
+    if (!list.includes(speciesName)) {
+        list.push(speciesName);
     }
     await POKEMON_KV.put(TRASH_LIST_KEY, JSON.stringify(list));
 }
@@ -323,18 +299,26 @@ async function onMessage(message) {
     }
 
     const text = message.text.trim();
-    const commandText = text.split(' ')[0];
+    const messageParts = text.split(' ');
+    const commandText = messageParts[0];
     const command = commandText.split('@')[0];
+    const pokemonQuery = messageParts.slice(1).join(' ');
     const chatId = message.chat.id;
 
     switch (command) {
         case '/start':
         case '/help':
-            return sendHelpMessage(chatId);
         case '/list':
             return sendHelpMessage(chatId);
         case '/trash':
-            return handleTrashCommand(chatId);
+            if (pokemonQuery) {
+                // 新增寶可夢到垃圾清單
+                await addToTrashList(pokemonQuery);
+                return sendMessage(chatId, `已將 "${pokemonQuery}" 加入垃圾清單。`);
+            } else {
+                // 顯示垃圾清單
+                return handleTrashCommand(chatId);
+            }
         case '/great_league_top':
             return await handleGreatLeagueTop(message);
         case '/ultra_league_top':
@@ -358,128 +342,96 @@ async function onMessage(message) {
     }
 }
 
-/**
- * 處理 inline button 點擊事件
- */
-async function onCallbackQuery(callbackQuery) {
-    const data = callbackQuery.data;
-    const chatId = callbackQuery.message.chat.id;
-    const [action, speciesId] = data.split(':');
+// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
+async function handleWebhook(event) {
+    if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
+        return new Response('Unauthorized', { status: 403 });
+    }
+    const update = await event.request.json();
+    event.waitUntil(onUpdate(update));
+    return new Response('Ok');
+}
+async function onUpdate(update) {
+    let allowedUserIds = [];
+    try {
+        if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
+            allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
+        }
+    } catch (e) {
+        console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
+    }
     
-    if (action === 'add_to_trash' && speciesId) {
-        try {
-            const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
-            const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
-            const transResponse = await fetch(translationUrl);
-            const allPokemonData = await transResponse.json();
-            const pokemon = allPokemonData.find(p => p.speciesId.toLowerCase() === speciesId.toLowerCase());
-            
-            if (pokemon) {
-                await addToTrashList(pokemon.speciesId, pokemon.speciesName);
-                await answerCallbackQuery(callbackQuery.id, `已將 "${pokemon.speciesName}" 加入垃圾清單！`);
-            } else {
-                await answerCallbackQuery(callbackQuery.id, "找不到這隻寶可夢，無法加入清單。");
-            }
-        } catch (e) {
-            await answerCallbackQuery(callbackQuery.id, "處理請求時發生錯誤。");
-            console.error("處理按鈕點擊時出錯:", e);
+    if ('message' in update && update.message.from) {
+        const user = update.message.from;
+        const userId = user.id;
+        if (allowedUserIds.length > 0 && !allowedUserIds.includes(userId)) {
+            let userInfo = user.first_name || '';
+            if (user.last_name) userInfo += ` ${user.last_name}`;
+            if (user.username) userInfo += ` (@${user.username})`;
+            console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
+            return;
+        }
+        if ('text' in update.message) {
+            await onMessage(update.message);
         }
     }
 }
-
-
-// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
-async function handleWebhook(event) {
-  if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
-    return new Response('Unauthorized', { status: 403 });
-  }
-  const update = await event.request.json();
-  event.waitUntil(onUpdate(update));
-  return new Response('Ok');
-}
-async function onUpdate(update) {
-  let allowedUserIds = [];
-  try {
-    if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
-      allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
-    }
-  } catch (e) {
-    console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
-  }
-  
-  if ('message' in update && update.message.from) {
-    const user = update.message.from;
-    const userId = user.id;
-    if (allowedUserIds.length > 0 && !allowedUserIds.includes(userId)) {
-      let userInfo = user.first_name || '';
-      if (user.last_name) userInfo += ` ${user.last_name}`;
-      if (user.username) userInfo += ` (@${user.username})`;
-      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
-      return;
-    }
-    if ('text' in update.message) {
-      await onMessage(update.message);
-    }
-  }
-  if ('callback_query' in update) {
-    await onCallbackQuery(update.callback_query);
-  }
-}
 async function sendMessage(chatId, text, parseMode = null) {
-  const params = { chat_id: chatId, text };
-  if (parseMode) {
-    params.parse_mode = parseMode;
-  }
-  return (await fetch(apiUrl('sendMessage', params))).json();
+    const params = { chat_id: chatId, text };
+    if (parseMode) {
+        params.parse_mode = parseMode;
+    }
+    return (await fetch(apiUrl('sendMessage', params))).json();
 }
 async function sendInlineButton (chatId, text, button) {
-  return sendInlineButtons(chatId, text, [[button]]);
+    return sendInlineButtons(chatId, text, [[button]]);
 }
 async function sendInlineButtons (chatId, text, buttons) {
-  return (await fetch(apiUrl('sendMessage', {
-    chat_id: chatId,
-    reply_markup: JSON.stringify({
-      inline_keyboard: buttons
-    }),
-    text,
-    parse_mode: 'Markdown'
-  }))).json();
+    return (await fetch(apiUrl('sendMessage', {
+        chat_id: chatId,
+        reply_markup: JSON.stringify({
+            inline_keyboard: buttons
+        }),
+        text,
+        parse_mode: 'Markdown'
+    }))).json();
 }
 async function answerCallbackQuery (callbackQueryId, text = null) {
-  const data = {
-    callback_query_id: callbackQueryId
-  };
-  if (text) {
-    data.text = text;
-  }
-  return (await fetch(apiUrl('answerCallbackQuery', data))).json();
+    const data = {
+        callback_query_id: callbackQueryId
+    };
+    if (text) {
+        data.text = text;
+    }
+    return (await fetch(apiUrl('answerCallbackQuery', data))).json();
 }
 function apiUrl(methodName, params = null) {
-  let query = '';
-  if (params) {
-    query = '?' + new URLSearchParams(params).toString();
-  }
-  return `https://api.telegram.org/bot${TOKEN}/${methodName}${query}`;
+    let query = '';
+    if (params) {
+        query = '?' + new URLSearchParams(params).toString();
+    }
+    return `https://api.telegram.org/bot${TOKEN}/${methodName}${query}`;
 }
 function sendHelpMessage(chatId) {
     const leagueCommands = leagues.map(l => `\`/${l.command}\` - 查詢 ${l.name} 前25名`).join('\n');
     const helpMessage = `*寶可夢排名查詢 Bot*\n\n` +
-      `*功能說明:*\n` +
-      `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
-      `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
-      `*垃圾清單指令:*\n` +
-      `\` /trash \` - 顯示垃圾清單\n\n` +
-      `*聯盟排名指令:*\n` +
-      `${leagueCommands}\n\n` +
-      `\` /list \` - 顯示所有聯盟排名查詢指令\n` +
-      `\` /help \` - 顯示此說明`;
+        `*功能說明:*\n` +
+        `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
+        `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
+        `*垃圾清單指令:*\n` +
+        `\` /trash \` - 顯示垃圾清單\n` +
+        `\` /trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n\n` +
+        `*聯盟排名指令:*\n` +
+        `${leagueCommands}\n\n` +
+        `\` /list \` - 顯示所有聯盟排名查詢指令\n` +
+        `\` /help \` - 顯示此說明`;
     return sendMessage(chatId, helpMessage, 'Markdown');
 }
 async function handleWebhook(event) {
-  if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
-    return new Response('Unauthorized', { status: 403 });
-  }
-  const update = await event.request.json();
-  event.waitUntil(onUpdate(update));
-  return new Response('Ok');
+    if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
+        return new Response('Unauthorized', { status: 403 });
+    }
+    const update = await event.request.json();
+    event.waitUntil(onUpdate(update));
+    return new Response('Ok');
 }
