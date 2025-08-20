@@ -14,7 +14,7 @@ const BRANCH_NAME = "main";
 const TOKEN = ENV_BOT_TOKEN;
 const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
-const ALLOWED_USER_IDS_JSON = ALLOWED_USER_IDS_JSON; // ✅ 這裡已修改
+const ALLOWED_USER_IDS_JSON = ALLOWED_USER_IDS_JSON;
 const TRASH_LIST_KEY = 'trash_pokemon_list'; // KV 儲存的 key
 
 const leagues = [
@@ -259,6 +259,19 @@ async function addToTrashList(pokemonName) {
     }
     await POKEMON_KV.put(TRASH_LIST_KEY, JSON.stringify(list));
 }
+
+/**
+ * 從 KV 取得垃圾清單
+ */
+async function getTrashList() {
+    if (typeof POKEMON_KV === 'undefined') {
+        console.error("錯誤：POKEMON_KV 命名空間未綁定。");
+        return [];
+    }
+    const list = await POKEMON_KV.get(TRASH_LIST_KEY, 'json');
+    return list || [];
+}
+
 
 // --- 新增的命令處理函式，用於調用 handleLeagueCommand ---
 async function handleLittleLeagueTop(message) {
