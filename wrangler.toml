@@ -12,3 +12,7 @@ compatibility_date = "2025-08-05"
 
 [observability.logs]
 enabled = true
+
+[[kv_namespaces]]
+binding = "POKEMON_KV"
+id = "a6aecf7af8304faabc3d8620b7e66bdd"
