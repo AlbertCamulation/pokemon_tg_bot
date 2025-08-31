@@ -467,7 +467,6 @@ async function onMessage(message) {
   }
 }
 
-// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
 async function handleWebhook(event) {
   if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
     return new Response('Unauthorized', { status: 403 });
@@ -494,10 +493,12 @@ async function onUpdate(update) {
       let userInfo = user.first_name || '';
       if (user.last_name) userInfo += ` ${user.last_name}`;
       if (user.username) userInfo += ` (@${user.username})`;
-      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
+      console.error(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
       return;
     }
-
+    else {
+      console.log(`Authorized access for user: ID=${userId}, Name=${user.first_name}`);
+    }
     if ('text' in update.message) {
       await onMessage(update.message);
     }
