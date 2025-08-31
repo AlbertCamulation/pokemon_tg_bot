@@ -101,7 +101,6 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
         cpDisplay = ` CP: ${pokemon.cp}`;
       }
       
-      const rating = getPokemonRating(isPvpokeRank ? pokemon.rank : pokemon.tier);
       const score = pokemon.score && typeof pokemon.score === 'number' ? `(${pokemon.score.toFixed(2)})` : '';
       
       replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}\n`;
@@ -183,7 +182,7 @@ async function handlePokemonSearch(chatId, query) {
           const cp = p.cp ? ` CP: ${p.cp}` : '';
           const typesDisplay = p.types && p.types.length > 0 ? `(${p.types.join(', ')})` : '';
 
-          replyMessage += `${rankDisplay} ${p.speciesName} ${typesDisplay}${cp} ${score} - ${rating}\n`;
+          replyMessage += `${rankDisplay} ${p.speciesName} ${typesDisplay}${cp} ${score}\n`;
         });
       }
     });
@@ -231,17 +230,16 @@ function getPokemonRating(rank) {
 /**
  * 處理 /trash 命令，現在會顯示使用者專屬的垃圾清單
  */
-async function handleTrashCommand(chatId, userId) {
+async function handleTrashCommand(chatId, userId, messageFrom) {
   const trashList = await getTrashList(userId);
+  const userName = messageFrom.first_name || messageFrom.username || "訓練家";
+  
   if (trashList.length === 0) {
-    return await sendMessage(chatId, "您的垃圾清單目前是空的。");
+    return await sendMessage(chatId, `您好, ${userName}\n您的垃圾清單目前是空的。`);
   }
 
-  // 格式化為逗號分隔的字串
   const pokemonNames = trashList.join(',');
-
-  // Markdown 格式可能對長字串不友好，使用 HTML 的 <code> 標籤
-  let replyMessage = `您的垃圾清單：\n\n<code>${pokemonNames}&!3*&!4*</code>\n\n可以複製這個清單並貼到遊戲內搜尋。`;
+  let replyMessage = `您好, ${userName}\n這是您的垃圾清單：\n\n<code>${pokemonNames}&!3*&!4*</code>\n\n可以複製這個清單並貼到遊戲內搜尋。`;
 
   return await sendMessage(chatId, replyMessage, 'HTML');
 }
@@ -263,7 +261,6 @@ async function handleUntrashCommand(chatId, userId, pokemonNames) {
     let currentList = await getTrashList(userId);
     const removedPokemon = [];
 
-    // 移除指定的寶可夢
     pokemonNames.forEach(name => {
         const index = currentList.indexOf(name);
         if (index > -1) {
@@ -361,7 +358,7 @@ async function onMessage(message) {
   const command = commandText.split('@')[0];
   const pokemonQuery = messageParts.slice(1);
   const chatId = message.chat.id;
-  const userId = message.from.id; // 從訊息中獲取 userId
+  const userId = message.from.id;
 
   switch (command) {
     case '/start':
@@ -374,7 +371,7 @@ async function onMessage(message) {
         const addedPokemon = pokemonQuery.join(', ');
         return sendMessage(chatId, `已將 "${addedPokemon}" 加入您的垃圾清單。`);
       } else {
-        return handleTrashCommand(chatId, userId);
+        return handleTrashCommand(chatId, userId, message.from);
       }
     case '/untrash':
       return handleUntrashCommand(chatId, userId, pokemonQuery);
