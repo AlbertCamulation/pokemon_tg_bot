@@ -10,7 +10,7 @@ const REPO_NAME = "pokemon_tg_bot";
 const BRANCH_NAME = "main";
 // --------------------
 
-// --- Telegram Bot 相關設定 (直接從全域變數讀取) ---
+// --- Telegram Bot 相關設定 (直接從全域變數讀取) ) ---
 const TOKEN = ENV_BOT_TOKEN;
 const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
@@ -85,11 +85,11 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       let cpDisplay = '';
       
       const speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
-      const isPvpokeRank = pokemon.score !== undefined; // 判斷是否為 PvPoke 數據
+      const isPvpokeRank = pokemon.score !== undefined;
 
-      if (isPvpokeRank) { // PvPoke 結構
+      if (isPvpokeRank) {
         rankDisplay = pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}`;
-      } else { // PogoHub 結構
+      } else {
         rankDisplay = pokemon.tier ? `(${pokemon.tier})` : '';
       }
       
@@ -160,8 +160,8 @@ async function handlePokemonSearch(chatId, query) {
             score: pokemon.score || pokemon.cp || 'N/A',
             speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
             types: pokemon.types,
-            tier: pokemon.tier, // Go Hub tier
-            cp: pokemon.cp, // Go Hub cp
+            tier: pokemon.tier,
+            cp: pokemon.cp,
             speciesId: pokemon.speciesId,
           });
         }
@@ -245,6 +245,43 @@ async function handleTrashCommand(chatId, userId) {
 
   return await sendMessage(chatId, replyMessage, 'HTML');
 }
+
+/**
+ * 處理 /untrash 命令，可以移除多個寶可夢
+ */
+async function handleUntrashCommand(chatId, userId, pokemonNames) {
+    if (pokemonNames.length === 0) {
+        return await sendMessage(chatId, "請輸入您想移除的寶可夢名稱，以空格分隔。");
+    }
+
+    if (typeof POKEMON_KV === 'undefined') {
+        console.error("錯誤：POKEMON_KV 命名空間未綁定。");
+        return;
+    }
+
+    const kvKey = TRASH_LIST_PREFIX + userId;
+    let currentList = await getTrashList(userId);
+    const removedPokemon = [];
+
+    // 移除指定的寶可夢
+    pokemonNames.forEach(name => {
+        const index = currentList.indexOf(name);
+        if (index > -1) {
+            currentList.splice(index, 1);
+            removedPokemon.push(name);
+        }
+    });
+
+    if (removedPokemon.length > 0) {
+        await POKEMON_KV.put(kvKey, JSON.stringify(currentList));
+        const removedNames = removedPokemon.join(', ');
+        return sendMessage(chatId, `已從您的垃圾清單中移除：${removedNames}。`);
+    } else {
+        const notFoundNames = pokemonNames.join(', ');
+        return sendMessage(chatId, `清單中找不到您指定的寶可夢：${notFoundNames}。`);
+    }
+}
+
 
 /**
  * 將寶可夢加入使用者專屬的垃圾清單
@@ -333,13 +370,14 @@ async function onMessage(message) {
       return sendHelpMessage(chatId);
     case '/trash':
       if (pokemonQuery.length > 0) {
-        // 新增多個寶可夢到垃圾清單
-        await addToTrashList(userId, pokemonQuery); 
+        await addToTrashList(userId, pokemonQuery);
         const addedPokemon = pokemonQuery.join(', ');
         return sendMessage(chatId, `已將 "${addedPokemon}" 加入您的垃圾清單。`);
       } else {
-        return handleTrashCommand(chatId, userId); // 顯示垃圾清單
+        return handleTrashCommand(chatId, userId);
       }
+    case '/untrash':
+      return handleUntrashCommand(chatId, userId, pokemonQuery);
     case '/great_league_top':
       return await handleGreatLeagueTop(message);
     case '/ultra_league_top':
@@ -430,7 +468,8 @@ function sendHelpMessage(chatId) {
       `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
       `*垃圾清單指令:*\n` +
       `\` /trash \` - 顯示垃圾清單\n` +
-      `\` /trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n\n` +
+      `\` /trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n` +
+      `\` /untrash [寶可夢名稱]\` - 從清單中刪除寶可夢\n\n` +
       `*聯盟排名指令:*\n` +
       `${leagueCommands}\n\n` +
       `\` /list \` - 顯示所有聯盟排名查詢指令\n` +
