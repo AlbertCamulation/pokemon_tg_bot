@@ -104,7 +104,7 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       
       const score = pokemon.score && typeof pokemon.score === 'number' ? `(${pokemon.score.toFixed(2)})` : '';
       
-      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score} - ${getPokemonRating(pokemon.rank || pokemon.tier)}\n`;
+      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}\n`;
     });
 
     return sendMessage(chatId, replyMessage.trim(), 'Markdown');
