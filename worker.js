@@ -490,6 +490,9 @@ async function onUpdate(update) {
     const user = update.message.from;
     const userId = user.id;
 
+    // 修正後的白名單檢查邏輯
+    // 如果白名單存在且長度大於0，才進行檢查。
+    // 如果使用者ID不在列表中，則阻擋。
     if (allowedUserIds.length > 0 && !allowedUserIds.includes(userId)) {
       let userInfo = user.first_name || '';
       if (user.last_name) userInfo += ` ${user.last_name}`;
