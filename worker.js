@@ -478,7 +478,7 @@ async function onUpdate(update) {
   if ('message' in update && update.message.from) {
     const user = update.message.from;
     const userId = user.id;
-
+    console.log(allowedUserIds);
     if (allowedUserIds.length > 0 && !allowedUserIds.includes(userId)) {
       let userInfo = user.first_name || '';
       if (user.last_name) userInfo += ` ${user.last_name}`;
