@@ -10,12 +10,13 @@ const REPO_NAME = "pokemon_tg_bot";
 const BRANCH_NAME = "main";
 // --------------------
 
-// --- Telegram Bot 相關設定 (直接從全域變數讀取) ) ---
+// --- Telegram Bot 相關設定 (直接從全域變數讀取) ---
 const TOKEN = ENV_BOT_TOKEN;
 const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
 const ALLOWED_USER_IDS_JSON = ALLOWED_USER_IDS_JSON;
 const TRASH_LIST_PREFIX = 'trash_pokemon_'; // KV 儲存的 key 前綴
+const ALLOWED_UID_KEY = 'allowed_user_ids'; // KV 儲存的白名單 key
 
 const leagues = [
   { command: "little_league_top", name: "小小盃", cp: "500", path: "data/rankings_500.json" },
@@ -85,11 +86,11 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       let cpDisplay = '';
       
       const speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
-      const isPvpokeRank = pokemon.score !== undefined;
+      const isPvpokeRank = pokemon.score !== undefined; // 判斷是否為 PvPoke 數據
 
-      if (isPvpokeRank) {
+      if (isPvpokeRank) { // PvPoke 結構
         rankDisplay = pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}`;
-      } else {
+      } else { // PogoHub 結構
         rankDisplay = pokemon.tier ? `(${pokemon.tier})` : '';
       }
       
@@ -161,7 +162,6 @@ async function handlePokemonSearch(chatId, query) {
             types: pokemon.types,
             tier: pokemon.tier,
             cp: pokemon.cp,
-            speciesId: pokemon.speciesId,
           });
         }
       });
@@ -182,7 +182,7 @@ async function handlePokemonSearch(chatId, query) {
           const cp = p.cp ? ` CP: ${p.cp}` : '';
           const typesDisplay = p.types && p.types.length > 0 ? `(${p.types.join(', ')})` : '';
 
-          replyMessage += `${rankDisplay} ${p.speciesName} ${typesDisplay}${cp} ${score}\n`;
+          replyMessage += `${rankDisplay} ${p.speciesName} ${typesDisplay}${cp} ${score} - ${rating}\n`;
         });
       }
     });
@@ -279,6 +279,99 @@ async function handleUntrashCommand(chatId, userId, pokemonNames) {
     }
 }
 
+/**
+ * 處理 /list_allowed_uid 命令
+ */
+async function handleListAllowedUidCommand(chatId) {
+    let allowedUserIds = [];
+    try {
+        if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
+            allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
+        }
+    } catch (e) {
+        console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
+        return sendMessage(chatId, '無法解析 ALLOWED_USER_IDS_JSON，請檢查格式。');
+    }
+
+    if (allowedUserIds.length === 0) {
+        return sendMessage(chatId, '目前沒有已授權的使用者 ID。');
+    }
+
+    let replyMessage = '已授權的使用者 ID：\n\n';
+    
+    // 這裡我們無法直接從 Worker 獲取使用者名稱，因為沒有存取 Telegram API 的權限來反查 ID。
+    // 只能顯示 ID 本身。
+    allowedUserIds.forEach(uid => {
+        replyMessage += `- <code>${uid}</code>\n`;
+    });
+
+    replyMessage += '\n_(請注意，Worker 無法直接透過 ID 查詢使用者名稱)_';
+    
+    return sendMessage(chatId, replyMessage, 'HTML');
+}
+
+/**
+ * 處理 /allow_uid {uid} 命令
+ */
+async function handleAllowUidCommand(chatId, uid) {
+    if (!uid) {
+        return sendMessage(chatId, '請提供一個使用者 ID 以加入白名單。例如：`/allow_uid 123456789`');
+    }
+
+    let allowedUserIds = [];
+    try {
+        if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
+            allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
+        }
+    } catch (e) {
+        return sendMessage(chatId, '無法解析 ALLOWED_USER_IDS_JSON，請檢查格式。');
+    }
+
+    const newUid = parseInt(uid);
+    if (isNaN(newUid)) {
+        return sendMessage(chatId, '無效的使用者 ID，請輸入數字。');
+    }
+    
+    if (allowedUserIds.includes(newUid)) {
+        return sendMessage(chatId, `使用者 ID ${newUid} 已在白名單中。`);
+    }
+
+    allowedUserIds.push(newUid);
+    // 這裡無法直接修改 Cloudflare Worker 的環境變數，需要手動更新
+    return sendMessage(chatId, `使用者 ID ${newUid} 已成功加入。請手動更新你的 Cloudflare Worker 的 \`ALLOWED_USER_IDS_JSON\` 環境變數，並重新部署。`);
+}
+
+/**
+ * 處理 /del_uid {uid} 命令
+ */
+async function handleDelUidCommand(chatId, uid) {
+    if (!uid) {
+        return sendMessage(chatId, '請提供一個使用者 ID 以從白名單移除。例如：`/del_uid 123456789`');
+    }
+
+    let allowedUserIds = [];
+    try {
+        if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
+            allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
+        }
+    } catch (e) {
+        return sendMessage(chatId, '無法解析 ALLOWED_USER_IDS_JSON，請檢查格式。');
+    }
+
+    const uidToRemove = parseInt(uid);
+    if (isNaN(uidToRemove)) {
+        return sendMessage(chatId, '無效的使用者 ID，請輸入數字。');
+    }
+
+    const index = allowedUserIds.indexOf(uidToRemove);
+    if (index > -1) {
+        allowedUserIds.splice(index, 1);
+        // 這裡無法直接修改 Cloudflare Worker 的環境變數，需要手動更新
+        return sendMessage(chatId, `使用者 ID ${uidToRemove} 已從白名單中移除。請手動更新你的 Cloudflare Worker 的 \`ALLOWED_USER_IDS_JSON\` 環境變數，並重新部署。`);
+    } else {
+        return sendMessage(chatId, `使用者 ID ${uidToRemove} 不在白名單中。`);
+    }
+}
 
 /**
  * 將寶可夢加入使用者專屬的垃圾清單
@@ -314,36 +407,6 @@ async function getTrashList(userId) {
   return list || [];
 }
 
-
-// --- 新增的命令處理函式，用於調用 handleLeagueCommand ---
-async function handleLittleLeagueTop(message) {
-  await handleLeagueCommand(message.chat.id, "little_league_top");
-}
-
-async function handleGreatLeagueTop(message) {
-  await handleLeagueCommand(message.chat.id, "great_league_top");
-}
-
-async function handleUltraLeagueTop(message) {
-  await handleLeagueCommand(message.chat.id, "ultra_league_top");
-}
-
-async function handleMasterLeagueTop(message) {
-  await handleLeagueCommand(message.chat.id, "master_league_top");
-}
-
-async function handleAttackersTop(message) {
-  await handleLeagueCommand(message.chat.id, "attackers_top");
-}
-
-async function handleDefendersTop(message) {
-  await handleLeagueCommand(message.chat.id, "defenders_top");
-}
-
-async function handleSummerCupTop(message) {
-  await handleLeagueCommand(message.chat.id, "summer_cup_top");
-}
-
 /**
  * 處理 incoming Message
  */
@@ -365,6 +428,12 @@ async function onMessage(message) {
     case '/help':
     case '/list':
       return sendHelpMessage(chatId);
+    case '/list_allowed_uid':
+      return handleListAllowedUidCommand(chatId);
+    case '/allow_uid':
+      return handleAllowUidCommand(chatId, pokemonQuery[0]);
+    case '/del_uid':
+      return handleDelUidCommand(chatId, pokemonQuery[0]);
     case '/trash':
       if (pokemonQuery.length > 0) {
         await addToTrashList(userId, pokemonQuery);
@@ -467,6 +536,10 @@ function sendHelpMessage(chatId) {
       `\` /trash \` - 顯示垃圾清單\n` +
       `\` /trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n` +
       `\` /untrash [寶可夢名稱]\` - 從清單中刪除寶可夢\n\n` +
+      `*白名單管理指令:*\n` +
+      `\` /list_allowed_uid \` - 顯示已授權的使用者 ID\n` +
+      `\` /allow_uid [使用者ID] \` - 新增使用者 ID 到白名單\n` +
+      `\` /del_uid [使用者ID] \` - 從白名單中刪除使用者 ID\n\n` +
       `*聯盟排名指令:*\n` +
       `${leagueCommands}\n\n` +
       `\` /list \` - 顯示所有聯盟排名查詢指令\n` +
