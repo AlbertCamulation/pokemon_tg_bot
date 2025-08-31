@@ -14,7 +14,6 @@ const BRANCH_NAME = "main";
 const TOKEN = ENV_BOT_TOKEN;
 const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
-const ALLOWED_USER_IDS_JSON = ALLOWED_USER_IDS_JSON;
 const TRASH_LIST_PREFIX = 'trash_pokemon_'; // KV 儲存的 key 前綴
 const ALLOWED_UID_KEY = 'allowed_user_ids'; // KV 儲存的白名單 key
 
@@ -23,7 +22,7 @@ const leagues = [
   { command: "great_league_top", name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
   { command: "ultra_league_top", name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
   { command: "master_league_top", name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
-  { command: "attackers_top", name: "最佳攻擊", cp: "N/A", path: "data/rankings_attack_tier.json" },
+  { command: "attackers_top", name: "最佳攻擊", cp: "N/A", path: "data/rankings_attackers_tier.json" },
   { command: "defenders_top", name: "最佳防禦", cp: "N/A", path: "data/rankings_defenders_tier.json" },
   { command: "summer_cup_top", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" }
 ];
@@ -280,18 +279,33 @@ async function handleUntrashCommand(chatId, userId, pokemonNames) {
 }
 
 /**
+ * 從 KV 取得已授權的使用者 ID 列表
+ */
+async function getAllowedUserIds() {
+    if (typeof POKEMON_KV === 'undefined') {
+        console.error("錯誤：POKEMON_KV 命名空間未綁定。");
+        return [];
+    }
+    const allowedIds = await POKEMON_KV.get(ALLOWED_UID_KEY, 'json');
+    return allowedIds || [];
+}
+
+/**
+ * 設定已授權的使用者 ID 列表到 KV
+ */
+async function setAllowedUserIds(ids) {
+    if (typeof POKEMON_KV === 'undefined') {
+        console.error("錯誤：POKEMON_KV 命名空間未綁定。");
+        return;
+    }
+    await POKEMON_KV.put(ALLOWED_UID_KEY, JSON.stringify(ids));
+}
+
+/**
  * 處理 /list_allowed_uid 命令
  */
 async function handleListAllowedUidCommand(chatId) {
-    let allowedUserIds = [];
-    try {
-        if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
-            allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
-        }
-    } catch (e) {
-        console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
-        return sendMessage(chatId, '無法解析 ALLOWED_USER_IDS_JSON，請檢查格式。');
-    }
+    const allowedUserIds = await getAllowedUserIds();
 
     if (allowedUserIds.length === 0) {
         return sendMessage(chatId, '目前沒有已授權的使用者 ID。');
@@ -299,14 +313,10 @@ async function handleListAllowedUidCommand(chatId) {
 
     let replyMessage = '已授權的使用者 ID：\n\n';
     
-    // 這裡我們無法直接從 Worker 獲取使用者名稱，因為沒有存取 Telegram API 的權限來反查 ID。
-    // 只能顯示 ID 本身。
     allowedUserIds.forEach(uid => {
         replyMessage += `- <code>${uid}</code>\n`;
     });
 
-    replyMessage += '\n_(請注意，Worker 無法直接透過 ID 查詢使用者名稱)_';
-    
     return sendMessage(chatId, replyMessage, 'HTML');
 }
 
@@ -318,14 +328,7 @@ async function handleAllowUidCommand(chatId, uid) {
         return sendMessage(chatId, '請提供一個使用者 ID 以加入白名單。例如：`/allow_uid 123456789`');
     }
 
-    let allowedUserIds = [];
-    try {
-        if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
-            allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
-        }
-    } catch (e) {
-        return sendMessage(chatId, '無法解析 ALLOWED_USER_IDS_JSON，請檢查格式。');
-    }
+    let allowedUserIds = await getAllowedUserIds();
 
     const newUid = parseInt(uid);
     if (isNaN(newUid)) {
@@ -337,8 +340,8 @@ async function handleAllowUidCommand(chatId, uid) {
     }
 
     allowedUserIds.push(newUid);
-    // 這裡無法直接修改 Cloudflare Worker 的環境變數，需要手動更新
-    return sendMessage(chatId, `使用者 ID ${newUid} 已成功加入。請手動更新你的 Cloudflare Worker 的 \`ALLOWED_USER_IDS_JSON\` 環境變數，並重新部署。`);
+    await setAllowedUserIds(allowedUserIds);
+    return sendMessage(chatId, `使用者 ID ${newUid} 已成功加入白名單。`);
 }
 
 /**
@@ -349,14 +352,7 @@ async function handleDelUidCommand(chatId, uid) {
         return sendMessage(chatId, '請提供一個使用者 ID 以從白名單移除。例如：`/del_uid 123456789`');
     }
 
-    let allowedUserIds = [];
-    try {
-        if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
-            allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
-        }
-    } catch (e) {
-        return sendMessage(chatId, '無法解析 ALLOWED_USER_IDS_JSON，請檢查格式。');
-    }
+    let allowedUserIds = await getAllowedUserIds();
 
     const uidToRemove = parseInt(uid);
     if (isNaN(uidToRemove)) {
@@ -366,8 +362,8 @@ async function handleDelUidCommand(chatId, uid) {
     const index = allowedUserIds.indexOf(uidToRemove);
     if (index > -1) {
         allowedUserIds.splice(index, 1);
-        // 這裡無法直接修改 Cloudflare Worker 的環境變數，需要手動更新
-        return sendMessage(chatId, `使用者 ID ${uidToRemove} 已從白名單中移除。請手動更新你的 Cloudflare Worker 的 \`ALLOWED_USER_IDS_JSON\` 環境變數，並重新部署。`);
+        await setAllowedUserIds(allowedUserIds);
+        return sendMessage(chatId, `使用者 ID ${uidToRemove} 已從白名單中移除。`);
     } else {
         return sendMessage(chatId, `使用者 ID ${uidToRemove} 不在白名單中。`);
     }
@@ -467,6 +463,7 @@ async function onMessage(message) {
   }
 }
 
+// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
 async function handleWebhook(event) {
   if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
     return new Response('Unauthorized', { status: 403 });
@@ -476,14 +473,7 @@ async function handleWebhook(event) {
   return new Response('Ok');
 }
 async function onUpdate(update) {
-  let allowedUserIds = [];
-  try {
-    if (typeof ALLOWED_USER_IDS_JSON !== 'undefined' && ALLOWED_USER_IDS_JSON) {
-      allowedUserIds = JSON.parse(ALLOWED_USER_IDS_JSON);
-    }
-  } catch (e) {
-    console.error("解析 ALLOWED_USER_IDS_JSON 時出錯:", e);
-  }
+  let allowedUserIds = await getAllowedUserIds();
   
   if ('message' in update && update.message.from) {
     const user = update.message.from;
@@ -493,13 +483,12 @@ async function onUpdate(update) {
       let userInfo = user.first_name || '';
       if (user.last_name) userInfo += ` ${user.last_name}`;
       if (user.username) userInfo += ` (@${user.username})`;
-      console.error(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
+      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
       return;
     }
-    else {
-      console.log(`Authorized access for user: ID=${userId}, Name=${user.first_name}`);
-    }
+
     if ('text' in update.message) {
+      console.log(`User ${userId} (${user.username || user.first_name}) sent: ${update.message.text}`);
       await onMessage(update.message);
     }
   }
