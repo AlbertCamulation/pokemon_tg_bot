@@ -86,6 +86,11 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       let cpDisplay = '';
       
       const speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
+      // --- 🔥 強制翻譯修正點 🔥 ---
+      if (speciesName === 'Giratina (Altered)') {
+        speciesName = '騎拉帝納(別種)';
+      }
+      // --------------------------
       const isPvpokeRank = pokemon.score !== undefined; // 判斷是否為 PvPoke 數據
 
       if (isPvpokeRank) { // PvPoke 結構
