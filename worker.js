@@ -405,7 +405,7 @@ async function getTrashList(userId) {
 }
 
 /**
- * 處理 incoming Message
+ * 處理 incoming Message (已修正版本)
  */
 async function onMessage(message) {
   if (!message.text) {
@@ -415,23 +415,39 @@ async function onMessage(message) {
   const text = message.text.trim();
   const messageParts = text.split(' ');
   const commandText = messageParts[0];
-  const command = commandText.split('@')[0];
+  // 修正1：移除指令最前面的 '/'，方便後續比對
+  const command = commandText.split('@')[0].substring(1); 
   const pokemonQuery = messageParts.slice(1);
   const chatId = message.chat.id;
   const userId = message.from.id;
 
+  // 修正2：動態檢查指令是否存在於 leagues 陣列中
+  const leagueInfo = leagues.find(l => l.command === command);
+
+  if (leagueInfo) {
+    // 如果是聯盟指令，就統一呼叫 handleLeagueCommand 函式
+    const limit = parseInt(pokemonQuery[0], 10) || 25;
+    return await handleLeagueCommand(chatId, command, limit);
+  }
+
+  // 修正3：如果不是聯盟指令，才進入 switch 處理其他指令
+  // 注意 case 後面都沒有斜線 '/'
   switch (command) {
-    case '/start':
-    case '/help':
-    case '/list':
+    case 'start':
+    case 'help':
+    case 'list':
       return sendHelpMessage(chatId);
-    case '/list_allowed_uid':
+    
+    case 'list_allowed_uid':
       return handleListAllowedUidCommand(chatId);
-    case '/allow_uid':
+    
+    case 'allow_uid':
       return handleAllowUidCommand(chatId, pokemonQuery[0]);
-    case '/del_uid':
+    
+    case 'del_uid':
       return handleDelUidCommand(chatId, pokemonQuery[0]);
-    case '/trash':
+    
+    case 'trash':
       if (pokemonQuery.length > 0) {
         await addToTrashList(userId, pokemonQuery);
         const addedPokemon = pokemonQuery.join(', ');
@@ -439,28 +455,16 @@ async function onMessage(message) {
       } else {
         return handleTrashCommand(chatId, userId, message.from);
       }
-    case '/untrash':
+    
+    case 'untrash':
       return handleUntrashCommand(chatId, userId, pokemonQuery);
-    case '/great_league_top':
-      return await handleGreatLeagueTop(message);
-    case '/ultra_league_top':
-      return await handleUltraLeagueTop(message);
-    case '/master_league_top':
-      return await handleMasterLeagueTop(message);
-    case '/attackers_top':
-      return await handleAttackersTop(message);
-    case '/defenders_top':
-      return await handleDefendersTop(message);
-    case '/summer_cup_top':
-      return await handleSummerCupTop(message);
-    case '/retro_cup_top':
-      return await handleRetroCupTop(message);
-    case '/little_league_top':
-      return await handleLittleLeagueTop(message);
+    
     default:
+      // 如果指令是以 '/' 開頭但找不到對應處理，視為未知指令
       if (text.startsWith('/')) {
-        return sendMessage(chatId, '這是一個未知的指令。請直接輸入寶可夢的中英文名稱來查詢排名。');
+        return sendMessage(chatId, '這是一個未知的指令。請使用 /help 查看所有可用指令。');
       } else {
+        // 如果不是以 '/' 開頭，則視為寶可夢名稱搜尋
         return await handlePokemonSearch(chatId, text);
       }
   }
