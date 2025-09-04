@@ -25,7 +25,7 @@ const leagues = [
   { command: "attackers_top", name: "最佳攻擊", cp: "N/A", path: "data/rankings_attackers_tier.json" },
   { command: "defenders_top", name: "最佳防禦", cp: "N/A", path: "data/rankings_defenders_tier.json" },
   { command: "summer_cup_top", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" },
-  { command: "retro_cup_top", name: "復古盃1500", cp: "2500", path: "data/rankings_1500_retro.json" }
+  { command: "retro_cup_top", name: "復古盃1500", cp: "1500", path: "data/rankings_1500_retro.json" }
 ];
 
 /**
