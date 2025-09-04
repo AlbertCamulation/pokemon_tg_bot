@@ -24,7 +24,8 @@ const leagues = [
   { command: "master_league_top", name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
   { command: "attackers_top", name: "最佳攻擊", cp: "N/A", path: "data/rankings_attackers_tier.json" },
   { command: "defenders_top", name: "最佳防禦", cp: "N/A", path: "data/rankings_defenders_tier.json" },
-  { command: "summer_cup_top", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" }
+  { command: "summer_cup_top", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" },
+  { command: "retro_cup_top", name: "復古盃1500", cp: "2500", path: "data/rankings_1500_retro.json" }
 ];
 
 /**
@@ -452,6 +453,8 @@ async function onMessage(message) {
       return await handleDefendersTop(message);
     case '/summer_cup_top':
       return await handleSummerCupTop(message);
+    case '/retro_cup_top':
+      return await handleRetroCupTop(message);
     case '/little_league_top':
       return await handleLittleLeagueTop(message);
     default:
