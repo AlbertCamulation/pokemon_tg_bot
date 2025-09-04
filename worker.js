@@ -95,7 +95,7 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
         speciesName = '騎拉帝納(別種) 暗影';
       }
       // ------------------------------------
-
+      const isPvpokeRank = pokemon.score !== undefined;
       if (isPvpokeRank) { // PvPoke 結構
         rankDisplay = pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}`;
       } else { // PogoHub 結構
