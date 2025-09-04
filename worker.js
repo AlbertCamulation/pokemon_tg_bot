@@ -85,13 +85,16 @@ async function handleLeagueCommand(chatId, command, limit = 25) {
       let typesDisplay = '';
       let cpDisplay = '';
       
-      const speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
-      // --- 🔥 強制翻譯修正點 🔥 ---
-      if (speciesName === 'Giratina (Altered) (Shadow)') {
+      // --- 🔥 修正點：將 const 改為 let 🔥 ---
+      let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
+      
+      // --- 🔥 增加對普通版和暗影版的強制翻譯 🔥 ---
+      if (speciesName === 'Giratina (Altered)') {
+        speciesName = '騎拉帝納(別種)';
+      } else if (speciesName === 'Giratina (Altered) (Shadow)') {
         speciesName = '騎拉帝納(別種) 暗影';
       }
-      // --------------------------
-      const isPvpokeRank = pokemon.score !== undefined; // 判斷是否為 PvPoke 數據
+      // ------------------------------------
 
       if (isPvpokeRank) { // PvPoke 結構
         rankDisplay = pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}`;
