@@ -1,0 +1,55 @@
+name: Fetch and Commit PvPoke Rankings
+
+on:
+  schedule:
+    # 每天執行一次 (at 00:00 UTC)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+
+    steps:
+      # 步驟 1: 先 Checkout 你的專案程式碼
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 步驟 2: 設定 Python 環境
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x' # 使用最新的 Python 3 版本
+
+      # 步驟 3: 安裝 Python 依賴套件
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 步驟 4: 執行 Python 腳本來獲取資料
+      - name: Fetch PvPoke rankings data
+        run: python fetch_data.py
+      
+      # 步驟 5: 設定 Git 並 Commit/Push 檔案
+      - name: Commit and push if there are changes
+        run: |
+          # 設定 Git 的機器人使用者
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 將 data 資料夾中的所有變更加入追蹤列表
+          git add data/
+          
+          # 檢查是否有檔案變更，若有才執行 commit 和 push
+          # 'git status --porcelain' 會在有變更時輸出內容，否則為空
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Changes detected. Committing and pushing..."
+            git commit -m "Update PvPoke rankings data ($(date +'%Y-%m-%d'))"
+            git push
+          else
+            echo "No changes detected. Skipping commit."
+          fi
