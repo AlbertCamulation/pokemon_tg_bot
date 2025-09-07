@@ -48,78 +48,96 @@ addEventListener('fetch', event => {
  * 處理所有聯盟排名的命令
  */
 async function handleLeagueCommand(chatId, command, limit = 25) {
-  const leagueInfo = leagues.find(l => l.command === command);
-  if (!leagueInfo) {
-    return sendMessage(chatId, '未知的命令，請檢查指令。');
-  }
+  const leagueInfo = leagues.find(l => l.command === command);
+  if (!leagueInfo) {
+    return sendMessage(chatId, '未知的命令，請檢查指令。');
+  }
 
-  await sendMessage(chatId, `正在查詢 *${leagueInfo.name}* 的前 ${limit} 名寶可夢，請稍候...`, 'Markdown');
+  await sendMessage(chatId, `正在查詢 *${leagueInfo.name}* 的前 ${limit} 名寶可夢，請稍候...`, 'Markdown');
 
-  try {
-    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
-    const dataUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${leagueInfo.path}?${cacheBuster}`;
-    const transUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+  try {
+    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+    const dataUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${leagueInfo.path}?${cacheBuster}`;
+    const transUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+    
+    const [response, transResponse] = await Promise.all([
+      fetch(dataUrl),
+      fetch(transUrl)
+    ]);
+
+    if (!response.ok) {
+      throw new Error(`無法載入 ${leagueInfo.name} 排名資料 (HTTP ${response.status})`);
+    }
+    if (!transResponse.ok) {
+      throw new Error(`無法載入寶可夢中英文對照表 (HTTP ${transResponse.status})`);
+    }
+
+    const rankings = await response.json();
+    const allPokemonData = await transResponse.json();
+    const idToNameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+
+    const topRankings = rankings.slice(0, limit);
+
+    let replyMessage = `🏆 *${leagueInfo.name}* (前 ${limit} 名) 🏆\n\n`;
     
-    const [response, transResponse] = await Promise.all([
-      fetch(dataUrl),
-      fetch(transUrl)
-    ]);
+    // --- ⭐️ 新增：用於存放可複製名稱的陣列 ⭐️ ---
+    const copyableNames = [];
 
-    if (!response.ok) {
-      throw new Error(`無法載入 ${leagueInfo.name} 排名資料 (HTTP ${response.status})`);
-    }
-    if (!transResponse.ok) {
-      throw new Error(`無法載入寶可夢中英文對照表 (HTTP ${transResponse.status})`);
-    }
+    topRankings.forEach((pokemon, rankIndex) => {
+      let rankDisplay = '';
+      let typesDisplay = '';
+      let cpDisplay = '';
+      
+      let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
+      
+      if (speciesName === 'Giratina (Altered)') {
+        speciesName = '騎拉帝納(別種)';
+      } else if (speciesName === 'Giratina (Altered) (Shadow)') {
+        speciesName = '騎拉帝納(別種) 暗影';
+      }
 
-    const rankings = await response.json();
-    const allPokemonData = await transResponse.json();
-    const idToNameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-
-    const topRankings = rankings.slice(0, limit);
-
-    let replyMessage = `🏆 *${leagueInfo.name}* (前 ${limit} 名) 🏆\n\n`;
-
-    topRankings.forEach((pokemon, rankIndex) => {
-      let rankDisplay = '';
-      let typesDisplay = '';
-      let cpDisplay = '';
-      
-      // --- 🔥 修正點：將 const 改為 let 🔥 ---
-      let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
-      
-      // --- 🔥 增加對普通版和暗影版的強制翻譯 🔥 ---
-      if (speciesName === 'Giratina (Altered)') {
-        speciesName = '騎拉帝納(別種)';
-      } else if (speciesName === 'Giratina (Altered) (Shadow)') {
-        speciesName = '騎拉帝納(別種) 暗影';
-      }
+      // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
+      const cleanedName = speciesName
+          .replace(/\s*暗影/g, '')      // 移除 " 暗影"
+          .replace(/\s*伽勒爾/g, '')    // 移除 " 伽勒爾"
+          .replace(/\(別種\)/g, '');    // 移除 "(別種)"
+      copyableNames.push(cleanedName.trim());
       // ------------------------------------
-      const isPvpokeRank = pokemon.score !== undefined;
-      if (isPvpokeRank) { // PvPoke 結構
-        rankDisplay = pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}`;
-      } else { // PogoHub 結構
-        rankDisplay = pokemon.tier ? `(${pokemon.tier})` : '';
-      }
       
-      if (pokemon.types && pokemon.types.length > 0) {
-        typesDisplay = `(${pokemon.types.join(', ')})`;
-      }
+      const isPvpokeRank = pokemon.score !== undefined;
+      if (isPvpokeRank) { // PvPoke 結構
+        rankDisplay = pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}`;
+      } else { // PogoHub 結構
+        rankDisplay = pokemon.tier ? `(${pokemon.tier})` : '';
+      }
+      
+      if (pokemon.types && pokemon.types.length > 0) {
+        typesDisplay = `(${pokemon.types.join(', ')})`;
+      }
 
-      if (pokemon.cp) {
-        cpDisplay = ` CP: ${pokemon.cp}`;
-      }
-      
-      const score = pokemon.score && typeof pokemon.score === 'number' ? `(${pokemon.score.toFixed(2)})` : '';
-      
-      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}\n`;
-    });
+      if (pokemon.cp) {
+        cpDisplay = ` CP: ${pokemon.cp}`;
+      }
+      
+      const score = pokemon.score && typeof pokemon.score === 'number' ? `(${pokemon.score.toFixed(2)})` : '';
+      
+      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}\n`;
+    });
 
-    return sendMessage(chatId, replyMessage.trim(), 'Markdown');
-  } catch (e) {
-    console.error(`查詢 ${leagueInfo.name} 時出錯:`, e);
-    return sendMessage(chatId, `處理查詢 *${leagueInfo.name}* 時發生錯誤: ${e.message}`, 'Markdown');
-  }
+    // --- ⭐️ 新增：將可複製的清單附加到訊息末尾 ⭐️ ---
+    if (copyableNames.length > 0) {
+        replyMessage += `\n\n*可複製清單:*\n`;
+        replyMessage += "```\n";
+        replyMessage += copyableNames.join(',');
+        replyMessage += "\n```";
+    }
+    // ------------------------------------
+
+    return sendMessage(chatId, replyMessage.trim(), 'Markdown');
+  } catch (e) {
+    console.error(`查詢 ${leagueInfo.name} 時出錯:`, e);
+    return sendMessage(chatId, `處理查詢 *${leagueInfo.name}* 時發生錯誤: ${e.message}`, 'Markdown');
+  }
 }
 
 /**
