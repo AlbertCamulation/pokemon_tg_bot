@@ -48,7 +48,7 @@ addEventListener('fetch', event => {
 /**
  * 處理所有聯盟排名的命令
  */
-async function handleLeagueCommand(chatId, command, limit = 25) {
+async function handleLeagueCommand(chatId, command, limit = 50) {
   const leagueInfo = leagues.find(l => l.command === command);
   if (!leagueInfo) {
     return sendMessage(chatId, '未知的命令，請檢查指令。');
