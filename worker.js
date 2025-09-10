@@ -24,7 +24,8 @@ const leagues = [
   { command: "master_league_top", name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
   { command: "attackers_top", name: "最佳攻擊", cp: "10000", path: "data/rankings_attackers_tier.json" },
   { command: "defenders_top", name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
-  { command: "summer_cup_top", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" },
+  { command: "summer_cup_top_2500", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" },
+  { command: "summer_cup_top_1500", name: "夏日盃1500", cp: "1500", path: "data/rankings_1500_summer.json" },
   { command: "retro_cup_top", name: "復古盃1500", cp: "1500", path: "data/rankings_1500_retro.json" }
 ];
 
