@@ -104,6 +104,8 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
         speciesName = '念力土偶 暗影';
       } else if (speciesName === 'Zweilous (Shadow)') {
         speciesName = '雙首暴龍 暗影';
+      } else if (speciesName === 'Golisopod') {
+        speciesName = '具甲武者';
       }
 
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
