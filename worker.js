@@ -108,6 +108,8 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
 
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
       const cleanedName = speciesName
+          .replace(/\s*別種/g, '')
+          .replace(/\s*裝甲/g, '')
           .replace(/\s*滿腹花紋/g, '')
           .replace(/\s*洗翠/g, '')
           .replace(/\s*Mega/g, '')
