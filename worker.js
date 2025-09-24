@@ -100,10 +100,24 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
         speciesName = '騎拉帝納(別種)';
       } else if (speciesName === 'Giratina (Altered) (Shadow)') {
         speciesName = '騎拉帝納(別種) 暗影';
+      } else if (speciesName === 'Claydol (Shadow)') {
+        speciesName = '念力土偶 暗影';
+      } else if (speciesName === 'Zweilous (Shadow)') {
+        speciesName = '雙首暴龍 暗影';
       }
 
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
       const cleanedName = speciesName
+          .replace(/\s*滿腹花紋/g, '')
+          .replace(/\s*洗翠/g, '')
+          .replace(/\s*Mega/g, '')
+          .replace(/\s*Mega X/g, '')
+          .replace(/\s*Mega Y/g, '')
+          .replace(/\s*原始/g, '')
+          .replace(/\s*起源/g, '')
+          .replace(/\s*劍之王/g, '')
+          .replace(/\s*盾之王/g, '')
+          .replace(/\s*焰白/g, '')
           .replace(/\s*暗影/g, '')      // 移除 " 暗影"
           .replace(/\s*伽勒爾/g, '')    // 移除 " 伽勒爾"
           .replace(/\(別種\)/g, '');    // 移除 "(別種)"
@@ -132,9 +146,10 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
 
     // --- ⭐️ 新增：將可複製的清單附加到訊息末尾 ⭐️ ---
     if (copyableNames.length > 0) {
+        const uniqueNames = [...new Set(copyableNames)];
         replyMessage += `\n\n*可複製清單:*\n`;
         replyMessage += "```\n";
-        replyMessage += copyableNames.join(',');
+        replyMessage += uniqueNames.join(',');
         replyMessage += "\n```";
     }
     // ------------------------------------
