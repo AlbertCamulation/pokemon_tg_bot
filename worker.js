@@ -496,7 +496,7 @@ async function onMessage(message) {
 
   if (leagueInfo) {
     // 如果是聯盟指令，就統一呼叫 handleLeagueCommand 函式
-    const limit = parseInt(pokemonQuery[0], 10) || $LIMIT_LEAGUES_SHOW;
+    const limit = parseInt(pokemonQuery[0], 10) || LIMIT_LEAGUES_SHOW;
     return await handleLeagueCommand(chatId, command, limit);
   }
 
