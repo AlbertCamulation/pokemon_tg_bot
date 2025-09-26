@@ -594,7 +594,7 @@ function apiUrl(methodName, params = null) {
   return `https://api.telegram.org/bot${TOKEN}/${methodName}${query}`;
 }
 function sendHelpMessage(chatId) {
-  const leagueCommands = leagues.map(l => `/${l.command} - 查詢 ${l.name} 前25名`).join('\n');
+  const leagueCommands = leagues.map(l => `/${l.command.replace(/_/g, '\\_')} - 查詢 ${l.name} 前${LIMIT_LEAGUES_SHOW}名`).join('\n');
   const helpMessage = `*寶可夢排名查詢 Bot*\n\n` +
       `*功能說明:*\n` +
       `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
