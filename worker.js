@@ -97,9 +97,9 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
       let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
       
       if (speciesName === 'Giratina (Altered)') {
-        speciesName = '騎拉帝納(別種)';
+        speciesName = '騎拉帝納 別種';
       } else if (speciesName === 'Giratina (Altered) (Shadow)') {
-        speciesName = '騎拉帝納(別種) 暗影';
+        speciesName = '騎拉帝納 別種 暗影';
       } else if (speciesName === 'Claydol (Shadow)') {
         speciesName = '念力土偶 暗影';
       } else if (speciesName === 'Zweilous (Shadow)') {
@@ -115,7 +115,6 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
           .replace(/\s*特大尺寸/g, '')
           .replace(/\s*大尺寸/g, '')
           .replace(/\s*小尺寸/g, '')
-          .replace(/\(別種\)/g, '');    // 移除 "(別種)"
           .replace(/\s*別種/g, '')
           .replace(/\s*裝甲/g, '')
           .replace(/\s*滿腹花紋/g, '')
