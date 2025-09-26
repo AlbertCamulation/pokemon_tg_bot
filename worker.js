@@ -16,7 +16,7 @@ const WEBHOOK = '/endpoint';
 const SECRET = ENV_BOT_SECRET;
 const TRASH_LIST_PREFIX = 'trash_pokemon_'; // KV 儲存的 key 前綴
 const ALLOWED_UID_KEY = 'allowed_user_ids'; // KV 儲存的白名單 key
-
+const LIMIT_LEAGUES_SHOW = 50
 const leagues = [
   { command: "little_league_top", name: "小小盃", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
@@ -496,7 +496,7 @@ async function onMessage(message) {
 
   if (leagueInfo) {
     // 如果是聯盟指令，就統一呼叫 handleLeagueCommand 函式
-    const limit = parseInt(pokemonQuery[0], 10) || 25;
+    const limit = parseInt(pokemonQuery[0], 10) || $LIMIT_LEAGUES_SHOW;
     return await handleLeagueCommand(chatId, command, limit);
   }
 
@@ -594,23 +594,23 @@ function apiUrl(methodName, params = null) {
   return `https://api.telegram.org/bot${TOKEN}/${methodName}${query}`;
 }
 function sendHelpMessage(chatId) {
-  const leagueCommands = leagues.map(l => `\`/${l.command}\` - 查詢 ${l.name} 前25名`).join('\n');
+  const leagueCommands = leagues.map(l => `/${l.command} - 查詢 ${l.name} 前25名`).join('\n');
   const helpMessage = `*寶可夢排名查詢 Bot*\n\n` +
       `*功能說明:*\n` +
       `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
       `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
       `*垃圾清單指令:*\n` +
-      ` /trash  - 顯示垃圾清單\n` +
-      `\` /trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n` +
-      `\` /untrash [寶可夢名稱]\` - 從清單中刪除寶可夢\n\n` +
+      `/trash - 顯示垃圾清單\n` +
+      `\`/trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n` +
+      `\`/untrash [寶可夢名稱]\` - 從清單中刪除寶可夢\n\n` +
       `*白名單管理指令:*\n` +
-      ` /list_allowed_uid  - 顯示已授權的使用者 ID\n` +
-      `\` /allow_uid [使用者ID] \` - 新增使用者 ID 到白名單\n` +
-      `\` /del_uid [使用者ID] \` - 從白名單中刪除使用者 ID\n\n` +
+      `/list_allowed_uid - 顯示已授權的使用者 ID\n` +
+      `\`/allow_uid [使用者ID]\` - 新增使用者 ID 到白名單\n` +
+      `\`/del_uid [使用者ID]\` - 從白名單中刪除使用者 ID\n\n` +
       `*聯盟排名指令:*\n` +
       `${leagueCommands}\n\n` +
-      ` /list  - 顯示所有聯盟排名查詢指令\n` +
-      ` /help  - 顯示此說明`;
+      `/list - 顯示所有聯盟排名查詢指令\n` +
+      `/help - 顯示此說明`;
   /*const helpMessage = `*寶可夢排名查詢 Bot*\n\n` +
       `*功能說明:*\n` +
       `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
