@@ -115,6 +115,7 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
           .replace(/\s*特大尺寸/g, '')
           .replace(/\s*大尺寸/g, '')
           .replace(/\s*小尺寸/g, '')
+          .replace(/\(別種\)/g, '');    // 移除 "(別種)"
           .replace(/\s*別種/g, '')
           .replace(/\s*裝甲/g, '')
           .replace(/\s*滿腹花紋/g, '')
@@ -129,7 +130,7 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
           .replace(/\s*焰白/g, '')
           .replace(/\s*暗影/g, '')      // 移除 " 暗影"
           .replace(/\s*伽勒爾/g, '')    // 移除 " 伽勒爾"
-          .replace(/\(別種\)/g, '');    // 移除 "(別種)"
+          
       copyableNames.push(cleanedName.trim());
       // ------------------------------------
       
