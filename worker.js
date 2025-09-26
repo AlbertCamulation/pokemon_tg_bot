@@ -108,6 +108,12 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
         speciesName = '具甲武者';
       } else if (speciesName === 'Cradily') {
         speciesName = '搖籃百合';
+      } else if (speciesName === 'Gigantamax Snorlax') {
+        speciesName = '卡比獸 極巨化';
+      } else if (speciesName === 'Hisuian Avalugg') {
+        speciesName = '冰岩怪 洗翠';
+      } else if (speciesName === 'Gigantamax Lapras') {
+        speciesName = '拉普拉斯 極巨化';
       }
 
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
@@ -127,8 +133,9 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
           .replace(/\s*劍之王/g, '')
           .replace(/\s*盾之王/g, '')
           .replace(/\s*焰白/g, '')
-          .replace(/\s*暗影/g, '')      // 移除 " 暗影"
-          .replace(/\s*伽勒爾/g, '')    // 移除 " 伽勒爾"
+          .replace(/\s*暗影/g, '')
+          .replace(/\s*伽勒爾/g, '')
+          .replace(/\s*極巨化/g, '') 
           
       copyableNames.push(cleanedName.trim());
       // ------------------------------------
