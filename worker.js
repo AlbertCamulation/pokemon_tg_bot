@@ -295,7 +295,7 @@ async function handleTrashCommand(chatId, userId, messageFrom) {
   }
 
   const pokemonNames = trashList.join(',');
-  let replyMessage = `您好, ${userName}\n這是您的垃圾清單：\n\n<code>${pokemonNames}&!3*&!4*</code>\n\n可以複製這個清單並貼到遊戲內搜尋。`;
+  let replyMessage = `您好, ${userName}\n這是您的垃圾清單：\n\n<code>${pokemonNames}&!3*&!4*</code>\n\n可以複製這個清單並貼到遊戲內搜尋。\n\n新增寶可夢：<code>/trash</code>`;
 
   return await sendMessage(chatId, replyMessage, 'HTML');
 }
