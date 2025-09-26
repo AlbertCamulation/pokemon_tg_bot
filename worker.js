@@ -114,8 +114,12 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
         speciesName = '冰岩怪 洗翠';
       } else if (speciesName === 'Gigantamax Lapras') {
         speciesName = '拉普拉斯 極巨化';
-      } else if (speciesName === 'Hydreigon (Shadow) ') {
+      } else if (speciesName === 'Hydreigon (Shadow)') {
         speciesName = '三首惡龍 暗影';
+      } else if (speciesName === 'Toucannon (Shadow)') {
+        speciesName = '銃嘴大鳥 暗影';
+      } else if (speciesName === 'Trumbeak (Shadow) ') {
+        speciesName = '喇叭啄鳥 暗影';
       }
 
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
@@ -125,6 +129,7 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
           .replace(/\s*拂曉之翼/g, '')
           .replace(/\s*黃昏之鬃/g, '')
           .replace(/\s*特大尺寸/g, '')
+          .replace(/\s*普通尺寸/g, '')
           .replace(/\s*大尺寸/g, '')
           .replace(/\s*小尺寸/g, '')
           .replace(/\s*別種/g, '')
