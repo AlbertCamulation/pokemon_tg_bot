@@ -106,10 +106,15 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
         speciesName = '雙首暴龍 暗影';
       } else if (speciesName === 'Golisopod') {
         speciesName = '具甲武者';
+      } else if (speciesName === 'Cradily') {
+        speciesName = '搖籃百合';
       }
 
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
       const cleanedName = speciesName
+          .replace(/\s*特大尺寸/g, '')
+          .replace(/\s*大尺寸/g, '')
+          .replace(/\s*小尺寸/g, '')
           .replace(/\s*別種/g, '')
           .replace(/\s*裝甲/g, '')
           .replace(/\s*滿腹花紋/g, '')
