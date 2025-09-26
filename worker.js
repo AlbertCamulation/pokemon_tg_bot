@@ -201,7 +201,8 @@ async function handlePokemonSearch(chatId, query) {
     );
     const allLeagueRanks = await Promise.all(fetchPromises);
 
-    let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢家族排名結果 🏆\n`;
+    /*let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢家族排名結果 🏆\n`;*/
+    let replyMessage = `🏆 與 <b>"${query}"</b> 相關的寶可夢家族排名結果 🏆\n`;
     let foundAnyResults = false;
 
     allLeagueRanks.forEach((rankings, index) => {
@@ -224,7 +225,8 @@ async function handlePokemonSearch(chatId, query) {
       
       if (resultsInThisLeague.length > 0) {
         foundAnyResults = true;
-        replyMessage += `\n*${league.name} (${league.cp}):*\n`;
+        /*replyMessage += `\n*${league.name} (${league.cp}):*\n`;*/
+        replyMessage += `\n<b>${league.name} (${league.cp}):</b>\n`;
         resultsInThisLeague.forEach(p => {
           let rankDisplay = '';
           if (p.rank && typeof p.rank === 'number') {
@@ -238,7 +240,8 @@ async function handlePokemonSearch(chatId, query) {
           const cp = p.cp ? ` CP: ${p.cp}` : '';
           const typesDisplay = p.types && p.types.length > 0 ? `(${p.types.join(', ')})` : '';
 
-          replyMessage += `${rankDisplay} ${p.speciesName} ${typesDisplay}${cp} ${score} - ${rating}\n`;
+          /*replyMessage += `${rankDisplay} ${p.speciesName} ${typesDisplay}${cp} ${score} - ${rating}\n`;*/
+          replyMessage += `${rankDisplay} <code>${p.speciesName}</code> ${typesDisplay}${cp} ${score} - ${rating}\n`;
         });
       }
     });
@@ -247,7 +250,8 @@ async function handlePokemonSearch(chatId, query) {
       replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
     }
 
-    return await sendMessage(chatId, replyMessage.trim(), 'Markdown');
+    /*return await sendMessage(chatId, replyMessage.trim(), 'Markdown');*/
+    return await sendMessage(chatId, replyMessage.trim(), 'HTML');
 
   } catch (e) {
     console.error("搜尋時出錯:", e);
