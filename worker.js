@@ -114,6 +114,8 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
         speciesName = '冰岩怪 洗翠';
       } else if (speciesName === 'Gigantamax Lapras') {
         speciesName = '拉普拉斯 極巨化';
+      } else if (speciesName === 'Hydreigon (Shadow) ') {
+        speciesName = '三首惡龍 暗影';
       }
 
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
