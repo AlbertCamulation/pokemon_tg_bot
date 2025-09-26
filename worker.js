@@ -600,6 +600,22 @@ function sendHelpMessage(chatId) {
       `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
       `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
       `*垃圾清單指令:*\n` +
+      ` /trash  - 顯示垃圾清單\n` +
+      `\` /trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n` +
+      `\` /untrash [寶可夢名稱]\` - 從清單中刪除寶可夢\n\n` +
+      `*白名單管理指令:*\n` +
+      ` /list_allowed_uid  - 顯示已授權的使用者 ID\n` +
+      `\` /allow_uid [使用者ID] \` - 新增使用者 ID 到白名單\n` +
+      `\` /del_uid [使用者ID] \` - 從白名單中刪除使用者 ID\n\n` +
+      `*聯盟排名指令:*\n` +
+      `${leagueCommands}\n\n` +
+      ` /list  - 顯示所有聯盟排名查詢指令\n` +
+      ` /help  - 顯示此說明`;
+  /*const helpMessage = `*寶可夢排名查詢 Bot*\n\n` +
+      `*功能說明:*\n` +
+      `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
+      `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
+      `*垃圾清單指令:*\n` +
       `\` /trash \` - 顯示垃圾清單\n` +
       `\` /trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n` +
       `\` /untrash [寶可夢名稱]\` - 從清單中刪除寶可夢\n\n` +
@@ -610,6 +626,6 @@ function sendHelpMessage(chatId) {
       `*聯盟排名指令:*\n` +
       `${leagueCommands}\n\n` +
       `\` /list \` - 顯示所有聯盟排名查詢指令\n` +
-      `\` /help \` - 顯示此說明`;
+      `\` /help \` - 顯示此說明`;*/
   return sendMessage(chatId, helpMessage, 'Markdown');
 }
