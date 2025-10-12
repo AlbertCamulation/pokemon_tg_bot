@@ -93,7 +93,13 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
       let cpDisplay = '';
       
       let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
-      
+      
+      // 🚨 新增：確保 speciesName 是字串，如果不是則跳過此條目或給予預設值
+      if (!speciesName || typeof speciesName !== 'string') {
+          console.warn(`跳過排名錯誤條目: speciesId=${pokemon.speciesId}`);
+          return; // 跳過此迴圈迭代，避免報錯
+      }
+
       if (speciesName === 'Giratina (Altered)') {
         speciesName = '騎拉帝納 別種';
       } else if (speciesName === 'Giratina (Altered) (Shadow)') {
@@ -120,9 +126,9 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
         speciesName = '喇叭啄鳥 暗影';
       }
 
-      // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
-      const cleanedName = speciesName
-          .replace(/\s*一擊流/g, '')
+      // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
+      const cleanedName = speciesName
+          .replace(/\s*一擊流/g, '')
           .replace(/\s*靈獸/g, '')
           .replace(/\s*冰凍/g, '')
           .replace(/\s*水流/g, '')
