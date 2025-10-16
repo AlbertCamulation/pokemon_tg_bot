@@ -24,9 +24,11 @@ const leagues = [
   { command: "summer_cup_top_1500", name: "夏日盃1500", cp: "1500", path: "data/rankings_1500_summer.json" },
   { command: "willpower_cup_top_1500", name: "意志盃1500", cp: "1500", path: "data/rankings_willpower_1500.json" },
   { command: "jungle_cup_top_1500", name: "叢林盃1500", cp: "1500", path: "data/rankings_1500_jungle.json" },
+  { command: "jungle_cup_top_1500", name: "超級聯盟remix", cp: "1500", path: "data/rankings_1500_remix.json" },
   { command: "ultra_league_top", name: "高級聯盟", cp: "2500", path: "data/rankings_2500.json" },
   { command: "summer_cup_top_2500", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" },
   { command: "master_league_top", name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
+  { command: "master_league_top", name: "大師紀念賽", cp: "10000", path: "data/rankings_10000_premier.json" },
   { command: "master_league_top_meta", name: "大師聯盟", cp: "10000", path: "data/rankings_meta_master_10000.json" },
   { command: "attackers_top", name: "最佳攻擊", cp: "10000", path: "data/rankings_attackers_tier.json" },
   { command: "defenders_top", name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
@@ -200,90 +202,114 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
 /**
  * 處理寶可夢模糊搜尋，並按聯盟分組排序顯示結果
  */
+/**
+ * 處理寶可夢模糊搜尋，並按聯盟分組排序顯示結果
+ * (已修改：過濾垃圾評價，並在全為垃圾時提供建議)
+ */
 async function handlePokemonSearch(chatId, query) {
-  await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
+    await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
 
-  try {
-    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
-    const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
-    const transResponse = await fetch(translationUrl);
-    if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
-    const allPokemonData = await transResponse.json();
-    
-    const isChinese = /[\u4e00-\u9fa5]/.test(query);
-    const lowerCaseQuery = query.toLowerCase();
-    const initialMatches = allPokemonData.filter(p => isChinese ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lowerCaseQuery));
-    if (initialMatches.length === 0) return await sendMessage(chatId, `很抱歉，找不到任何與 "${query}" 相關的寶可夢。`);
+    try {
+        const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+        const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+        const transResponse = await fetch(translationUrl);
+        if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
+        const allPokemonData = await transResponse.json();
+        
+        const isChinese = /[\u4e00-\u9fa5]/.test(query);
+        const lowerCaseQuery = query.toLowerCase();
+        const initialMatches = allPokemonData.filter(p => isChinese ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lowerCaseQuery));
+        if (initialMatches.length === 0) return await sendMessage(chatId, `很抱歉，找不到任何與 "${query}" 相關的寶可夢。`);
 
-    const familyIds = new Set(initialMatches.map(p => p.family ? p.family.id : null).filter(id => id));
-    const familyMatches = allPokemonData.filter(p => p.family && familyIds.has(p.family.id));
-    const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
+        const familyIds = new Set(initialMatches.map(p => p.family ? p.family.id : null).filter(id => id));
+        const familyMatches = allPokemonData.filter(p => p.family && familyIds.has(p.family.id));
+        const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
 
-    const matchingIds = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
-    const idToNameMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+        const matchingIds = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
+        const idToNameMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
-    const fetchPromises = leagues.map(league =>
-      fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}?${cacheBuster}`, { cf: { cacheTtl: 86400 } })
-        .then(res => res.ok ? res.json() : null)
-    );
-    const allLeagueRanks = await Promise.all(fetchPromises);
+        const fetchPromises = leagues.map(league =>
+            fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}?${cacheBuster}`, { cf: { cacheTtl: 86400 } })
+                .then(res => res.ok ? res.json() : null)
+        );
+        const allLeagueRanks = await Promise.all(fetchPromises);
 
-    /*let replyMessage = `🏆 與 *"${query}"* 相關的寶可夢家族排名結果 🏆\n`;*/
-    let replyMessage = `🏆 與 <b>"${query}"</b> 相關的寶可夢家族排名結果 🏆\n`;
-    let foundAnyResults = false;
+        let replyMessage = `🏆 與 <b>"${query}"</b> 相關的寶可夢家族排名結果 🏆\n`;
+        
+        // --- ⭐️ 新增：先收集所有結果再進行判斷 ⭐️ ---
+        const collectedResults = [];
 
-    allLeagueRanks.forEach((rankings, index) => {
-      const league = leagues[index];
-      if (!rankings) return;
+        allLeagueRanks.forEach((rankings, index) => {
+            const league = leagues[index];
+            if (!rankings) return;
 
-      const resultsInThisLeague = [];
-      rankings.forEach((pokemon, rankIndex) => {
-        if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
-          resultsInThisLeague.push({
-            rank: pokemon.rank || rankIndex + 1,
-            score: pokemon.score || pokemon.cp || 'N/A',
-            speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
-            types: pokemon.types,
-            tier: pokemon.tier,
-            cp: pokemon.cp,
-          });
-        }
-      });
-      
-      if (resultsInThisLeague.length > 0) {
-        foundAnyResults = true;
-        /*replyMessage += `\n*${league.name} (${league.cp}):*\n`;*/
-        replyMessage += `\n<b>${league.name} (${league.cp}):</b>\n`;
-        resultsInThisLeague.forEach(p => {
-          let rankDisplay = '';
-          if (p.rank && typeof p.rank === 'number') {
-            rankDisplay = `#${p.rank}`;
-          } else {
-            rankDisplay = p.tier ? `(${p.tier})` : '';
-          }
-          
-          const rating = getPokemonRating(p.rank || p.tier);
-          const score = p.score && typeof p.score === 'number' ? `(${p.score.toFixed(2)})` : '';
-          const cp = p.cp ? ` CP: ${p.cp}` : '';
-          const typesDisplay = p.types && p.types.length > 0 ? `(${p.types.join(', ')})` : '';
-
-          /*replyMessage += `${rankDisplay} ${p.speciesName} ${typesDisplay}${cp} ${score} - ${rating}\n`;*/
-          replyMessage += `${rankDisplay} <code>${p.speciesName}</code> ${typesDisplay}${cp} ${score} - ${rating}\n`;
+            rankings.forEach((pokemon, rankIndex) => {
+                if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
+                    const rank = pokemon.rank || pokemon.tier || rankIndex + 1;
+                    collectedResults.push({
+                        league: league,
+                        rank: rank,
+                        score: pokemon.score || pokemon.cp || 'N/A',
+                        speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
+                        types: pokemon.types,
+                        tier: pokemon.tier,
+                        cp: pokemon.cp,
+                        rating: getPokemonRating(rank) // 取得評價
+                    });
+                }
+            });
         });
-      }
-    });
 
-    if (!foundAnyResults) {
-      replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
+        // 過濾掉評價為 "垃圾" 的結果
+        const nonTrashResults = collectedResults.filter(p => p.rating !== "垃圾");
+
+        if (nonTrashResults.length > 0) {
+            // 如果有非垃圾的結果，則分組顯示
+            const resultsByLeague = {};
+            nonTrashResults.forEach(p => {
+                const leagueKey = `<b>${p.league.name} (${p.league.cp}):</b>`;
+                if (!resultsByLeague[leagueKey]) {
+                    resultsByLeague[leagueKey] = [];
+                }
+
+                let rankDisplay = '';
+                if (p.rank && typeof p.rank === 'number') {
+                    rankDisplay = `#${p.rank}`;
+                } else {
+                    rankDisplay = p.tier ? `(${p.tier})` : '';
+                }
+
+                const score = p.score && typeof p.score === 'number' ? `(${p.score.toFixed(2)})` : '';
+                const cp = p.cp ? ` CP: ${p.cp}` : '';
+                const typesDisplay = p.types && p.types.length > 0 ? `(${p.types.join(', ')})` : '';
+
+                resultsByLeague[leagueKey].push(
+                    `${rankDisplay} <code>${p.speciesName}</code> ${typesDisplay}${cp} ${score} - ${p.rating}`
+                );
+            });
+
+            for (const leagueName in resultsByLeague) {
+                replyMessage += `\n${leagueName}\n`;
+                replyMessage += resultsByLeague[leagueName].join('\n') + '\n';
+            }
+
+        } else if (collectedResults.length > 0 && nonTrashResults.length === 0) {
+            // 如果所有找到的結果都是垃圾
+            const representativeName = initialMatches[0].speciesName; // 使用第一個匹配項的名稱作為代表
+            replyMessage = `與 <b>"${query}"</b> 相關的寶可夢在所有聯盟中評價皆為垃圾。\n\n` +
+                         `建議可以輸入 <code>/trash ${representativeName}</code> 將其加入垃圾清單。`;
+        } else {
+            // 如果在所有聯盟中都找不到任何排名資料
+            replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
+        }
+        // --- ⭐️ 修改結束 ⭐️ ---
+
+        return await sendMessage(chatId, replyMessage.trim(), 'HTML');
+
+    } catch (e) {
+        console.error("搜尋時出錯:", e);
+        return await sendMessage(chatId, `處理搜尋時發生錯誤: ${e.message}`);
     }
-
-    /*return await sendMessage(chatId, replyMessage.trim(), 'Markdown');*/
-    return await sendMessage(chatId, replyMessage.trim(), 'HTML');
-
-  } catch (e) {
-    console.error("搜尋時出錯:", e);
-    return await sendMessage(chatId, `處理搜尋時發生錯誤: ${e.message}`);
-  }
 }
 
 /**
