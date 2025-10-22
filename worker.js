@@ -124,8 +124,10 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
         speciesName = '三首惡龍 暗影';
       } else if (speciesName === 'Toucannon (Shadow)') {
         speciesName = '銃嘴大鳥 暗影';
-      } else if (speciesName === 'Trumbeak (Shadow) ') {
+      } else if (speciesName === 'Trumbeak (Shadow)') {
         speciesName = '喇叭啄鳥 暗影';
+      } else if (speciesName === 'Trevenant (Shadow)') {
+        speciesName = '朽木妖 暗影';
       }
 
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
