@@ -20,7 +20,7 @@ const LIMIT_LEAGUES_SHOW = 50
 const leagues = [
   { command: "little_league_top", name: "小小盃", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
-  { command: "halloween_cup_league_top_1500", name: "萬聖節盃1500", cp: "1500", path: "data/rankings_1500_halloween.json" },
+  { command: "halloween_cup_league_top_1500", name: "萬聖節1500", cp: "1500", path: "data/rankings_1500_halloween.json" },
   { command: "retro_cup_top", name: "復古盃1500", cp: "1500", path: "data/rankings_1500_retro.json" },
   { command: "summer_cup_top_1500", name: "夏日盃1500", cp: "1500", path: "data/rankings_1500_summer.json" },
   { command: "willpower_cup_top_1500", name: "意志盃1500", cp: "1500", path: "data/rankings_willpower_1500.json" },
