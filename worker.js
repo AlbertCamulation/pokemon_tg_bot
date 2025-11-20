@@ -131,9 +131,13 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
       } else if (speciesName === 'Trevenant (Shadow)') {
         speciesName = '朽木妖 暗影';
       }
-
+      // 預先編譯 Regex
+      const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|閃電|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化)/g;
+      
+      // 在函式中使用
+      const cleanedName = speciesName.replace(NAME_CLEANER_REGEX, '').trim();
       // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
-      const cleanedName = speciesName
+      /*const cleanedName = speciesName
           .replace(/\s*一擊流/g, '')
           .replace(/\s*靈獸/g, '')
           .replace(/\s*冰凍/g, '')
@@ -161,7 +165,7 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
           .replace(/\s*焰白/g, '')
           .replace(/\s*暗影/g, '')
           .replace(/\s*伽勒爾/g, '')
-          .replace(/\s*極巨化/g, '') 
+          .replace(/\s*極巨化/g, '') */
           
       copyableNames.push(cleanedName.trim());
       // ------------------------------------
