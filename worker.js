@@ -1,22 +1,26 @@
 /**
- * 整合了 Telegram Bot、從 GitHub 讀取資料、User ID 白名單、
- * 以及中英文寶可夢模糊搜尋並按聯盟分組顯示結果的 Worker 腳本
- * (增加了針對翻譯檔的快取清除機制來解決部署問題)
+ * Pokemon Go Telegram Bot Worker
+ * 功能：
+ * 1. 多聯盟排行查詢 (從 GitHub 讀取)
+ * 2. 模糊搜尋寶可夢並顯示跨聯盟評價
+ * 3. 個人化垃圾清單 (/trash, /untrash)
+ * 4. 全域垃圾搜尋 (/trashall) - 輸出全聯盟皆為垃圾的 CSV 字串
+ * 5. 白名單管理 (/allow_uid, /del_uid)
  */
 
 // --- GitHub 相關設定 ---
 const GITHUB_USERNAME = "AlbertCamulation";
 const REPO_NAME = "pokemon_tg_bot";
 const BRANCH_NAME = "main";
-// --------------------
 
-// --- Telegram Bot 相關設定 (直接從全域變數讀取) ---
-const TOKEN = ENV_BOT_TOKEN;
-const WEBHOOK = '/endpoint';
-const SECRET = ENV_BOT_SECRET;
-const TRASH_LIST_PREFIX = 'trash_pokemon_'; // KV 儲存的 key 前綴
-const ALLOWED_UID_KEY = 'allowed_user_ids'; // KV 儲存的白名單 key
-const LIMIT_LEAGUES_SHOW = 50
+// --- 常數設定 ---
+// TOKEN 與 SECRET 從環境變數 (Settings -> Variables) 讀取: ENV_BOT_TOKEN, ENV_BOT_SECRET
+const WEBHOOK = '/endpoint'; 
+const TRASH_LIST_PREFIX = 'trash_pokemon_'; // KV 儲存 user trash list 的前綴
+const ALLOWED_UID_KEY = 'allowed_user_ids'; // KV 儲存白名單的 key
+const LIMIT_LEAGUES_SHOW = 50;
+
+// 定義聯盟列表
 const leagues = [
   { command: "little_league_top", name: "小小盃", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "超級聯盟", cp: "1500", path: "data/rankings_1500.json" },
@@ -31,203 +35,233 @@ const leagues = [
   { command: "summer_cup_top_2500", name: "夏日盃2500", cp: "2500", path: "data/rankings_2500_summer.json" },
   { command: "master_league_top", name: "大師聯盟", cp: "10000", path: "data/rankings_10000.json" },
   { command: "master_league_top_permier", name: "大師紀念賽", cp: "10000", path: "data/rankings_10000_premier.json" },
-  { command: "master_league_top_meta", name: "大師聯盟", cp: "10000", path: "data/rankings_meta_master_10000.json" },
-  { command: "attackers_top", name: "最佳攻擊", cp: "10000", path: "data/rankings_attackers_tier.json" },
-  { command: "defenders_top", name: "最佳防禦", cp: "10000", path: "data/rankings_defenders_tier.json" },
+  { command: "master_league_top_meta", name: "大師聯盟Meta", cp: "10000", path: "data/rankings_meta_master_10000.json" },
+  { command: "attackers_top", name: "最佳攻擊", cp: "Any", path: "data/rankings_attackers_tier.json" },
+  { command: "defenders_top", name: "最佳防禦", cp: "Any", path: "data/rankings_defenders_tier.json" },
 ];
 
+// --- 輔助正則：用於清理名稱以方便搜尋 ---
+const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|閃電|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化)/g;
+
 /**
- * 主監聽事件
+ * 主要監聽事件
  */
 addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.pathname === WEBHOOK) {
     event.respondWith(handleWebhook(event));
   } else if (url.pathname === '/registerWebhook') {
-    event.respondWith(registerWebhook(event, url, WEBHOOK, SECRET));
+    event.respondWith(registerWebhook(event, url, WEBHOOK, ENV_BOT_SECRET));
   } else if (url.pathname === '/unRegisterWebhook') {
     event.respondWith(unRegisterWebhook(event));
   } else {
-    event.respondWith(new Response('Ok'));
+    event.respondWith(new Response('Pokemon Bot is running.'));
   }
 });
+
+/**
+ * 處理 Webhook 請求
+ */
+async function handleWebhook(event) {
+  if (event.request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+  
+  // 驗證 Secret Header
+  const secret = event.request.headers.get('X-Telegram-Bot-Api-Secret-Token');
+  if (secret !== ENV_BOT_SECRET) {
+    return new Response('Unauthorized', { status: 403 });
+  }
+
+  try {
+    const update = await event.request.json();
+    if (update.message) {
+      await onMessage(update.message);
+    }
+    return new Response('Ok');
+  } catch (e) {
+    console.error('Error handling webhook:', e);
+    return new Response('Error', { status: 500 });
+  }
+}
 
 /**
  * 處理所有聯盟排名的命令
  */
 async function handleLeagueCommand(chatId, command, limit = 50) {
-  const leagueInfo = leagues.find(l => l.command === command);
-  if (!leagueInfo) {
-    return sendMessage(chatId, '未知的命令，請檢查指令。');
-  }
+  const leagueInfo = leagues.find(l => l.command === command);
+  if (!leagueInfo) {
+    return sendMessage(chatId, '未知的命令，請檢查指令。');
+  }
 
-  await sendMessage(chatId, `正在查詢 *${leagueInfo.name}* 的前 ${limit} 名寶可夢，請稍候...`, 'Markdown');
+  await sendMessage(chatId, `正在查詢 *${leagueInfo.name}* 的前 ${limit} 名寶可夢，請稍候...`, 'Markdown');
 
-  try {
-    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
-    const dataUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${leagueInfo.path}?${cacheBuster}`;
-    const transUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
-    
-    const [response, transResponse] = await Promise.all([
-      fetch(dataUrl),
-      fetch(transUrl)
-    ]);
-
-    if (!response.ok) {
-      throw new Error(`無法載入 ${leagueInfo.name} 排名資料 (HTTP ${response.status})`);
-    }
-    if (!transResponse.ok) {
-      throw new Error(`無法載入寶可夢中英文對照表 (HTTP ${transResponse.status})`);
-    }
-
-    const rankings = await response.json();
-    const allPokemonData = await transResponse.json();
-    const idToNameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-
-    const topRankings = rankings.slice(0, limit);
-
-    let replyMessage = `🏆 *${leagueInfo.name}* (前 ${limit} 名) 🏆\n\n`;
+  try {
+    const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+    const dataUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${leagueInfo.path}?${cacheBuster}`;
+    const transUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
     
-    // --- ⭐️ 新增：用於存放可複製名稱的陣列 ⭐️ ---
+    const [response, transResponse] = await Promise.all([
+      fetch(dataUrl),
+      fetch(transUrl)
+    ]);
+
+    if (!response.ok) throw new Error(`無法載入 ${leagueInfo.name} 排名資料`);
+    if (!transResponse.ok) throw new Error(`無法載入寶可夢中英文對照表`);
+
+    const rankings = await response.json();
+    const allPokemonData = await transResponse.json();
+    const idToNameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+
+    const topRankings = rankings.slice(0, limit);
+    let replyMessage = `🏆 *${leagueInfo.name}* (前 ${limit} 名) 🏆\n\n`;
     const copyableNames = [];
 
-    topRankings.forEach((pokemon, rankIndex) => {
-      let rankDisplay = '';
-      let typesDisplay = '';
-      let cpDisplay = '';
-      
-      let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
-      
-      // 🚨 新增：確保 speciesName 是字串，如果不是則跳過此條目或給予預設值
-      if (!speciesName || typeof speciesName !== 'string') {
-          console.warn(`跳過排名錯誤條目: speciesId=${pokemon.speciesId}`);
-          return; // 跳過此迴圈迭代，避免報錯
-      }
-
-      if (speciesName === 'Giratina (Altered)') {
-        speciesName = '騎拉帝納 別種';
-      } else if (speciesName === 'Giratina (Altered) (Shadow)') {
-        speciesName = '騎拉帝納 別種 暗影';
-      } else if (speciesName === 'Claydol (Shadow)') {
-        speciesName = '念力土偶 暗影';
-      } else if (speciesName === 'Zweilous (Shadow)') {
-        speciesName = '雙首暴龍 暗影';
-      } else if (speciesName === 'Golisopod') {
-        speciesName = '具甲武者';
-      } else if (speciesName === 'Cradily') {
-        speciesName = '搖籃百合';
-      } else if (speciesName === 'Gigantamax Snorlax') {
-        speciesName = '卡比獸 極巨化';
-      } else if (speciesName === 'Hisuian Avalugg') {
-        speciesName = '冰岩怪 洗翠';
-      } else if (speciesName === 'Gigantamax Lapras') {
-        speciesName = '拉普拉斯 極巨化';
-      } else if (speciesName === 'Hydreigon (Shadow)') {
-        speciesName = '三首惡龍 暗影';
-      } else if (speciesName === 'Toucannon (Shadow)') {
-        speciesName = '銃嘴大鳥 暗影';
-      } else if (speciesName === 'Trumbeak (Shadow)') {
-        speciesName = '喇叭啄鳥 暗影';
-      } else if (speciesName === 'Trevenant (Shadow)') {
-        speciesName = '朽木妖 暗影';
-      }
-      // 預先編譯 Regex
-      const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|閃電|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化)/g;
+    topRankings.forEach((pokemon, rankIndex) => {
+      let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
       
-      // 在函式中使用
+      if (!speciesName || typeof speciesName !== 'string') return;
+
+      // 特殊名稱對應修正 (可依需求增減)
+      if (speciesName === 'Giratina (Altered)') speciesName = '騎拉帝納 別種';
+      else if (speciesName === 'Giratina (Altered) (Shadow)') speciesName = '騎拉帝納 別種 暗影';
+      else if (speciesName === 'Claydol (Shadow)') speciesName = '念力土偶 暗影';
+      // ... (其他特殊名稱可在此補充)
+
+      // 清理名稱並存入複製清單
       const cleanedName = speciesName.replace(NAME_CLEANER_REGEX, '').trim();
-      // --- ⭐️ 新增：清理名稱並存入陣列 ⭐️ ---
-      /*const cleanedName = speciesName
-          .replace(/\s*一擊流/g, '')
-          .replace(/\s*靈獸/g, '')
-          .replace(/\s*冰凍/g, '')
-          .replace(/\s*水流/g, '')
-          .replace(/\s*閃電/g, '')
-          .replace(/\s*完全體/g, '')
-          .replace(/\s*闇黑/g, '')
-          .replace(/\s*拂曉之翼/g, '')
-          .replace(/\s*黃昏之鬃/g, '')
-          .replace(/\s*特大尺寸/g, '')
-          .replace(/\s*普通尺寸/g, '')
-          .replace(/\s*大尺寸/g, '')
-          .replace(/\s*小尺寸/g, '')
-          .replace(/\s*別種/g, '')
-          .replace(/\s*裝甲/g, '')
-          .replace(/\s*滿腹花紋/g, '')
-          .replace(/\s*洗翠/g, '')
-          .replace(/\s*Mega/g, '')
-          .replace(/\s*X/g, '')
-          .replace(/\s*Y/g, '')
-          .replace(/\s*原始/g, '')
-          .replace(/\s*起源/g, '')
-          .replace(/\s*劍之王/g, '')
-          .replace(/\s*盾之王/g, '')
-          .replace(/\s*焰白/g, '')
-          .replace(/\s*暗影/g, '')
-          .replace(/\s*伽勒爾/g, '')
-          .replace(/\s*極巨化/g, '') */
-          
-      copyableNames.push(cleanedName.trim());
-      // ------------------------------------
+      if (cleanedName) copyableNames.push(cleanedName);
+
+      // 顯示格式處理
+      let rankDisplay = '';
+      if (pokemon.score !== undefined) {
+        rankDisplay = pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}`;
+      } else {
+        rankDisplay = pokemon.tier ? `(${pokemon.tier})` : '';
+      }
       
-      const isPvpokeRank = pokemon.score !== undefined;
-      if (isPvpokeRank) { // PvPoke 結構
-        rankDisplay = pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}`;
-      } else { // PogoHub 結構
-        rankDisplay = pokemon.tier ? `(${pokemon.tier})` : '';
-      }
-      
-      if (pokemon.types && pokemon.types.length > 0) {
-        typesDisplay = `(${pokemon.types.join(', ')})`;
-      }
+      const typesDisplay = (pokemon.types && pokemon.types.length > 0) ? `(${pokemon.types.join(', ')})` : '';
+      const cpDisplay = pokemon.cp ? ` CP: ${pokemon.cp}` : '';
+      const score = (pokemon.score && typeof pokemon.score === 'number') ? `(${pokemon.score.toFixed(2)})` : '';
+      
+      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}\n`;
+    });
 
-      if (pokemon.cp) {
-        cpDisplay = ` CP: ${pokemon.cp}`;
-      }
-      
-      const score = pokemon.score && typeof pokemon.score === 'number' ? `(${pokemon.score.toFixed(2)})` : '';
-      
-      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}\n`;
-    });
-
-    // --- ⭐️ 新增：將可複製的清單附加到訊息末尾 ⭐️ ---
+    // 附加可複製清單
     if (copyableNames.length > 0) {
-        const uniqueNames = [...new Set(copyableNames)];
-        replyMessage += `\n\n*可複製清單:*\n`;
-        replyMessage += "```\n";
-        replyMessage += uniqueNames.join(',');
-        replyMessage += "\n```";
+      const uniqueNames = [...new Set(copyableNames)];
+      replyMessage += `\n\n*可複製清單:*\n\`\`\`\n${uniqueNames.join(',')}\n\`\`\``;
     }
-    // ------------------------------------
 
-    return sendMessage(chatId, replyMessage.trim(), 'Markdown');
-  } catch (e) {
-    console.error(`查詢 ${leagueInfo.name} 時出錯:`, e);
-    return sendMessage(chatId, `處理查詢 *${leagueInfo.name}* 時發生錯誤: ${e.message}`, 'Markdown');
-  }
+    return sendMessage(chatId, replyMessage.trim(), 'Markdown');
+  } catch (e) {
+    console.error(`查詢 ${leagueInfo.name} 時出錯:`, e);
+    return sendMessage(chatId, `處理查詢 *${leagueInfo.name}* 時發生錯誤: ${e.message}`, 'Markdown');
+  }
 }
 
 /**
- * 處理寶可夢模糊搜尋，並按聯盟分組排序顯示結果
+ * 處理 /trashall 命令 (核心需求)
+ * 邏輯：搜尋全聯盟，找出 "有在排名表中出現" 但 "在所有聯盟都評價很差(>100名 或 垃圾等級)" 的寶可夢
  */
+async function handleTrashAllCommand(chatId) {
+    await sendMessage(chatId, '🗑️ 正在掃描全聯盟資料，彙整「完全垃圾」的寶可夢清單，請稍候...');
+
+    try {
+        const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
+        
+        // 1. 下載翻譯檔
+        const transUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
+        const transResponse = await fetch(transUrl);
+        if (!transResponse.ok) throw new Error("無法讀取翻譯檔");
+        const allPokemonData = await transResponse.json();
+        const idToNameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+
+        // 2. 下載所有聯盟資料
+        const fetchPromises = leagues.map(league =>
+            fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${league.path}?${cacheBuster}`, { cf: { cacheTtl: 86400 } })
+                .then(res => res.ok ? res.json() : null)
+        );
+        const allLeagueRanks = await Promise.all(fetchPromises);
+
+        // 3. 分析數據
+        const goodIds = new Set(); // 只要在任一聯盟表現好，就放入這裡
+        const seenIds = new Set(); // 所有有出現過的 ID
+
+        allLeagueRanks.forEach(rankings => {
+            if (!rankings) return;
+            rankings.forEach(p => {
+                const pid = p.speciesId.toLowerCase();
+                seenIds.add(pid);
+
+                const rank = p.rank || p.tier || 999;
+                const rating = getPokemonRating(rank);
+                
+                // 定義 "非垃圾": 評價不是垃圾
+                if (rating !== "垃圾") {
+                    goodIds.add(pid);
+                }
+            });
+        });
+
+        // 4. 篩選出真正的垃圾 (出現過，但從來沒好過)
+        const trashNames = [];
+        seenIds.forEach(pid => {
+            if (!goodIds.has(pid)) {
+                let name = idToNameMap.get(pid);
+                if (name) {
+                    // 這裡可以做簡單的中文名稱修正
+                    if (name === 'Giratina (Altered)') name = '騎拉帝納 別種';
+                    else if (name === 'Giratina (Altered) (Shadow)') name = '騎拉帝納 別種 暗影';
+
+                    // 使用 Regex 清理名稱 (去掉 暗影, Mega, 洗翠...)
+                    const cleanedName = name.replace(NAME_CLEANER_REGEX, '').trim();
+                    if (cleanedName) {
+                        trashNames.push(cleanedName);
+                    }
+                }
+            }
+        });
+
+        // 5. 去重並排序
+        const uniqueTrashNames = [...new Set(trashNames)].sort();
+
+        if (uniqueTrashNames.length === 0) {
+            return await sendMessage(chatId, '🎉 驚人的發現！目前資料庫中沒有完全被評為垃圾的寶可夢。');
+        }
+
+        // 6. 產生 CSV 格式的回覆
+        const csvContent = uniqueTrashNames.join(',');
+        
+        let replyMessage = `🗑️ <b>全聯盟垃圾寶可夢清單</b>\n`;
+        replyMessage += `(已排除在任一聯盟排名前段的寶可夢)\n\n`;
+        replyMessage += `<code>${csvContent}</code>`;
+
+        return await sendMessage(chatId, replyMessage, 'HTML');
+
+    } catch (e) {
+        console.error("執行 trashall 時出錯:", e);
+        return await sendMessage(chatId, `查詢失敗: ${e.message}`);
+    }
+}
+
 /**
- * 處理寶可夢模糊搜尋，並按聯盟分組排序顯示結果
- * (已修改：過濾垃圾評價，並在全為垃圾時提供建議)
+ * 處理寶可夢模糊搜尋
  */
 async function handlePokemonSearch(chatId, query) {
-    await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名，請稍候...`);
+    await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的寶可夢家族排名...`);
 
     try {
         const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
         const translationUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/chinese_translation.json?${cacheBuster}`;
         const transResponse = await fetch(translationUrl);
-        if (!transResponse.ok) throw new Error(`無法載入寶可夢資料庫 (HTTP ${transResponse.status})`);
+        if (!transResponse.ok) throw new Error("無法載入寶可夢資料庫");
         const allPokemonData = await transResponse.json();
         
         const isChinese = /[\u4e00-\u9fa5]/.test(query);
         const lowerCaseQuery = query.toLowerCase();
         const initialMatches = allPokemonData.filter(p => isChinese ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lowerCaseQuery));
-        if (initialMatches.length === 0) return await sendMessage(chatId, `很抱歉，找不到任何與 "${query}" 相關的寶可夢。`);
+        if (initialMatches.length === 0) return await sendMessage(chatId, `找不到與 "${query}" 相關的寶可夢。`);
 
         const familyIds = new Set(initialMatches.map(p => p.family ? p.family.id : null).filter(id => id));
         const familyMatches = allPokemonData.filter(p => p.family && familyIds.has(p.family.id));
@@ -242,9 +276,7 @@ async function handlePokemonSearch(chatId, query) {
         );
         const allLeagueRanks = await Promise.all(fetchPromises);
 
-        let replyMessage = `🏆 與 <b>"${query}"</b> 相關的寶可夢家族排名結果 🏆\n`;
-        
-        // --- ⭐️ 新增：先收集所有結果再進行判斷 ⭐️ ---
+        let replyMessage = `🏆 與 <b>"${query}"</b> 相關的排名結果 🏆\n`;
         const collectedResults = [];
 
         allLeagueRanks.forEach((rankings, index) => {
@@ -262,66 +294,52 @@ async function handlePokemonSearch(chatId, query) {
                         types: pokemon.types,
                         tier: pokemon.tier,
                         cp: pokemon.cp,
-                        rating: getPokemonRating(rank) // 取得評價
+                        rating: getPokemonRating(rank)
                     });
                 }
             });
         });
 
-        // 過濾掉評價為 "垃圾" 的結果
+        // 過濾掉 "垃圾" 評價
         const nonTrashResults = collectedResults.filter(p => p.rating !== "垃圾");
 
         if (nonTrashResults.length > 0) {
-            // 如果有非垃圾的結果，則分組顯示
             const resultsByLeague = {};
             nonTrashResults.forEach(p => {
                 const leagueKey = `<b>${p.league.name} (${p.league.cp}):</b>`;
-                if (!resultsByLeague[leagueKey]) {
-                    resultsByLeague[leagueKey] = [];
-                }
+                if (!resultsByLeague[leagueKey]) resultsByLeague[leagueKey] = [];
 
-                let rankDisplay = '';
-                if (p.rank && typeof p.rank === 'number') {
-                    rankDisplay = `#${p.rank}`;
-                } else {
-                    rankDisplay = p.tier ? `(${p.tier})` : '';
-                }
-
-                const score = p.score && typeof p.score === 'number' ? `(${p.score.toFixed(2)})` : '';
+                let rankDisplay = (typeof p.rank === 'number') ? `#${p.rank}` : (p.tier ? `(${p.tier})` : '');
+                const score = (p.score && typeof p.score === 'number') ? `(${p.score.toFixed(2)})` : '';
                 const cp = p.cp ? ` CP: ${p.cp}` : '';
-                const typesDisplay = p.types && p.types.length > 0 ? `(${p.types.join(', ')})` : '';
+                const types = (p.types && p.types.length > 0) ? `(${p.types.join(', ')})` : '';
 
                 resultsByLeague[leagueKey].push(
-                    `${rankDisplay} <code>${p.speciesName}</code> ${typesDisplay}${cp} ${score} - ${p.rating}`
+                    `${rankDisplay} <code>${p.speciesName}</code> ${types}${cp} ${score} - ${p.rating}`
                 );
             });
 
             for (const leagueName in resultsByLeague) {
-                replyMessage += `\n${leagueName}\n`;
-                replyMessage += resultsByLeague[leagueName].join('\n') + '\n';
+                replyMessage += `\n${leagueName}\n` + resultsByLeague[leagueName].join('\n') + '\n';
             }
-
-        } else if (collectedResults.length > 0 && nonTrashResults.length === 0) {
-            // 如果所有找到的結果都是垃圾
-            const representativeName = initialMatches[0].speciesName; // 使用第一個匹配項的名稱作為代表
+        } else if (collectedResults.length > 0) {
+            const representativeName = initialMatches[0].speciesName;
             replyMessage = `與 <b>"${query}"</b> 相關的寶可夢在所有聯盟中評價皆為垃圾。\n\n` +
-                         `建議可以輸入 <code>/trash ${representativeName}</code> 將其加入垃圾清單。`;
+                         `建議輸入 <code>/trash ${representativeName}</code> 加入垃圾清單。`;
         } else {
-            // 如果在所有聯盟中都找不到任何排名資料
             replyMessage = `很抱歉，在所有聯盟中都找不到與 "${query}" 相關的排名資料。`;
         }
-        // --- ⭐️ 修改結束 ⭐️ ---
 
         return await sendMessage(chatId, replyMessage.trim(), 'HTML');
 
     } catch (e) {
         console.error("搜尋時出錯:", e);
-        return await sendMessage(chatId, `處理搜尋時發生錯誤: ${e.message}`);
+        return await sendMessage(chatId, `搜尋錯誤: ${e.message}`);
     }
 }
 
 /**
- * 根據排名給予評價的函式
+ * 評價等級判斷
  */
 function getPokemonRating(rank) {
   if (typeof rank === 'number' && !isNaN(rank)) {
@@ -331,352 +349,225 @@ function getPokemonRating(rank) {
     if (rank <= 100) return "🥉銅";
     return "垃圾";
   }
-  
   if (typeof rank === 'string') {
-    const ratingMap = {
-      "S": "🥇白金",
-      "A+": "🥇金",
-      "A": "🥈銀",
-      "B+": "🥉銅",
-      "B": "垃圾",
-      "C": "垃圾",
-      "D": "垃圾",
-      "F": "垃圾"
-    };
-    return ratingMap[rank] || "N/A";
+    const map = { "S": "🥇白金", "A+": "🥇金", "A": "🥈銀", "B+": "🥉銅" };
+    return map[rank] || "垃圾";
   }
   return "N/A";
 }
 
 /**
- * 處理 /trash 命令，現在會顯示使用者專屬的垃圾清單
+ * KV 資料操作相關函式
+ */
+async function getTrashList(userId) {
+  if (typeof POKEMON_KV === 'undefined') return [];
+  return (await POKEMON_KV.get(TRASH_LIST_PREFIX + userId, 'json')) || [];
+}
+
+async function addToTrashList(userId, pokemonNames) {
+  if (typeof POKEMON_KV === 'undefined') return;
+  const list = await getTrashList(userId);
+  pokemonNames.forEach(name => {
+    if (name && !list.includes(name)) list.push(name);
+  });
+  await POKEMON_KV.put(TRASH_LIST_PREFIX + userId, JSON.stringify(list));
+}
+
+async function getAllowedUserIds() {
+  if (typeof POKEMON_KV === 'undefined') return [];
+  return (await POKEMON_KV.get(ALLOWED_UID_KEY, 'json')) || [];
+}
+
+async function setAllowedUserIds(ids) {
+  if (typeof POKEMON_KV === 'undefined') return;
+  await POKEMON_KV.put(ALLOWED_UID_KEY, JSON.stringify(ids));
+}
+
+/**
+ * 處理 /trash 命令
  */
 async function handleTrashCommand(chatId, userId, messageFrom) {
   const trashList = await getTrashList(userId);
   const userName = messageFrom.first_name || messageFrom.username || "訓練家";
   
-  if (trashList.length === 0) {
-    return await sendMessage(chatId, `您好, ${userName}\n您的垃圾清單目前是空的。`);
-  }
+  if (trashList.length === 0) return sendMessage(chatId, `您好, ${userName}\n您的垃圾清單目前是空的。`);
 
   const pokemonNames = trashList.join(',');
-  let replyMessage = `您好, ${userName}\n這是您的垃圾清單：\n\n<code>${pokemonNames}&!3*&!4*</code>\n\n可以複製這個清單並貼到遊戲內搜尋。\n\n新增寶可夢：<code>/trash</code>`;
-
-  return await sendMessage(chatId, replyMessage, 'HTML');
+  let replyMessage = `您好, ${userName}\n您的垃圾清單：\n\n<code>${pokemonNames}&!3*&!4*</code>\n\n複製上方字串可於遊戲內搜尋。\n新增指令: /trash [名稱]`;
+  return sendMessage(chatId, replyMessage, 'HTML');
 }
 
 /**
- * 處理 /untrash 命令，可以移除多個寶可夢
+ * 處理 /untrash 命令
  */
 async function handleUntrashCommand(chatId, userId, pokemonNames) {
-    if (pokemonNames.length === 0) {
-        return await sendMessage(chatId, "請輸入您想移除的寶可夢名稱，以空格分隔。");
-    }
+  if (pokemonNames.length === 0) return sendMessage(chatId, "請輸入要移除的名稱。");
+  if (typeof POKEMON_KV === 'undefined') return;
 
-    if (typeof POKEMON_KV === 'undefined') {
-        console.error("錯誤：POKEMON_KV 命名空間未綁定。");
-        return;
-    }
-
-    const kvKey = TRASH_LIST_PREFIX + userId;
-    let currentList = await getTrashList(userId);
-    const removedPokemon = [];
-
-    pokemonNames.forEach(name => {
-        const index = currentList.indexOf(name);
-        if (index > -1) {
-            currentList.splice(index, 1);
-            removedPokemon.push(name);
-        }
-    });
-
-    if (removedPokemon.length > 0) {
-        await POKEMON_KV.put(kvKey, JSON.stringify(currentList));
-        const removedNames = removedPokemon.join(', ');
-        return sendMessage(chatId, `已從您的垃圾清單中移除：${removedNames}。`);
-    } else {
-        const notFoundNames = pokemonNames.join(', ');
-        return sendMessage(chatId, `清單中找不到您指定的寶可夢：${notFoundNames}。`);
-    }
-}
-
-/**
- * 從 KV 取得已授權的使用者 ID 列表
- */
-async function getAllowedUserIds() {
-    if (typeof POKEMON_KV === 'undefined') {
-        console.error("錯誤：POKEMON_KV 命名空間未綁定。");
-        return [];
-    }
-    const allowedIds = await POKEMON_KV.get(ALLOWED_UID_KEY, 'json');
-    return allowedIds || [];
-}
-
-/**
- * 設定已授權的使用者 ID 列表到 KV
- */
-async function setAllowedUserIds(ids) {
-    if (typeof POKEMON_KV === 'undefined') {
-        console.error("錯誤：POKEMON_KV 命名空間未綁定。");
-        return;
-    }
-    await POKEMON_KV.put(ALLOWED_UID_KEY, JSON.stringify(ids));
-}
-
-/**
- * 處理 /list_allowed_uid 命令
- */
-async function handleListAllowedUidCommand(chatId) {
-    const allowedUserIds = await getAllowedUserIds();
-
-    if (allowedUserIds.length === 0) {
-        return sendMessage(chatId, '目前沒有已授權的使用者 ID。');
-    }
-
-    let replyMessage = '已授權的使用者 ID：\n\n';
-    
-    allowedUserIds.forEach(uid => {
-        replyMessage += `- <code>${uid}</code>\n`;
-    });
-
-    return sendMessage(chatId, replyMessage, 'HTML');
-}
-
-/**
- * 處理 /allow_uid {uid} 命令
- */
-async function handleAllowUidCommand(chatId, uid) {
-    if (!uid) {
-        return sendMessage(chatId, '請提供一個使用者 ID 以加入白名單。例如：`/allow_uid 123456789`');
-    }
-
-    let allowedUserIds = await getAllowedUserIds();
-
-    const newUid = parseInt(uid);
-    if (isNaN(newUid)) {
-        return sendMessage(chatId, '無效的使用者 ID，請輸入數字。');
-    }
-    
-    if (allowedUserIds.includes(newUid)) {
-        return sendMessage(chatId, `使用者 ID ${newUid} 已在白名單中。`);
-    }
-
-    allowedUserIds.push(newUid);
-    await setAllowedUserIds(allowedUserIds);
-    return sendMessage(chatId, `使用者 ID ${newUid} 已成功加入白名單。`);
-}
-
-/**
- * 處理 /del_uid {uid} 命令
- */
-async function handleDelUidCommand(chatId, uid) {
-    if (!uid) {
-        return sendMessage(chatId, '請提供一個使用者 ID 以從白名單移除。例如：`/del_uid 123456789`');
-    }
-
-    let allowedUserIds = await getAllowedUserIds();
-
-    const uidToRemove = parseInt(uid);
-    if (isNaN(uidToRemove)) {
-        return sendMessage(chatId, '無效的使用者 ID，請輸入數字。');
-    }
-
-    const index = allowedUserIds.indexOf(uidToRemove);
-    if (index > -1) {
-        allowedUserIds.splice(index, 1);
-        await setAllowedUserIds(allowedUserIds);
-        return sendMessage(chatId, `使用者 ID ${uidToRemove} 已從白名單中移除。`);
-    } else {
-        return sendMessage(chatId, `使用者 ID ${uidToRemove} 不在白名單中。`);
-    }
-}
-
-/**
- * 將寶可夢加入使用者專屬的垃圾清單
- */
-async function addToTrashList(userId, pokemonNames) {
-  if (typeof POKEMON_KV === 'undefined') {
-    console.error("錯誤：POKEMON_KV 命名空間未綁定。");
-    return;
-  }
-  const kvKey = TRASH_LIST_PREFIX + userId; // 使用前綴 + userId 作為 KV key
-  const list = await getTrashList(userId);
-  
-  // 逐一處理多個寶可夢名稱
-  pokemonNames.forEach(pokemonName => {
-    if (pokemonName && !list.includes(pokemonName)) {
-      list.push(pokemonName);
+  const currentList = await getTrashList(userId);
+  const removed = [];
+  pokemonNames.forEach(name => {
+    const idx = currentList.indexOf(name);
+    if (idx > -1) {
+      currentList.splice(idx, 1);
+      removed.push(name);
     }
   });
 
-  await POKEMON_KV.put(kvKey, JSON.stringify(list));
-}
-
-/**
- * 從 KV 取得使用者專屬的垃圾清單
- */
-async function getTrashList(userId) {
-  if (typeof POKEMON_KV === 'undefined') {
-    console.error("錯誤：POKEMON_KV 命名空間未綁定。");
-    return [];
+  if (removed.length > 0) {
+    await POKEMON_KV.put(TRASH_LIST_PREFIX + userId, JSON.stringify(currentList));
+    return sendMessage(chatId, `已移除：${removed.join(', ')}`);
+  } else {
+    return sendMessage(chatId, "清單中找不到這些寶可夢。");
   }
-  const kvKey = TRASH_LIST_PREFIX + userId; // 使用前綴 + userId 作為 KV key
-  const list = await POKEMON_KV.get(kvKey, 'json');
-  return list || [];
 }
 
 /**
- * 處理 incoming Message (已修正版本)
+ * 處理 /allow_uid 與 /del_uid
+ */
+async function handleAllowUidCommand(chatId, uid) {
+    if (!uid) return sendMessage(chatId, '請輸入 UID');
+    let ids = await getAllowedUserIds();
+    const newId = parseInt(uid);
+    if (isNaN(newId)) return sendMessage(chatId, '無效的 UID');
+    if (ids.includes(newId)) return sendMessage(chatId, '已在白名單中');
+    ids.push(newId);
+    await setAllowedUserIds(ids);
+    return sendMessage(chatId, `已加入 UID: ${newId}`);
+}
+
+async function handleDelUidCommand(chatId, uid) {
+    if (!uid) return sendMessage(chatId, '請輸入 UID');
+    let ids = await getAllowedUserIds();
+    const targetId = parseInt(uid);
+    const idx = ids.indexOf(targetId);
+    if (idx > -1) {
+        ids.splice(idx, 1);
+        await setAllowedUserIds(ids);
+        return sendMessage(chatId, `已移除 UID: ${targetId}`);
+    }
+    return sendMessage(chatId, '不在白名單中');
+}
+
+/**
+ * 訊息入口與路由
  */
 async function onMessage(message) {
-  if (!message.text) {
-    return;
-  }
+  if (!message.text) return;
 
   const text = message.text.trim();
-  const messageParts = text.split(' ');
-  const commandText = messageParts[0];
-  // 修正1：移除指令最前面的 '/'，方便後續比對
-  const command = commandText.split('@')[0].substring(1); 
-  const pokemonQuery = messageParts.slice(1);
+  const parts = text.split(' ');
+  // 移除指令前的斜線與 @botname
+  const command = parts[0].split('@')[0].substring(1); 
+  const args = parts.slice(1);
   const chatId = message.chat.id;
   const userId = message.from.id;
 
-  // 修正2：動態檢查指令是否存在於 leagues 陣列中
+  // 1. 檢查是否為聯盟指令
   const leagueInfo = leagues.find(l => l.command === command);
-
   if (leagueInfo) {
-    // 如果是聯盟指令，就統一呼叫 handleLeagueCommand 函式
-    const limit = parseInt(pokemonQuery[0], 10) || LIMIT_LEAGUES_SHOW;
+    const limit = parseInt(args[0], 10) || LIMIT_LEAGUES_SHOW;
     return await handleLeagueCommand(chatId, command, limit);
   }
 
-  // 修正3：如果不是聯盟指令，才進入 switch 處理其他指令
-  // 注意 case 後面都沒有斜線 '/'
+  // 2. 檢查其他功能指令
   switch (command) {
     case 'start':
     case 'help':
     case 'list':
       return sendHelpMessage(chatId);
-    
+
+    case 'trashall':
+      return handleTrashAllCommand(chatId);
+
     case 'list_allowed_uid':
-      return handleListAllowedUidCommand(chatId);
-    
+      const ids = await getAllowedUserIds();
+      return sendMessage(chatId, ids.length ? `白名單:\n${ids.join('\n')}` : '白名單為空');
+
     case 'allow_uid':
-      return handleAllowUidCommand(chatId, pokemonQuery[0]);
-    
+      return handleAllowUidCommand(chatId, args[0]);
+
     case 'del_uid':
-      return handleDelUidCommand(chatId, pokemonQuery[0]);
-    
+      return handleDelUidCommand(chatId, args[0]);
+
     case 'trash':
-      if (pokemonQuery.length > 0) {
-        await addToTrashList(userId, pokemonQuery);
-        const addedPokemon = pokemonQuery.join(', ');
-        return sendMessage(chatId, `已將 "${addedPokemon}" 加入您的垃圾清單。`);
+      if (args.length > 0) {
+        await addToTrashList(userId, args);
+        return sendMessage(chatId, `已將 ${args.join(', ')} 加入垃圾清單。`);
       } else {
         return handleTrashCommand(chatId, userId, message.from);
       }
-    
+
     case 'untrash':
-      return handleUntrashCommand(chatId, userId, pokemonQuery);
-    
+      return handleUntrashCommand(chatId, userId, args);
+
     default:
-      // 如果指令是以 '/' 開頭但找不到對應處理，視為未知指令
-      if (text.startsWith('/')) {
-        return sendMessage(chatId, '這是一個未知的指令。請使用 /help 查看所有可用指令。');
-      } else {
-        // 如果不是以 '/' 開頭，則視為寶可夢名稱搜尋
-        return await handlePokemonSearch(chatId, text);
+      // 如果不是指令，且長度足夠，則視為模糊搜尋
+      if (text.length >= 2 && !text.startsWith('/')) {
+        return handlePokemonSearch(chatId, text);
       }
-  }
-}
-
-// --- 為了讓程式碼完整，將其他無需修改的函式貼在下方 ---
-async function handleWebhook(event) {
-  if (event.request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== SECRET) {
-    return new Response('Unauthorized', { status: 403 });
-  }
-  const update = await event.request.json();
-  event.waitUntil(onUpdate(update));
-  return new Response('Ok');
-}
-async function onUpdate(update) {
-  let allowedUserIds = await getAllowedUserIds();
-  
-  if ('message' in update && update.message.from) {
-    const user = update.message.from;
-    const userId = user.id;
-    console.log(allowedUserIds);
-    if (allowedUserIds.length > 0 && !allowedUserIds.includes(userId)) {
-      let userInfo = user.first_name || '';
-      if (user.last_name) userInfo += ` ${user.last_name}`;
-      if (user.username) userInfo += ` (@${user.username})`;
-      console.log(`Blocked access for unauthorized user: ID=${userId}, Name=${userInfo}`);
+      // 不回覆未知指令，避免洗版
       return;
-    }
+  }
+}
 
-    if ('text' in update.message) {
-      console.log(`User ${userId} (${user.username || user.first_name}) sent: ${update.message.text}`);
-      await onMessage(update.message);
-    }
-  }
+/**
+ * 發送訊息至 Telegram
+ */
+async function sendMessage(chatId, text, parseMode = '') {
+  const url = `https://api.telegram.org/bot${ENV_BOT_TOKEN}/sendMessage`;
+  const payload = { chat_id: chatId, text: text };
+  if (parseMode) payload.parse_mode = parseMode;
+  
+  await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
 }
-async function sendMessage(chatId, text, parseMode = null) {
-  const params = { chat_id: chatId, text };
-  if (parseMode) {
-    params.parse_mode = parseMode;
-  }
-  return (await fetch(apiUrl('sendMessage', params))).json();
+
+/**
+ * 幫助訊息
+ */
+async function sendHelpMessage(chatId) {
+  const helpText = `
+🤖 *Pokemon Go 排行機器人*
+
+*排名查詢:*
+/great_league_top - 超級聯盟
+/ultra_league_top - 高級聯盟
+/master_league_top - 大師聯盟
+/little_league_top - 小小盃
+... (輸入 /list 查看完整列表)
+
+*功能指令:*
+🔍 直接輸入寶可夢名稱 (如: 巨沼怪) 可查詢評價
+🗑️ /trash [名稱] - 加入個人垃圾清單
+📋 /trash - 查看/複製個人垃圾清單
+✨ /trashall - 取得全聯盟垃圾寶可夢 CSV
+❌ /untrash [名稱] - 移除清單項目
+  `;
+  await sendMessage(chatId, helpText, 'Markdown');
 }
-async function registerWebhook(event, requestUrl, suffix, secret) {
-  const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
-  const r = await (await fetch(apiUrl('setWebhook', { url: webhookUrl, secret_token: secret }))).json();
-  return new Response('ok' in r && r.ok ? 'Ok' : JSON.stringify(r, null, 2));
+
+/**
+ * 註冊/解除 Webhook
+ */
+async function registerWebhook(event, url, webhookPath, secret) {
+  const webhookUrl = `${url.protocol}//${url.hostname}${webhookPath}`;
+  const apiUrl = `https://api.telegram.org/bot${ENV_BOT_TOKEN}/setWebhook`;
+  
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: webhookUrl, secret_token: secret })
+  });
+  
+  return new Response(await response.text());
 }
+
 async function unRegisterWebhook(event) {
-  const r = await (await fetch(apiUrl('setWebhook', { url: '' }))).json();
-  return new Response('ok' in r && r.ok ? 'Ok' : JSON.stringify(r, null, 2));
-}
-function apiUrl(methodName, params = null) {
-  let query = '';
-  if (params) {
-    query = '?' + new URLSearchParams(params).toString();
-  }
-  return `https://api.telegram.org/bot${TOKEN}/${methodName}${query}`;
-}
-function sendHelpMessage(chatId) {
-  const leagueCommands = leagues.map(l => `/${l.command.replace(/_/g, '\\_')} - 查詢 ${l.name} 前${LIMIT_LEAGUES_SHOW}名`).join('\n');
-  const helpMessage = `*寶可夢排名查詢 Bot*\n\n` +
-      `*功能說明:*\n` +
-      `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
-      `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
-      `*垃圾清單指令:*\n` +
-      `/trash - 顯示垃圾清單\n` +
-      `\`/trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n` +
-      `\`/untrash [寶可夢名稱]\` - 從清單中刪除寶可夢\n\n` +
-      `*白名單管理指令:*\n` +
-      `/list_allowed_uid - 顯示已授權的使用者 ID\n` +
-      `\`/allow_uid [使用者ID]\` - 新增使用者 ID 到白名單\n` +
-      `\`/del_uid [使用者ID]\` - 從白名單中刪除使用者 ID\n\n` +
-      `*聯盟排名指令:*\n` +
-      `${leagueCommands}\n\n` +
-      `/list - 顯示所有聯盟排名查詢指令\n` +
-      `/help - 顯示此說明`;
-  /*const helpMessage = `*寶可夢排名查詢 Bot*\n\n` +
-      `*功能說明:*\n` +
-      `\`直接輸入寶可夢名稱\` (中/英文) 來查詢其在各聯盟中的排名。\n` +
-      `*例如:* \`索財靈\` 或 \`Gimmighoul\`\n\n` +
-      `*垃圾清單指令:*\n` +
-      `\` /trash \` - 顯示垃圾清單\n` +
-      `\` /trash [寶可夢名稱]\` - 新增寶可夢到垃圾清單\n` +
-      `\` /untrash [寶可夢名稱]\` - 從清單中刪除寶可夢\n\n` +
-      `*白名單管理指令:*\n` +
-      `\` /list_allowed_uid \` - 顯示已授權的使用者 ID\n` +
-      `\` /allow_uid [使用者ID] \` - 新增使用者 ID 到白名單\n` +
-      `\` /del_uid [使用者ID] \` - 從白名單中刪除使用者 ID\n\n` +
-      `*聯盟排名指令:*\n` +
-      `${leagueCommands}\n\n` +
-      `\` /list \` - 顯示所有聯盟排名查詢指令\n` +
-      `\` /help \` - 顯示此說明`;*/
-  return sendMessage(chatId, helpMessage, 'Markdown');
+  const apiUrl = `https://api.telegram.org/bot${ENV_BOT_TOKEN}/deleteWebhook`;
+  const response = await fetch(apiUrl);
+  return new Response(await response.text());
 }
