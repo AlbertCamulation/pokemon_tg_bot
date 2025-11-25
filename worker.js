@@ -1,9 +1,8 @@
 /**
- * Pokemon Go Telegram Bot Worker (v3.1 完整修復版)
- * 功能：
- * 1. /trashall：全聯盟垃圾清單 (家族連坐法，只要進化型強勢，退化型就不會被列入)
- * 2. 模糊搜尋：顯示各聯盟排名
- * 3. /trash：個人清單管理
+ * Pokemon Go Telegram Bot Worker (v3.2 背景執行優化版)
+ * 修正重點：
+ * 針對 /trashall 運算過久導致 Telegram Timeout 的問題，
+ * 改用 event.waitUntil 讓運算在背景執行，防止機器人卡死。
  */
 
 // --- GitHub 設定 ---
@@ -54,13 +53,19 @@ addEventListener('fetch', event => {
   }
 });
 
+// ⭐️ 關鍵修改：使用 waitUntil 進行背景處理，防止 Timeout ⭐️
 async function handleWebhook(event) {
   if (event.request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
   const secret = event.request.headers.get('X-Telegram-Bot-Api-Secret-Token');
   if (secret !== ENV_BOT_SECRET) return new Response('Unauthorized', { status: 403 });
+  
   try {
     const update = await event.request.json();
-    if (update.message) await onMessage(update.message);
+    if (update.message) {
+      // 這裡不使用 await，而是告訴 Worker 在背景繼續執行 onMessage
+      // 並立刻回傳 200 OK 給 Telegram，這樣 Telegram 就不會覺得機器人卡住了
+      event.waitUntil(onMessage(update.message));
+    }
     return new Response('Ok');
   } catch (e) {
     return new Response('Error', { status: 500 });
@@ -119,9 +124,9 @@ async function handleLeagueCommand(chatId, command, limit = 50) {
   }
 }
 
-// 2. /trashall 家族連坐判斷 (核心修復)
+// 2. /trashall 家族連坐判斷 (背景執行版)
 async function handleTrashAllCommand(chatId) {
-    await sendMessage(chatId, '🗑️ 正在掃描全家族譜系 (Family Check)，請稍候...');
+    await sendMessage(chatId, '🗑️ 正在掃描全家族譜系 (需下載 17 個檔案，請稍候)...');
 
     try {
         const cacheBuster = `v=${Math.random().toString(36).substring(7)}`;
@@ -136,7 +141,6 @@ async function handleTrashAllCommand(chatId) {
         const idToFamilyMap = new Map();
         allPokemonData.forEach(p => {
             const pid = p.speciesId.toLowerCase();
-            // 如果有 family.id 就用，沒有就用自己的 pid 當作獨立家族
             const famId = (p.family && p.family.id) ? p.family.id : `single_${pid}`;
             idToFamilyMap.set(pid, famId);
         });
@@ -162,7 +166,7 @@ async function handleTrashAllCommand(chatId) {
                 if (rating !== "垃圾") {
                     const famId = idToFamilyMap.get(pid);
                     if (famId) goodFamilies.add(famId);
-                    else goodFamilies.add(`single_${pid}`); // 防呆
+                    else goodFamilies.add(`single_${pid}`);
                 }
             });
         });
@@ -177,11 +181,9 @@ async function handleTrashAllCommand(chatId) {
             // 如果這個家族 不在 強勢名單中
             if (!goodFamilies.has(famId)) {
                 let name = p.speciesName;
-                // 名稱修正
                 if (name === 'Giratina (Altered)') name = '騎拉帝納 別種';
                 else if (name === 'Giratina (Altered) (Shadow)') name = '騎拉帝納 別種 暗影';
 
-                // 清理名稱
                 const cleanedName = name.replace(NAME_CLEANER_REGEX, '').trim();
                 if (cleanedName) trashNamesSet.add(cleanedName);
             }
@@ -196,7 +198,7 @@ async function handleTrashAllCommand(chatId) {
         const csvContent = sortedNames.join(',');
         
         let replyMessage = `🗑️ <b>全聯盟垃圾寶可夢清單 (家族連坐版)</b>\n`;
-        replyMessage += `(若某寶可夢的進化型或特殊形態在任一聯盟強勢，則全家族皆不會列入此清單)\n\n`;
+        replyMessage += `(背景運算完成！此清單已排除任何進化型或形態在任一聯盟強勢的家族)\n\n`;
         replyMessage += `<code>${csvContent}</code>`;
 
         return await sendMessage(chatId, replyMessage, 'HTML');
