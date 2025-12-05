@@ -31,9 +31,7 @@ const leagues = [
   { command: "defenders_top", name: "最佳防守者", cp: "Any", path: "data/rankings_defenders_tier.json" }
 ];
 
-// --- 屬性相剋表 (Type Chart) ---
-// key: 攻擊方屬性, value: 被攻擊方屬性的倍率 (僅列出非 1.0 的)
-// 參考 Pokemon GO 數據: 克制=1.6, 被抗=0.625, 無效(雙抗)=0.390625
+// 屬性相剋表 (Type Chart)
 const typeChart = {
   normal: { rock: 0.625, ghost: 0.39, steel: 0.625 },
   fire: { fire: 0.625, water: 0.625, grass: 1.6, ice: 1.6, bug: 1.6, rock: 0.625, dragon: 0.625, steel: 1.6 },
@@ -64,7 +62,7 @@ export default {
     if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
     if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
     if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
-    return new Response("Pokemon Bot is running (Smart Team Builder).", { status: 200 });
+    return new Response("Pokemon Bot is running (Fixed ctx Scope).", { status: 200 });
   }
 };
 
@@ -77,8 +75,9 @@ async function handleWebhook(request, env, ctx) {
 
   try {
     const update = await request.json();
-    if (update.message) ctx.waitUntil(onMessage(update.message, env));
-    else if (update.callback_query) ctx.waitUntil(onCallbackQuery(update.callback_query, env));
+    // 這裡我們傳入 ctx
+    if (update.message) ctx.waitUntil(onMessage(update.message, env, ctx));
+    else if (update.callback_query) ctx.waitUntil(onCallbackQuery(update.callback_query, env, ctx));
     return new Response("Ok");
   } catch (e) {
     console.error(e);
@@ -86,7 +85,8 @@ async function handleWebhook(request, env, ctx) {
   }
 }
 
-async function onCallbackQuery(callbackQuery, env) {
+// 增加 ctx 參數
+async function onCallbackQuery(callbackQuery, env, ctx) {
   const chatId = callbackQuery.message.chat.id;
   const data = callbackQuery.data; 
   const callbackQueryId = callbackQuery.id;
@@ -94,10 +94,10 @@ async function onCallbackQuery(callbackQuery, env) {
   answerCallbackQuery(callbackQueryId, "", env).catch(console.error);
 
   const leagueInfo = leagues.find((l) => l.command === data);
-  if (leagueInfo) return await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env);
+  if (leagueInfo) return await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env, ctx);
 
   switch (data) {
-    case "meta_analysis": return handleMetaAnalysis(chatId, env);
+    case "meta_analysis": return handleMetaAnalysis(chatId, env, ctx); // 傳入 ctx
     case "trash_list": return handleTrashCommand(chatId, callbackQuery.from.id, callbackQuery.from, env);
     case "help_menu": return sendHelpMessage(chatId, env);
     case "main_menu": return sendMainMenu(chatId, env);
@@ -105,7 +105,8 @@ async function onCallbackQuery(callbackQuery, env) {
   }
 }
 
-async function onMessage(message, env) {
+// 增加 ctx 參數
+async function onMessage(message, env, ctx) {
   if (!message.text) return;
   const text = message.text.trim();
   const parts = text.split(" ");
@@ -117,7 +118,7 @@ async function onMessage(message, env) {
   const leagueInfo = leagues.find((l) => l.command === command);
   if (leagueInfo) {
     const limit = parseInt(args[0], 10) || LIMIT_LEAGUES_SHOW;
-    return await handleLeagueCommand(chatId, command, limit, env);
+    return await handleLeagueCommand(chatId, command, limit, env, ctx); // 傳入 ctx
   }
 
   if (command) {
@@ -139,18 +140,16 @@ async function onMessage(message, env) {
     }
   }
 
-  if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, text, env);
+  // 傳入 ctx
+  if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, text, env, ctx);
 }
 
 // --- 核心功能: 屬性分析與組隊 ---
 
-// 計算某個屬性組合(defTypes)對所有攻擊屬性的抗性
-// 回傳: 一個物件 { fire: 1.6, water: 0.625 ... }，代表受到該屬性攻擊的倍率
 function calculateWeaknesses(types) {
   const weaknesses = {};
   allTypes.forEach(attackType => {
     let multiplier = 1.0;
-    // 檢查攻擊屬性(attackType)對我方屬性(defType)的倍率
     types.forEach(defType => {
       const typeLower = defType.toLowerCase();
       if (typeChart[attackType] && typeChart[attackType][typeLower] !== undefined) {
@@ -162,8 +161,8 @@ function calculateWeaknesses(types) {
   return weaknesses;
 }
 
-// ★ 新增功能: Meta 全面分析與組隊建議 (含屬性相剋邏輯) ★
-async function handleMetaAnalysis(chatId, env) {
+// 增加 ctx 參數
+async function handleMetaAnalysis(chatId, env, ctx) {
   const targetLeagues = [
     leagues.find(l => l.command === "great_league_top"),
     leagues.find(l => l.command === "ultra_league_top"),
@@ -172,7 +171,7 @@ async function handleMetaAnalysis(chatId, env) {
 
   await sendMessage(chatId, `🔄 **正在分析三聯盟實時生態與屬性聯防，請稍候...**`, null, env);
 
-  const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env);
+  const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
   if (!transResponse.ok) return sendMessage(chatId, "❌ 無法讀取翻譯資料庫", null, env);
   const allPokemonData = await transResponse.json();
   const idToNameMap = new Map(allPokemonData.map((p) => [p.speciesId.toLowerCase(), p.speciesName]));
@@ -189,7 +188,8 @@ async function handleMetaAnalysis(chatId, env) {
     if (!league) continue;
 
     try {
-      const response = await fetchWithCache(getDataUrl(league.path), env);
+      // 這裡傳入 ctx
+      const response = await fetchWithCache(getDataUrl(league.path), env, ctx);
       if (!response.ok) {
         await sendMessage(chatId, `❌ 無法讀取 ${league.name} 資料`, null, env);
         continue;
@@ -198,63 +198,45 @@ async function handleMetaAnalysis(chatId, env) {
       const rankings = await response.json();
       if (rankings.length === 0) continue;
 
-      // 1. 最強王者
       const topOne = rankings[0];
       const topOneName = getName(topOne);
       const topOneScore = topOne.score ? topOne.score.toFixed(1) : "N/A";
-
-      // 2. 暴力 T0 隊
       const topThree = rankings.slice(0, 3).map(p => getName(p));
 
-      // 3. 智慧聯防隊 (Team Builder)
-      // 邏輯: 選 Top 1 當隊長，分析弱點，找能抗弱點的隊友
-      
       const teamBalanced = [topOne];
-      const teamWeaknesses = []; // 存儲目前隊伍怕什麼屬性
+      const teamWeaknesses = [];
 
-      // 計算隊長的弱點 (倍率 > 1.0 為弱點)
       if (topOne.types) {
         const w = calculateWeaknesses(topOne.types);
         Object.entries(w).forEach(([type, val]) => {
-          if (val > 1.0) teamWeaknesses.push(type); // 記錄隊長的弱點
+          if (val > 1.0) teamWeaknesses.push(type);
         });
       }
 
-      // 在前 40 名中尋找隊友
       for (let i = 1; i < Math.min(rankings.length, 40); i++) {
         const candidate = rankings[i];
         if (!candidate.types || teamBalanced.length >= 3) continue;
-        if (teamBalanced.some(p => p.speciesId === candidate.speciesId)) continue; // 避免重複
+        if (teamBalanced.some(p => p.speciesId === candidate.speciesId)) continue;
 
         const candidateWeaknesses = calculateWeaknesses(candidate.types);
-        
-        // 核心判斷：這位候選人能否抵抗「目前隊伍最怕的屬性」？
-        // 檢查候選人受到 teamWeaknesses 攻擊時，倍率是否 < 1.0 (有抗性)
         let coversWeakness = false;
         
         if (teamWeaknesses.length > 0) {
-          // 只要能抗其中一個主要弱點就算合格
           coversWeakness = teamWeaknesses.some(weakType => candidateWeaknesses[weakType] < 1.0);
         } else {
-          // 如果隊長太強沒弱點(少見)，就找單純強的
           coversWeakness = true; 
         }
 
-        // 避免屬性過度重複：候選人本身不要再怕已經很怕的屬性了
-        // 例如隊長怕火，候選人最好不要也怕火
         let addsNewWeakness = false;
         teamWeaknesses.forEach(weakType => {
            if (candidateWeaknesses[weakType] > 1.0) addsNewWeakness = true;
         });
 
-        // 錄取標準：能掩護弱點 且 不會讓原本弱點更嚴重 (寬鬆一點，不要雙倍弱點就好)
         if (coversWeakness && !addsNewWeakness) {
           teamBalanced.push(candidate);
-          // 更新隊伍弱點池 (這裡簡化處理，不再動態更新弱點池，以免邏輯太複雜)
         }
       }
 
-      // 如果沒湊滿 3 隻，補上前幾名
       let backupIndex = 1;
       while (teamBalanced.length < 3 && backupIndex < rankings.length) {
         const p = rankings[backupIndex++];
@@ -268,13 +250,10 @@ async function handleMetaAnalysis(chatId, env) {
          return `${getName(p)} ${types}`;
       });
 
-      // 產生報告
       let message = `📊 **${league.name} 本季生態分析報告**\n\n`;
       message += `👑 **${league.name.substring(0,2)}最強王者**\n👉 **${topOneName}** (評分: ${topOneScore})\n\n`;
-      
       message += `⚔️ **暴力 T0 隊**\n`;
       message += `1️⃣ ${topThree[0]}\n2️⃣ ${topThree[1]}\n3️⃣ ${topThree[2]}\n\n`;
-
       message += `🛡️ **智慧聯防隊** (屬性互補)\n`;
       message += `1️⃣ ${balancedNames[0]} (核心)\n`;
       message += `2️⃣ ${balancedNames[1]} (掩護)\n`;
@@ -291,7 +270,8 @@ async function handleMetaAnalysis(chatId, env) {
 
 // --- 通用工具函數 ---
 
-async function fetchWithCache(url, env) {
+// ★★★ 修正: fetchWithCache 必須接收 ctx 並正確使用 ★★★
+async function fetchWithCache(url, env, ctx) {
   const cache = caches.default;
   const cacheKey = new Request(url, { method: "GET" });
   let cachedRes = await cache.match(cacheKey);
@@ -308,7 +288,14 @@ async function fetchWithCache(url, env) {
   headers.set("Content-Type", "application/json");
 
   const responseToCache = new Response(bodyText, { status: response.status, headers: headers });
-  ctx.waitUntil(cache.put(cacheKey, responseToCache)); // 使用 ctx.waitUntil 確保寫入
+  
+  // ★ 這裡使用 ctx 來確保快取寫入不會因為 Worker 結束而被中斷
+  if (ctx && ctx.waitUntil) {
+    ctx.waitUntil(cache.put(cacheKey, responseToCache));
+  } else {
+    // 如果因為某些原因 ctx 沒傳進來 (例如測試環境)，就不等待或直接報錯，但這裡做容錯處理
+    cache.put(cacheKey, responseToCache).catch(console.error);
+  }
 
   return new Response(bodyText, { status: response.status, headers: headers });
 }
@@ -317,8 +304,8 @@ function getDataUrl(filename) {
   return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=2`;
 }
 
-// 處理聯盟排名查詢
-async function handleLeagueCommand(chatId, command, limit = 50, env) {
+// 增加 ctx 參數
+async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
   if (!leagueInfo) return sendMessage(chatId, "未知的命令。", null, env);
 
@@ -326,8 +313,8 @@ async function handleLeagueCommand(chatId, command, limit = 50, env) {
 
   try {
     const [response, transResponse] = await Promise.all([
-      fetchWithCache(getDataUrl(leagueInfo.path), env),
-      fetchWithCache(getDataUrl("data/chinese_translation.json"), env)
+      fetchWithCache(getDataUrl(leagueInfo.path), env, ctx),
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
     ]);
 
     if (!response.ok || !transResponse.ok) throw new Error("資料讀取失敗");
@@ -373,11 +360,11 @@ async function handleLeagueCommand(chatId, command, limit = 50, env) {
   }
 }
 
-// 處理單隻寶可夢搜尋
-async function handlePokemonSearch(chatId, query, env) {
+// 增加 ctx 參數
+async function handlePokemonSearch(chatId, query, env, ctx) {
   await sendMessage(chatId, `🔍 正在查詢與 "${query}" 相關的排名...`, null, env);
   try {
-    const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env);
+    const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     if (!transResponse.ok) throw new Error("無法載入寶可夢資料庫");
     
     const allPokemonData = await transResponse.json();
@@ -398,7 +385,7 @@ async function handlePokemonSearch(chatId, query, env) {
     const idToNameMap = new Map(finalMatches.map((p) => [p.speciesId.toLowerCase(), p.speciesName]));
 
     const allLeagueRanks = await Promise.all(leagues.map((league) => 
-      fetchWithCache(getDataUrl(league.path), env).then((res) => res.ok ? res.json() : null)
+      fetchWithCache(getDataUrl(league.path), env, ctx).then((res) => res.ok ? res.json() : null)
     ));
 
     let replyMessage = `🏆 與 <b>"${query}"</b> 相關的排名結果 🏆\n`;
