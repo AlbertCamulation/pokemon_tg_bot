@@ -8,7 +8,7 @@ const ALLOWED_UID_KEY = "allowed_user_ids";
 const LIMIT_LEAGUES_SHOW = 50;
 const CACHE_TTL = 3600;
 
-// 名稱清理 (移除多餘後綴，用於產生乾淨的複製字串)
+// 名稱清理
 const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|閃電|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|阿羅拉|的樣子)/g;
 
 // 聯盟定義
@@ -31,7 +31,7 @@ const leagues = [
   { command: "defenders_top", name: "最佳防守者", cp: "Any", path: "data/rankings_defenders_tier.json" }
 ];
 
-// --- Pokémon GO 專屬屬性相剋表 ---
+// Pokémon GO 專屬屬性相剋表
 const typeChart = {
   normal: { rock: 0.625, ghost: 0.390625, steel: 0.625 },
   fire: { fire: 0.625, water: 0.625, grass: 1.6, ice: 1.6, bug: 1.6, rock: 0.625, dragon: 0.625, steel: 1.6 },
@@ -55,14 +55,14 @@ const typeChart = {
 
 const allTypes = Object.keys(typeChart);
 
-// --- Worker Entry Point ---
+// --- Worker Entry ---
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
     if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
     if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
-    return new Response("Pokemon Bot Running (Stable HTML Version)", { status: 200 });
+    return new Response("Pokemon Bot Running (Fixed Format + Meta + Copy)", { status: 200 });
   }
 };
 
@@ -85,10 +85,9 @@ async function handleWebhook(request, env, ctx) {
 
 async function onCallbackQuery(callbackQuery, env, ctx) {
   const chatId = callbackQuery.message.chat.id;
-  const data = callbackQuery.data; 
+  const data = callbackQuery.data;
   const callbackQueryId = callbackQuery.id;
 
-  // 避免 Loading 卡住，先回應空字串
   answerCallbackQuery(callbackQueryId, "", env).catch(console.error);
 
   const leagueInfo = leagues.find((l) => l.command === data);
@@ -130,11 +129,11 @@ async function onMessage(message, env, ctx) {
     }
   }
 
-  // 文字搜尋
+  // 搜尋功能
   if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, text, env, ctx);
 }
 
-// --- 屬性計算與組隊邏輯 ---
+// --- 核心演算法 ---
 
 function getDefenseProfile(defTypes) {
   const profile = {};
@@ -158,7 +157,6 @@ function getWeaknesses(defTypes) {
   return Object.entries(profile).filter(([type, val]) => val > 1.0).map(([type]) => type);
 }
 
-// 尋找最佳隊友 (避免共同弱點 + 抵抗隊伍弱點)
 function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
   const teamWeaknessCounts = {}; 
   currentTeam.forEach(p => {
@@ -174,8 +172,6 @@ function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
   const urgentWeaknesses = Object.keys(teamWeaknessCounts).sort((a, b) => teamWeaknessCounts[b] - teamWeaknessCounts[a]);
   let bestPartner = null;
   let bestScore = -9999;
-  
-  // 擴大搜尋範圍到前 40 名，確保能找到互補的
   const searchPool = rankings.slice(0, 40); 
 
   for (const candidate of searchPool) {
@@ -188,23 +184,14 @@ function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
     const candProfile = getDefenseProfile(candInfo.types);
     const candWeaknesses = getWeaknesses(candInfo.types);
 
-    // 加分：能抵抗目前隊伍的弱點
     urgentWeaknesses.forEach(weakType => {
-      if (candProfile[weakType] < 1.0) {
-        const weight = teamWeaknessCounts[weakType] || 1;
-        score += (20 * weight); 
-      }
+      if (candProfile[weakType] < 1.0) score += (20 * (teamWeaknessCounts[weakType] || 1));
     });
 
-    // 扣分：自己也怕這個弱點 (嚴重扣分，避免雙倍弱點)
     urgentWeaknesses.forEach(weakType => {
-      if (candProfile[weakType] > 1.0) {
-        const weight = teamWeaknessCounts[weakType] || 1;
-        score -= (30 * weight); 
-      }
+      if (candProfile[weakType] > 1.0) score -= (30 * (teamWeaknessCounts[weakType] || 1));
     });
 
-    // 互補：自己的弱點是否被現有隊友抵抗?
     candWeaknesses.forEach(w => {
       let covered = false;
       currentTeam.forEach(teammate => {
@@ -214,11 +201,9 @@ function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
           if (tProfile[w] < 1.0) covered = true;
         }
       });
-      if (covered) score += 5; 
-      else score -= 5;
+      if (covered) score += 5; else score -= 5;
     });
 
-    // 排名權重 (排名越高分越少扣)
     const rankIndex = rankings.indexOf(candidate);
     score -= (rankIndex * 0.5); 
 
@@ -228,11 +213,9 @@ function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
     }
   }
 
-  // 兜底方案：如果真的找不到(罕見)，找排名最高且不在隊伍的
   if (!bestPartner || bestScore < -50) {
     bestPartner = searchPool.find(p => !currentTeam.some(m => m.speciesId === p.speciesId));
   }
-
   return bestPartner;
 }
 
@@ -245,7 +228,6 @@ function buildBalancedTeam(leader, rankings, map) {
   return team;
 }
 
-// --- 主要功能: Meta 分析 ---
 async function handleMetaAnalysis(chatId, env, ctx) {
   const targetLeagues = [
     leagues.find(l => l.command === "great_league_top"),
@@ -261,19 +243,14 @@ async function handleMetaAnalysis(chatId, env, ctx) {
   const allPokemonData = await transResponse.json();
   const pokemonDetailMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p]));
 
-  // 名字處理 (forCopy=true 時去除多餘文字)
   const getName = (p, forCopy = false) => {
     const detail = pokemonDetailMap.get(p.speciesId.toLowerCase());
     let name = detail ? detail.speciesName : p.speciesName;
-    
-    // 特殊名字修正
     if (name === "Giratina (Altered)") name = "騎拉帝納 別種";
     else if (name === "Giratina (Altered) (Shadow)") name = "騎拉帝納 別種 暗影";
     else if (name === "Claydol (Shadow)") name = "念力土偶 暗影";
     
-    if (forCopy) {
-      return name.replace(NAME_CLEANER_REGEX, "").trim();
-    }
+    if (forCopy) return name.replace(NAME_CLEANER_REGEX, "").trim();
     return name;
   };
 
@@ -285,31 +262,20 @@ async function handleMetaAnalysis(chatId, env, ctx) {
 
   for (const league of targetLeagues) {
     if (!league) continue;
-
     try {
       const response = await fetchWithCache(getDataUrl(league.path), env, ctx);
       const rankings = await response.json();
       if (!rankings || rankings.length === 0) continue;
 
-      // 1. 最強王者
       const topOne = rankings[0];
       const topOneScore = topOne.score ? topOne.score.toFixed(1) : "N/A";
-
-      // 2. 暴力隊 (Rank 1-3)
       const teamViolence = rankings.slice(0, 3);
-
-      // 3. 智慧聯防隊 (Leader: Rank 1)
       const teamBalanced = buildBalancedTeam(topOne, rankings, pokemonDetailMap);
 
-      // 4. 二當家聯防隊 (Leader: Rank 2 or 3)
       let altLeader = rankings[1]; 
-      // 確保二當家隊長不是智慧隊的隊員(避免重複感)
-      if (teamBalanced.some(p => p.speciesId === altLeader.speciesId)) {
-         altLeader = rankings[2];
-      }
+      if (teamBalanced.some(p => p.speciesId === altLeader.speciesId)) altLeader = rankings[2];
       const teamAlternative = buildBalancedTeam(altLeader, rankings, pokemonDetailMap);
 
-      // 收集可複製字串
       const copySet = new Set();
       [...teamViolence, ...teamBalanced, ...teamAlternative].forEach(p => {
         const cleanName = getName(p, true);
@@ -317,31 +283,23 @@ async function handleMetaAnalysis(chatId, env, ctx) {
       });
       const copyString = [...copySet].join(",");
 
-      // 產生報告 (HTML 格式)
       let msg = `📊 <b>${league.name} 戰略分析</b>\n\n`;
       msg += `👑 <b>META 核心</b>\n👉 <b>${getName(topOne)}</b> (分: ${topOneScore})\n\n`;
-
       msg += `⚔️ <b>暴力 T0 隊</b> (純強度)\n`;
       teamViolence.forEach((p, i) => msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`);
-
       msg += `\n🛡️ <b>智慧聯防隊</b> (以王者為核)\n`;
       teamBalanced.forEach((p, i) => msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`);
-
       msg += `\n🔄 <b>二當家聯防隊</b> (替代方案)\n`;
       teamAlternative.forEach((p, i) => msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`);
-
       msg += `\n📋 <b>一鍵複製搜尋字串</b>\n`;
       msg += `<code>${copyString}</code>`;
 
       await sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
-
-    } catch (e) {
-      await sendMessage(chatId, `⚠️ ${league.name} 分析錯誤: ${e.message}`, null, env);
-    }
+    } catch (e) { await sendMessage(chatId, `⚠️ ${league.name} 分析錯誤: ${e.message}`, null, env); }
   }
 }
 
-// --- 工具函數 ---
+// --- 通用工具 ---
 
 async function fetchWithCache(url, env, ctx) {
   const cache = caches.default;
@@ -353,7 +311,6 @@ async function fetchWithCache(url, env, ctx) {
   if (!response.ok) return response;
 
   const bodyText = await response.text();
-  // 防止空內容導致 JSON 解析失敗
   if (!bodyText || bodyText.trim().length === 0) return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" }});
 
   const headers = new Headers(response.headers);
@@ -361,7 +318,6 @@ async function fetchWithCache(url, env, ctx) {
   headers.set("Content-Type", "application/json");
 
   const responseToCache = new Response(bodyText, { status: response.status, headers: headers });
-  
   if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(cacheKey, responseToCache));
   else cache.put(cacheKey, responseToCache).catch(console.error);
 
@@ -369,11 +325,65 @@ async function fetchWithCache(url, env, ctx) {
 }
 
 function getDataUrl(filename) {
-  // ver=6 強制刷新快取，確保拿到最新程式碼對應的資料
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=6`;
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=7`;
 }
 
-// 處理聯盟排名查詢
+// 修正後的搜尋邏輯 (還原格式 + 分組)
+async function handlePokemonSearch(chatId, query, env, ctx) {
+  await sendMessage(chatId, `🔍 查詢 "<b>${query}</b>"...`, { parse_mode: "HTML" }, env);
+  try {
+    const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    const data = await res.json();
+    const isChi = /[\u4e00-\u9fa5]/.test(query);
+    const lower = query.toLowerCase();
+    const matches = data.filter(p => isChi ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lower));
+    if(!matches.length) return sendMessage(chatId, "找不到寶可夢", null, env);
+    
+    const ids = new Set(matches.map(p => p.speciesId.toLowerCase()));
+    const map = new Map(matches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+    
+    // 取得所有聯盟資料
+    const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
+    
+    let msg = `🏆 <b>"${query}" 相關排名</b>\n`;
+    const resultsByLeague = {}; // 用於分組
+
+    rankResults.forEach((list, i) => {
+      if(!list) return;
+      list.forEach((p, rankIndex) => {
+        if(ids.has(p.speciesId.toLowerCase())) {
+           // 修正 rank 讀取邏輯: 優先用 p.rank，沒有則用 index+1 (通常是 API 的順序)
+           const rank = p.rank || rankIndex + 1;
+           const rankDisplay = `#${rank}`;
+           const rating = getPokemonRating(rank); // 計算評價 (金/銀/銅)
+           
+           let name = map.get(p.speciesId.toLowerCase());
+           // 特殊處理
+           if(name === "Giratina (Altered)") name = "騎拉帝納 別種";
+           
+           // 格式化單行字串
+           const line = `${rankDisplay} ${name} ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
+           
+           const leagueName = leagues[i].name;
+           if (!resultsByLeague[leagueName]) resultsByLeague[leagueName] = [];
+           resultsByLeague[leagueName].push(line);
+        }
+      });
+    });
+
+    // 組合最終訊息
+    for (const [league, lines] of Object.entries(resultsByLeague)) {
+      msg += `\n<b>${league}:</b>\n${lines.join("\n")}\n`;
+    }
+
+    if (msg === `🏆 <b>"${query}" 相關排名</b>\n`) {
+       msg += "\n(此寶可夢在所有聯盟中未上榜)";
+    }
+
+    return sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
+  } catch(e) { return sendMessage(chatId, `Error: ${e.message}`, null, env); }
+}
+
 async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
   if (!leagueInfo) return sendMessage(chatId, "未知的命令。", null, env);
@@ -402,36 +412,6 @@ async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   } catch(e) { return sendMessage(chatId, `Error: ${e.message}`, null, env); }
 }
 
-async function handlePokemonSearch(chatId, query, env, ctx) {
-  await sendMessage(chatId, `🔍 查詢 "${query}"...`, null, env);
-  try {
-    const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
-    const data = await res.json();
-    const isChi = /[\u4e00-\u9fa5]/.test(query);
-    const lower = query.toLowerCase();
-    const matches = data.filter(p => isChi ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lower));
-    if(!matches.length) return sendMessage(chatId, "找不到寶可夢", null, env);
-    
-    const ids = new Set(matches.map(p => p.speciesId.toLowerCase()));
-    const map = new Map(matches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-    
-    const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
-    
-    let msg = `🏆 <b>"${query}" 排名</b>\n`;
-    rankResults.forEach((list, i) => {
-      if(!list) return;
-      list.forEach(p => {
-        if(ids.has(p.speciesId.toLowerCase())) {
-           const rank = p.rank ? `#${p.rank}` : `(${p.tier})`;
-           msg += `\n${leagues[i].name}: ${rank} ${map.get(p.speciesId.toLowerCase())} ${p.score ? `(${p.score.toFixed(1)})` : ""}`;
-        }
-      });
-    });
-    return sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
-  } catch(e) { return sendMessage(chatId, `Error: ${e.message}`, null, env); }
-}
-
-// 選單功能
 async function sendMainMenu(chatId, env) {
   const text = "🤖 <b>PvP 查詢機器人</b>\n請選擇功能或直接輸入名稱查詢。";
   const keyboard = generateMainMenu();
@@ -495,9 +475,23 @@ async function handleDelUidCommand(chatId, uid, env) {
   sendMessage(chatId, "Removed", null, env);
 }
 
+// 評分計算 (恢復)
+function getPokemonRating(rank) {
+  if (typeof rank === "number") { 
+    if (rank <= 10) return "🥇白金"; 
+    if (rank <= 25) return "🥇金"; 
+    if (rank <= 50) return "🥈銀"; 
+    if (rank <= 100) return "🥉銅"; 
+  }
+  if (typeof rank === "string") { 
+    const map = { "S": "🥇白金", "A+": "🥇金", "A": "🥈銀", "B+": "🥉銅" }; 
+    return map[rank] || "垃圾"; 
+  }
+  return "垃圾";
+}
+
 // 訊息發送 (修復版)
 async function sendMessage(chatId, text, options = null, env) {
-  // 檢查 text 是否為空，避免發送失敗
   if (!text) return;
 
   const payload = { 
@@ -505,15 +499,12 @@ async function sendMessage(chatId, text, options = null, env) {
     text: text
   };
 
-  // 只有當 options 存在且有屬性時才加入，避免覆蓋
   if (options) {
     if (options.inline_keyboard) {
       payload.reply_markup = { inline_keyboard: options.inline_keyboard };
     }
-    // 預設為 HTML，除非 options 指定了其他
     payload.parse_mode = options.parse_mode || "HTML";
   } else {
-    // 預設不使用 parse_mode (純文字) 或使用 HTML，這裡選 HTML 以支援格式
     payload.parse_mode = "HTML";
   }
   
