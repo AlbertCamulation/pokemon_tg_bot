@@ -68,7 +68,7 @@ export default {
     if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
     if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
     if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
-    return new Response("Pokemon Bot Running (Filtered Search + Fixed Menu)", { status: 200 });
+    return new Response("Pokemon Bot Running (Filtered Search + Meta + Types)", { status: 200 });
   }
 };
 
@@ -144,7 +144,73 @@ async function onMessage(message, env, ctx) {
   if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, text, env, ctx);
 }
 
-// --- 核心演算法 ---
+// --- 核心功能: 搜尋與過濾 ---
+
+async function handlePokemonSearch(chatId, query, env, ctx) {
+  await sendMessage(chatId, `🔍 查詢 "<b>${query}</b>"...`, { parse_mode: "HTML" }, env);
+  try {
+    const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    const data = await res.json();
+    const isChi = /[\u4e00-\u9fa5]/.test(query);
+    const lower = query.toLowerCase();
+    const matches = data.filter(p => isChi ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lower));
+    if(!matches.length) return sendMessage(chatId, "找不到寶可夢", null, env);
+    
+    const ids = new Set(matches.map(p => p.speciesId.toLowerCase()));
+    const map = new Map(matches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+    
+    const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
+    
+    let msg = `🏆 <b>"${query}" 相關排名</b>\n`;
+    const resultsByLeague = {}; 
+
+    rankResults.forEach((list, i) => {
+      if(!list) return;
+      list.forEach((p, rankIndex) => {
+        if(ids.has(p.speciesId.toLowerCase())) {
+           // 1. 取得正確排名 (若無 p.rank 則用索引補)
+           const rank = p.rank || p.tier || rankIndex + 1;
+           const rating = getPokemonRating(rank);
+           
+           // ★★★ 關鍵過濾邏輯 ★★★
+           // A. 過濾評級為垃圾的
+           if (rating === "垃圾") return;
+           
+           // B. 過濾排名大於 100 的 (僅針對 PvP 數字排名)
+           if (typeof rank === "number" && rank > 100) return;
+
+           // 顯示處理
+           const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
+           let name = map.get(p.speciesId.toLowerCase());
+           if(name === "Giratina (Altered)") name = "騎拉帝納 別種";
+           
+           const line = `${rankDisplay} ${name} ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
+           
+           const leagueName = leagues[i].name;
+           if (!resultsByLeague[leagueName]) resultsByLeague[leagueName] = [];
+           resultsByLeague[leagueName].push(line);
+        }
+      });
+    });
+
+    // 檢查是否有結果
+    let hasResults = false;
+    for (const [league, lines] of Object.entries(resultsByLeague)) {
+      if (lines.length > 0) {
+        msg += `\n<b>${league}:</b>\n${lines.join("\n")}\n`;
+        hasResults = true;
+      }
+    }
+
+    if (!hasResults) {
+       msg += "\n(此寶可夢在所有聯盟中排名未達標，或不適合對戰)";
+    }
+
+    return sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
+  } catch(e) { return sendMessage(chatId, `Error: ${e.message}`, null, env); }
+}
+
+// --- 核心演算法: Meta & Team Builder ---
 
 function getDefenseProfile(defTypes) {
   const profile = {};
@@ -375,67 +441,10 @@ async function fetchWithCache(url, env, ctx) {
 }
 
 function getDataUrl(filename) {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=9`;
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=10`;
 }
 
-// 修正後的搜尋邏輯: 增加排名與評級過濾
-async function handlePokemonSearch(chatId, query, env, ctx) {
-  await sendMessage(chatId, `🔍 查詢 "<b>${query}</b>"...`, { parse_mode: "HTML" }, env);
-  try {
-    const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
-    const data = await res.json();
-    const isChi = /[\u4e00-\u9fa5]/.test(query);
-    const lower = query.toLowerCase();
-    const matches = data.filter(p => isChi ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lower));
-    if(!matches.length) return sendMessage(chatId, "找不到寶可夢", null, env);
-    
-    const ids = new Set(matches.map(p => p.speciesId.toLowerCase()));
-    const map = new Map(matches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-    
-    const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
-    
-    let msg = `🏆 <b>"${query}" 相關排名</b>\n`;
-    const resultsByLeague = {}; 
-
-    rankResults.forEach((list, i) => {
-      if(!list) return;
-      list.forEach((p, rankIndex) => {
-        if(ids.has(p.speciesId.toLowerCase())) {
-           const rank = p.rank || p.tier || rankIndex + 1;
-           const rating = getPokemonRating(rank);
-           
-           // ★★★ 過濾邏輯 ★★★
-           // 1. 如果評級是垃圾，直接不顯示
-           if (rating === "垃圾") return;
-           
-           // 2. 如果是 PvP 排名且大於 100，直接不顯示
-           if (typeof rank === "number" && rank > 100) return;
-
-           const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
-           let name = map.get(p.speciesId.toLowerCase());
-           if(name === "Giratina (Altered)") name = "騎拉帝納 別種";
-           
-           const line = `${rankDisplay} ${name} ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
-           
-           const leagueName = leagues[i].name;
-           if (!resultsByLeague[leagueName]) resultsByLeague[leagueName] = [];
-           resultsByLeague[leagueName].push(line);
-        }
-      });
-    });
-
-    for (const [league, lines] of Object.entries(resultsByLeague)) {
-      msg += `\n<b>${league}:</b>\n${lines.join("\n")}\n`;
-    }
-
-    if (msg === `🏆 <b>"${query}" 相關排名</b>\n`) {
-       msg += "\n(此寶可夢在所有聯盟中排名未達標)";
-    }
-
-    return sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
-  } catch(e) { return sendMessage(chatId, `Error: ${e.message}`, null, env); }
-}
-
+// 處理聯盟排名查詢
 async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
   if (!leagueInfo) return sendMessage(chatId, "未知的命令。", null, env);
