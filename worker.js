@@ -31,15 +31,7 @@ const leagues = [
   { command: "defenders_top", name: "最佳防守者", cp: "Any", path: "data/rankings_defenders_tier.json" }
 ];
 
-// --- Pokémon GO 專屬屬性相剋表 (基於 1.6 / 0.625) ---
-const GO_MULTIPLIERS = {
-  SUPER_EFFECTIVE: 1.6,
-  NEUTRAL: 1.0,
-  RESISTED: 0.625,
-  IMMUNE: 0.390625 // GO 的無效其實是雙抗
-};
-
-// 完整相剋矩陣 (Gen 6+)
+// --- Pokémon GO 專屬屬性相剋表 ---
 const typeChart = {
   normal: { rock: 0.625, ghost: 0.390625, steel: 0.625 },
   fire: { fire: 0.625, water: 0.625, grass: 1.6, ice: 1.6, bug: 1.6, rock: 0.625, dragon: 0.625, steel: 1.6 },
@@ -70,7 +62,7 @@ export default {
     if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
     if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
     if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
-    return new Response("Pokemon Bot Running (Enhanced Logic)", { status: 200 });
+    return new Response("Pokemon Bot Running (Enhanced Logic + Copy String)", { status: 200 });
   }
 };
 
@@ -142,14 +134,12 @@ async function onMessage(message, env, ctx) {
 
 // --- 屬性計算核心 ---
 
-// 計算某個寶可夢(defTypes)受到各種屬性攻擊的倍率
 function getDefenseProfile(defTypes) {
   const profile = {};
   allTypes.forEach(attackType => {
     let multiplier = 1.0;
     defTypes.forEach(t => {
       const typeLower = t.toLowerCase();
-      // 預設 1.0
       let factor = 1.0;
       if (typeChart[attackType] && typeChart[attackType][typeLower] !== undefined) {
         factor = typeChart[attackType][typeLower];
@@ -161,7 +151,6 @@ function getDefenseProfile(defTypes) {
   return profile;
 }
 
-// 找出弱點 (倍率 > 1.0)
 function getWeaknesses(defTypes) {
   const profile = getDefenseProfile(defTypes);
   return Object.entries(profile).filter(([type, val]) => val > 1.0).map(([type]) => type);
@@ -169,9 +158,7 @@ function getWeaknesses(defTypes) {
 
 // 核心演算法：尋找最佳隊友 (互補評分制)
 function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
-  // 1. 分析目前隊伍的弱點
-  const teamWeaknessCounts = {}; // 記錄每個屬性被隊伍多少成員懼怕
-  
+  const teamWeaknessCounts = {}; 
   currentTeam.forEach(p => {
     const pInfo = pokemonTypeMap.get(p.speciesId.toLowerCase());
     if (pInfo && pInfo.types) {
@@ -182,18 +169,12 @@ function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
     }
   });
 
-  // 找出目前最需要防守的屬性 (例如: 2隻都怕火，火就是大威脅)
   const urgentWeaknesses = Object.keys(teamWeaknessCounts).sort((a, b) => teamWeaknessCounts[b] - teamWeaknessCounts[a]);
-
-  // 2. 遍歷排名靠前的寶可夢尋找隊友
   let bestPartner = null;
   let bestScore = -9999;
-
-  // 只看前 30 名，確保強度夠高
-  const searchPool = rankings.slice(0, 30); 
+  const searchPool = rankings.slice(0, 40); // 擴大搜尋範圍到前40名
 
   for (const candidate of searchPool) {
-    // 跳過已在隊伍的
     if (currentTeam.some(m => m.speciesId === candidate.speciesId)) continue;
 
     const candInfo = pokemonTypeMap.get(candidate.speciesId.toLowerCase());
@@ -203,24 +184,23 @@ function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
     const candProfile = getDefenseProfile(candInfo.types);
     const candWeaknesses = getWeaknesses(candInfo.types);
 
-    // [加分] 能抵抗目前隊伍的弱點
+    // 加分：能抗目前隊伍弱點
     urgentWeaknesses.forEach(weakType => {
       if (candProfile[weakType] < 1.0) {
-        // 如果這個屬性是隊伍的大弱點(>1人怕)，加分更多
         const weight = teamWeaknessCounts[weakType] || 1;
         score += (20 * weight); 
       }
     });
 
-    // [扣分] 候選人自己也怕這個屬性 (絕對要避免共同弱點)
+    // 扣分：自己也怕同樣的屬性 (嚴重扣分)
     urgentWeaknesses.forEach(weakType => {
       if (candProfile[weakType] > 1.0) {
         const weight = teamWeaknessCounts[weakType] || 1;
-        score -= (30 * weight); // 懲罰重一點
+        score -= (30 * weight); 
       }
     });
 
-    // [微調] 候選人自身的弱點，目前的隊友能不能幫忙抗？
+    // 互補：自己的弱點是否被隊友抗？
     candWeaknesses.forEach(w => {
       let covered = false;
       currentTeam.forEach(teammate => {
@@ -230,9 +210,14 @@ function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
           if (tProfile[w] < 1.0) covered = true;
         }
       });
-      if (covered) score += 5; // 有人罩
-      else score -= 5;         // 沒人罩
+      if (covered) score += 5; 
+      else score -= 5;
     });
+
+    // 排名加權：排名越高越好 (避免選到太後面的冷門角)
+    // 假設 rankings 已經排序，i 是 index。越前面扣越少。
+    const rankIndex = rankings.indexOf(candidate);
+    score -= (rankIndex * 0.5); 
 
     if (score > bestScore) {
       bestScore = score;
@@ -240,12 +225,21 @@ function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
     }
   }
 
-  // 如果找不到好的(積分太低)，就塞排名最高的湊數
   if (!bestPartner || bestScore < -50) {
     bestPartner = searchPool.find(p => !currentTeam.some(m => m.speciesId === p.speciesId));
   }
 
   return bestPartner;
+}
+
+// 建立隊伍 Helper
+function buildBalancedTeam(leader, rankings, map) {
+  const team = [leader];
+  const partner1 = findBestPartner(rankings, team, map);
+  if (partner1) team.push(partner1);
+  const partner2 = findBestPartner(rankings, team, map);
+  if (partner2) team.push(partner2);
+  return team;
 }
 
 // ★★★ 三聯盟 Meta 分析 ★★★
@@ -256,36 +250,36 @@ async function handleMetaAnalysis(chatId, env, ctx) {
     leagues.find(l => l.command === "master_league_top")
   ];
 
-  await sendMessage(chatId, `🔄 **正在計算屬性抗性矩陣與 Meta 權重...**`, null, env);
+  await sendMessage(chatId, `🔄 **正在分析三聯盟實時生態與屬性聯防...**`, null, env);
 
-  // 1. 取得完整資料 (包含屬性)
   const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
   if (!transResponse.ok) return sendMessage(chatId, "❌ 無法讀取資料庫", null, env);
   
   const allPokemonData = await transResponse.json();
-  // 建立詳細 Map: ID -> { name, types, ... }
   const pokemonDetailMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p]));
 
-  // 名字轉換 helper
-  const getName = (p) => {
+  // 名字處理 (含去特殊字元供複製用)
+  const getName = (p, forCopy = false) => {
     const detail = pokemonDetailMap.get(p.speciesId.toLowerCase());
     let name = detail ? detail.speciesName : p.speciesName;
     
-    // 特殊名字修正
     if (name === "Giratina (Altered)") name = "騎拉帝納 別種";
     else if (name === "Giratina (Altered) (Shadow)") name = "騎拉帝納 別種 暗影";
     else if (name === "Claydol (Shadow)") name = "念力土偶 暗影";
     
+    if (forCopy) {
+      // 移除 "暗影", "伽勒爾" 等後綴以便遊戲內搜尋
+      return name.replace(NAME_CLEANER_REGEX, "").trim();
+    }
     return name;
   };
 
   const getTypesStr = (p) => {
     const detail = pokemonDetailMap.get(p.speciesId.toLowerCase());
     if (!detail || !detail.types) return "";
-    return `(${detail.types.join("/")})`; // 顯示如 (Water/Ground)
+    return `(${detail.types.join("/")})`; 
   };
 
-  // 2. 逐一分析聯盟
   for (const league of targetLeagues) {
     if (!league) continue;
 
@@ -294,41 +288,49 @@ async function handleMetaAnalysis(chatId, env, ctx) {
       const rankings = await response.json();
       if (!rankings || rankings.length === 0) continue;
 
-      // --- A. 最強王者 ---
+      // 1. 最強王者 (Rank 1)
       const topOne = rankings[0];
       const topOneScore = topOne.score ? topOne.score.toFixed(1) : "N/A";
 
-      // --- B. 暴力隊 (前三名) ---
+      // 2. 暴力隊 (Rank 1, 2, 3)
       const teamViolence = rankings.slice(0, 3);
 
-      // --- C. 智慧聯防隊 (演算法) ---
-      const teamBalanced = [];
-      
-      // C-1. 隊長 (第一名)
-      teamBalanced.push(topOne);
+      // 3. 智慧聯防隊 (Core: Rank 1)
+      const teamBalanced = buildBalancedTeam(topOne, rankings, pokemonDetailMap);
 
-      // C-2. 找隊友 1 (掩護隊長)
-      const partner1 = findBestPartner(rankings, teamBalanced, pokemonDetailMap);
-      if (partner1) teamBalanced.push(partner1);
+      // 4. 二當家聯防隊 (Core: Rank 2)
+      // 如果 Rank 2 已經在 TeamBalanced 裡當隊員了，就找 Rank 3 當隊長，以此類推
+      let altLeader = rankings[1]; 
+      if (teamBalanced.some(p => p.speciesId === altLeader.speciesId)) {
+         altLeader = rankings[2];
+      }
+      const teamAlternative = buildBalancedTeam(altLeader, rankings, pokemonDetailMap);
 
-      // C-3. 找隊友 2 (掩護隊長+隊友1)
-      const partner2 = findBestPartner(rankings, teamBalanced, pokemonDetailMap);
-      if (partner2) teamBalanced.push(partner2);
+      // --- 收集所有推薦名單供複製 ---
+      const copySet = new Set();
+      [...teamViolence, ...teamBalanced, ...teamAlternative].forEach(p => {
+        const cleanName = getName(p, true); // 取得乾淨名字
+        if (cleanName) copySet.add(cleanName);
+      });
+      const copyString = [...copySet].join(",");
 
-      // --- 產生報告 ---
+      // --- 產生報告訊息 ---
       let msg = `📊 **${league.name} 戰略分析**\n\n`;
+      
       msg += `👑 **META 核心**\n👉 **${getName(topOne)}** (分: ${topOneScore})\n\n`;
 
       msg += `⚔️ **暴力 T0 隊** (純強度)\n`;
-      teamViolence.forEach((p, i) => {
-        msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`;
-      });
+      teamViolence.forEach((p, i) => msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`);
 
-      msg += `\n🛡️ **智慧聯防隊** (屬性互補)\n`;
-      teamBalanced.forEach((p, i) => {
-        const role = i === 0 ? "(核心)" : i === 1 ? "(掩護)" : "(補位)";
-        msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)} ${role}\n`;
-      });
+      msg += `\n🛡️ **智慧聯防隊** (以王者為核)\n`;
+      teamBalanced.forEach((p, i) => msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`);
+
+      msg += `\n🔄 **二當家聯防隊** (替代方案)\n`;
+      teamAlternative.forEach((p, i) => msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`);
+
+      // 加上可複製區塊
+      msg += `\n📋 **一鍵複製搜尋字串**\n`;
+      msg += `\`\`\`\n${copyString}\n\`\`\``;
 
       await sendMessage(chatId, msg, { parse_mode: "Markdown" }, env);
 
@@ -364,13 +366,13 @@ async function fetchWithCache(url, env, ctx) {
 }
 
 function getDataUrl(filename) {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=3`; // ver=3 強制刷新
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=4`; // ver=4 強制刷新
 }
 
-// 搜尋與列表功能 (保持不變)
+// 搜尋與列表功能
 async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
-  if (!leagueInfo) return sendMessage(chatId, "未知命令", null, env);
+  if (!leagueInfo) return sendMessage(chatId, "未知的命令。", null, env);
   await sendMessage(chatId, `查詢 *${leagueInfo.name}*...`, null, env);
   try {
     const [resRank, resTrans] = await Promise.all([
@@ -434,26 +436,21 @@ async function sendMainMenu(chatId, env) {
 function generateMainMenu() {
   const keyboard = [];
   const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-  
   const add = (items) => {
     const btns = items.map(l => ({ text: l.name, callback_data: l.command }));
     keyboard.push(...chunk(btns, 2));
   };
-
   keyboard.push([{ text: "📊 三聯盟 Meta 生態分析", callback_data: "meta_analysis" }]);
-  
   const groups = {
     "🏆 超級 (1500)": leagues.filter(l => l.cp === "1500"),
     "⚔️ 高級 (2500)": leagues.filter(l => l.cp === "2500"),
     "👑 大師 (Max)": leagues.filter(l => l.cp === "10000"),
     "📊 PvE": leagues.filter(l => l.cp === "Any")
   };
-
   for (const [title, items] of Object.entries(groups)) {
     keyboard.push([{ text: `--- ${title} ---`, callback_data: "dummy" }]);
     add(items);
   }
-  
   keyboard.push([{ text: "📝 垃圾清單", callback_data: "trash_list" }, { text: "ℹ️ 說明", callback_data: "help_menu" }]);
   return keyboard;
 }
