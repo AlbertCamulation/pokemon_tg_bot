@@ -14,20 +14,20 @@ var NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|閃電|完全體|�
 var leagues = [
   { command: "little_league_top", name: "\u5C0F\u5C0F\u76C3 (500)", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "\u8D85\u7D1A\u806F\u76DF (1500)", cp: "1500", path: "data/rankings_1500.json" },
-  { command: "great_league_top_remix", name: "\u8D85\u7D1A Remix", cp: "1500", path: "data/rankings_1500_remix.json" },
-  { command: "great_league_championship2025", name: "\u51A0\u8ECD\u8CFD 2025", cp: "1500", path: "data/rankings_1500_LAIC_2025_Championship_Series_Cup.json" },
-  { command: "halloween_cup_league_top_1500", name: "\u842C\u8056\u7BC0\u76C3", cp: "1500", path: "data/rankings_1500_halloween.json" },
-  { command: "retro_cup_top", name: "\u5FA9\u53E4\u76C3", cp: "1500", path: "data/rankings_1500_retro.json" },
+  { command: "great_league_top_remix", name: "\u8D85\u7D1A Remix (1500)", cp: "1500", path: "data/rankings_1500_remix.json" },
+  { command: "great_league_championship2025", name: "\u51A0\u8ECD\u8CFD 2025 (1500)", cp: "1500", path: "data/rankings_1500_LAIC_2025_Championship_Series_Cup.json" },
+  { command: "halloween_cup_league_top_1500", name: "\u842C\u8056\u7BC0\u76C3 (1500)", cp: "1500", path: "data/rankings_1500_halloween.json" },
+  { command: "retro_cup_top", name: "\u5FA9\u53E4\u76C3 (1500)", cp: "1500", path: "data/rankings_1500_retro.json" },
   { command: "summer_cup_top_1500", name: "\u590F\u65E5\u76C3 (1500)", cp: "1500", path: "data/rankings_1500_summer.json" },
-  { command: "willpower_cup_top_1500", name: "\u610F\u5FD7\u76C3", cp: "1500", path: "data/rankings_willpower_1500.json" },
-  { command: "jungle_cup_top_1500", name: "\u53E2\u6797\u76C3", cp: "1500", path: "data/rankings_1500_jungle.json" },
+  { command: "willpower_cup_top_1500", name: "\u610F\u5FD7\u76C3 (1500)", cp: "1500", path: "data/rankings_willpower_1500.json" },
+  { command: "jungle_cup_top_1500", name: "\u53E2\u6797\u76C3 (1500)", cp: "1500", path: "data/rankings_1500_jungle.json" },
   { command: "ultra_league_top", name: "\u9AD8\u7D1A\u806F\u76DF (2500)", cp: "2500", path: "data/rankings_2500.json" },
   { command: "summer_cup_top_2500", name: "\u590F\u65E5\u76C3 (2500)", cp: "2500", path: "data/rankings_2500_summer.json" },
-  { command: "master_league_top", name: "\u5927\u5E2B\u806F\u76DF (\u7121\u4E0A\u9650)", cp: "10000", path: "data/rankings_10000.json" },
-  { command: "master_league_top_permier", name: "\u5927\u5E2B\u7D00\u5FF5\u8CFD", cp: "10000", path: "data/rankings_10000_premier.json" },
-  { command: "master_league_top_meta", name: "\u5927\u5E2B Meta", cp: "10000", path: "data/rankings_meta_master_10000.json" },
-  { command: "attackers_top", name: "\u6700\u4F73\u653B\u64CA\u624B", cp: "Any", path: "data/rankings_attackers_tier.json" },
-  { command: "defenders_top", name: "\u6700\u4F73\u9632\u5B88\u8005", cp: "Any", path: "data/rankings_defenders_tier.json" }
+  { command: "master_league_top", name: "\u5927\u5E2B\u806F\u76DF (\u7121\u4E0A\u9650) (10000)", cp: "10000", path: "data/rankings_10000.json" },
+  { command: "master_league_top_permier", name: "\u5927\u5E2B\u7D00\u5FF5\u8CFD (10000)", cp: "10000", path: "data/rankings_10000_premier.json" },
+  { command: "master_league_top_meta", name: "\u5927\u5E2B Meta (10000)", cp: "10000", path: "data/rankings_meta_master_10000.json" },
+  { command: "attackers_top", name: "\u6700\u4F73\u653B\u64CA\u624B (10000)", cp: "Any", path: "data/rankings_attackers_tier.json" },
+  { command: "defenders_top", name: "\u6700\u4F73\u9632\u5B88\u8005 (10000)", cp: "Any", path: "data/rankings_defenders_tier.json" }
 ];
 // --- 新增：屬性定義與相剋表 ---
 const typeNames = {
