@@ -399,7 +399,9 @@ async function handleMetaAnalysis(chatId, env, ctx) {
   const getTypesStr = (p) => {
     const detail = pokemonDetailMap.get(p.speciesId.toLowerCase());
     if (!detail || !detail.types) return "";
-    const chiTypes = detail.types.map(t => typeNames[t.toLowerCase()] || t);
+    const chiTypes = detail.types
+      .filter(t => t.toLowerCase() !== "none") // 1. 先過濾掉 'none'
+      .map(t => typeNames[t.toLowerCase()] || t); // 2. 再轉成中文
     return `(${chiTypes.join("/")})`;
   };
   for (const league of targetLeagues) {
