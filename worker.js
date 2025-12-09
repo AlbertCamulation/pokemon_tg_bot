@@ -242,7 +242,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
            let name = map.get(p.speciesId.toLowerCase());
            // 硬編碼修正
            if(name === "Giratina (Altered)") name = "騎拉帝納 別種";
-           if(name && name.includes("Hydreigon") && name.includes("Shadow")) name = "三首惡龍 (暗影)";
+           if(name && name.includes("Hydreigon") && name.includes("Shadow")) name = "三首惡龍 暗影";
            
            const line = `${rankDisplay} <code>${name}</code> ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
            
