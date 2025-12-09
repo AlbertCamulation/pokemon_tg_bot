@@ -339,21 +339,27 @@ ${uniqueNames.join(",")}
 __name(handleLeagueCommand, "handleLeagueCommand");
 __name2(handleLeagueCommand, "handleLeagueCommand");
 async function handlePokemonSearch(chatId, query, env, ctx) {
-  // ★ 新增：清理查詢字串 (移除 IV、數字、特殊符號)
-  const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
-  // 如果清理後只剩空字串(例如使用者真的只輸入 "100")，則保留原文，否則使用清理後的名稱
+  // ★ 新增這兩行：過濾掉所有非文字的符號 (IV、圓圈字、上標字、小數點)
+  const cleanQuery = query.replace(/[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g, "");
+  // 如果過濾完變成空字串(例如使用者只輸入數字)，就保留原樣，否則使用乾淨的字串
   const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
-  await sendMessage(chatId, `\u{1F50D} \u6B63\u5728\u67E5\u8A62\u8207 "${query}" \u76F8\u95DC\u7684\u6392\u540D...`, null, env);
+
+  await sendMessage(chatId, `\u{1F50D} \u6B63\u5728\u67E5\u8A62\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u6392\u540D...`, null, env);
   try {
     const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     if (!transResponse.ok) throw new Error("\u7121\u6CD5\u8F09\u5165\u5BF6\u53EF\u5922\u8CC7\u6599\u5EAB");
     const allPokemonData = await transResponse.json();
-    const isChinese = /[\u4e00-\u9fa5]/.test(query);
-    const lowerCaseQuery = query.toLowerCase();
+    
+    // ★ 修改這裡：用 finalQuery 來做比對
+    const isChinese = /[\u4e00-\u9fa5]/.test(finalQuery);
+    const lowerCaseQuery = finalQuery.toLowerCase();
     const initialMatches = allPokemonData.filter(
-      (p) => isChinese ? p.speciesName.includes(query) : p.speciesId.toLowerCase().includes(lowerCaseQuery)
+      (p) => isChinese ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lowerCaseQuery)
     );
-    if (initialMatches.length === 0) return await sendMessage(chatId, `\u627E\u4E0D\u5230\u8207 "${query}" \u76F8\u95DC\u7684\u5BF6\u53EF\u5922\u3002`, null, env);
+
+    if (initialMatches.length === 0) return await sendMessage(chatId, `\u627E\u4E0D\u5230\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u5BF6\u53EF\u5922\u3002`, null, env);
+    
+    // ... (以下完全保持不變) ...
     const familyIds = new Set(initialMatches.map((p) => p.family ? p.family.id : null).filter((id) => id));
     const familyMatches = allPokemonData.filter((p) => p.family && familyIds.has(p.family.id));
     const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
@@ -362,7 +368,7 @@ async function handlePokemonSearch(chatId, query, env, ctx) {
     const allLeagueRanks = await Promise.all(leagues.map(
       (league) => fetchWithCache(getDataUrl(league.path), env, ctx).then((res) => res.ok ? res.json() : null)
     ));
-    let replyMessage = `\u{1F3C6} \u8207 <b>"${query}"</b> \u76F8\u95DC\u7684\u6392\u540D\u7D50\u679C \u{1F3C6}
+    let replyMessage = `\u{1F3C6} \u8207 <b>"${finalQuery}"</b> \u76F8\u95DC\u7684\u6392\u540D\u7D50\u679C \u{1F3C6}
 `;
     const collectedResults = [];
     allLeagueRanks.forEach((rankings, index) => {
@@ -403,17 +409,19 @@ ${leagueName}
     } else if (collectedResults.length > 0) {
       const representativeName = finalMatches.sort((a, b) => a.speciesName.length - b.speciesName.length)[0].speciesName;
       const cleanedRepName = representativeName.replace(NAME_CLEANER_REGEX, "").trim();
-      replyMessage = `\u8207 <b>"${query}"</b> \u76F8\u95DC\u7684\u5BF6\u53EF\u5922\u5BB6\u65CF\u5728\u6240\u6709\u806F\u76DF\u4E2D\u8A55\u50F9\u7686\u70BA\u5783\u573E\u3002
+      replyMessage = `\u8207 <b>"${finalQuery}"</b> \u76F8\u95DC\u7684\u5BF6\u53EF\u5922\u5BB6\u65CF\u5728\u6240\u6709\u806F\u76DF\u4E2D\u8A55\u50F9\u7686\u70BA\u5783\u573E\u3002
 
 \u5EFA\u8B70\u8F38\u5165 <code>/trash ${cleanedRepName}</code> \u52A0\u5165\u5783\u573E\u6E05\u55AE\u3002`;
     } else {
-      replyMessage = `\u5728\u6240\u6709\u806F\u76DF\u4E2D\u90FD\u627E\u4E0D\u5230\u8207 "${query}" \u76F8\u95DC\u7684\u6392\u540D\u8CC7\u6599\u3002`;
+      replyMessage = `\u5728\u6240\u6709\u806F\u76DF\u4E2D\u90FD\u627E\u4E0D\u5230\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u6392\u540D\u8CC7\u6599\u3002`;
     }
     return await sendMessage(chatId, replyMessage.trim(), { parse_mode: "HTML" }, env);
   } catch (e) {
     return sendMessage(chatId, `\u641C\u5C0B\u932F\u8AA4: ${e.message}`, null, env);
   }
 }
+__name(handlePokemonSearch, "handlePokemonSearch");
+__name2(handlePokemonSearch, "handlePokemonSearch");
 __name(handlePokemonSearch, "handlePokemonSearch");
 __name2(handlePokemonSearch, "handlePokemonSearch");
 async function sendMainMenu(chatId, env) {
