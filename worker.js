@@ -62,18 +62,10 @@ const typeNames = {
   dark: "惡", steel: "鋼", fairy: "妖精"
 };
 
-// --- Cloudflare Worker Entry Point ---
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
-    if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
-    if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
-    return new Response("Pokemon Bot Running (Clean Source).", { status: 200 });
-  }
-};
+// =========================================================
+//  核心邏輯區域 (Function Definitions)
+// =========================================================
 
-// --- Webhook Handlers ---
 async function handleWebhook(request, env, ctx) {
   if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
   const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
@@ -95,19 +87,21 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
   const data = callbackQuery.data; 
   const callbackQueryId = callbackQuery.id;
 
-  // 處理移除垃圾桶按鈕
+  // 1. 處理移除垃圾桶按鈕 (優先處理)
   if (data.startsWith("untrash_btn_")) {
     const name = data.replace("untrash_btn_", "");
+    // 先回應 callback 避免轉圈，再執行刪除
+    await answerCallbackQuery(callbackQueryId, "正在移除...", env);
     return handleUntrashCommand(chatId, callbackQuery.from.id, [name], env);
   }
 
-  // 處理屬性查詢按鈕
+  // 2. 處理屬性查詢按鈕
   if (data === "menu_atk_types") return sendTypeSelectionMenu(chatId, "atk", env);
   if (data === "menu_def_types") return sendTypeSelectionMenu(chatId, "def", env);
   if (data.startsWith("type_atk_")) return handleTypeDetail(chatId, data.replace("type_atk_", ""), "atk", env);
   if (data.startsWith("type_def_")) return handleTypeDetail(chatId, data.replace("type_def_", ""), "def", env);
 
-  // 處理主選單按鈕
+  // 3. 處理其他按鈕
   answerCallbackQuery(callbackQueryId, "", env).catch(console.error);
 
   const leagueInfo = leagues.find((l) => l.command === data);
@@ -158,14 +152,14 @@ async function onMessage(message, env, ctx) {
   if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, userId, text, env, ctx);
 }
 
-// --- 核心功能: 搜尋與過濾 ---
+// --- 核心功能: 搜尋與過濾 (補回來的函數) ---
 
 async function handlePokemonSearch(chatId, userId, query, env, ctx) {
   // 1. 清理查詢字串
   const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
   const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
 
-  await sendMessage(chatId, `\u{1F50D} \u6B63\u5728\u67E5\u8A62 "<b>${finalQuery}</b>"...`, { parse_mode: "HTML" }, env);
+  await sendMessage(chatId, `\u{1F50D} \u67E5\u8A62 "<b>${finalQuery}</b>"...`, { parse_mode: "HTML" }, env);
   
   try {
     const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
@@ -193,7 +187,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
            const rating = getPokemonRating(rank);
            
            // 過濾邏輯
-           if (rating === "\u5783\u573E") return;
+           if (rating === "垃圾") return;
            if (typeof rank === "number" && rank > 100) return;
 
            const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
@@ -238,6 +232,43 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
   } catch(e) { 
     return sendMessage(chatId, `⚠️ 發生錯誤: ${e.message}`, { parse_mode: "" }, env); 
   }
+}
+
+async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
+  const leagueInfo = leagues.find((l) => l.command === command);
+  if (!leagueInfo) return sendMessage(chatId, "未知的命令。", null, env);
+  await sendMessage(chatId, `查詢 <b>${leagueInfo.name}</b>...`, { parse_mode: "HTML" }, env);
+  try {
+    const [resRank, resTrans] = await Promise.all([
+      fetchWithCache(getDataUrl(leagueInfo.path), env, ctx),
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
+    ]);
+    const rankings = await resRank.json();
+    const trans = await resTrans.json();
+    const map = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+    
+    // 取前 N 名，過濾垃圾
+    const list = rankings.slice(0, limit);
+    let msg = `🏆 <b>${leagueInfo.name}</b> (Top ${limit})\n\n`;
+    const copyList = [];
+    
+    list.forEach((p, i) => {
+      const rank = p.rank || p.tier || i + 1;
+      const rating = getPokemonRating(rank);
+      if (rating === "垃圾") return;
+
+      let name = map.get(p.speciesId.toLowerCase()) || p.speciesName;
+      if (name === "Giratina (Altered)") name = "騎拉帝納 別種";
+      const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
+      if (clean) copyList.push(clean);
+      
+      const rankDisplay = p.rank ? `#${p.rank}` : `(${p.tier})`;
+      msg += `${rankDisplay} ${name} ${p.cp ? `CP:${p.cp}` : ""} ${p.score ? `(${p.score.toFixed(1)})` : ""} - ${rating}\n`;
+    });
+    
+    if(copyList.length) msg += `\n<code>${[...new Set(copyList)].join(",")}</code>`;
+    return sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
+  } catch(e) { return sendMessage(chatId, `Error: ${e.message}`, null, env); }
 }
 
 // --- 核心演算法: Meta & Team Builder ---
@@ -444,7 +475,11 @@ async function handleTypeDetail(chatId, typeKey, mode, env) {
   await sendMessage(chatId, msg, { inline_keyboard: keyboard, parse_mode: "HTML" }, env);
 }
 
-// --- 通用工具 ---
+// --- 5. 基礎工具函數 (KV, Fetch, SendMessage) ---
+
+function getDataUrl(filename) {
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=13`;
+}
 
 async function fetchWithCache(url, env, ctx) {
   const cache = caches.default;
@@ -467,48 +502,6 @@ async function fetchWithCache(url, env, ctx) {
   else cache.put(cacheKey, responseToCache).catch(console.error);
 
   return new Response(bodyText, { status: response.status, headers: headers });
-}
-
-function getDataUrl(filename) {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=12`;
-}
-
-// 聯盟列表查詢 (同樣應用過濾)
-async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
-  const leagueInfo = leagues.find((l) => l.command === command);
-  if (!leagueInfo) return sendMessage(chatId, "未知的命令。", null, env);
-  await sendMessage(chatId, `查詢 <b>${leagueInfo.name}</b>...`, { parse_mode: "HTML" }, env);
-  try {
-    const [resRank, resTrans] = await Promise.all([
-      fetchWithCache(getDataUrl(leagueInfo.path), env, ctx),
-      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
-    ]);
-    const rankings = await resRank.json();
-    const trans = await resTrans.json();
-    const map = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-    
-    // 取前 N 名，但仍需過濾垃圾
-    const list = rankings.slice(0, limit);
-    let msg = `🏆 <b>${leagueInfo.name}</b> (Top ${limit})\n\n`;
-    const copyList = [];
-    
-    list.forEach((p, i) => {
-      const rank = p.rank || p.tier || i + 1;
-      const rating = getPokemonRating(rank);
-      if (rating === "\u5783\u573E") return;
-
-      let name = map.get(p.speciesId.toLowerCase()) || p.speciesName;
-      if (name === "Giratina (Altered)") name = "騎拉帝納 別種";
-      const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
-      if (clean) copyList.push(clean);
-      
-      const rankDisplay = p.rank ? `#${p.rank}` : `(${p.tier})`;
-      msg += `${rankDisplay} ${name} ${p.cp ? `CP:${p.cp}` : ""} ${p.score ? `(${p.score.toFixed(1)})` : ""} - ${rating}\n`;
-    });
-    
-    if(copyList.length) msg += `\n<code>${[...new Set(copyList)].join(",")}</code>`;
-    return sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
-  } catch(e) { return sendMessage(chatId, `Error: ${e.message}`, null, env); }
 }
 
 async function sendMainMenu(chatId, env) {
@@ -541,8 +534,8 @@ async function handleDelUidCommand(chatId, uid, env) { const ids = await getAllo
 
 function getPokemonRating(rank) {
   if (typeof rank === "number") { if (rank <= 10) return "🥇白金"; if (rank <= 25) return "🥇金"; if (rank <= 50) return "🥈銀"; if (rank <= 100) return "🥉銅"; }
-  if (typeof rank === "string") { const map = { "S": "🥇白金", "A+": "🥇金", "A": "🥈銀", "B+": "🥉銅" }; return map[rank] || "\u5783\u573E"; }
-  return "\u5783\u573E";
+  if (typeof rank === "string") { const map = { "S": "🥇白金", "A+": "🥇金", "A": "🥈銀", "B+": "🥉銅" }; return map[rank] || "垃圾"; }
+  return "垃圾";
 }
 
 async function sendMessage(chatId, text, options = null, env) {
@@ -557,3 +550,14 @@ async function sendMessage(chatId, text, options = null, env) {
 async function answerCallbackQuery(id, text, env) { fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/answerCallbackQuery`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ callback_query_id: id, text }) }); }
 async function registerWebhook(req, url, env) { const res = await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setWebhook`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: `${url.protocol}//${url.hostname}${WEBHOOK_PATH}`, secret_token: env.ENV_BOT_SECRET }) }); return new Response(await res.text()); }
 async function unRegisterWebhook(env) { const res = await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/deleteWebhook`); return new Response(await res.text()); }
+
+// --- Cloudflare Worker Entry Point (移到最後) ---
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
+    if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
+    if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
+    return new Response("Pokemon Bot Running (Final Corrected Version).", { status: 200 });
+  }
+};
