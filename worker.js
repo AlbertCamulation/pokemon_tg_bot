@@ -13,8 +13,8 @@ var ALLOWED_UID_KEY = "allowed_user_ids";
 var LIMIT_LEAGUES_SHOW = 50;
 var CACHE_TTL = 3600;
 var NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|閃電|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|阿羅拉|的樣子)/g;
-// ★ 請加入這行 (這是處理使用者輸入用的：過濾數字、小數點、圓圈文字、上標符號)
 var QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
+
 var leagues = [
   { command: "little_league_top", name: "\u5C0F\u5C0F\u76C3 (500)", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "\u8D85\u7D1A\u806F\u76DF (1500)", cp: "1500", path: "data/rankings_1500.json" },
@@ -74,123 +74,335 @@ var typeChart = {
   fairy: { fire: 0.625, fighting: 1.6, poison: 0.625, dragon: 1.6, dark: 1.6, steel: 0.625 }
 };
 var allTypes = Object.keys(typeChart);
-var worker_default = {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
-    if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
-    if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
-    return new Response("Pokemon Bot is running (Fixed ctx Scope).", { status: 200 });
-  }
-};
-async function handleWebhook(request, env, ctx) {
-  if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
-  const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
-  if (secret !== env.ENV_BOT_SECRET) return new Response("Unauthorized", { status: 403 });
-  try {
-    const update = await request.json();
-    if (update.message) ctx.waitUntil(onMessage(update.message, env, ctx));
-    else if (update.callback_query) ctx.waitUntil(onCallbackQuery(update.callback_query, env, ctx));
-    return new Response("Ok");
-  } catch (e) {
-    console.error(e);
-    return new Response("Error", { status: 500 });
-  }
+
+// --- 輔助函數定義 (必須放在最上方，確保被讀取) ---
+
+function generateMainMenu() {
+  const keyboard = [];
+  const chunk = /* @__PURE__ */ __name2((arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size)), "chunk");
+  const cat500 = leagues.filter((l) => l.cp === "500");
+  const cat1500 = leagues.filter((l) => l.cp === "1500");
+  const cat2500 = leagues.filter((l) => l.cp === "2500");
+  const catMaster = leagues.filter((l) => l.cp === "10000");
+  const catPvE = leagues.filter((l) => l.cp === "Any");
+  const addCategory = /* @__PURE__ */ __name2((title, items) => {
+    const buttons = items.map((l) => ({ text: l.name, callback_data: l.command }));
+    keyboard.push(...chunk(buttons, 2));
+  }, "addCategory");
+  keyboard.push([{ text: "\u{1F4CA} \u4E09\u806F\u76DF Meta \u751F\u614B\u5206\u6790", callback_data: "meta_analysis" }]);
+  addCategory("\u5C0F\u5C0F\u76C3", cat500);
+  keyboard.push([{ text: "--- \u{1F3C6} \u8D85\u7D1A\u806F\u76DF (1500) ---", callback_data: "dummy" }]);
+  addCategory("\u8D85\u7D1A\u806F\u76DF", cat1500);
+  keyboard.push([{ text: "--- \u2694\uFE0F \u9AD8\u7D1A\u806F\u76DF (2500) ---", callback_data: "dummy" }]);
+  addCategory("\u9AD8\u7D1A\u806F\u76DF", cat2500);
+  keyboard.push([{ text: "--- \u{1F451} \u5927\u5E2B\u806F\u76DF ---", callback_data: "dummy" }]);
+  addCategory("\u5927\u5E2B\u806F\u76DF", catMaster);
+  keyboard.push([{ text: "--- \u{1F4CA} PvE & \u5DE5\u5177 ---", callback_data: "dummy" }]);
+  addCategory("PvE", catPvE);
+  keyboard.push([
+    { text: "\u{1F4DD} \u6211\u7684\u5783\u573E\u6E05\u55AE", callback_data: "trash_list" },
+    { text: "\u2139\uFE0F \u64CD\u4F5C\u8AAA\u660E", callback_data: "help_menu" }
+  ]);
+  keyboard.push([
+    { text: "\u2694\uFE0F \u653B\u64CA\u5C6C\u6027\u67E5\u8A62", callback_data: "menu_atk_types" },
+    { text: "\u{1F6E1}\uFE0F \u9632\u79A6\u5C6C\u6027\u67E5\u8A62", callback_data: "menu_def_types" }
+  ]);
+  return keyboard;
 }
-__name(handleWebhook, "handleWebhook");
-__name2(handleWebhook, "handleWebhook");
-async function onCallbackQuery(callbackQuery, env, ctx) {
-  const chatId = callbackQuery.message.chat.id;
-  const data = callbackQuery.data;
-  const callbackQueryId = callbackQuery.id;
-  answerCallbackQuery(callbackQueryId, "", env).catch(console.error);
-  // --- 新增：處理搜尋結果的移出垃圾桶按鈕 ---
-  if (data.startsWith("untrash_btn_")) {
-    const name = data.replace("untrash_btn_", "");
-    return handleUntrashCommand(chatId, callbackQuery.from.id, [name], env);
-  }
-  if (data === "menu_atk_types") return sendTypeSelectionMenu(chatId, "atk", env);
-  if (data === "menu_def_types") return sendTypeSelectionMenu(chatId, "def", env);
-  if (data.startsWith("type_atk_")) return handleTypeDetail(chatId, data.replace("type_atk_", ""), "atk", env);
-  if (data.startsWith("type_def_")) return handleTypeDetail(chatId, data.replace("type_def_", ""), "def", env);
-  const leagueInfo = leagues.find((l) => l.command === data);
-  if (leagueInfo) return await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env, ctx);
-  switch (data) {
-    case "meta_analysis":
-      return handleMetaAnalysis(chatId, env, ctx);
-    // 傳入 ctx
-    case "trash_list":
-      return handleTrashCommand(chatId, callbackQuery.from.id, callbackQuery.from, env);
-    case "help_menu":
-      return sendHelpMessage(chatId, env);
-    case "main_menu":
-      return sendMainMenu(chatId, env);
-    default:
-      return;
-  }
+__name(generateMainMenu, "generateMainMenu");
+__name2(generateMainMenu, "generateMainMenu");
+
+async function sendMainMenu(chatId, env) {
+  const text = `\u{1F916} *\u5BF6\u53EF\u5922 PvP \u67E5\u8A62\u6A5F\u5668\u4EBA*
+
+\u8ACB\u9078\u64C7\u67E5\u8A62\u9805\u76EE\uFF0C\u6216\u76F4\u63A5\u8F38\u5165\u5BF6\u53EF\u5922\u540D\u7A31 (\u5982: \`\u746A\u529B\u9732\u9E97\`) \u9032\u884C\u641C\u5C0B\u3002
+`;
+  const keyboard = generateMainMenu();
+  await sendMessage(chatId, text, { inline_keyboard: keyboard }, env);
 }
-__name(onCallbackQuery, "onCallbackQuery");
-__name2(onCallbackQuery, "onCallbackQuery");
-async function onMessage(message, env, ctx) {
-  if (!message.text) return;
-  const text = message.text.trim();
-  const parts = text.split(" ");
-  const command = parts[0].startsWith("/") ? parts[0].split("@")[0].substring(1) : null;
-  const args = parts.slice(1);
-  const chatId = message.chat.id;
-  const userId = message.from.id;
-  const leagueInfo = leagues.find((l) => l.command === command);
-  if (leagueInfo) {
-    const limit = parseInt(args[0], 10) || LIMIT_LEAGUES_SHOW;
-    return await handleLeagueCommand(chatId, command, limit, env, ctx);
-  }
-  if (command) {
-    switch (command) {
-      case "start":
-      case "menu":
-        return sendMainMenu(chatId, env);
-      case "help":
-        return sendHelpMessage(chatId, env);
-      case "list_allowed_uid":
-        const ids = await getAllowedUserIds(env);
-        return sendMessage(chatId, ids.length ? `\u767D\u540D\u55AE:
-${ids.join("\n")}` : "\u767D\u540D\u55AE\u70BA\u7A7A", null, env);
-      case "allow_uid":
-        return handleAllowUidCommand(chatId, args[0], env);
-      case "del_uid":
-        return handleDelUidCommand(chatId, args[0], env);
-      case "trash":
-        if (args.length > 0) {
-          await addToTrashList(userId, args, env);
-          return sendMessage(chatId, `\u5DF2\u52A0\u5165\u5783\u573E\u6E05\u55AE: ${args.join(", ")}`, null, env);
-        } else return handleTrashCommand(chatId, userId, message.from, env);
-      case "untrash":
-        return handleUntrashCommand(chatId, userId, args, env);
-      default:
-        return;
-    }
-  }
-  // 搜尋功能
-  if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, userId, text, env, ctx);
+__name(sendMainMenu, "sendMainMenu");
+__name2(sendMainMenu, "sendMainMenu");
+
+async function sendHelpMessage(chatId, env) {
+  const helpText = `\u{1F916} <b>\u5BF6\u53EF\u5922 PvP \u67E5\u8A62\u6A5F\u5668\u4EBA\u4F7F\u7528\u8AAA\u660E</b>
+
+\u{1F50D} <b>\u57FA\u672C\u67E5\u8A62</b>
+\u76F4\u63A5\u8F38\u5165\u5BF6\u53EF\u5922\u540D\u7A31 (\u4E2D/\u82F1) \u5373\u53EF\u67E5\u770B\u5404\u806F\u76DF\u6392\u540D\u3001\u8A55\u7D1A\u8207\u5EFA\u8B70\u3002
+\u7BC4\u4F8B\uFF1A<code>\u746A\u529B\u9732\u9E97</code> \u6216 <code>Azumarill</code>
+
+\u{1F4CA} <b>Meta \u751F\u614B\u5206\u6790 (\u7368\u5BB6\u529F\u80FD)</b>
+\u9EDE\u64CA\u9078\u55AE\u4E2D\u7684\u300C<b>\u4E09\u806F\u76DF Meta \u751F\u614B\u5206\u6790</b>\u300D\uFF0C\u7CFB\u7D71\u5C07\u8A08\u7B97\uFF1A
+1. \u{1F451} <b>\u7576\u5B63\u6700\u5F37\u738B\u8005</b>\uFF1A\u6700\u503C\u5F97\u6295\u8CC7\u7684\u6838\u5FC3\u3002
+2. \u2694\uFE0F <b>\u66B4\u529B T0 \u968A</b>\uFF1A\u7531\u6392\u540D\u6700\u9AD8\u7684\u5F37\u52E2\u89D2\u7D44\u6210\u3002
+3. \u{1F6E1}\uFE0F <b>\u667A\u6167\u806F\u9632\u968A</b>\uFF1A\u900F\u904E\u6F14\u7B97\u6CD5\u8A08\u7B97\u5C6C\u6027\u4E92\u88DC\u3002
+4. \u{1F504} <b>\u4E8C\u7576\u5BB6\u806F\u9632\u968A</b>\uFF1A\u82E5\u7121\u6700\u5F37\u738B\u8005\u7684\u66FF\u4EE3\u65B9\u6848\u3002
+<i>(\u9644\u5E36\u904A\u6232\u5167\u4E00\u9375\u8907\u88FD\u641C\u5C0B\u5B57\u4E32)</i>
+
+\u2696\uFE0F <b>\u5C6C\u6027\u76F8\u524B\u67E5\u8A62</b>
+\u9EDE\u64CA\u300C<b>\u653B\u64CA/\u9632\u79A6\u5C6C\u6027\u67E5\u8A62</b>\u300D\uFF0C\u67E5\u770B Pok\xE9mon GO \u5C08\u5C6C\u500D\u7387\uFF1A
+\u2022 \u{1F4AA} \u6548\u679C\u7D55\u4F73 (1.6x)
+\u2022 \u{1F6E1}\uFE0F \u5177\u6709\u6297\u6027 (0.625x)
+\u2022 \u{1F6AB} \u96D9\u6297/\u7121\u6548 (0.39x)
+
+\u{1F5D1}\uFE0F <b>\u5783\u573E\u6E05\u55AE\u7BA1\u7406</b>
+\u2022 <code>/trash [\u540D\u7A31]</code>\uFF1A\u52A0\u5165\u5783\u573E\u6E05\u55AE
+\u2022 <code>/untrash [\u540D\u7A31]</code>\uFF1A\u79FB\u9664\u5783\u573E\u6E05\u55AE
+\u2022 <code>/trash</code>\uFF1A\u67E5\u770B\u76EE\u524D\u7684\u6E05\u55AE (\u53EF\u8907\u88FD\u641C\u5C0B\u5B57\u4E32)
+
+\u{1F518} <b>\u5E38\u7528\u6307\u4EE4</b>
+\u2022 <code>/start</code> \u6216 <code>/menu</code>\uFF1A\u559A\u9192\u5716\u5F62\u5316\u4E3B\u9078\u55AE
+\u2022 <code>/great_league_top</code>\uFF1A\u67E5\u770B\u8D85\u7D1A\u806F\u76DF\u6392\u884C
+<i>(\u652F\u63F4\u5F8C\u65B9\u52A0\u6578\u5B57\u81EA\u8A02\u986F\u793A\u6578\u91CF\uFF0C\u5982\uFF1A/great_league_top 10)</i>`;
+  await sendMessage(chatId, helpText, { parse_mode: "HTML" }, env);
 }
-__name(onMessage, "onMessage");
-__name2(onMessage, "onMessage");
-function calculateWeaknesses(types) {
-  const weaknesses = {};
-  allTypes.forEach((attackType) => {
-    let multiplier = 1;
-    types.forEach((defType) => {
-      const typeLower = defType.toLowerCase();
-      if (typeChart[attackType] && typeChart[attackType][typeLower] !== void 0) {
-        multiplier *= typeChart[attackType][typeLower];
+__name(sendHelpMessage, "sendHelpMessage");
+__name2(sendHelpMessage, "sendHelpMessage");
+
+async function sendTypeSelectionMenu(chatId, mode, env) {
+  const title = mode === "atk" ? "\u2694\uFE0F <b>\u653B\u64CA\u5C6C\u6027\u67E5\u8A62</b>\n\u8ACB\u9078\u64C7\u653B\u64CA\u62DB\u5F0F\u7684\u5C6C\u6027\uFF1A" : "\u{1F6E1}\uFE0F <b>\u9632\u79A6\u5C6C\u6027\u67E5\u8A62</b>\n\u8ACB\u9078\u64C7\u9632\u5B88\u65B9(\u81EA\u5DF1)\u7684\u5C6C\u6027\uFF1A";
+  const keyboard = [];
+  const types = Object.keys(typeNames);
+  for (let i = 0; i < types.length; i += 3) {
+    const row = types.slice(i, i + 3).map((t) => ({ text: typeNames[t], callback_data: `type_${mode}_${t}` }));
+    keyboard.push(row);
+  }
+  keyboard.push([{ text: "\u{1F519} \u56DE\u4E3B\u9078\u55AE", callback_data: "main_menu" }]);
+  await sendMessage(chatId, title, { inline_keyboard: keyboard, parse_mode: "HTML" }, env);
+}
+__name(sendTypeSelectionMenu, "sendTypeSelectionMenu");
+__name2(sendTypeSelectionMenu, "sendTypeSelectionMenu");
+
+async function handleTypeDetail(chatId, typeKey, mode, env) {
+  const typeName = typeNames[typeKey];
+  let msg = "";
+  if (mode === "atk") {
+    const strongAgainst = [];
+    Object.entries(typeChart[typeKey]).forEach(([target, multiplier]) => {
+      if (multiplier > 1) strongAgainst.push(`${typeNames[target]} (${multiplier}x)`);
+    });
+    msg = `\u2694\uFE0F <b>${typeName}\u5C6C\u6027 (\u653B\u64CA\u65B9)</b>
+
+\u{1F4AA} <b>\u6548\u679C\u7D55\u4F73 (1.6x)\uFF1A</b>
+${strongAgainst.length ? strongAgainst.join("\n") : "\u7121"}
+
+<i>(\u8A3B\uFF1APokemon GO \u524B\u5236\u500D\u7387\u70BA 1.6)</i>`;
+  } else {
+    const resistantTo = [];
+    const immuneTo = [];
+    allTypes.forEach((attacker) => {
+      let multiplier = 1;
+      if (typeChart[attacker] && typeChart[attacker][typeKey] !== void 0) multiplier = typeChart[attacker][typeKey];
+      if (multiplier < 1) {
+        const text = `${typeNames[attacker]} (${multiplier}x)`;
+        if (multiplier < 0.6) immuneTo.push(text);
+        else resistantTo.push(text);
       }
     });
-    weaknesses[attackType] = multiplier;
-  });
-  return weaknesses;
+    msg = `\u{1F6E1}\uFE0F <b>${typeName}\u5C6C\u6027 (\u9632\u5B88\u65B9)</b>
+
+\u{1F6AB} <b>\u88AB\u96D9\u6297/\u7121\u6548 (0.39x)\uFF1A</b>
+${immuneTo.length ? immuneTo.join("\n") : "\u7121"}
+
+\u{1F6E1}\uFE0F <b>\u5177\u6709\u6297\u6027 (0.625x)\uFF1A</b>
+${resistantTo.length ? resistantTo.join("\n") : "\u7121"}
+`;
+  }
+  const keyboard = [[{ text: "\u{1F519} \u56DE\u4E0A\u4E00\u5C64", callback_data: `menu_${mode}_types` }]];
+  await sendMessage(chatId, msg, { inline_keyboard: keyboard, parse_mode: "HTML" }, env);
 }
-__name(calculateWeaknesses, "calculateWeaknesses");
-__name2(calculateWeaknesses, "calculateWeaknesses");
+__name(handleTypeDetail, "handleTypeDetail");
+__name2(handleTypeDetail, "handleTypeDetail");
+
+async function handleTrashCommand(chatId, userId, messageFrom, env) {
+  const trashList = await getTrashList(userId, env);
+  const userName = messageFrom.first_name || "\u8A13\u7DF4\u5BB6";
+  if (trashList.length === 0) return sendMessage(chatId, `\u60A8\u597D, ${userName}
+\u60A8\u7684\u5783\u573E\u6E05\u55AE\u76EE\u524D\u662F\u7A7A\u7684\u3002`, null, env);
+  let replyMessage = `\u60A8\u597D, ${userName}
+\u60A8\u7684\u5783\u573E\u6E05\u55AE\uFF1A
+
+<code>${trashList.join(",")}&!3*&!4*</code>`;
+  return sendMessage(chatId, replyMessage, { parse_mode: "HTML" }, env);
+}
+__name(handleTrashCommand, "handleTrashCommand");
+__name2(handleTrashCommand, "handleTrashCommand");
+
+async function handleUntrashCommand(chatId, userId, pokemonNames, env) {
+  if (!env.POKEMON_KV) return;
+  const currentList = await getTrashList(userId, env);
+  const removed = [];
+  pokemonNames.forEach((name) => {
+    const idx = currentList.indexOf(name);
+    if (idx > -1) {
+      currentList.splice(idx, 1);
+      removed.push(name);
+    }
+  });
+  if (removed.length > 0) {
+    await env.POKEMON_KV.put(TRASH_LIST_PREFIX + userId, JSON.stringify(currentList));
+    return sendMessage(chatId, `\u5DF2\u79FB\u9664\uFF1A${removed.join(", ")}`, null, env);
+  }
+  return sendMessage(chatId, "\u6E05\u55AE\u4E2D\u627E\u4E0D\u5230\u9019\u4E9B\u5BF6\u53EF\u5922\u3002", null, env);
+}
+__name(handleUntrashCommand, "handleUntrashCommand");
+__name2(handleUntrashCommand, "handleUntrashCommand");
+
+async function handleAllowUidCommand(chatId, uid, env) {
+  if (!uid) return sendMessage(chatId, "\u8ACB\u8F38\u5165 UID", null, env);
+  let ids = await getAllowedUserIds(env);
+  const newId = parseInt(uid);
+  if (isNaN(newId)) return sendMessage(chatId, "\u7121\u6548 UID", null, env);
+  if (ids.includes(newId)) return sendMessage(chatId, "\u5DF2\u5728\u767D\u540D\u55AE", null, env);
+  ids.push(newId);
+  await setAllowedUserIds(ids, env);
+  return sendMessage(chatId, `\u5DF2\u52A0\u5165 UID: ${newId}`, null, env);
+}
+__name(handleAllowUidCommand, "handleAllowUidCommand");
+__name2(handleAllowUidCommand, "handleAllowUidCommand");
+
+async function handleDelUidCommand(chatId, uid, env) {
+  if (!uid) return sendMessage(chatId, "\u8ACB\u8F38\u5165 UID", null, env);
+  let ids = await getAllowedUserIds(env);
+  const targetId = parseInt(uid);
+  const idx = ids.indexOf(targetId);
+  if (idx > -1) {
+    ids.splice(idx, 1);
+    await setAllowedUserIds(ids, env);
+    return sendMessage(chatId, `\u5DF2\u79FB\u9664 UID: ${targetId}`, null, env);
+  }
+  return sendMessage(chatId, "\u4E0D\u5728\u767D\u540D\u55AE\u4E2D", null, env);
+}
+__name(handleDelUidCommand, "handleDelUidCommand");
+__name2(handleDelUidCommand, "handleDelUidCommand");
+
+async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
+  const leagueInfo = leagues.find((l) => l.command === command);
+  if (!leagueInfo) return sendMessage(chatId, "\u672A\u77E5\u7684\u547D\u4EE4\u3002", null, env);
+  await sendMessage(chatId, `\u6B63\u5728\u67E5\u8A62 *${leagueInfo.name}* \u524D ${limit} \u540D...`, null, env);
+  try {
+    const [response, transResponse] = await Promise.all([
+      fetchWithCache(getDataUrl(leagueInfo.path), env, ctx),
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
+    ]);
+    if (!response.ok || !transResponse.ok) throw new Error("\u8CC7\u6599\u8B80\u53D6\u5931\u6557");
+    const rankings = await response.json();
+    const allPokemonData = await transResponse.json();
+    const idToNameMap = new Map(allPokemonData.map((p) => [p.speciesId.toLowerCase(), p.speciesName]));
+    const topRankings = rankings.slice(0, limit);
+    let replyMessage = `\u{1F3C6} *${leagueInfo.name}* (\u524D ${limit} \u540D) \u{1F3C6}
+
+`;
+    const copyableNames = [];
+    topRankings.forEach((pokemon, rankIndex) => {
+      let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
+      if (!speciesName || typeof speciesName !== "string") return;
+      if (speciesName === "Giratina (Altered)") speciesName = "\u9A0E\u62C9\u5E1D\u7D0D \u5225\u7A2E";
+      else if (speciesName === "Giratina (Altered) (Shadow)") speciesName = "\u9A0E\u62C9\u5E1D\u7D0D \u5225\u7A2E \u6697\u5F71";
+      else if (speciesName === "Claydol (Shadow)") speciesName = "\u5FF5\u529B\u571F\u5076 \u6697\u5F71";
+      const cleanedName = speciesName.replace(NAME_CLEANER_REGEX, "").trim();
+      if (cleanedName) copyableNames.push(cleanedName);
+      let rankDisplay = pokemon.score !== void 0 ? pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}` : pokemon.tier ? `(${pokemon.tier})` : "";
+      const typesDisplay = pokemon.types && pokemon.types.length > 0 ? `(${pokemon.types.join(", ")})` : "";
+      const cpDisplay = pokemon.cp ? ` CP: ${pokemon.cp}` : "";
+      const score = pokemon.score && typeof pokemon.score === "number" ? `(${pokemon.score.toFixed(2)})` : "";
+      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}
+`;
+    });
+    if (copyableNames.length > 0) {
+      const uniqueNames = [...new Set(copyableNames)];
+      replyMessage += `
+*\u53EF\u8907\u88FD\u6E05\u55AE:*
+\`\`\`
+${uniqueNames.join(",")}
+\`\`\``;
+    }
+    return sendMessage(chatId, replyMessage.trim(), null, env);
+  } catch (e) {
+    return sendMessage(chatId, `\u67E5\u8A62\u5931\u6557: ${e.message}`, null, env);
+  }
+}
+__name(handleLeagueCommand, "handleLeagueCommand");
+__name2(handleLeagueCommand, "handleLeagueCommand");
+
+async function handlePokemonSearch(chatId, query, env, ctx) {
+  // ★ 新增：清理查詢字串 (移除 IV、數字、特殊符號)
+  const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
+  // 如果清理後只剩空字串(例如使用者真的只輸入 "100")，則保留原文，否則使用清理後的名稱
+  const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
+  await sendMessage(chatId, `\u{1F50D} \u6B63\u5728\u67E5\u8A62\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u6392\u540D...`, null, env);
+  try {
+    const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    if (!transResponse.ok) throw new Error("\u7121\u6CD5\u8F09\u5165\u5BF6\u53EF\u5922\u8CC7\u6599\u5EAB");
+    const allPokemonData = await transResponse.json();
+    const isChinese = /[\u4e00-\u9fa5]/.test(finalQuery);
+    const lowerCaseQuery = finalQuery.toLowerCase();
+    const initialMatches = allPokemonData.filter(
+      (p) => isChinese ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lowerCaseQuery)
+    );
+    if (initialMatches.length === 0) return await sendMessage(chatId, `\u627E\u4E0D\u5230\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u5BF6\u53EF\u5922\u3002`, null, env);
+    const familyIds = new Set(initialMatches.map((p) => p.family ? p.family.id : null).filter((id) => id));
+    const familyMatches = allPokemonData.filter((p) => p.family && familyIds.has(p.family.id));
+    const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
+    const matchingIds = new Set(finalMatches.map((p) => p.speciesId.toLowerCase()));
+    const idToNameMap = new Map(finalMatches.map((p) => [p.speciesId.toLowerCase(), p.speciesName]));
+    const allLeagueRanks = await Promise.all(leagues.map(
+      (league) => fetchWithCache(getDataUrl(league.path), env, ctx).then((res) => res.ok ? res.json() : null)
+    ));
+    let replyMessage = `\u{1F3C6} \u8207 <b>"${finalQuery}"</b> \u76F8\u95DC\u7684\u6392\u540D\u7D50\u679C \u{1F3C6}
+`;
+    const collectedResults = [];
+    allLeagueRanks.forEach((rankings, index) => {
+      const league = leagues[index];
+      if (!rankings) return;
+      rankings.forEach((pokemon, rankIndex) => {
+        if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
+          const rank = pokemon.rank || pokemon.tier || rankIndex + 1;
+          collectedResults.push({
+            league,
+            rank,
+            score: pokemon.score || pokemon.cp || "N/A",
+            speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
+            types: pokemon.types,
+            tier: pokemon.tier,
+            cp: pokemon.cp,
+            rating: getPokemonRating(rank)
+          });
+        }
+      });
+    });
+    const nonTrashResults = collectedResults.filter((p) => p.rating !== "\u5783\u573E");
+    if (nonTrashResults.length > 0) {
+      const resultsByLeague = {};
+      nonTrashResults.forEach((p) => {
+        const leagueKey = `<b>${p.league.name}:</b>`;
+        if (!resultsByLeague[leagueKey]) resultsByLeague[leagueKey] = [];
+        let rankDisplay = typeof p.rank === "number" ? `#${p.rank}` : p.tier ? `(${p.tier})` : "";
+        const score = p.score && typeof p.score === "number" ? `(${p.score.toFixed(2)})` : "";
+        const types = p.types && p.types.length > 0 ? `(${p.types.join(", ")})` : "";
+        resultsByLeague[leagueKey].push(`${rankDisplay} <code>${p.speciesName}</code> ${types}${p.cp ? ` CP:${p.cp}` : ""} ${score} - ${p.rating}`);
+      });
+      for (const leagueName in resultsByLeague) {
+        replyMessage += `
+${leagueName}
+` + resultsByLeague[leagueName].join("\n") + "\n";
+      }
+    } else if (collectedResults.length > 0) {
+      const representativeName = finalMatches.sort((a, b) => a.speciesName.length - b.speciesName.length)[0].speciesName;
+      const cleanedRepName = representativeName.replace(NAME_CLEANER_REGEX, "").trim();
+      replyMessage = `\u8207 <b>"${finalQuery}"</b> \u76F8\u95DC\u7684\u5BF6\u53EF\u5922\u5BB6\u65CF\u5728\u6240\u6709\u806F\u76DF\u4E2D\u8A55\u50F9\u7686\u70BA\u5783\u573E\u3002
+
+\u5EFA\u8B70\u8F38\u5165 <code>/trash ${cleanedRepName}</code> \u52A0\u5165\u5783\u573E\u6E05\u55AE\u3002`;
+    } else {
+      replyMessage = `\u5728\u6240\u6709\u806F\u76DF\u4E2D\u90FD\u627E\u4E0D\u5230\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u6392\u540D\u8CC7\u6599\u3002`;
+    }
+    return await sendMessage(chatId, replyMessage.trim(), { parse_mode: "HTML" }, env);
+  } catch (e) {
+    return sendMessage(chatId, `\u641C\u5C0B\u932F\u8AA4: ${e.message}`, null, env);
+  }
+}
+__name(handlePokemonSearch, "handlePokemonSearch");
+__name2(handlePokemonSearch, "handlePokemonSearch");
+
 async function handleMetaAnalysis(chatId, env, ctx) {
   const targetLeagues = [
     leagues.find((l) => l.command === "great_league_top"),
@@ -199,7 +411,7 @@ async function handleMetaAnalysis(chatId, env, ctx) {
   ];
   await sendMessage(chatId, `\u{1F504} <b>\u6B63\u5728\u5206\u6790\u4E09\u806F\u76DF\u5BE6\u6642\u751F\u614B\u8207\u5C6C\u6027\u806F\u9632...</b>`, { parse_mode: "HTML" }, env);
   const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
-  if (!transResponse.ok) return sendMessage(chatId, "\u274C \u7121\u6CD5\u8B80\u53D6\u8CC7\u6599\u5EAB", null, env);
+  if (!transResponse.ok) return sendMessage(chatId, "\u274C \u7121\u6CD5\u8B80\u53D6\u7FFB\u8B6F\u8CC7\u6599\u5EAB", null, env);
   const allPokemonData = await transResponse.json();
   const pokemonDetailMap = new Map(allPokemonData.map((p) => [p.speciesId.toLowerCase(), p]));
   const getName = /* @__PURE__ */ __name((p, forCopy = false) => {
@@ -269,234 +481,18 @@ async function handleMetaAnalysis(chatId, env, ctx) {
 __name(handleMetaAnalysis, "handleMetaAnalysis");
 __name2(handleMetaAnalysis, "handleMetaAnalysis");
 __name2(handleMetaAnalysis, "handleMetaAnalysis");
-async function fetchWithCache(url, env, ctx) {
-  const cache = caches.default;
-  const cacheKey = new Request(url, { method: "GET" });
-  let cachedRes = await cache.match(cacheKey);
-  if (cachedRes) return cachedRes;
-  const response = await fetch(url);
-  if (!response.ok) return response;
-  const bodyText = await response.text();
-  if (!bodyText || bodyText.trim().length === 0) return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" } });
-  const headers = new Headers(response.headers);
-  headers.set("Cache-Control", `public, max-age=${CACHE_TTL}`);
-  headers.set("Content-Type", "application/json");
-  const responseToCache = new Response(bodyText, { status: response.status, headers });
-  if (ctx && ctx.waitUntil) {
-    ctx.waitUntil(cache.put(cacheKey, responseToCache));
-  } else {
-    cache.put(cacheKey, responseToCache).catch(console.error);
+
+// --- Worker Entry Point (必須放在檔案最後) ---
+var worker_default = {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
+    if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
+    if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
+    return new Response("Pokemon Bot is running (Fixed ctx Scope).", { status: 200 });
   }
-  return new Response(bodyText, { status: response.status, headers });
-}
-__name(fetchWithCache, "fetchWithCache");
-__name2(fetchWithCache, "fetchWithCache");
-function getDataUrl(filename) {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=2`;
-}
-__name(getDataUrl, "getDataUrl");
-__name2(getDataUrl, "getDataUrl");
-async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
-  const leagueInfo = leagues.find((l) => l.command === command);
-  if (!leagueInfo) return sendMessage(chatId, "\u672A\u77E5\u7684\u547D\u4EE4\u3002", null, env);
-  await sendMessage(chatId, `\u6B63\u5728\u67E5\u8A62 *${leagueInfo.name}* \u524D ${limit} \u540D...`, null, env);
-  try {
-    const [response, transResponse] = await Promise.all([
-      fetchWithCache(getDataUrl(leagueInfo.path), env, ctx),
-      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
-    ]);
-    if (!response.ok || !transResponse.ok) throw new Error("\u8CC7\u6599\u8B80\u53D6\u5931\u6557");
-    const rankings = await response.json();
-    const allPokemonData = await transResponse.json();
-    const idToNameMap = new Map(allPokemonData.map((p) => [p.speciesId.toLowerCase(), p.speciesName]));
-    const topRankings = rankings.slice(0, limit);
-    let replyMessage = `\u{1F3C6} *${leagueInfo.name}* (\u524D ${limit} \u540D) \u{1F3C6}
+};
 
-`;
-    const copyableNames = [];
-    topRankings.forEach((pokemon, rankIndex) => {
-      let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
-      if (!speciesName || typeof speciesName !== "string") return;
-      if (speciesName === "Giratina (Altered)") speciesName = "\u9A0E\u62C9\u5E1D\u7D0D \u5225\u7A2E";
-      else if (speciesName === "Giratina (Altered) (Shadow)") speciesName = "\u9A0E\u62C9\u5E1D\u7D0D \u5225\u7A2E \u6697\u5F71";
-      else if (speciesName === "Claydol (Shadow)") speciesName = "\u5FF5\u529B\u571F\u5076 \u6697\u5F71";
-      const cleanedName = speciesName.replace(NAME_CLEANER_REGEX, "").trim();
-      if (cleanedName) copyableNames.push(cleanedName);
-      let rankDisplay = pokemon.score !== void 0 ? pokemon.rank ? `#${pokemon.rank}` : `#${rankIndex + 1}` : pokemon.tier ? `(${pokemon.tier})` : "";
-      const typesDisplay = pokemon.types && pokemon.types.length > 0 ? `(${pokemon.types.join(", ")})` : "";
-      const cpDisplay = pokemon.cp ? ` CP: ${pokemon.cp}` : "";
-      const score = pokemon.score && typeof pokemon.score === "number" ? `(${pokemon.score.toFixed(2)})` : "";
-      replyMessage += `${rankDisplay} ${speciesName} ${typesDisplay}${cpDisplay} ${score}
-`;
-    });
-    if (copyableNames.length > 0) {
-      const uniqueNames = [...new Set(copyableNames)];
-      replyMessage += `
-*\u53EF\u8907\u88FD\u6E05\u55AE:*
-\`\`\`
-${uniqueNames.join(",")}
-\`\`\``;
-    }
-    return sendMessage(chatId, replyMessage.trim(), null, env);
-  } catch (e) {
-    return sendMessage(chatId, `\u67E5\u8A62\u5931\u6557: ${e.message}`, null, env);
-  }
-}
-__name(handleLeagueCommand, "handleLeagueCommand");
-__name2(handleLeagueCommand, "handleLeagueCommand");
-// 修改參數：多接收 userId
-async function handlePokemonSearch(chatId, userId, query, env, ctx) {
-  await sendMessage(chatId, `🔍 查詢 "<b>${query}</b>"...`, { parse_mode: "HTML" }, env);
-  
-  try {
-    const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
-    const data = await res.json();
-    
-    // 清理搜尋字串
-    const cleanQuery = query.replace(QUERY_CLEANER_REGEX, ""); 
-    const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
-
-    const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
-    const lower = finalQuery.toLowerCase();
-    const matches = data.filter(p => isChi ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lower));
-    
-    if(!matches.length) return sendMessage(chatId, "找不到寶可夢", null, env);
-    
-    const ids = new Set(matches.map(p => p.speciesId.toLowerCase()));
-    const map = new Map(matches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-    
-    const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
-    
-    let msg = `🏆 <b>"${finalQuery}" 相關排名</b>\n`;
-    const resultsByLeague = {}; 
-
-    rankResults.forEach((list, i) => {
-      if(!list) return;
-      list.forEach((p, rankIndex) => {
-        if(ids.has(p.speciesId.toLowerCase())) {
-           const rank = p.rank || p.tier || rankIndex + 1;
-           const rating = getPokemonRating(rank);
-           if (rating === "垃圾") return;
-           if (typeof rank === "number" && rank > 100) return;
-
-           const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
-           let name = map.get(p.speciesId.toLowerCase());
-           if(name === "Giratina (Altered)") name = "騎拉帝納 別種";
-           
-           const line = `${rankDisplay} ${name} ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
-           
-           const leagueName = leagues[i].name;
-           if (!resultsByLeague[leagueName]) resultsByLeague[leagueName] = [];
-           resultsByLeague[leagueName].push(line);
-        }
-      });
-    });
-
-    let hasContent = false;
-    for (const [league, lines] of Object.entries(resultsByLeague)) {
-      if (lines.length > 0) {
-        msg += `\n<b>${league}:</b>\n${lines.join("\n")}\n`;
-        hasContent = true;
-      }
-    }
-
-    if (!hasContent) {
-       msg += "\n(此寶可夢在所有聯盟中排名未達標)";
-    }
-
-    // ★★★ 新增功能：檢查是否在垃圾清單中 ★★★
-    let options = { parse_mode: "HTML" };
-    
-    // 取得該用戶的垃圾清單
-    const trashList = await getTrashList(userId, env);
-    
-    // 檢查搜尋結果中，是否有任何一隻寶可夢在垃圾清單裡
-    const foundInTrash = matches.find(p => trashList.includes(p.speciesName));
-
-    if (foundInTrash) {
-      msg += `\n\n⚠️ <b>注意：${foundInTrash.speciesName} 目前在您的垃圾清單中</b>`;
-      // 加入按鈕
-      options.inline_keyboard = [[
-        { text: `♻️ 將 "${foundInTrash.speciesName}" 移出垃圾清單`, callback_data: `untrash_btn_${foundInTrash.speciesName}` }
-      ]];
-    }
-
-    return sendMessage(chatId, msg, options, env);
-
-  } catch(e) { 
-    return sendMessage(chatId, `⚠️ 發生錯誤: ${e.message}`, { parse_mode: "" }, env); 
-  }
-}
-__name(sendMainMenu, "sendMainMenu");
-__name2(sendMainMenu, "sendMainMenu");
-async function sendHelpMessage(chatId, env) {
-  const helpText = `\u{1F916} <b>\u5BF6\u53EF\u5922 PvP \u67E5\u8A62\u6A5F\u5668\u4EBA\u4F7F\u7528\u8AAA\u660E</b>
-
-\u{1F50D} <b>\u57FA\u672C\u67E5\u8A62</b>
-\u76F4\u63A5\u8F38\u5165\u5BF6\u53EF\u5922\u540D\u7A31 (\u4E2D/\u82F1) \u5373\u53EF\u67E5\u770B\u5404\u806F\u76DF\u6392\u540D\u3001\u8A55\u7D1A\u8207\u5EFA\u8B70\u3002
-\u7BC4\u4F8B\uFF1A<code>\u746A\u529B\u9732\u9E97</code> \u6216 <code>Azumarill</code>
-
-\u{1F4CA} <b>Meta \u751F\u614B\u5206\u6790 (\u7368\u5BB6\u529F\u80FD)</b>
-\u9EDE\u64CA\u9078\u55AE\u4E2D\u7684\u300C<b>\u4E09\u806F\u76DF Meta \u751F\u614B\u5206\u6790</b>\u300D\uFF0C\u7CFB\u7D71\u5C07\u8A08\u7B97\uFF1A
-1. \u{1F451} <b>\u7576\u5B63\u6700\u5F37\u738B\u8005</b>\uFF1A\u6700\u503C\u5F97\u6295\u8CC7\u7684\u6838\u5FC3\u3002
-2. \u2694\uFE0F <b>\u66B4\u529B T0 \u968A</b>\uFF1A\u7531\u6392\u540D\u6700\u9AD8\u7684\u5F37\u52E2\u89D2\u7D44\u6210\u3002
-3. \u{1F6E1}\uFE0F <b>\u667A\u6167\u806F\u9632\u968A</b>\uFF1A\u900F\u904E\u6F14\u7B97\u6CD5\u8A08\u7B97\u5C6C\u6027\u4E92\u88DC\u3002
-4. \u{1F504} <b>\u4E8C\u7576\u5BB6\u806F\u9632\u968A</b>\uFF1A\u82E5\u7121\u6700\u5F37\u738B\u8005\u7684\u66FF\u4EE3\u65B9\u6848\u3002
-<i>(\u9644\u5E36\u904A\u6232\u5167\u4E00\u9375\u8907\u88FD\u641C\u5C0B\u5B57\u4E32)</i>
-
-\u2696\uFE0F <b>\u5C6C\u6027\u76F8\u524B\u67E5\u8A62</b>
-\u9EDE\u64CA\u300C<b>\u653B\u64CA/\u9632\u79A6\u5C6C\u6027\u67E5\u8A62</b>\u300D\uFF0C\u67E5\u770B Pok\xE9mon GO \u5C08\u5C6C\u500D\u7387\uFF1A
-\u2022 \u{1F4AA} \u6548\u679C\u7D55\u4F73 (1.6x)
-\u2022 \u{1F6E1}\uFE0F \u5177\u6709\u6297\u6027 (0.625x)
-\u2022 \u{1F6AB} \u96D9\u6297/\u7121\u6548 (0.39x)
-
-\u{1F5D1}\uFE0F <b>\u5783\u573E\u6E05\u55AE\u7BA1\u7406</b>
-\u2022 <code>/trash [\u540D\u7A31]</code>\uFF1A\u52A0\u5165\u5783\u573E\u6E05\u55AE
-\u2022 <code>/untrash [\u540D\u7A31]</code>\uFF1A\u79FB\u9664\u5783\u573E\u6E05\u55AE
-\u2022 <code>/trash</code>\uFF1A\u67E5\u770B\u76EE\u524D\u7684\u6E05\u55AE (\u53EF\u8907\u88FD\u641C\u5C0B\u5B57\u4E32)
-
-\u{1F518} <b>\u5E38\u7528\u6307\u4EE4</b>
-\u2022 <code>/start</code> \u6216 <code>/menu</code>\uFF1A\u559A\u9192\u5716\u5F62\u5316\u4E3B\u9078\u55AE
-\u2022 <code>/great_league_top</code>\uFF1A\u67E5\u770B\u8D85\u7D1A\u806F\u76DF\u6392\u884C
-<i>(\u652F\u63F4\u5F8C\u65B9\u52A0\u6578\u5B57\u81EA\u8A02\u986F\u793A\u6578\u91CF\uFF0C\u5982\uFF1A/great_league_top 10)</i>`;
-  await sendMessage(chatId, helpText, { parse_mode: "HTML" }, env);
-}
-__name(sendHelpMessage, "sendHelpMessage");
-__name2(sendHelpMessage, "sendHelpMessage");
-function generateMainMenu() {
-  const keyboard = [];
-  const chunk = /* @__PURE__ */ __name2((arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size)), "chunk");
-  const cat500 = leagues.filter((l) => l.cp === "500");
-  const cat1500 = leagues.filter((l) => l.cp === "1500");
-  const cat2500 = leagues.filter((l) => l.cp === "2500");
-  const catMaster = leagues.filter((l) => l.cp === "10000");
-  const catPvE = leagues.filter((l) => l.cp === "Any");
-  const addCategory = /* @__PURE__ */ __name2((title, items) => {
-    const buttons = items.map((l) => ({ text: l.name, callback_data: l.command }));
-    keyboard.push(...chunk(buttons, 2));
-  }, "addCategory");
-  keyboard.push([{ text: "\u{1F4CA} \u4E09\u806F\u76DF Meta \u751F\u614B\u5206\u6790", callback_data: "meta_analysis" }]);
-  addCategory("\u5C0F\u5C0F\u76C3", cat500);
-  keyboard.push([{ text: "--- \u{1F3C6} \u8D85\u7D1A\u806F\u76DF (1500) ---", callback_data: "dummy" }]);
-  addCategory("\u8D85\u7D1A\u806F\u76DF", cat1500);
-  keyboard.push([{ text: "--- \u2694\uFE0F \u9AD8\u7D1A\u806F\u76DF (2500) ---", callback_data: "dummy" }]);
-  addCategory("\u9AD8\u7D1A\u806F\u76DF", cat2500);
-  keyboard.push([{ text: "--- \u{1F451} \u5927\u5E2B\u806F\u76DF ---", callback_data: "dummy" }]);
-  addCategory("\u5927\u5E2B\u806F\u76DF", catMaster);
-  keyboard.push([{ text: "--- \u{1F4CA} PvE & \u5DE5\u5177 ---", callback_data: "dummy" }]);
-  addCategory("PvE", catPvE);
-  keyboard.push([
-    { text: "\u{1F4DD} \u6211\u7684\u5783\u573E\u6E05\u55AE", callback_data: "trash_list" },
-    { text: "\u2139\uFE0F \u64CD\u4F5C\u8AAA\u660E", callback_data: "help_menu" }
-  ]);
-  keyboard.push([
-    { text: "\u2694\uFE0F \u653B\u64CA\u5C6C\u6027\u67E5\u8A62", callback_data: "menu_atk_types" },
-    { text: "\u{1F6E1}\uFE0F \u9632\u79A6\u5C6C\u6027\u67E5\u8A62", callback_data: "menu_def_types" }
-  ]);
-  return keyboard;
-}
-__name(generateMainMenu, "generateMainMenu");
-__name2(generateMainMenu, "generateMainMenu");
 async function getTrashList(userId, env) {
   if (!env.POKEMON_KV) return [];
   return await env.POKEMON_KV.get(TRASH_LIST_PREFIX + userId, "json") || [];
@@ -525,64 +521,7 @@ async function setAllowedUserIds(ids, env) {
 }
 __name(setAllowedUserIds, "setAllowedUserIds");
 __name2(setAllowedUserIds, "setAllowedUserIds");
-async function handleTrashCommand(chatId, userId, messageFrom, env) {
-  const trashList = await getTrashList(userId, env);
-  const userName = messageFrom.first_name || "\u8A13\u7DF4\u5BB6";
-  if (trashList.length === 0) return sendMessage(chatId, `\u60A8\u597D, ${userName}
-\u60A8\u7684\u5783\u573E\u6E05\u55AE\u76EE\u524D\u662F\u7A7A\u7684\u3002`, null, env);
-  let replyMessage = `\u60A8\u597D, ${userName}
-\u60A8\u7684\u5783\u573E\u6E05\u55AE\uFF1A
 
-<code>${trashList.join(",")}&!3*&!4*</code>`;
-  return sendMessage(chatId, replyMessage, { parse_mode: "HTML" }, env);
-}
-__name(handleTrashCommand, "handleTrashCommand");
-__name2(handleTrashCommand, "handleTrashCommand");
-async function handleUntrashCommand(chatId, userId, pokemonNames, env) {
-  if (!env.POKEMON_KV) return;
-  const currentList = await getTrashList(userId, env);
-  const removed = [];
-  pokemonNames.forEach((name) => {
-    const idx = currentList.indexOf(name);
-    if (idx > -1) {
-      currentList.splice(idx, 1);
-      removed.push(name);
-    }
-  });
-  if (removed.length > 0) {
-    await env.POKEMON_KV.put(TRASH_LIST_PREFIX + userId, JSON.stringify(currentList));
-    return sendMessage(chatId, `\u5DF2\u79FB\u9664\uFF1A${removed.join(", ")}`, null, env);
-  }
-  return sendMessage(chatId, "\u6E05\u55AE\u4E2D\u627E\u4E0D\u5230\u9019\u4E9B\u5BF6\u53EF\u5922\u3002", null, env);
-}
-__name(handleUntrashCommand, "handleUntrashCommand");
-__name2(handleUntrashCommand, "handleUntrashCommand");
-async function handleAllowUidCommand(chatId, uid, env) {
-  if (!uid) return sendMessage(chatId, "\u8ACB\u8F38\u5165 UID", null, env);
-  let ids = await getAllowedUserIds(env);
-  const newId = parseInt(uid);
-  if (isNaN(newId)) return sendMessage(chatId, "\u7121\u6548 UID", null, env);
-  if (ids.includes(newId)) return sendMessage(chatId, "\u5DF2\u5728\u767D\u540D\u55AE", null, env);
-  ids.push(newId);
-  await setAllowedUserIds(ids, env);
-  return sendMessage(chatId, `\u5DF2\u52A0\u5165 UID: ${newId}`, null, env);
-}
-__name(handleAllowUidCommand, "handleAllowUidCommand");
-__name2(handleAllowUidCommand, "handleAllowUidCommand");
-async function handleDelUidCommand(chatId, uid, env) {
-  if (!uid) return sendMessage(chatId, "\u8ACB\u8F38\u5165 UID", null, env);
-  let ids = await getAllowedUserIds(env);
-  const targetId = parseInt(uid);
-  const idx = ids.indexOf(targetId);
-  if (idx > -1) {
-    ids.splice(idx, 1);
-    await setAllowedUserIds(ids, env);
-    return sendMessage(chatId, `\u5DF2\u79FB\u9664 UID: ${targetId}`, null, env);
-  }
-  return sendMessage(chatId, "\u4E0D\u5728\u767D\u540D\u55AE\u4E2D", null, env);
-}
-__name(handleDelUidCommand, "handleDelUidCommand");
-__name2(handleDelUidCommand, "handleDelUidCommand");
 function getPokemonRating(rank) {
   if (typeof rank === "number") {
     if (rank <= 10) return "\u{1F947}\u767D\u91D1";
@@ -598,145 +537,7 @@ function getPokemonRating(rank) {
 }
 __name(getPokemonRating, "getPokemonRating");
 __name2(getPokemonRating, "getPokemonRating");
-async function sendTypeSelectionMenu(chatId, mode, env) {
-  const title = mode === "atk" ? "\u2694\uFE0F <b>\u653B\u64CA\u5C6C\u6027\u67E5\u8A62</b>\n\u8ACB\u9078\u64C7\u653B\u64CA\u62DB\u5F0F\u7684\u5C6C\u6027\uFF1A" : "\u{1F6E1}\uFE0F <b>\u9632\u79A6\u5C6C\u6027\u67E5\u8A62</b>\n\u8ACB\u9078\u64C7\u9632\u5B88\u65B9(\u81EA\u5DF1)\u7684\u5C6C\u6027\uFF1A";
-  const keyboard = [];
-  const types = Object.keys(typeNames);
-  for (let i = 0; i < types.length; i += 3) {
-    const row = types.slice(i, i + 3).map((t) => ({ text: typeNames[t], callback_data: `type_${mode}_${t}` }));
-    keyboard.push(row);
-  }
-  keyboard.push([{ text: "\u{1F519} \u56DE\u4E3B\u9078\u55AE", callback_data: "main_menu" }]);
-  await sendMessage(chatId, title, { inline_keyboard: keyboard, parse_mode: "HTML" }, env);
-}
-__name(sendTypeSelectionMenu, "sendTypeSelectionMenu");
-__name2(sendTypeSelectionMenu, "sendTypeSelectionMenu");
-async function handleTypeDetail(chatId, typeKey, mode, env) {
-  const typeName = typeNames[typeKey];
-  let msg = "";
-  if (mode === "atk") {
-    const strongAgainst = [];
-    Object.entries(typeChart[typeKey]).forEach(([target, multiplier]) => {
-      if (multiplier > 1) strongAgainst.push(`${typeNames[target]} (${multiplier}x)`);
-    });
-    msg = `\u2694\uFE0F <b>${typeName}\u5C6C\u6027 (\u653B\u64CA\u65B9)</b>
 
-\u{1F4AA} <b>\u6548\u679C\u7D55\u4F73 (1.6x)\uFF1A</b>
-${strongAgainst.length ? strongAgainst.join("\n") : "\u7121"}
-
-<i>(\u8A3B\uFF1APokemon GO \u524B\u5236\u500D\u7387\u70BA 1.6)</i>`;
-  } else {
-    const resistantTo = [];
-    const immuneTo = [];
-    allTypes.forEach((attacker) => {
-      let multiplier = 1;
-      if (typeChart[attacker] && typeChart[attacker][typeKey] !== void 0) multiplier = typeChart[attacker][typeKey];
-      if (multiplier < 1) {
-        const text = `${typeNames[attacker]} (${multiplier}x)`;
-        if (multiplier < 0.6) immuneTo.push(text);
-        else resistantTo.push(text);
-      }
-    });
-    msg = `\u{1F6E1}\uFE0F <b>${typeName}\u5C6C\u6027 (\u9632\u5B88\u65B9)</b>
-
-\u{1F6AB} <b>\u88AB\u96D9\u6297/\u7121\u6548 (0.39x)\uFF1A</b>
-${immuneTo.length ? immuneTo.join("\n") : "\u7121"}
-
-\u{1F6E1}\uFE0F <b>\u5177\u6709\u6297\u6027 (0.625x)\uFF1A</b>
-${resistantTo.length ? resistantTo.join("\n") : "\u7121"}
-`;
-  }
-  const keyboard = [[{ text: "\u{1F519} \u56DE\u4E0A\u4E00\u5C64", callback_data: `menu_${mode}_types` }]];
-  await sendMessage(chatId, msg, { inline_keyboard: keyboard, parse_mode: "HTML" }, env);
-}
-__name(handleTypeDetail, "handleTypeDetail");
-__name2(handleTypeDetail, "handleTypeDetail");
-function getDefenseProfile(defTypes) {
-  const profile = {};
-  allTypes.forEach((attackType) => {
-    let multiplier = 1;
-    defTypes.forEach((t) => {
-      const typeLower = t.toLowerCase();
-      let factor = 1;
-      if (typeChart[attackType] && typeChart[attackType][typeLower] !== void 0) {
-        factor = typeChart[attackType][typeLower];
-      }
-      multiplier *= factor;
-    });
-    profile[attackType] = multiplier;
-  });
-  return profile;
-}
-__name(getDefenseProfile, "getDefenseProfile");
-__name2(getDefenseProfile, "getDefenseProfile");
-function getWeaknesses(defTypes) {
-  const profile = getDefenseProfile(defTypes);
-  return Object.entries(profile).filter(([type, val]) => val > 1).map(([type]) => type);
-}
-__name(getWeaknesses, "getWeaknesses");
-__name2(getWeaknesses, "getWeaknesses");
-function findBestPartner(rankings, currentTeam, pokemonTypeMap) {
-  const teamWeaknessCounts = {};
-  currentTeam.forEach((p) => {
-    const pInfo = pokemonTypeMap.get(p.speciesId.toLowerCase());
-    if (pInfo && pInfo.types) {
-      const weaknesses = getWeaknesses(pInfo.types);
-      weaknesses.forEach((w) => {
-        teamWeaknessCounts[w] = (teamWeaknessCounts[w] || 0) + 1;
-      });
-    }
-  });
-  const urgentWeaknesses = Object.keys(teamWeaknessCounts).sort((a, b) => teamWeaknessCounts[b] - teamWeaknessCounts[a]);
-  let bestPartner = null;
-  let bestScore = -9999;
-  const searchPool = rankings.slice(0, 40);
-  for (const candidate of searchPool) {
-    if (currentTeam.some((m) => m.speciesId === candidate.speciesId)) continue;
-    const candInfo = pokemonTypeMap.get(candidate.speciesId.toLowerCase());
-    if (!candInfo || !candInfo.types) continue;
-    let score = 0;
-    const candProfile = getDefenseProfile(candInfo.types);
-    const candWeaknesses = getWeaknesses(candInfo.types);
-    urgentWeaknesses.forEach((weakType) => {
-      if (candProfile[weakType] < 1) score += 20 * (teamWeaknessCounts[weakType] || 1);
-    });
-    urgentWeaknesses.forEach((weakType) => {
-      if (candProfile[weakType] > 1) score -= 30 * (teamWeaknessCounts[weakType] || 1);
-    });
-    candWeaknesses.forEach((w) => {
-      let covered = false;
-      currentTeam.forEach((teammate) => {
-        const tInfo = pokemonTypeMap.get(teammate.speciesId.toLowerCase());
-        if (tInfo) {
-          const tProfile = getDefenseProfile(tInfo.types);
-          if (tProfile[w] < 1) covered = true;
-        }
-      });
-      if (covered) score += 5;
-      else score -= 5;
-    });
-    const rankIndex = rankings.indexOf(candidate);
-    score -= rankIndex * 0.5;
-    if (score > bestScore) {
-      bestScore = score;
-      bestPartner = candidate;
-    }
-  }
-  if (!bestPartner || bestScore < -50) bestPartner = searchPool.find((p) => !currentTeam.some((m) => m.speciesId === p.speciesId));
-  return bestPartner;
-}
-__name(findBestPartner, "findBestPartner");
-__name2(findBestPartner, "findBestPartner");
-function buildBalancedTeam(leader, rankings, map) {
-  const team = [leader];
-  const partner1 = findBestPartner(rankings, team, map);
-  if (partner1) team.push(partner1);
-  const partner2 = findBestPartner(rankings, team, map);
-  if (partner2) team.push(partner2);
-  return team;
-}
-__name(buildBalancedTeam, "buildBalancedTeam");
-__name2(buildBalancedTeam, "buildBalancedTeam");
 async function sendMessage(chatId, text, options = null, env) {
   const url = `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/sendMessage`;
   const payload = { chat_id: chatId, text, parse_mode: "Markdown" };
@@ -771,6 +572,7 @@ async function unRegisterWebhook(env) {
 }
 __name(unRegisterWebhook, "unRegisterWebhook");
 __name2(unRegisterWebhook, "unRegisterWebhook");
+
 export {
   worker_default as default
 };
