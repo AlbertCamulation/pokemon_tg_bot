@@ -299,7 +299,7 @@ async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
       const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
       if (clean) copyList.push(clean);
       
-      const rankDisplay = p.rank ? `#${p.rank}` : `(${p.tier})`;
+      const rankDisplay = `#${rank}`;
       msg += `${rankDisplay} ${name} ${p.cp ? `CP:${p.cp}` : ""} ${p.score ? `(${p.score.toFixed(1)})` : ""} - ${rating}\n`;
     });
     
