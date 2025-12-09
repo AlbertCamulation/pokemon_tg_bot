@@ -399,7 +399,8 @@ async function handleMetaAnalysis(chatId, env, ctx) {
   const getTypesStr = (p) => {
     const detail = pokemonDetailMap.get(p.speciesId.toLowerCase());
     if (!detail || !detail.types) return "";
-    return `(${detail.types.join("/")})`; 
+    const chiTypes = detail.types.map(t => typeNames[t.toLowerCase()] || t);
+    return `(${chiTypes.join("/")})`;
   };
   for (const league of targetLeagues) {
     if (!league) continue;
