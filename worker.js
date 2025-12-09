@@ -75,7 +75,7 @@ var typeChart = {
 };
 var allTypes = Object.keys(typeChart);
 
-// --- 輔助函數定義 (必須放在最上方，確保被讀取) ---
+// --- 所有函數定義 (先定義) ---
 
 function generateMainMenu() {
   const keyboard = [];
@@ -325,21 +325,26 @@ __name(handleLeagueCommand, "handleLeagueCommand");
 __name2(handleLeagueCommand, "handleLeagueCommand");
 
 async function handlePokemonSearch(chatId, query, env, ctx) {
-  // ★ 新增：清理查詢字串 (移除 IV、數字、特殊符號)
+  // ★ 1. 清理查詢字串 (新增邏輯)
   const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
-  // 如果清理後只剩空字串(例如使用者真的只輸入 "100")，則保留原文，否則使用清理後的名稱
   const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
-  await sendMessage(chatId, `\u{1F50D} \u6B63\u5728\u67E5\u8A62\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u6392\u540D...`, null, env);
+
+  await sendMessage(chatId, `\u{1F50D} \u67E5\u8A62 "<b>${finalQuery}</b>"...`, { parse_mode: "HTML" }, env);
+  
   try {
     const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     if (!transResponse.ok) throw new Error("\u7121\u6CD5\u8F09\u5165\u5BF6\u53EF\u5922\u8CC7\u6599\u5EAB");
     const allPokemonData = await transResponse.json();
+    
+    // ★ 2. 搜尋比對 (用 finalQuery)
     const isChinese = /[\u4e00-\u9fa5]/.test(finalQuery);
     const lowerCaseQuery = finalQuery.toLowerCase();
     const initialMatches = allPokemonData.filter(
       (p) => isChinese ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lowerCaseQuery)
     );
+    
     if (initialMatches.length === 0) return await sendMessage(chatId, `\u627E\u4E0D\u5230\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u5BF6\u53EF\u5922\u3002`, null, env);
+    
     const familyIds = new Set(initialMatches.map((p) => p.family ? p.family.id : null).filter((id) => id));
     const familyMatches = allPokemonData.filter((p) => p.family && familyIds.has(p.family.id));
     const finalMatches = familyMatches.length > 0 ? familyMatches : initialMatches;
@@ -348,53 +353,60 @@ async function handlePokemonSearch(chatId, query, env, ctx) {
     const allLeagueRanks = await Promise.all(leagues.map(
       (league) => fetchWithCache(getDataUrl(league.path), env, ctx).then((res) => res.ok ? res.json() : null)
     ));
-    let replyMessage = `\u{1F3C6} \u8207 <b>"${finalQuery}"</b> \u76F8\u95DC\u7684\u6392\u540D\u7D50\u679C \u{1F3C6}
+    
+    let replyMessage = `\u{1F3C6} <b>"${finalQuery}" \u76F8\u95DC\u6392\u540D</b>
 `;
-    const collectedResults = [];
+    const resultsByLeague = {};
+
+    // ★ 3. 整理排名 (保留過濾邏輯：前100名 + 非垃圾)
     allLeagueRanks.forEach((rankings, index) => {
       const league = leagues[index];
       if (!rankings) return;
       rankings.forEach((pokemon, rankIndex) => {
         if (matchingIds.has(pokemon.speciesId.toLowerCase())) {
           const rank = pokemon.rank || pokemon.tier || rankIndex + 1;
-          collectedResults.push({
-            league,
-            rank,
-            score: pokemon.score || pokemon.cp || "N/A",
-            speciesName: idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName,
-            types: pokemon.types,
-            tier: pokemon.tier,
-            cp: pokemon.cp,
-            rating: getPokemonRating(rank)
-          });
+          const rating = getPokemonRating(rank);
+          
+          // 過濾垃圾
+          if (rating === "\u5783\u573E") return;
+          // 過濾 100 名外 (僅限 PvP 數字排名)
+          if (typeof rank === "number" && rank > 100) return;
+
+          let rankDisplay = typeof rank === "number" ? `#${rank}` : p.tier ? `(${p.tier})` : `#${rank}`;
+          const score = pokemon.score && typeof pokemon.score === "number" ? `(${pokemon.score.toFixed(2)})` : "";
+          const types = pokemon.types && pokemon.types.length > 0 ? `(${pokemon.types.join(", ")})` : "";
+          let speciesName = idToNameMap.get(pokemon.speciesId.toLowerCase()) || pokemon.speciesName;
+          if (speciesName === "Giratina (Altered)") speciesName = "\u9A0E\u62C9\u5E1D\u7D0D \u5225\u7A2E";
+
+          const line = `${rankDisplay} <code>${speciesName}</code> ${types}${pokemon.cp ? ` CP:${pokemon.cp}` : ""} ${score} - ${rating}`;
+          
+          if (!resultsByLeague[league.name]) resultsByLeague[league.name] = [];
+          resultsByLeague[league.name].push(line);
         }
       });
     });
-    const nonTrashResults = collectedResults.filter((p) => p.rating !== "\u5783\u573E");
-    if (nonTrashResults.length > 0) {
-      const resultsByLeague = {};
-      nonTrashResults.forEach((p) => {
-        const leagueKey = `<b>${p.league.name}:</b>`;
-        if (!resultsByLeague[leagueKey]) resultsByLeague[leagueKey] = [];
-        let rankDisplay = typeof p.rank === "number" ? `#${p.rank}` : p.tier ? `(${p.tier})` : "";
-        const score = p.score && typeof p.score === "number" ? `(${p.score.toFixed(2)})` : "";
-        const types = p.types && p.types.length > 0 ? `(${p.types.join(", ")})` : "";
-        resultsByLeague[leagueKey].push(`${rankDisplay} <code>${p.speciesName}</code> ${types}${p.cp ? ` CP:${p.cp}` : ""} ${score} - ${p.rating}`);
-      });
-      for (const leagueName in resultsByLeague) {
-        replyMessage += `
-${leagueName}
-` + resultsByLeague[leagueName].join("\n") + "\n";
-      }
-    } else if (collectedResults.length > 0) {
-      const representativeName = finalMatches.sort((a, b) => a.speciesName.length - b.speciesName.length)[0].speciesName;
-      const cleanedRepName = representativeName.replace(NAME_CLEANER_REGEX, "").trim();
-      replyMessage = `\u8207 <b>"${finalQuery}"</b> \u76F8\u95DC\u7684\u5BF6\u53EF\u5922\u5BB6\u65CF\u5728\u6240\u6709\u806F\u76DF\u4E2D\u8A55\u50F9\u7686\u70BA\u5783\u573E\u3002
 
-\u5EFA\u8B70\u8F38\u5165 <code>/trash ${cleanedRepName}</code> \u52A0\u5165\u5783\u573E\u6E05\u55AE\u3002`;
-    } else {
-      replyMessage = `\u5728\u6240\u6709\u806F\u76DF\u4E2D\u90FD\u627E\u4E0D\u5230\u8207 "${finalQuery}" \u76F8\u95DC\u7684\u6392\u540D\u8CC7\u6599\u3002`;
+    let hasContent = false;
+    for (const [leagueName, lines] of Object.entries(resultsByLeague)) {
+      if (lines.length > 0) {
+        replyMessage += `
+<b>${leagueName}:</b>
+${lines.join("\n")}
+`;
+        hasContent = true;
+      }
     }
+
+    if (!hasContent) {
+      replyMessage += `
+(\u6B64\u5BF6\u53EF\u5922\u5728\u6240\u6709\u806F\u76DF\u4E2D\u6392\u540D\u672A\u9032\u5165\u524D 100 \u540D\uFF0C\u6216\u4E0D\u9069\u5408\u5C0D\u6230)`;
+    }
+
+    // ★ 4. 檢查垃圾清單 (需要傳入 userId)
+    // 這裡我們需要一個 userId，但 handlePokemonSearch 沒傳進來
+    // 我們可以從 ctx 或 env 拿不到，必須修改上層調用，或這裡先暫時略過這個功能
+    // 為了安全起見，這裡先不加入按鈕，確保搜尋先恢復正常
+    
     return await sendMessage(chatId, replyMessage.trim(), { parse_mode: "HTML" }, env);
   } catch (e) {
     return sendMessage(chatId, `\u641C\u5C0B\u932F\u8AA4: ${e.message}`, null, env);
@@ -482,16 +494,34 @@ __name(handleMetaAnalysis, "handleMetaAnalysis");
 __name2(handleMetaAnalysis, "handleMetaAnalysis");
 __name2(handleMetaAnalysis, "handleMetaAnalysis");
 
-// --- Worker Entry Point (必須放在檔案最後) ---
-var worker_default = {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
-    if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
-    if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
-    return new Response("Pokemon Bot is running (Fixed ctx Scope).", { status: 200 });
+async function fetchWithCache(url, env, ctx) {
+  const cache = caches.default;
+  const cacheKey = new Request(url, { method: "GET" });
+  let cachedRes = await cache.match(cacheKey);
+  if (cachedRes) return cachedRes;
+  const response = await fetch(url);
+  if (!response.ok) return response;
+  const bodyText = await response.text();
+  if (!bodyText || bodyText.trim().length === 0) return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" } });
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", `public, max-age=${CACHE_TTL}`);
+  headers.set("Content-Type", "application/json");
+  const responseToCache = new Response(bodyText, { status: response.status, headers });
+  if (ctx && ctx.waitUntil) {
+    ctx.waitUntil(cache.put(cacheKey, responseToCache));
+  } else {
+    cache.put(cacheKey, responseToCache).catch(console.error);
   }
-};
+  return new Response(bodyText, { status: response.status, headers });
+}
+__name(fetchWithCache, "fetchWithCache");
+__name2(fetchWithCache, "fetchWithCache");
+
+function getDataUrl(filename) {
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=3`;
+}
+__name(getDataUrl, "getDataUrl");
+__name2(getDataUrl, "getDataUrl");
 
 async function getTrashList(userId, env) {
   if (!env.POKEMON_KV) return [];
@@ -499,6 +529,7 @@ async function getTrashList(userId, env) {
 }
 __name(getTrashList, "getTrashList");
 __name2(getTrashList, "getTrashList");
+
 async function addToTrashList(userId, pokemonNames, env) {
   if (!env.POKEMON_KV) return;
   const list = await getTrashList(userId, env);
@@ -509,12 +540,14 @@ async function addToTrashList(userId, pokemonNames, env) {
 }
 __name(addToTrashList, "addToTrashList");
 __name2(addToTrashList, "addToTrashList");
+
 async function getAllowedUserIds(env) {
   if (!env.POKEMON_KV) return [];
   return await env.POKEMON_KV.get(ALLOWED_UID_KEY, "json") || [];
 }
 __name(getAllowedUserIds, "getAllowedUserIds");
 __name2(getAllowedUserIds, "getAllowedUserIds");
+
 async function setAllowedUserIds(ids, env) {
   if (!env.POKEMON_KV) return;
   await env.POKEMON_KV.put(ALLOWED_UID_KEY, JSON.stringify(ids));
@@ -549,12 +582,14 @@ async function sendMessage(chatId, text, options = null, env) {
 }
 __name(sendMessage, "sendMessage");
 __name2(sendMessage, "sendMessage");
+
 async function answerCallbackQuery(callbackQueryId, text, env) {
   const url = `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/answerCallbackQuery`;
   await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ callback_query_id: callbackQueryId, text }) });
 }
 __name(answerCallbackQuery, "answerCallbackQuery");
 __name2(answerCallbackQuery, "answerCallbackQuery");
+
 async function registerWebhook(request, url, env) {
   const webhookUrl = `${url.protocol}//${url.hostname}${WEBHOOK_PATH}`;
   const response = await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setWebhook`, {
@@ -566,6 +601,7 @@ async function registerWebhook(request, url, env) {
 }
 __name(registerWebhook, "registerWebhook");
 __name2(registerWebhook, "registerWebhook");
+
 async function unRegisterWebhook(env) {
   const response = await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/deleteWebhook`);
   return new Response(await response.text());
@@ -573,6 +609,81 @@ async function unRegisterWebhook(env) {
 __name(unRegisterWebhook, "unRegisterWebhook");
 __name2(unRegisterWebhook, "unRegisterWebhook");
 
+// --- 主要邏輯函數 ---
+
+async function onCallbackQuery(callbackQuery, env, ctx) {
+  const chatId = callbackQuery.message.chat.id;
+  const data = callbackQuery.data;
+  const callbackQueryId = callbackQuery.id;
+  answerCallbackQuery(callbackQueryId, "", env).catch(console.error);
+  if (data === "menu_atk_types") return sendTypeSelectionMenu(chatId, "atk", env);
+  if (data === "menu_def_types") return sendTypeSelectionMenu(chatId, "def", env);
+  if (data.startsWith("type_atk_")) return handleTypeDetail(chatId, data.replace("type_atk_", ""), "atk", env);
+  if (data.startsWith("type_def_")) return handleTypeDetail(chatId, data.replace("type_def_", ""), "def", env);
+  const leagueInfo = leagues.find((l) => l.command === data);
+  if (leagueInfo) return await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env, ctx);
+  switch (data) {
+    case "meta_analysis":
+      return handleMetaAnalysis(chatId, env, ctx);
+    // 傳入 ctx
+    case "trash_list":
+      return handleTrashCommand(chatId, callbackQuery.from.id, callbackQuery.from, env);
+    case "help_menu":
+      return sendHelpMessage(chatId, env);
+    case "main_menu":
+      return sendMainMenu(chatId, env);
+    default:
+      return;
+  }
+}
+__name(onCallbackQuery, "onCallbackQuery");
+__name2(onCallbackQuery, "onCallbackQuery");
+
+async function onMessage(message, env, ctx) {
+  if (!message.text) return;
+  const text = message.text.trim();
+  const parts = text.split(" ");
+  const command = parts[0].startsWith("/") ? parts[0].split("@")[0].substring(1) : null;
+  const args = parts.slice(1);
+  const chatId = message.chat.id;
+  const userId = message.from.id;
+  const leagueInfo = leagues.find((l) => l.command === command);
+  if (leagueInfo) {
+    const limit = parseInt(args[0], 10) || LIMIT_LEAGUES_SHOW;
+    return await handleLeagueCommand(chatId, command, limit, env, ctx);
+  }
+  if (command) {
+    switch (command) {
+      case "start":
+      case "menu":
+        return sendMainMenu(chatId, env);
+      case "help":
+        return sendHelpMessage(chatId, env);
+      case "list_allowed_uid":
+        const ids = await getAllowedUserIds(env);
+        return sendMessage(chatId, ids.length ? `\u767D\u540D\u55AE:
+${ids.join("\n")}` : "\u767D\u540D\u55AE\u70BA\u7A7A", null, env);
+      case "allow_uid":
+        return handleAllowUidCommand(chatId, args[0], env);
+      case "del_uid":
+        return handleDelUidCommand(chatId, args[0], env);
+      case "trash":
+        if (args.length > 0) {
+          await addToTrashList(userId, args, env);
+          return sendMessage(chatId, `\u5DF2\u52A0\u5165\u5783\u573E\u6E05\u55AE: ${args.join(", ")}`, null, env);
+        } else return handleTrashCommand(chatId, userId, message.from, env);
+      case "untrash":
+        return handleUntrashCommand(chatId, userId, args, env);
+      default:
+        return;
+    }
+  }
+  if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, text, env, ctx);
+}
+__name(onMessage, "onMessage");
+__name2(onMessage, "onMessage");
+
+// 導出 (放到最後)
 export {
   worker_default as default
 };
