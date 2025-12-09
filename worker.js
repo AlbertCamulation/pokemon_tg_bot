@@ -239,14 +239,8 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
            if (typeof rank === "number" && rank > 100) return;
 
            const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
-           let name = map.get(p.speciesId.toLowerCase());
-           // 硬編碼修正
-           if(name === "Giratina (Altered)") name = "騎拉帝納 別種";
-           if(name && name.includes("Hydreigon") && name.includes("Shadow")) name = "三首惡龍 暗影";
-           if(name && name.includes("Toucannon") && name.includes("Shadow")) name = "銃嘴大鳥 暗影";
-           if(name && name.includes("Snorlax") && name.includes("Gigantamax")) name = "卡比獸 超極巨化";
-           if(name && name.includes("Lapras") && name.includes("Gigantamax")) name = "拉普拉斯 超極巨化";
-           if(name && name.includes("Aegislash") && name.includes("Shield Forme")) name = "堅盾劍怪 盾牌形態";
+           // ★★★ 改用共用函數 ★★★
+           let name = getTranslatedName(p.speciesId, map.get(p.speciesId.toLowerCase()), map);
            
            const line = `${rankDisplay} <code>${name}</code> ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
            
@@ -291,6 +285,22 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     return sendMessage(chatId, `⚠️ 發生錯誤: ${e.message}`, { parse_mode: "" }, env); 
   }
 }
+// ★★★ 新增這個共用函數：集中管理所有特殊翻譯 ★★★
+function getTranslatedName(id, originalName, map) {
+  let name = map.get(id.toLowerCase()) || originalName;
+
+  // 既有的修正
+  if (name === "Giratina (Altered)") return "騎拉帝納 別種";
+  if (name === "Giratina (Altered) (Shadow)") return "騎拉帝納 別種 暗影";
+  if (name === "Claydol (Shadow)") return "念力土偶 暗影";
+  if(name && name.includes("Hydreigon") && name.includes("Shadow")) name = "三首惡龍 暗影";
+  if(name && name.includes("Toucannon") && name.includes("Shadow")) name = "銃嘴大鳥 暗影";
+  if(name && name.includes("Snorlax") && name.includes("Gigantamax")) name = "卡比獸 超極巨化";
+  if(name && name.includes("Lapras") && name.includes("Gigantamax")) name = "拉普拉斯 超極巨化";
+  if(name && name.includes("Aegislash") && name.includes("Shield Forme")) name = "堅盾劍怪 盾牌形態";
+
+  return name;
+}
 // --- 聯盟排名查詢 ---
 async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
@@ -312,12 +322,9 @@ async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
     list.forEach((p, i) => {
       const rank = p.rank || p.tier || i + 1;
       const rating = getPokemonRating(rank);
-      if (rating === "垃圾") return;
-
-      let name = map.get(p.speciesId.toLowerCase()) || p.speciesName;
-      if (name === "Giratina (Altered)") name = "騎拉帝納 別種";
-      // ★ 強制修正三首惡龍
-      if(name.includes("Hydreigon") && name.includes("Shadow")) name = "三首惡龍 (暗影)";
+      if (rating === "垃圾") return
+      // ★★★ 改用共用函數 ★★★
+      let name = getTranslatedName(p.speciesId, p.speciesName, map);
       const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
       if (clean) copyList.push(clean);
       
@@ -411,10 +418,8 @@ async function handleMetaAnalysis(chatId, env, ctx) {
   const pokemonDetailMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p]));
   const getName = (p, forCopy = false) => {
     const detail = pokemonDetailMap.get(p.speciesId.toLowerCase());
-    let name = detail ? detail.speciesName : p.speciesName;
-    if (name === "Giratina (Altered)") name = "騎拉帝納 別種";
-    else if (name === "Giratina (Altered) (Shadow)") name = "騎拉帝納 別種 暗影";
-    else if (name === "Claydol (Shadow)") name = "念力土偶 暗影";
+    let originalName = detail ? detail.speciesName : p.speciesName;
+    let name = getTranslatedName(p.speciesId, originalName, pokemonDetailMap);
     if (forCopy) return name.replace(NAME_CLEANER_REGEX, "").trim();
     return name;
   };
