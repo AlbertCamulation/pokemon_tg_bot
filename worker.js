@@ -296,6 +296,8 @@ async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
 
       let name = map.get(p.speciesId.toLowerCase()) || p.speciesName;
       if (name === "Giratina (Altered)") name = "騎拉帝納 別種";
+      // ★ 強制修正三首惡龍
+      if(name.includes("Hydreigon") && name.includes("Shadow")) name = "三首惡龍 (暗影)";
       const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
       if (clean) copyList.push(clean);
       
