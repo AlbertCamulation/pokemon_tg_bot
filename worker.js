@@ -271,8 +271,6 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     return sendMessage(chatId, `\u26A0\uFE0F \u767C\u751F\u932F\u8AA4: ${e.message}`, { parse_mode: "" }, env); 
   }
 }
-__name(handlePokemonSearch, "handlePokemonSearch");
-__name2(handlePokemonSearch, "handlePokemonSearch");
 // --- 聯盟排名查詢 ---
 async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
