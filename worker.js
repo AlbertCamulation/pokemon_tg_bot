@@ -166,7 +166,7 @@ async function handleTrashCommand(chatId, userId, messageFrom, env) {
     return sendMessage(chatId, `您好, ${safeName}\n您的垃圾清單目前是空的。`, null, env);
   }
   
-  let replyMessage = `您好, ${safeName}\n您的垃圾清單：\n\n<code>${trashList.join(",")}&!3*&!4*</code>`;
+  let replyMessage = `您好, ${safeName}\n您的垃圾清單：\n\n<code>${trashList.join(",")}</code>`;
   return sendMessage(chatId, replyMessage, { parse_mode: "HTML" }, env);
 }
 
