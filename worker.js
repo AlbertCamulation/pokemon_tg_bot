@@ -10,7 +10,7 @@ const ALLOWED_UID_KEY = "allowed_user_ids";
 const LIMIT_LEAGUES_SHOW = 50;
 const CACHE_TTL = 3600;
 
-const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|閃電|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|阿羅拉|的樣子)/g;
+const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/g;
 const QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
 
 const leagues = [
@@ -243,6 +243,10 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
            // 硬編碼修正
            if(name === "Giratina (Altered)") name = "騎拉帝納 別種";
            if(name && name.includes("Hydreigon") && name.includes("Shadow")) name = "三首惡龍 暗影";
+           if(name && name.includes("Toucannon") && name.includes("Shadow")) name = "銃嘴大鳥 暗影";
+           if(name && name.includes("Snorlax") && name.includes("Gigantamax")) name = "卡比獸 超極巨化";
+           if(name && name.includes("Lapras") && name.includes("Gigantamax")) name = "拉普拉斯 超極巨化";
+           if(name && name.includes("Aegislash") && name.includes("Shield Forme")) name = "堅盾劍怪 盾牌形態";
            
            const line = `${rankDisplay} <code>${name}</code> ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
            
