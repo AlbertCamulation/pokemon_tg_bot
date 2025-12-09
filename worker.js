@@ -13,6 +13,8 @@ var ALLOWED_UID_KEY = "allowed_user_ids";
 var LIMIT_LEAGUES_SHOW = 50;
 var CACHE_TTL = 3600;
 var NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|閃電|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|阿羅拉|的樣子)/g;
+// ★ 請加入這行 (這是處理使用者輸入用的：過濾數字、小數點、圓圈文字、上標符號)
+var QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
 var leagues = [
   { command: "little_league_top", name: "\u5C0F\u5C0F\u76C3 (500)", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "\u8D85\u7D1A\u806F\u76DF (1500)", cp: "1500", path: "data/rankings_1500.json" },
@@ -337,6 +339,10 @@ ${uniqueNames.join(",")}
 __name(handleLeagueCommand, "handleLeagueCommand");
 __name2(handleLeagueCommand, "handleLeagueCommand");
 async function handlePokemonSearch(chatId, query, env, ctx) {
+  // ★ 新增：清理查詢字串 (移除 IV、數字、特殊符號)
+  const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
+  // 如果清理後只剩空字串(例如使用者真的只輸入 "100")，則保留原文，否則使用清理後的名稱
+  const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
   await sendMessage(chatId, `\u{1F50D} \u6B63\u5728\u67E5\u8A62\u8207 "${query}" \u76F8\u95DC\u7684\u6392\u540D...`, null, env);
   try {
     const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
