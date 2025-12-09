@@ -68405,12 +68405,6 @@
     }
   },
   {
-    "speciesId": "hydreigon_shadow",
-    "speciesName": "三首惡龍 (暗影)",
-    "family": { "id": "deino", "name": "單首龍" },
-    "types": ["dragon", "dark"]
-  },
-  {
     "dex": 635,
     "speciesId": "hydreigon",
     "speciesName": "三首惡龍",
