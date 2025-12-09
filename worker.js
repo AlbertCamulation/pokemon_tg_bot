@@ -188,9 +188,8 @@ async function handleUntrashCommand(chatId, userId, pokemonNames, env) {
   }
   return sendMessage(chatId, "清單中找不到這些寶可夢。", null, env);
 }
-
-// --- 搜尋功能 ---
 async function handlePokemonSearch(chatId, userId, query, env, ctx) {
+  // 1. 清理查詢字串
   const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
   const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
 
@@ -210,7 +209,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     
     const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
     
-    let msg = `🏆 <b>"${finalQuery}" 相關排名</b>\n`;
+    let msg = `\u{1F3C6} <b>"${finalQuery}" \u76F8\u95DC\u6392\u540D</b>\n`;
     const resultsByLeague = {}; 
 
     rankResults.forEach((list, i) => {
@@ -219,7 +218,9 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
         if(ids.has(p.speciesId.toLowerCase())) {
            const rank = p.rank || p.tier || rankIndex + 1;
            const rating = getPokemonRating(rank);
-           if (rating === "垃圾") return;
+           
+           // 過濾邏輯
+           if (rating === "\u5783\u573E") return;
            if (typeof rank === "number" && rank > 100) return;
 
            const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
@@ -227,6 +228,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
            if(name === "Giratina (Altered)") name = "騎拉帝納 別種";
            
            const line = `${rankDisplay} <code>${name}</code> ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
+           
            const leagueName = leagues[i].name;
            if (!resultsByLeague[leagueName]) resultsByLeague[leagueName] = [];
            resultsByLeague[leagueName].push(line);
@@ -242,7 +244,14 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
       }
     }
 
-    if (!hasContent) msg += "\n(此寶可夢在所有聯盟中排名未達標)";
+    // ★★★ 修正點：如果找到了寶可夢但沒有顯示任何排名 (代表都是垃圾) ★★★
+    if (!hasContent) {
+       // 找出一個代表性的名字 (通常取最短的那個，例如 "爆音怪" 而不是 "爆音怪 (暗影)")
+       const representative = matches.sort((a, b) => a.speciesName.length - b.speciesName.length)[0];
+       const cleanName = representative.speciesName.replace(NAME_CLEANER_REGEX, "").trim();
+       
+       msg = `與 <b>"${finalQuery}"</b> 相關的寶可夢在所有聯盟中評價皆為垃圾。\n\n建議可以輸入 <code>/trash ${cleanName}</code> 將其加入垃圾清單。`;
+    }
 
     // 檢查垃圾清單
     let options = { parse_mode: "HTML" };
@@ -250,16 +259,20 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     const foundInTrash = matches.find(p => trashList.includes(p.speciesName));
 
     if (foundInTrash) {
-      msg += `\n\n⚠️ <b>注意：${foundInTrash.speciesName} 目前在您的垃圾清單中</b>`;
+      msg += `\n\n\u26A0\uFE0F <b>\u6CE8\u610F\uFF1A"${foundInTrash.speciesName}" \u76EE\u524D\u5728\u60A8\u7684\u5783\u573E\u6E05\u55AE\u4E2D</b>`;
       options.inline_keyboard = [[
-        { text: `♻️ 將 "${foundInTrash.speciesName}" 移出垃圾清單`, callback_data: `untrash_btn_${foundInTrash.speciesName}` }
+        { text: `\u267B\uFE0F \u5C07 "${foundInTrash.speciesName}" \u79FB\u51FA\u6E05\u55AE`, callback_data: `untrash_btn_${foundInTrash.speciesName}` }
       ]];
     }
 
     return sendMessage(chatId, msg, options, env);
-  } catch(e) { return sendMessage(chatId, `⚠️ 發生錯誤: ${e.message}`, { parse_mode: "" }, env); }
-}
 
+  } catch(e) { 
+    return sendMessage(chatId, `\u26A0\uFE0F \u767C\u751F\u932F\u8AA4: ${e.message}`, { parse_mode: "" }, env); 
+  }
+}
+__name(handlePokemonSearch, "handlePokemonSearch");
+__name2(handlePokemonSearch, "handlePokemonSearch");
 // --- 聯盟排名查詢 ---
 async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
