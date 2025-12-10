@@ -212,7 +212,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
   // 取得該訊息的 ID，以便稍後編輯
   const loadingMsgId = loadingMsg.result ? loadingMsg.result.message_id : null;
   try {
-    const [resTrans, resMoves] = await Promise.all([
+    const [resTrans, resMoves, resEvents] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
       fetchWithCache(getDataUrl("data/move.json"), env, ctx),
       fetchWithCache(getDataUrl("data/events.json"), env, ctx)
