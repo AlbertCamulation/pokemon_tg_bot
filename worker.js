@@ -220,7 +220,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
 
     const data = await resTrans.json();
     const movesData = resMoves.ok ? await resMoves.json() : {};
-
+    const eventsData = resEvents.ok ? await resEvents.json() : [];
     const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
     const lower = finalQuery.toLowerCase();
 
