@@ -1,0 +1,36 @@
+name: Update Pokemon Events
+
+on:
+  schedule:
+    # 每天台灣時間早上 8:00 (UTC 00:00) 跑一次
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 手動觸發
+
+jobs:
+  update-events:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4
+
+    - name: Run scraper script
+      run: |
+        python scripts/update_events.py
+
+    - name: Commit and Push if changed
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add data/events.json
+        # 如果有變動才 Commit，避免空 Commit 報錯
+        git diff --quiet && git diff --staged --quiet || (git commit -m "auto: update event schedule from wingzero" && git push)
