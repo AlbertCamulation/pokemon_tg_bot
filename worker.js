@@ -89,7 +89,7 @@ async function fetchWithCache(url, env, ctx) {
 }
 
 function getDataUrl(filename) {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=999`;
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=1000`;
 }
 
 function getPokemonRating(rank) {
@@ -214,7 +214,8 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
   try {
     const [resTrans, resMoves] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
-      fetchWithCache(getDataUrl("data/move.json"), env, ctx)
+      fetchWithCache(getDataUrl("data/move.json"), env, ctx),
+      fetchWithCache(getDataUrl("data/events.json"), env, ctx)
     ]);
 
     const data = await resTrans.json();
@@ -307,27 +308,39 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
         hasContent = true;
       }
     }
-    // ★★★ 新增：結論產生邏輯 ★★★
+    // ★★★ 結論與活動判斷邏輯 ★★★
     if (hasContent) {
         const keepCategories = new Set();
-        // 遍歷所有有結果的聯盟名稱
         Object.keys(resultsByLeague).forEach(leagueName => {
-            if (leagueName.includes("500") && !leagueName.includes("1500") && !leagueName.includes("2500")) {
-                keepCategories.add(500);
-            } else if (leagueName.includes("1500")) {
-                keepCategories.add(1500);
-            } else if (leagueName.includes("2500")) {
-                keepCategories.add(2500);
-            } else if (leagueName.includes("10000") || leagueName.includes("無上限") || leagueName.includes("最佳")) {
-                // 大師聯盟、最佳攻擊/防守都歸類為 10000
-                keepCategories.add(10000);
-            }
+            if (leagueName.includes("500") && !leagueName.includes("1500") && !leagueName.includes("2500")) keepCategories.add(500);
+            else if (leagueName.includes("1500")) keepCategories.add(1500);
+            else if (leagueName.includes("2500")) keepCategories.add(2500);
+            else if (leagueName.includes("10000") || leagueName.includes("無上限") || leagueName.includes("最佳")) keepCategories.add(10000);
         });
 
         if (keepCategories.size > 0) {
-            // 從小到大排序 (500 -> 1500 -> 2500 -> 10000)
             const sortedCats = Array.from(keepCategories).sort((a, b) => a - b);
             msg += `\n📌 <b>結論：建議保留 ${sortedCats.join(" / ")}</b>`;
+        }
+
+        if (hasEliteRequirement) {
+            msg += `\n⚠️ <b>注意：部分推薦招式 (*) 需使用厲害招式學習器。</b>`;
+        }
+
+        // --- 活動檢查 ---
+        // 檢查搜尋結果中的任何一隻寶可夢 (initialMatches)，是否出現在 eventsData 的 pokemonId 列表中
+        const upcoming = eventsData.filter(e => {
+            return initialMatches.some(p => {
+                // e.pokemonId 是一個陣列 (例如 ["spheal"])
+                // p.speciesId 是搜尋到的寶可夢 (例如 "spheal")
+                return e.pokemonId.includes(p.speciesId.toLowerCase());
+            });
+        });
+
+        if (upcoming.length > 0) {
+            upcoming.forEach(e => {
+                msg += `\n🎉 <b>即將到來：<a href="${e.link}">${e.eventName}</a> (${e.date})</b>\n建議保留體質好的，等待活動進化習得招式！`;
+            });
         }
     }
     // --------------------------------
