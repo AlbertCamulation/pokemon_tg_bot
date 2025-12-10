@@ -339,7 +339,16 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
 
         if (upcoming.length > 0) {
             upcoming.forEach(e => {
-                msg += `\n🎉 <b>即將到來：<a href="${e.link}">${e.eventName}</a> (${e.date})</b>\n建議保留體質好的，等待活動進化習得招式！`;
+                msg += `\n🎉 <b>即將到來：<a href="${e.link}">${e.eventName}</a> (${e.date})</b>`;
+                
+                // ★★★ 改動在這裡 ★★★
+                // 邏輯：如果是 "社群日" 且 "這隻寶可夢推薦招式裡有星號(*)"
+                if (e.eventName.includes("社群日") && hasEliteRequirement) {
+                    msg += `\n💡 建議保留體質好的，等待社群再進化學習特殊招式！`;
+                } else {
+                    // 其他情況 (聚焦時刻、團體戰，或不需要特殊招式的社群日)
+                    msg += `\n📢 相關寶可夢活動即將到來！`;
+                }
             });
         }
     }
