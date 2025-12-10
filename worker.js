@@ -226,7 +226,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     const formatMove = (moveId, eliteList) => {
       if (!moveId) return "";
       let name = movesData[moveId] || moveId;
-      if (eliteList && eliteList.includes(moveId)) name += "(厲害)";
+      if (eliteList && eliteList.includes(moveId)) name += "*";
       return name;
     };
 
