@@ -239,7 +239,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     
     let msg = `🏆 <b>"${finalQuery}" 家族相關排名</b>\n`;
     const resultsByLeague = {}; 
-
+    let hasEliteRequirement = false;
     // 招式格式化函數
     const formatMove = (moveId, eliteList) => {
       if (!moveId) return "";
