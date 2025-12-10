@@ -195,30 +195,26 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
   await sendMessage(chatId, `\u{1F50D} \u67E5\u8A62 "<b>${finalQuery}</b>" (\u542B\u62db\u5f0f)...`, { parse_mode: "HTML" }, env);
   
   try {
-    // 1. 同時讀取「寶可夢資料(含eliteMoves)」與「招式翻譯」
     const [resTrans, resMoves] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
       fetchWithCache(getDataUrl("data/moves.json"), env, ctx)
     ]);
 
     const data = await resTrans.json();
-    // 招式檔若讀取失敗則用空物件，避免報錯
     const movesData = resMoves.ok ? await resMoves.json() : {};
 
     const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
     const lower = finalQuery.toLowerCase();
 
-    // 2. 搜尋邏輯
     const initialMatches = data.filter(p => isChi ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lower));
     
     if(!initialMatches.length) return sendMessage(chatId, "找不到寶可夢", null, env);
     
-    // 進化鏈擴充
     const familyIds = new Set();
     initialMatches.forEach(p => { if (p.family && p.family.id) familyIds.add(p.family.id); });
     const finalMatches = data.filter(p => (p.family && familyIds.has(p.family.id)) || initialMatches.includes(p));
     
-    // 建立 Map 以便快速查找寶可夢詳細資料 (為了拿 eliteMoves)
+    // Map 存的是物件 (Object)
     const pokemonMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p]));
     const ids = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
     
@@ -227,16 +223,11 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     let msg = `🏆 <b>"${finalQuery}" 家族相關排名</b>\n`;
     const resultsByLeague = {}; 
 
-    // ★★★ 招式格式化小幫手 ★★★
-    // 參數: moveId (招式ID), eliteList (該寶可夢的厲害招式清單)
+    // 招式格式化
     const formatMove = (moveId, eliteList) => {
       if (!moveId) return "";
-      let name = movesData[moveId] || moveId; // 先轉中文
-      
-      // 檢查這個招式是否在該寶可夢的 eliteMoves 裡
-      if (eliteList && eliteList.includes(moveId)) {
-        name += "(厲害)";
-      }
+      let name = movesData[moveId] || moveId;
+      if (eliteList && eliteList.includes(moveId)) name += "(厲害)";
       return name;
     };
 
@@ -252,14 +243,15 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
 
            const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
            
-           // 取得該寶可夢的詳細資料 (包含 eliteMoves)
+           // ★★★ 修正重點：先取出字串，再傳給翻譯函數 ★★★
            const pDetail = pokemonMap.get(p.speciesId.toLowerCase());
+           // pDetail 是一個物件，我們要取它的 speciesName (字串)
+           const rawName = pDetail ? pDetail.speciesName : p.speciesName; 
+           let name = getTranslatedName(p.speciesId, rawName);
+
            const eliteList = pDetail ? pDetail.eliteMoves : []; 
 
-           // 翻譯名稱
-           let name = getTranslatedName(p.speciesId, pDetail ? pDetail.speciesName : p.speciesName, pokemonMap);
-
-           // ★★★ 處理招式顯示 ★★★
+           // 處理招式顯示
            let moveStr = "";
            if (p.moveFast && p.moveCharged) {
              const fast = formatMove(p.moveFast, eliteList);
@@ -307,15 +299,12 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     return sendMessage(chatId, `⚠️ 發生錯誤: ${e.message}`, { parse_mode: "" }, env); 
   }
 }
-// ★★★ 共用翻譯函數 (安全防護 + 無括號版) ★★★
-function getTranslatedName(id, originalName, map) {
-  // 1. 安全取值：防止 id 為 null，也防止取不到值變成 undefined
-  let raw = map.get((id || "").toLowerCase()) || originalName || id || "";
-  
-  // 2. 強制轉型：確保 name 絕對是字串 (String)，避免 .includes 報錯
-  let name = String(raw);
+// ★★★ 共用翻譯函數 (純文字處理版) ★★★
+function getTranslatedName(id, nameStr) {
+  // 1. 確保傳進來的一定是字串 (防止 [object Object] 或 undefined)
+  let name = String(nameStr || id || "");
 
-  // 硬編碼修正 (已移除括號，改用空格)
+  // 硬編碼修正 (無括號版)
   if (name === "Giratina (Altered)") return "騎拉帝納 別種";
   if (name === "Giratina (Altered) (Shadow)") return "騎拉帝納 別種 暗影";
   if (name === "Claydol (Shadow)") return "念力土偶 暗影";
@@ -329,7 +318,6 @@ function getTranslatedName(id, originalName, map) {
 
   return name;
 }
-// --- 聯盟排名查詢 ---
 async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
   if (!leagueInfo) return sendMessage(chatId, "未知的命令。", null, env);
@@ -341,6 +329,7 @@ async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
     ]);
     const rankings = await resRank.json();
     const trans = await resTrans.json();
+    // 這裡 Map 存的是字串 (speciesName)
     const map = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
     
     const list = rankings.slice(0, limit);
@@ -350,9 +339,12 @@ async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
     list.forEach((p, i) => {
       const rank = p.rank || p.tier || i + 1;
       const rating = getPokemonRating(rank);
-      if (rating === "垃圾") return
-      // ★★★ 改用共用函數 ★★★
-      let name = getTranslatedName(p.speciesId, p.speciesName, map);
+      if (rating === "垃圾") return;
+
+      // ★★★ 修正重點：先取出字串，再傳給翻譯函數 ★★★
+      const rawName = map.get(p.speciesId.toLowerCase()) || p.speciesName;
+      let name = getTranslatedName(p.speciesId, rawName);
+      
       const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
       if (clean) copyList.push(clean);
       
@@ -364,7 +356,6 @@ async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
     return sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
   } catch(e) { return sendMessage(chatId, `Error: ${e.message}`, null, env); }
 }
-
 // --- Meta 分析 ---
 function getDefenseProfile(defTypes) {
   const profile = {};
