@@ -197,7 +197,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
   try {
     const [resTrans, resMoves] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
-      fetchWithCache(getDataUrl("data/moves.json"), env, ctx)
+      fetchWithCache(getDataUrl("data/move.json"), env, ctx)
     ]);
 
     const data = await resTrans.json();
