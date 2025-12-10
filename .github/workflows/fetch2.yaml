@@ -32,7 +32,7 @@ jobs:
 
       # 步驟 4: 執行 Python 腳本來獲取資料
       - name: Fetch PvPoke rankings data
-        run: python fetch_data.py
+        run: python scripts/fetch_data.py
       
       # 步驟 5: 設定 Git 並 Commit/Push 檔案
       - name: Commit and push if there are changes
