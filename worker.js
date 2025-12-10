@@ -189,44 +189,57 @@ async function handleUntrashCommand(chatId, userId, pokemonNames, env) {
   return sendMessage(chatId, "清單中找不到這些寶可夢。", null, env);
 }
 async function handlePokemonSearch(chatId, userId, query, env, ctx) {
-  // 1. 清理查詢字串
   const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
   const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
 
-  await sendMessage(chatId, `\u{1F50D} \u67E5\u8A62 "<b>${finalQuery}</b>" (\u542B\u9032\u5316\u93C8)...`, { parse_mode: "HTML" }, env);
+  await sendMessage(chatId, `\u{1F50D} \u67E5\u8A62 "<b>${finalQuery}</b>" (\u542B\u62db\u5f0f)...`, { parse_mode: "HTML" }, env);
   
   try {
-    const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
-    const data = await res.json();
+    // 1. 同時讀取「寶可夢資料(含eliteMoves)」與「招式翻譯」
+    const [resTrans, resMoves] = await Promise.all([
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
+      fetchWithCache(getDataUrl("data/moves.json"), env, ctx)
+    ]);
+
+    const data = await resTrans.json();
+    // 招式檔若讀取失敗則用空物件，避免報錯
+    const movesData = resMoves.ok ? await resMoves.json() : {};
+
     const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
     const lower = finalQuery.toLowerCase();
 
-    // 2. 初步搜尋 (字串比對)
+    // 2. 搜尋邏輯
     const initialMatches = data.filter(p => isChi ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lower));
     
     if(!initialMatches.length) return sendMessage(chatId, "找不到寶可夢", null, env);
     
-    // ★★★ 補回：進化鏈擴展邏輯 ★★★
+    // 進化鏈擴充
     const familyIds = new Set();
-    initialMatches.forEach(p => {
-        if (p.family && p.family.id) familyIds.add(p.family.id);
-    });
-
-    // 包含同家族的所有進化型 (finalMatches 才是我們最後要用的列表)
-    const finalMatches = data.filter(p => 
-        (p.family && familyIds.has(p.family.id)) || initialMatches.includes(p)
-    );
+    initialMatches.forEach(p => { if (p.family && p.family.id) familyIds.add(p.family.id); });
+    const finalMatches = data.filter(p => (p.family && familyIds.has(p.family.id)) || initialMatches.includes(p));
     
-    // 3. 準備比對 ID
+    // 建立 Map 以便快速查找寶可夢詳細資料 (為了拿 eliteMoves)
+    const pokemonMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p]));
     const ids = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
-    const map = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
     
     const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
     
     let msg = `🏆 <b>"${finalQuery}" 家族相關排名</b>\n`;
     const resultsByLeague = {}; 
 
-    // 4. 遍歷排名
+    // ★★★ 招式格式化小幫手 ★★★
+    // 參數: moveId (招式ID), eliteList (該寶可夢的厲害招式清單)
+    const formatMove = (moveId, eliteList) => {
+      if (!moveId) return "";
+      let name = movesData[moveId] || moveId; // 先轉中文
+      
+      // 檢查這個招式是否在該寶可夢的 eliteMoves 裡
+      if (eliteList && eliteList.includes(moveId)) {
+        name += "(厲害)";
+      }
+      return name;
+    };
+
     rankResults.forEach((list, i) => {
       if(!list) return;
       list.forEach((p, rankIndex) => {
@@ -234,15 +247,27 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
            const rank = p.rank || p.tier || rankIndex + 1;
            const rating = getPokemonRating(rank);
            
-           // 過濾垃圾 & 排名過低
            if (rating === "垃圾") return;
            if (typeof rank === "number" && rank > 100) return;
 
            const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
-           // ★★★ 改用共用函數 ★★★
-           let name = getTranslatedName(p.speciesId, map.get(p.speciesId.toLowerCase()), map);
            
-           const line = `${rankDisplay} <code>${name}</code> ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}`;
+           // 取得該寶可夢的詳細資料 (包含 eliteMoves)
+           const pDetail = pokemonMap.get(p.speciesId.toLowerCase());
+           const eliteList = pDetail ? pDetail.eliteMoves : []; 
+
+           // 翻譯名稱
+           let name = getTranslatedName(p.speciesId, pDetail ? pDetail.speciesName : p.speciesName, pokemonMap);
+
+           // ★★★ 處理招式顯示 ★★★
+           let moveStr = "";
+           if (p.moveFast && p.moveCharged) {
+             const fast = formatMove(p.moveFast, eliteList);
+             const charged = p.moveCharged.map(m => formatMove(m, eliteList)).join(", ");
+             moveStr = `\n└ ⚔️ ${fast} / 💥 ${charged}`;
+           }
+           
+           const line = `${rankDisplay} <code>${name}</code> ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}${moveStr}`;
            
            const leagueName = leagues[i].name;
            if (!resultsByLeague[leagueName]) resultsByLeague[leagueName] = [];
@@ -259,15 +284,12 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
       }
     }
 
-    // ★★★ 修正點：找不到排名的提示邏輯 ★★★
     if (!hasContent) {
-       // 找出一個代表性的名字 (優先用 initialMatches 的第一個，通常是最短匹配)
        const representative = initialMatches[0] || finalMatches[0];
        const cleanName = representative ? representative.speciesName.replace(NAME_CLEANER_REGEX, "").trim() : finalQuery;
        msg = `與 <b>"${finalQuery}"</b> 相關的寶可夢在所有聯盟中評價皆為垃圾。\n\n建議輸入 <code>/trash ${cleanName}</code> 加入清單。`;
     }
 
-    // 5. 檢查垃圾清單 (檢查整個家族是否有人在垃圾桶)
     let options = { parse_mode: "HTML" };
     const trashList = await getTrashList(userId, env);
     const foundInTrash = finalMatches.find(p => trashList.includes(p.speciesName));
