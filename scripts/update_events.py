@@ -53,8 +53,8 @@ def parse_monthly_article(url, name_to_id, current_year):
         # 定義我們要抓的區塊關鍵字
         target_categories = ["極巨對戰", "極巨星期一", "傳說團體戰", "超級團體戰", "暗影傳說團體戰"]
         
-        # 日期正則 (支援 12/1, 12/22, 1/4 等格式)
-        date_pattern = re.compile(r'(\d{1,2}/\d{1,2})[～~-](\d{1,2}/\d{1,2})')
+        # 加入 \s* 允許波浪號前後有空白
+        date_pattern = re.compile(r'(\d{1,2}/\d{1,2})\s*[～~-]\s*(\d{1,2}/\d{1,2})')
 
         for line in text_lines:
             line = line.strip()
