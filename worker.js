@@ -307,19 +307,25 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     return sendMessage(chatId, `⚠️ 發生錯誤: ${e.message}`, { parse_mode: "" }, env); 
   }
 }
-// ★★★ 新增這個共用函數：集中管理所有特殊翻譯 ★★★
+// ★★★ 共用翻譯函數 (安全防護 + 無括號版) ★★★
 function getTranslatedName(id, originalName, map) {
-  let name = map.get(id.toLowerCase()) || originalName;
+  // 1. 安全取值：防止 id 為 null，也防止取不到值變成 undefined
+  let raw = map.get((id || "").toLowerCase()) || originalName || id || "";
+  
+  // 2. 強制轉型：確保 name 絕對是字串 (String)，避免 .includes 報錯
+  let name = String(raw);
 
-  // 既有的修正
+  // 硬編碼修正 (已移除括號，改用空格)
   if (name === "Giratina (Altered)") return "騎拉帝納 別種";
   if (name === "Giratina (Altered) (Shadow)") return "騎拉帝納 別種 暗影";
   if (name === "Claydol (Shadow)") return "念力土偶 暗影";
-  if(name && name.includes("Hydreigon") && name.includes("Shadow")) name = "三首惡龍 暗影";
-  if(name && name.includes("Toucannon") && name.includes("Shadow")) name = "銃嘴大鳥 暗影";
-  if(name && name.includes("Snorlax") && name.includes("Gigantamax")) name = "卡比獸 超極巨化";
-  if(name && name.includes("Lapras") && name.includes("Gigantamax")) name = "拉普拉斯 超極巨化";
-  if(name && name.includes("Aegislash") && name.includes("Shield Forme")) name = "堅盾劍怪 盾牌形態";
+  
+  // 安全的 includes 檢查
+  if (name.includes("Hydreigon") && name.includes("Shadow")) return "三首惡龍 暗影";
+  if (name.includes("Toucannon") && name.includes("Shadow")) return "銃嘴大鳥 暗影";
+  if (name.includes("Snorlax") && name.includes("Gigantamax")) return "卡比獸 超極巨化";
+  if (name.includes("Lapras") && name.includes("Gigantamax")) return "拉普拉斯 超極巨化";
+  if (name.includes("Aegislash") && name.includes("Shield")) return "堅盾劍怪 盾牌";
 
   return name;
 }
