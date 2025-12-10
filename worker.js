@@ -109,7 +109,7 @@ function getPokemonRating(rank) {
 // 修改後的 sendMessage (會回傳結果，讓我們拿到 message_id)
 async function sendMessage(chatId, text, options = null, env) {
   if (!text) return;
-  const payload = { chat_id: chatId, text: text };
+  const payload = { chat_id: chatId, text: text ,link_preview_options: { is_disabled: true }};
   if (options) {
     if (options.inline_keyboard) payload.reply_markup = { inline_keyboard: options.inline_keyboard };
     payload.parse_mode = options.parse_mode || "HTML";
@@ -124,7 +124,7 @@ async function sendMessage(chatId, text, options = null, env) {
 // 新增：編輯訊息函數
 async function editMessage(chatId, messageId, text, options = null, env) {
   if (!text) return;
-  const payload = { chat_id: chatId, message_id: messageId, text: text };
+  const payload = { chat_id: chatId, message_id: messageId, text: text,link_preview_options: { is_disabled: true }};
   if (options) {
     if (options.inline_keyboard) payload.reply_markup = { inline_keyboard: options.inline_keyboard };
     payload.parse_mode = options.parse_mode || "HTML";
