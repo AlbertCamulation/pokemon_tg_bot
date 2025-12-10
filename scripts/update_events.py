@@ -97,20 +97,16 @@ def fetch_events():
     
     soup = BeautifulSoup(resp.content, 'html.parser')
     
-    # 根據提供的 HTML 結構定位
-    # <ul class="list-unstyled"> -> <li class="py-3 border-bottom">
     event_list = soup.select('div.col-lg-9 ul.list-unstyled li.py-3')
     
     events_data = []
-    current_date = datetime.now()
     
     for li in event_list:
         h3 = li.find('h3')
         if not h3: continue
         
-        # 1. 抓標題 (移除最後的 icon 連結文字)
+        # 1. 抓標題
         raw_title = h3.get_text().strip()
-        # 標題裡面可能有 <a href...><i class="fas fa-link"></i></a>，get_text 會把 icon 去掉
         
         # 2. 抓詳細連結
         a_tag = h3.find('a')
@@ -118,47 +114,45 @@ def fetch_events():
         if a_tag and 'href' in a_tag.attrs:
             detail_url = BASE_URL + a_tag['href']
             
-        # 3. 抓時間
+        # 3. 抓時間 (★★★ 修改重點 ★★★)
         time_tag = li.find('time')
         date_str = ""
         raw_date_str = ""
         if time_tag:
-            # 格式: 2025-12-06 14:00:00 ~ 2025-12-07 17:00:00
             raw_date_str = time_tag.get_text().strip()
-            # 我們只需要開始日期給 Bot 判斷: 2025-12-06
-            match = re.search(r'(\d{4}-\d{2}-\d{2})', raw_date_str)
-            if match:
-                date_str = match.group(1)
-        
-        # 過濾過期太久的活動 (例如只抓未來活動 + 過去 3 天內的)
-        # 這裡為了簡單，全部抓下來，讓 JS 去過濾
+            # 抓取所有日期格式
+            dates = re.findall(r'(\d{4}-\d{2}-\d{2})', raw_date_str)
+            
+            if len(dates) >= 2:
+                # 如果開始和結束日期不同，顯示範圍
+                if dates[0] != dates[1]:
+                    date_str = f"{dates[0]} ~ {dates[1]}"
+                else:
+                    date_str = dates[0]
+            elif len(dates) == 1:
+                date_str = dates[0]
+            else:
+                date_str = raw_date_str # 萬一格式很怪，就顯示原文
         
         print(f"📅 發現活動: {raw_title} ({date_str})")
         
-        # 4. 判斷寶可夢 ID
-        # 先嘗試從標題找
+        # 4. 判斷寶可夢 ID (保持不變)
         pokemon_ids = []
         for name, pid in name_to_id.items():
             if name in raw_title:
                 pokemon_ids.append(pid)
         
-        # 如果標題找不到 (例如 "2025年12月社群日") 且有內頁連結，就進去爬
         if not pokemon_ids and detail_url:
-            # 判斷是否值得爬內頁 (社群日、聚焦時刻、團體戰)
-            keywords = ["社群日", "聚焦時刻", "團體戰", "調查", "孵化", "對戰日"]
+            keywords = ["社群日", "聚焦時刻", "團體戰", "調查", "孵化", "對戰日", "極巨"]
             if any(k in raw_title for k in keywords):
                 ids_in_detail = get_detail_pokemon(detail_url, name_to_id)
-                # 簡單過濾：如果是社群日，通常主角出現次數最多，或我們取前幾個
-                # 這裡直接合併
                 pokemon_ids.extend(ids_in_detail)
         
-        # 去除重複 ID
         pokemon_ids = list(set(pokemon_ids))
         
-        # 只有當我們確定有相關寶可夢時才加入 (或者標題包含重要關鍵字)
         if pokemon_ids or any(k in raw_title for k in ["社群日", "聚焦時刻"]):
             events_data.append({
-                "date": date_str,
+                "date": date_str,      # 這裡現在會是 "2025-12-22 ~ 2025-12-31"
                 "raw_time": raw_date_str,
                 "pokemonId": pokemon_ids,
                 "eventName": raw_title,
