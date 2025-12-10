@@ -268,9 +268,9 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
              const charged = chargedArray.filter(m => m).map(m => formatMove(m, eliteList)).join(", ");
              
              if (charged) {
-                moveStr = `\n└ ⚔️ ${fast} / 💥 ${charged}`;
+                moveStr = `\n└ ${fast} / ${charged}`;
              } else {
-                moveStr = `\n└ ⚔️ ${fast}`;
+                moveStr = `\n└ ${fast}`;
              }
            }
            
@@ -486,7 +486,7 @@ async function handleMetaAnalysis(chatId, env, ctx) {
       const copyString = [...copySet].join(",");
       let msg = `📊 <b>${league.name} 戰略分析</b>\n\n`;
       msg += `👑 <b>META 核心</b>\n👉 <b>${getName(topOne)}</b> (分: ${topOneScore})\n\n`;
-      msg += `⚔️ <b>暴力 T0 隊</b> (純強度)\n`;
+      msg += `<b>暴力 T0 隊</b> (純強度)\n`;
       teamViolence.forEach((p, i) => msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`);
       msg += `\n🛡️ <b>智慧聯防隊</b> (以王者為核)\n`;
       teamBalanced.forEach((p, i) => msg += `${i+1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`);
@@ -501,7 +501,7 @@ async function handleMetaAnalysis(chatId, env, ctx) {
 
 // --- 屬性查詢 ---
 async function sendTypeSelectionMenu(chatId, mode, env) {
-  const title = mode === "atk" ? "⚔️ <b>攻擊屬性查詢</b>\n請選擇攻擊招式的屬性：" : "🛡️ <b>防禦屬性查詢</b>\n請選擇防守方(自己)的屬性：";
+  const title = mode === "atk" ? "<b>攻擊屬性查詢</b>\n請選擇攻擊招式的屬性：" : "🛡️ <b>防禦屬性查詢</b>\n請選擇防守方(自己)的屬性：";
   const keyboard = [];
   const types = Object.keys(typeNames);
   for (let i = 0; i < types.length; i += 3) {
@@ -520,7 +520,7 @@ async function handleTypeDetail(chatId, typeKey, mode, env) {
     Object.entries(typeChart[typeKey]).forEach(([target, multiplier]) => {
       if (multiplier > 1.0) strongAgainst.push(`${typeNames[target]} (${multiplier}x)`);
     });
-    msg = `⚔️ <b>${typeName}屬性 (攻擊方)</b>\n\n💪 <b>效果絕佳 (1.6x)：</b>\n${strongAgainst.length ? strongAgainst.join("\n") : "無"}\n\n<i>(註：Pokemon GO 剋制倍率為 1.6)</i>`;
+    msg = `<b>${typeName}屬性 (攻擊方)</b>\n\n💪 <b>效果絕佳 (1.6x)：</b>\n${strongAgainst.length ? strongAgainst.join("\n") : "無"}\n\n<i>(註：Pokemon GO 剋制倍率為 1.6)</i>`;
   } else {
     const resistantTo = [];
     const immuneTo = [];
@@ -544,9 +544,9 @@ function generateMainMenu() {
   const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
   const add = (items) => { const btns = items.map(l => ({ text: l.name, callback_data: l.command })); keyboard.push(...chunk(btns, 2)); };
   keyboard.push([{ text: "📊 三聯盟 Meta 生態分析", callback_data: "meta_analysis" }]);
-  const groups = { "🏆 超級 (1500)": leagues.filter(l => l.cp === "1500"), "⚔️ 高級 (2500)": leagues.filter(l => l.cp === "2500"), "👑 大師 (Max)": leagues.filter(l => l.cp === "10000"), "📊 PvE": leagues.filter(l => l.cp === "Any") };
+  const groups = { "🏆 超級 (1500)": leagues.filter(l => l.cp === "1500"), "高級 (2500)": leagues.filter(l => l.cp === "2500"), "👑 大師 (Max)": leagues.filter(l => l.cp === "10000"), "📊 PvE": leagues.filter(l => l.cp === "Any") };
   for (const [title, items] of Object.entries(groups)) { keyboard.push([{ text: `--- ${title} ---`, callback_data: "dummy" }]); add(items); }
-  keyboard.push([{ text: "⚔️ 攻擊屬性查詢", callback_data: "menu_atk_types" }, { text: "🛡️ 防禦屬性查詢", callback_data: "menu_def_types" }]);
+  keyboard.push([{ text: "攻擊屬性查詢", callback_data: "menu_atk_types" }, { text: "🛡️ 防禦屬性查詢", callback_data: "menu_def_types" }]);
   keyboard.push([{ text: "📝 垃圾清單", callback_data: "trash_list" }, { text: "ℹ️ 說明", callback_data: "help_menu" }]);
   return keyboard;
 }
