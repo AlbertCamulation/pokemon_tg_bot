@@ -214,7 +214,6 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     initialMatches.forEach(p => { if (p.family && p.family.id) familyIds.add(p.family.id); });
     const finalMatches = data.filter(p => (p.family && familyIds.has(p.family.id)) || initialMatches.includes(p));
     
-    // Map 存的是物件 (Object)
     const pokemonMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p]));
     const ids = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
     
@@ -223,7 +222,7 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
     let msg = `🏆 <b>"${finalQuery}" 家族相關排名</b>\n`;
     const resultsByLeague = {}; 
 
-    // 招式格式化
+    // 招式格式化函數
     const formatMove = (moveId, eliteList) => {
       if (!moveId) return "";
       let name = movesData[moveId] || moveId;
@@ -243,20 +242,36 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
 
            const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
            
-           // ★★★ 修正重點：先取出字串，再傳給翻譯函數 ★★★
            const pDetail = pokemonMap.get(p.speciesId.toLowerCase());
-           // pDetail 是一個物件，我們要取它的 speciesName (字串)
            const rawName = pDetail ? pDetail.speciesName : p.speciesName; 
            let name = getTranslatedName(p.speciesId, rawName);
 
            const eliteList = pDetail ? pDetail.eliteMoves : []; 
 
-           // 處理招式顯示
+           // ★★★ 修正重點：兼容 moveset 陣列格式 ★★★
+           let fastMoveId = p.moveFast;
+           let chargedMoveIds = p.moveCharged;
+
+           // 如果沒有 moveFast，但有 moveset 陣列 (PvPoke 格式)
+           // moveset[0] = 小招, moveset[1...] = 大招
+           if (!fastMoveId && p.moveset && Array.isArray(p.moveset) && p.moveset.length > 0) {
+               fastMoveId = p.moveset[0];
+               chargedMoveIds = p.moveset.slice(1);
+           }
+
+           // 組合招式字串
            let moveStr = "";
-           if (p.moveFast && p.moveCharged) {
-             const fast = formatMove(p.moveFast, eliteList);
-             const charged = p.moveCharged.map(m => formatMove(m, eliteList)).join(", ");
-             moveStr = `\n└ ⚔️ ${fast} / 💥 ${charged}`;
+           if (fastMoveId) {
+             const fast = formatMove(fastMoveId, eliteList);
+             // 確保 chargedMoveIds 是陣列
+             const chargedArray = Array.isArray(chargedMoveIds) ? chargedMoveIds : [chargedMoveIds];
+             const charged = chargedArray.filter(m => m).map(m => formatMove(m, eliteList)).join(", ");
+             
+             if (charged) {
+                moveStr = `\n└ ⚔️ ${fast} / 💥 ${charged}`;
+             } else {
+                moveStr = `\n└ ⚔️ ${fast}`;
+             }
            }
            
            const line = `${rankDisplay} <code>${name}</code> ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}${moveStr}`;
