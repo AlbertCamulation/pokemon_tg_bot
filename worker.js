@@ -106,6 +106,7 @@ function getPokemonRating(rank) {
   return "垃圾";
 }
 
+// 修改後的 sendMessage (會回傳結果，讓我們拿到 message_id)
 async function sendMessage(chatId, text, options = null, env) {
   if (!text) return;
   const payload = { chat_id: chatId, text: text };
@@ -114,8 +115,23 @@ async function sendMessage(chatId, text, options = null, env) {
     payload.parse_mode = options.parse_mode || "HTML";
   } else { payload.parse_mode = "HTML"; }
   
-  await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/sendMessage`, {
+  const response = await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/sendMessage`, {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) 
+  });
+  return await response.json(); // 回傳 JSON 以便取得 message_id
+}
+
+// 新增：編輯訊息函數
+async function editMessage(chatId, messageId, text, options = null, env) {
+  if (!text) return;
+  const payload = { chat_id: chatId, message_id: messageId, text: text };
+  if (options) {
+    if (options.inline_keyboard) payload.reply_markup = { inline_keyboard: options.inline_keyboard };
+    payload.parse_mode = options.parse_mode || "HTML";
+  } else { payload.parse_mode = "HTML"; }
+
+  await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/editMessageText`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
   });
 }
 
@@ -192,8 +208,9 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
   const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
   const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
 
-  await sendMessage(chatId, `\u{1F50D} \u67E5\u8A62 "<b>${finalQuery}</b>" (\u542B\u62db\u5f0f)...`, { parse_mode: "HTML" }, env);
-  
+  const loadingMsg = await sendMessage(chatId, `\u{1F50D} \u67E5\u8A62 "<b>${finalQuery}</b>" (\u542B\u62db\u5f0f)...`, { parse_mode: "HTML" }, env);
+  // 取得該訊息的 ID，以便稍後編輯
+  const loadingMsgId = loadingMsg.result ? loadingMsg.result.message_id : null;
   try {
     const [resTrans, resMoves] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
@@ -307,11 +324,18 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
         { text: `♻️ 將 "${foundInTrash.speciesName}" 移出垃圾清單`, callback_data: `untrash_btn_${foundInTrash.speciesName}` }
       ]];
     }
-
-    return sendMessage(chatId, msg, options, env);
+    // ★★★ 關鍵修改：如果有 loadingMsgId，就編輯它；否則發送新訊息 ★★★
+    if (loadingMsgId) {
+        await editMessage(chatId, loadingMsgId, msg, options, env);
+    } else {
+        await sendMessage(chatId, msg, options, env);
+    }
 
   } catch(e) { 
-    return sendMessage(chatId, `⚠️ 發生錯誤: ${e.message}`, { parse_mode: "" }, env); 
+    // 發生錯誤時也嘗試編輯原本的訊息
+    const errorMsg = `⚠️ 發生錯誤: ${e.message}`;
+    if (loadingMsgId) await editMessage(chatId, loadingMsgId, errorMsg, null, env);
+    else await sendMessage(chatId, errorMsg, null, env);
   }
 }
 // ★★★ 共用翻譯函數 (純文字處理版) ★★★
