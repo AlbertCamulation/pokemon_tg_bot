@@ -45,6 +45,15 @@
     "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
   },
   {
+    "date": "2025-12-14",
+    "raw_time": "2025-12-14 14:00:00 ~ 2025-12-14 17:00:00",
+    "pokemonId": [
+      "snorlax"
+    ],
+    "eventName": "超極巨化卡比獸極巨對戰日",
+    "link": "https://pokemon.wingzero.tw/page/archive/1494/tw"
+  },
+  {
     "date": "2025-12-13 ~ 2025-12-22",
     "raw_time": "2025-12-13 10:00:00 ~ 2025-12-22 10:00:00",
     "pokemonId": [
@@ -113,23 +122,5 @@
     ],
     "eventName": "席多藍恩暗影傳說團體戰",
     "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
-  },
-  {
-    "date": "2025-11-30",
-    "raw_time": "2025-11-30 14:00:00 ~ 2025-11-30 17:00:00",
-    "pokemonId": [
-      "pikipek"
-    ],
-    "eventName": "2025年11月社群日：小篤兒",
-    "link": "https://pokemon.wingzero.tw/page/archive/1482/tw"
-  },
-  {
-    "date": "2025-11-29 ~ 2025-11-30",
-    "raw_time": "2025-11-29 06:00:00 ~ 2025-11-30 21:00:00",
-    "pokemonId": [
-      "lugia"
-    ],
-    "eventName": "極巨化洛奇亞極巨對戰週末",
-    "link": "https://pokemon.wingzero.tw/page/archive/1487/tw"
   }
 ]
