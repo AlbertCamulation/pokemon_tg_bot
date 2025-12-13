@@ -1,5 +1,23 @@
 [
   {
+    "date": "2026-01-18",
+    "raw_time": "2026-01-18 14:00:00 ~ 2026-01-18 17:00:00",
+    "pokemonId": [
+      "grookey"
+    ],
+    "eventName": "敲音猴社群日",
+    "link": "https://pokemon.wingzero.tw/page/archive/1499/tw"
+  },
+  {
+    "date": "2026-01-04",
+    "raw_time": "2026-01-04 14:00:00 ~ 2026-01-04 17:00:00",
+    "pokemonId": [
+      "piplup"
+    ],
+    "eventName": "2026年1月波加曼經典社群日",
+    "link": "https://pokemon.wingzero.tw/page/archive/1501/tw"
+  },
+  {
     "date": "2025-12-30",
     "raw_time": "2025-12-30 18:00:00 ~ 2025-12-30 19:00:00",
     "pokemonId": [
@@ -94,33 +112,6 @@
       "kyurem"
     ],
     "eventName": "酋雷姆傳說團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
-  },
-  {
-    "date": "2025-12-04 ~ 2025-12-13",
-    "raw_time": "2025-12-04 10:00:00 ~ 2025-12-13 10:00:00",
-    "pokemonId": [
-      "gyarados"
-    ],
-    "eventName": "超級暴鯉龍超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
-  },
-  {
-    "date": "2025-12-02",
-    "raw_time": "2025-12-02 18:00:00 ~ 2025-12-02 19:00:00",
-    "pokemonId": [
-      "cranidos"
-    ],
-    "eventName": "頭蓋龍聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
-  },
-  {
-    "date": "2025-12-02 ~ 2026-01-02",
-    "raw_time": "2025-12-02 00:00:00 ~ 2026-01-02 00:00:00",
-    "pokemonId": [
-      "heatran"
-    ],
-    "eventName": "席多藍恩暗影傳說團體戰",
     "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
   }
 ]
