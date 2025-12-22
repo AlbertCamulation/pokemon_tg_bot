@@ -8,7 +8,8 @@ const WEBHOOK_PATH = "/endpoint";
 const TRASH_LIST_PREFIX = "trash_pokemon_";
 const ALLOWED_UID_KEY = "allowed_user_ids";
 const LIMIT_LEAGUES_SHOW = 50;
-const CACHE_TTL = 3600;
+// 原本是 3600 (1小時)，改成 86400 (24小時)
+const CACHE_TTL = 86400;
 
 const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/g;
 const QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
@@ -67,26 +68,64 @@ const typeNames = {
 // =========================================================
 //  2. 基礎工具函數 (Utils & API Wrappers)
 // =========================================================
-
+// 修改後的 fetchWithCache (加入重試機制與錯誤處理)
 async function fetchWithCache(url, env, ctx) {
   const cache = caches.default;
   const cacheKey = new Request(url, { method: "GET" });
+
+  // 1. 先嘗試從 Cloudflare 快取讀取
   let cachedRes = await cache.match(cacheKey);
   if (cachedRes) return cachedRes;
 
-  const response = await fetch(url);
-  if (!response.ok) return response;
+  // 2. 定義重試邏輯 (最多重試 2 次，共 3 次機會)
+  const maxRetries = 2;
+  let response = null;
+  
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      response = await fetch(url);
+      // 如果成功 (200 OK) 就跳出迴圈
+      if (response.ok) break; 
+    } catch (e) {
+      console.error(`Fetch attempt ${i + 1} failed: ${e.message}`);
+    }
+    // 如果不是最後一次嘗試，稍微等待一下 (50ms) 再重試
+    if (i < maxRetries) await new Promise(r => setTimeout(r, 50));
+  }
 
-  const bodyText = await response.text();
-  if (!bodyText || bodyText.trim().length === 0) return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" }});
+  // 3. 如果重試後還是失敗，回傳空陣列避免程式崩潰
+  if (!response || !response.ok) {
+    console.error(`Failed to fetch ${url} after retries.`);
+    return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" }});
+  }
 
+  // 4. 讀取並複製資料
+  // 這裡使用 try-catch 防止讀取 body 時發生錯誤
+  let bodyText;
+  try {
+    bodyText = await response.text();
+  } catch (e) {
+    return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" }});
+  }
+
+  if (!bodyText || bodyText.trim().length === 0) {
+    return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" }});
+  }
+
+  // 5. 設定快取 Header 並存入快取
   const headers = new Headers(response.headers);
   headers.set("Cache-Control", `public, max-age=${CACHE_TTL}`);
   headers.set("Content-Type", "application/json");
 
   const responseToCache = new Response(bodyText, { status: response.status, headers: headers });
-  if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(cacheKey, responseToCache));
-  else cache.put(cacheKey, responseToCache).catch(console.error);
+  
+  // 使用 waitUntil 確保快取寫入不會被中斷
+  if (ctx && ctx.waitUntil) {
+    ctx.waitUntil(cache.put(cacheKey, responseToCache.clone()));
+  } else {
+    // 如果沒有 ctx (極少見)，就非同步寫入
+    cache.put(cacheKey, responseToCache.clone()).catch(console.error);
+  }
 
   return new Response(bodyText, { status: response.status, headers: headers });
 }
