@@ -9,6 +9,15 @@
     "link": "https://pokemon.wingzero.tw/page/archive/1499/tw"
   },
   {
+    "date": "2026-01-10",
+    "raw_time": "2026-01-10 15:00:00 ~ 2026-01-10 17:00:00",
+    "pokemonId": [
+      "kyurem"
+    ],
+    "eventName": "酋雷姆合體團體戰日",
+    "link": "https://pokemon.wingzero.tw/page/archive/1503/tw"
+  },
+  {
     "date": "2026-01-04",
     "raw_time": "2026-01-04 14:00:00 ~ 2026-01-04 17:00:00",
     "pokemonId": [
@@ -87,31 +96,6 @@
       "abomasnow"
     ],
     "eventName": "超級暴雪王超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
-  },
-  {
-    "date": "2025-12-09",
-    "raw_time": "2025-12-09 18:00:00 ~ 2025-12-09 19:00:00",
-    "pokemonId": [
-      "shieldon"
-    ],
-    "eventName": "盾甲龍聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
-  },
-  {
-    "date": "2025-12-06 ~ 2025-12-07",
-    "raw_time": "2025-12-06 14:00:00 ~ 2025-12-07 17:00:00",
-    "pokemonId": [],
-    "eventName": "2025年12月社群日",
-    "link": "https://pokemon.wingzero.tw/page/archive/1485/tw"
-  },
-  {
-    "date": "2025-12-04 ~ 2025-12-13",
-    "raw_time": "2025-12-04 10:00:00 ~ 2025-12-13 10:00:00",
-    "pokemonId": [
-      "kyurem"
-    ],
-    "eventName": "酋雷姆傳說團體戰",
     "link": "https://pokemon.wingzero.tw/page/archive/1488/tw"
   }
 ]
