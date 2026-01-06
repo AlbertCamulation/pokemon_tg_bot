@@ -783,14 +783,15 @@ function generateHTML() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeMaster PRO | 屬性掃描系統</title>
+    <title>PokeMaster PRO | PvP 戰術終端</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Noto+Sans+TC:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background: #000; color: #eee; overflow-x: hidden; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #000; color: #eee; }
         .tech-font { font-family: 'Orbitron', sans-serif; }
         
+        /* 霓虹紅科技主題 */
         .neon-border { border: 1px solid rgba(255, 0, 0, 0.4); box-shadow: 0 0 20px rgba(255, 0, 0, 0.15); }
         .neon-text-red { color: #ff0000; text-shadow: 0 0 12px rgba(255, 0, 0, 0.6); }
         .btn-red { background: #b90000; box-shadow: 0 0 20px rgba(185, 0, 0, 0.4); transition: 0.3s; }
@@ -807,47 +808,18 @@ function generateHTML() {
         .type-steel { background: #607d8b; } .type-fairy { background: #d81b60; } .type-normal { background: #757575; }
 
         .league-chip.active { background: #ff0000; color: white; border-color: #ff0000; }
-        
-        /* 浮動分析 HUD - 修正定位邏輯 */
-        #typeHUD {
-            position: fixed; /* 關鍵：使用 fixed 定位 */
-            pointer-events: none; /* 關鍵：防止滑鼠擋住事件導致閃爍 */
-            z-index: 999999;
-            background: rgba(5, 0, 0, 0.98);
-            border: 2px solid #ff0000;
-            box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
-            display: none;
-            width: 280px;
-            opacity: 0;
-            transition: opacity 0.15s ease-out;
-        }
-
-        .scanline {
-            width: 100%; height: 2px; background: rgba(255, 0, 0, 0.4);
-            position: absolute; animation: scan 2.5s linear infinite;
-        }
-        @keyframes scan { 0% { top: 0% } 100% { top: 100% } }
     </style>
 </head>
 <body class="pb-20">
-    <div id="typeHUD" class="p-6 rounded-2xl">
-        <div class="scanline"></div>
-        <div id="hudContent"></div>
-        <div class="mt-5 pt-3 border-t border-red-900/50 flex justify-between items-center">
-            <span class="text-[9px] tech-font text-red-500 animate-pulse tracking-widest">ENCOUNTER_ANALYSIS</span>
-            <i class="fa-solid fa-crosshairs text-red-700 text-xs"></i>
-        </div>
-    </div>
-
     <div class="max-w-6xl mx-auto p-4 md:p-8">
         <div class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 btn-red rounded-2xl flex items-center justify-center text-3xl">
-                    <i class="fa-solid fa-eye-low-beam"></i>
+                    <i class="fa-solid fa-terminal"></i>
                 </div>
                 <div>
                     <h1 class="text-4xl font-black tracking-tighter tech-font uppercase">PokeMaster <span class="neon-text-red">PRO</span></h1>
-                    <p class="text-[10px] tech-font text-zinc-600 tracking-[0.3em]">BATTLE STRATEGY INTERFACE</p>
+                    <p class="text-[10px] tech-font text-zinc-600 tracking-[0.3em]">TACTICAL ANALYSIS TERMINAL</p>
                 </div>
             </div>
             <button onclick="toggleSettings()" class="bg-zinc-950 border border-red-900/50 px-6 py-3 rounded-full text-xs font-black tech-font hover:bg-red-950 transition">
@@ -857,29 +829,38 @@ function generateHTML() {
 
         <div class="relative mb-16">
             <div class="absolute inset-0 bg-red-600 blur-3xl opacity-5"></div>
-            <div class="relative bg-zinc-950 p-2 rounded-3xl flex neon-border">
-                <input type="text" id="searchInput" placeholder="輸入搜尋目標名稱..." 
+            <div class="relative bg-zinc-950 p-2 rounded-3xl flex neon-border shadow-2xl">
+                <input type="text" id="searchInput" placeholder="輸入搜尋目標名稱 (例: 瑪力露麗)..." 
                        class="flex-1 bg-transparent p-5 text-2xl focus:outline-none font-black text-red-500 placeholder:text-zinc-800">
                 <button onclick="performSearch()" class="btn-red text-white px-12 rounded-2xl font-black uppercase tracking-widest tech-font">SEARCH</button>
             </div>
         </div>
 
         <div id="settingsModal" class="hidden bg-zinc-950 p-10 rounded-[3rem] mb-12 border-2 border-red-900 shadow-2xl">
-            <h2 class="font-black text-xl mb-8 neon-text-red tech-font uppercase">Monitoring Configuration</h2>
+            <h2 class="font-black text-xl mb-8 neon-text-red tech-font uppercase">System Configuration</h2>
             <div id="leaguePicker" class="flex flex-wrap gap-4"></div>
         </div>
 
-        <div id="evoSection" class="hidden mb-20 text-center">
-            <div id="evolutionChain" class="flex flex-wrap justify-center items-center gap-8 bg-zinc-950/30 p-12 rounded-[3.5rem] border border-zinc-900"></div>
-            <p class="mt-8 tech-font text-[10px] text-zinc-600 tracking-[0.4em] uppercase italic">--- Move cursor over stage to reveal attribute logic ---</p>
+        <div id="infoSection" class="hidden mb-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-zinc-950/50 p-10 rounded-[3rem] border border-zinc-900 shadow-inner">
+                <h2 class="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.4em] mb-8">Evolution Sequence</h2>
+                <div id="evolutionChain" class="flex flex-wrap justify-center items-center gap-8"></div>
+            </div>
+
+            <div class="bg-zinc-900/80 p-8 rounded-[3rem] border border-red-950/50 shadow-2xl">
+                <h2 class="text-[10px] font-bold text-red-600 uppercase tracking-[0.4em] mb-6">Tactical HUD</h2>
+                <div id="attributeHUD" class="space-y-6">
+                    <div class="animate-pulse text-zinc-800 text-xs tech-font">AWAITING_BIO_SCAN...</div>
+                </div>
+            </div>
         </div>
 
-        <div id="eventBanner" class="hidden mb-12 border-l-8 border-red-600 bg-red-950/30 p-8 rounded-3xl text-red-200 shadow-2xl shadow-red-900/10"></div>
+        <div id="eventBanner" class="hidden mb-12 border-l-8 border-red-600 bg-red-950/30 p-8 rounded-3xl text-red-200"></div>
 
         <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             <div class="col-span-full text-center py-40">
-                <i class="fa-solid fa-satellite fa-beat text-8xl mb-8 text-zinc-900 opacity-50"></i>
-                <p class="text-zinc-800 tech-font uppercase tracking-[1.2em] text-sm">System Standby / Ready</p>
+                <i class="fa-solid fa-circle-nodes fa-beat text-8xl mb-8 text-zinc-900"></i>
+                <p class="text-zinc-700 tech-font uppercase tracking-[1em] text-sm">System Standby / Ready</p>
             </div>
         </div>
     </div>
@@ -905,7 +886,7 @@ function generateHTML() {
         function renderLeaguePicker() {
             const picker = document.getElementById('leaguePicker');
             picker.innerHTML = allLeagues.map(l => \`
-                <button onclick="toggleLeague('\${l.id}')" class="league-chip px-6 py-3 rounded-2xl border border-zinc-800 text-xs font-black uppercase tracking-tighter transition \${selectedLeagues.includes(l.id) ? 'active' : ''}">\${l.name}</button>
+                <button onclick="toggleLeague('\${l.id}')" class="league-chip px-6 py-3 rounded-2xl border border-zinc-800 text-xs font-black uppercase transition \${selectedLeagues.includes(l.id) ? 'active' : ''}">\${l.name}</button>
             \`).join('');
         }
         function toggleLeague(id) {
@@ -914,91 +895,91 @@ function generateHTML() {
             renderLeaguePicker(); performSearch();
         }
 
+        function getTypeBadges(types) {
+            if (!types) return '';
+            return types.filter(t => t && t.toLowerCase() !== 'none')
+                .map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()] || t}</span>\`)
+                .join('');
+        }
+
         function calculateEffectiveness(types) {
             const results = {};
             Object.keys(typeNames).forEach(t => results[t] = 1);
-            const vTypes = types.filter(t => t && t.toLowerCase() !== 'none');
-            vTypes.forEach(type => {
-                const typeLower = type.toLowerCase();
+            const valid = types.filter(t => t && t.toLowerCase() !== 'none');
+            valid.forEach(type => {
+                const lower = type.toLowerCase();
                 Object.keys(typeChart).forEach(attacker => {
-                    if (typeChart[attacker] && typeChart[attacker][typeLower]) results[attacker] *= typeChart[attacker][typeLower];
+                    if (typeChart[attacker][lower]) results[attacker] *= typeChart[attacker][lower];
                 });
             });
             return results;
         }
 
-        // --- HUD 定位核心邏輯修復 ---
-        const hud = document.getElementById('typeHUD');
-        document.addEventListener('mousemove', (e) => {
-            if (hud.style.display === 'block') {
-                // 補償偏移量，讓方框出現在滑鼠右下方
-                const offsetX = 20;
-                const offsetY = 20;
-                
-                // 邊界檢查：避免超出視窗右側
-                let posX = e.clientX + offsetX;
-                if (posX + 280 > window.innerWidth) posX = e.clientX - 300;
-
-                hud.style.left = posX + 'px';
-                hud.style.top = (e.clientY + offsetY) + 'px';
-            }
-        });
-
-        function inspectType(name, types) {
+        function updateHUD(name, types) {
             const eff = calculateEffectiveness(types);
             const weaknesses = Object.entries(eff).filter(([t, v]) => v > 1).sort((a,b) => b[1]-a[1]);
             const resists = Object.entries(eff).filter(([t, v]) => v < 1).sort((a,b) => a[1]-b[1]);
             
-            document.getElementById('hudContent').innerHTML = \`
-                <div class="text-white font-black text-2xl border-b border-red-600 pb-3 mb-5 tech-font uppercase tracking-tighter">\${name}</div>
+            document.getElementById('attributeHUD').innerHTML = \`
+                <div class="text-white font-black text-xl border-b border-red-600 pb-3 mb-4 tech-font uppercase tracking-tighter">\${name}</div>
                 <div class="space-y-5">
                     <div>
-                        <div class="text-[11px] font-black text-red-500 uppercase mb-3 tracking-[0.2em]">Weakness Logic</div>
-                        <div class="flex flex-wrap gap-2.5">\${weaknesses.map(([t, v]) => \`<span class="text-[12px] bg-red-950/40 px-2 py-1 rounded-lg border border-red-600/30 text-white font-bold">\${typeNames[t]} <span class="text-red-500 ml-1">x\${v.toFixed(1)}</span></span>\`).join('')}</div>
+                        <div class="text-[10px] font-black text-red-500 uppercase mb-2 tracking-[0.2em]">Weakness Logic</div>
+                        <div class="flex flex-wrap gap-2">\${weaknesses.map(([t, v]) => \`
+                            <span class="text-[11px] bg-red-950/40 px-2 py-1 rounded border border-red-600/30 text-white font-bold">\${typeNames[t]} <span class="text-red-500 ml-1">x\${v.toFixed(1)}</span></span>
+                        \`).join('')}</div>
                     </div>
                     <div>
-                        <div class="text-[11px] font-black text-green-500 uppercase mb-3 tracking-[0.2em]">Resist Data</div>
-                        <div class="flex flex-wrap gap-2.5">\${resists.map(([t, v]) => \`<span class="text-[12px] bg-green-950/20 px-2 py-1 rounded-lg border border-green-600/30 text-white font-bold">\${typeNames[t]} <span class="text-green-500 ml-1">x\${v.toFixed(1)}</span></span>\`).join('')}</div>
+                        <div class="text-[10px] font-black text-green-500 uppercase mb-2 tracking-[0.2em]">Resist Data</div>
+                        <div class="flex flex-wrap gap-2">\${resists.map(([t, v]) => \`
+                            <span class="text-[11px] bg-green-950/20 px-2 py-1 rounded border border-green-600/30 text-white font-bold">\${typeNames[t]} <span class="text-green-500 ml-1">x\${v.toFixed(1)}</span></span>
+                        \`).join('')}</div>
                     </div>
                 </div>
             \`;
-            hud.style.display = 'block';
-            setTimeout(() => hud.style.opacity = '1', 5);
-        }
-
-        function clearInspect() { 
-            hud.style.opacity = '0';
-            setTimeout(() => { if(hud.style.opacity === '0') hud.style.display = 'none'; }, 150);
         }
 
         async function performSearch() {
             const query = document.getElementById('searchInput').value.trim();
             if (!query) return;
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '<div class="col-span-full text-center py-40 text-red-600"><i class="fa-solid fa-dna fa-spin text-7xl"></i><p class="mt-6 tech-font uppercase tracking-[0.5em] animate-pulse">Scanning Bio-Records...</p></div>';
+            resultsDiv.innerHTML = '<div class="col-span-full text-center py-40 text-red-600"><i class="fa-solid fa-dna fa-spin text-7xl"></i><p class="mt-6 tech-font uppercase tracking-[0.5em] animate-pulse">Syncing DNA Database...</p></div>';
 
             try {
                 const res = await fetch(\`/api/search?q=\${encodeURIComponent(query)}\`);
                 const data = await res.json();
                 if (!data.results || data.results.length === 0) {
-                    resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600 font-black tech-font uppercase text-3xl tracking-tighter">DATA_FETCH_ERROR: TARGET_NOT_FOUND</div>'; return;
+                    resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600 font-black tech-font text-2xl tracking-tighter">DATA_FETCH_FAILED: UNKNOWN_SPECIES</div>'; return;
                 }
 
-                const evoSection = document.getElementById('evoSection');
+                document.getElementById('infoSection').classList.remove('hidden');
+
+                // 1. 渲染進化鏈 + 初始化 HUD (預設顯示最後一個進化型)
                 const evoDiv = document.getElementById('evolutionChain');
                 evoDiv.innerHTML = data.evolutionChain.map((p, idx) => \`
                     <div class="flex items-center">
-                        <div onmouseenter="inspectType('\${p.name}', \${JSON.stringify(p.types)})" onmouseleave="clearInspect()"
-                             class="bg-zinc-950 p-8 rounded-[2.5rem] border border-zinc-900 hover:border-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,0,0,0.25)] transition-all duration-300 cursor-crosshair min-w-[150px] text-center shadow-2xl relative group">
-                            <div class="font-black text-white text-lg mb-4 group-hover:neon-text-red transition-colors">\${p.name}</div>
-                            <div class="flex gap-2 justify-center">
-                                \${p.types.filter(t=>t&&t.toLowerCase()!=='none').map(t=>\`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()]}</span>\`).join('')}
-                            </div>
+                        <div onmouseenter="updateHUD('\${p.name}', \${JSON.stringify(p.types)})"
+                             class="bg-zinc-950 p-6 rounded-[2.5rem] border border-zinc-900 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_30px_rgba(255,0,0,0.2)] transition-all duration-300 cursor-pointer min-w-[130px] text-center shadow-2xl relative group">
+                            <div class="font-black text-white text-base mb-3 group-hover:neon-text-red transition-colors">\${p.name}</div>
+                            <div class="flex gap-1.5 justify-center">\${getTypeBadges(p.types)}</div>
                         </div>
-                        \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-chevron-right mx-8 text-red-600 opacity-30 text-2xl"></i>' : ''}
+                        \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-chevron-right mx-6 text-red-600 opacity-20 text-xl"></i>' : ''}
                     </div>
                 \`).join('');
-                evoSection.classList.remove('hidden');
+                
+                // 初始化 HUD
+                const lastPoke = data.evolutionChain[data.evolutionChain.length - 1];
+                updateHUD(lastPoke.name, lastPoke.types);
+
+                const banner = document.getElementById('eventBanner');
+                if (data.events && data.events.length > 0) {
+                    banner.innerHTML = data.events.map(e => \`
+                        <div class="flex items-center gap-4 text-red-200"><i class="fa-solid fa-triangle-exclamation text-red-600 text-2xl"></i>
+                        <div><div class="font-black text-xl uppercase tracking-tighter">Event Detected: \${e.eventName}</div>
+                        <div class="text-xs opacity-70 tech-font">DATE: \${e.date} · <a href="\${e.link}" target="_blank" class="underline">DETAILS_LINK</a></div></div></div>
+                    \`).join('');
+                    banner.classList.remove('hidden');
+                } else { banner.classList.add('hidden'); }
 
                 const filtered = data.results.filter(r => selectedLeagues.includes(r.leagueId));
                 const others = data.results.filter(r => !selectedLeagues.includes(r.leagueId));
@@ -1007,35 +988,21 @@ function generateHTML() {
                     <div class="card-dark rounded-[3rem] overflow-hidden hover:scale-[1.02] transition-all duration-500 shadow-2xl border border-zinc-900">
                         <div class="p-10 bg-zinc-950/80 border-b border-zinc-900">
                             <h3 class="text-2xl font-black text-white tech-font uppercase tracking-tighter mb-2">\${league.leagueName}</h3>
-                            <div class="flex items-center gap-3">
-                                <span class="w-12 h-1 bg-red-600"></span>
-                                <span class="text-[9px] text-zinc-500 tech-font tracking-widest uppercase">Field Data Rankings</span>
-                            </div>
+                            <div class="flex items-center gap-3"><span class="w-12 h-1 bg-red-600"></span><span class="text-[9px] text-zinc-500 tech-font tracking-widest uppercase">Combat Rankings</span></div>
                         </div>
                         <div class="p-8 space-y-5">
                             \${league.pokemons.map(p => \`
-                                <div class="p-6 rounded-[2rem] bg-zinc-900/40 border border-zinc-800/40 hover:bg-zinc-900/60 transition-colors group">
+                                <div class="p-6 rounded-[2rem] bg-zinc-900/40 border border-zinc-800/40 group hover:bg-zinc-900/70 transition-colors">
                                     <div class="flex justify-between items-start mb-4">
-                                        <div>
-                                            <span class="text-[10px] font-black text-red-500 tech-font uppercase opacity-60 tracking-widest mb-1 block">INDEX_RANK #\${p.rank}</span>
-                                            <div class="text-2xl font-black text-zinc-100 group-hover:text-white transition-colors">\${p.name}</div>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-[11px] bg-red-600 text-white px-3 py-1.5 rounded-xl tech-font font-black shadow-lg shadow-red-900/20">\${p.rating}</span>
-                                            <div class="text-[9px] text-zinc-600 tech-font mt-2 uppercase tracking-tighter">Combat Tier</div>
-                                        </div>
+                                        <div><span class="text-[10px] font-black text-red-600 tech-font uppercase opacity-60 tracking-widest mb-1 block">R-INDEX #\${p.rank}</span>
+                                        <div class="text-2xl font-black text-zinc-100 group-hover:text-white">\${p.name}</div></div>
+                                        <div class="text-right"><span class="text-[11px] bg-red-600 text-white px-3 py-1.5 rounded-xl tech-font font-black shadow-lg shadow-red-900/20">\${p.rating}</span></div>
                                     </div>
-                                    <div class="flex gap-2 mb-5">\${p.types.filter(t=>t&&t.toLowerCase()!=='none').map(t=>\`<span class="type-badge type-\${t.toLowerCase()} text-[9px]">\${typeNames[t.toLowerCase()]}</span>\`).join('')}</div>
-                                    <div class="text-[13px] font-medium text-zinc-400 bg-black/60 p-5 rounded-[1.5rem] border border-zinc-800/50 leading-relaxed shadow-inner">
-                                        <div class="flex items-center gap-4">
-                                            <i class="fa-solid fa-burst text-red-900 text-base"></i>
-                                            <span>\${p.moves}</span>
-                                        </div>
+                                    <div class="flex gap-2 mb-5">\${getTypeBadges(p.types)}</div>
+                                    <div class="text-[13px] font-medium text-zinc-400 bg-black/60 p-5 rounded-[1.5rem] border border-zinc-800/50 leading-relaxed shadow-inner font-mono italic">
+                                        <div class="flex items-center gap-4"><i class="fa-solid fa-burst text-red-900"></i><span>\${p.moves}</span></div>
                                     </div>
-                                    <div class="mt-4 flex justify-between items-center opacity-40 text-[9px] tech-font font-bold">
-                                        <span>SIGNAL_LOCK_OK</span>
-                                        <span class="text-red-500 tracking-tighter">DATA_VAL: \${p.score}</span>
-                                    </div>
+                                    <div class="mt-4 flex justify-between items-center opacity-40 text-[9px] tech-font font-bold"><span>LOCK_STATUS: OK</span><span>VAL: \${p.score}</span></div>
                                 </div>
                             \`).join('')}
                         </div>
@@ -1043,10 +1010,10 @@ function generateHTML() {
                 \`;
 
                 resultsDiv.innerHTML = filtered.map(renderCard).join('') + 
-                                     (others.length > 0 ? '<div class="col-span-full py-20 opacity-30 text-center tech-font text-sm tracking-[1.5em] text-zinc-800">UNSECURED_DATA_STREAM_END</div>' : '') +
+                                     (others.length > 0 ? '<div class="col-span-full py-20 opacity-20 text-center tech-font text-sm tracking-[1.5em] text-zinc-700 uppercase italic">--- Buffering Secondary Data Streams ---</div>' : '') +
                                      others.map(renderCard).join('');
 
-            } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600 font-bold">FATAL_CRITICAL_ERROR: ' + e.message + '</div>'; }
+            } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600 font-bold">SYSTEM_KERNEL_PANIC: ' + e.message + '</div>'; }
         }
 
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
