@@ -783,191 +783,214 @@ function generateHTML() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeMaster PvP 專業儀表板</title>
+    <title>PokeMaster PRO | PvP 科技儀表板</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background: #f0f2f5; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        .type-badge { padding: 2px 8px; border-radius: 4px; color: white; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-        .type-fire { background: #ff4422; } .type-water { background: #3399ff; } .type-grass { background: #77cc55; }
-        .type-electric { background: #ffcc33; color: #333; } .type-ice { background: #66ccff; } .type-fighting { background: #bb5544; }
-        .type-poison { background: #aa5599; } .type-ground { background: #ddbb55; } .type-flying { background: #8899ff; }
-        .type-psychic { background: #ff5599; } .type-bug { background: #aabb22; } .type-rock { background: #bbaa66; }
-        .type-ghost { background: #6666bb; } .type-dragon { background: #7766ee; } .type-dark { background: #775544; }
-        .type-steel { background: #aaaabb; } .type-fairy { background: #ee99ee; } .type-normal { background: #aaaa99; }
-        .league-chip.active { background: #2563eb; color: white; border-color: #2563eb; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background: #050505; color: #eee; }
+        .tech-font { font-family: 'Orbitron', sans-serif; }
+        
+        /* 霓虹紅風格 */
+        .neon-border { border: 1px solid rgba(255, 0, 0, 0.3); box-shadow: 0 0 15px rgba(255, 0, 0, 0.1); }
+        .neon-text-red { color: #ff3333; text-shadow: 0 0 10px rgba(255, 51, 51, 0.5); }
+        .btn-red { background: #cc0000; box-shadow: 0 0 20px rgba(204, 0, 0, 0.4); transition: 0.3s; }
+        .btn-red:hover { background: #ff0000; box-shadow: 0 0 30px rgba(255, 0, 0, 0.6); }
+        
+        .card-dark { background: #111; border: 1px solid #222; border-top: 3px solid #cc0000; }
+        .type-badge { padding: 2px 8px; border-radius: 4px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* 屬性顏色 (深色優化) */
+        .type-fire { background: #c0392b; } .type-water { background: #2980b9; } .type-grass { background: #27ae60; }
+        .type-electric { background: #f1c40f; color: #000; } .type-ice { background: #3498db; } .type-fighting { background: #962d22; }
+        .type-poison { background: #8e44ad; } .type-ground { background: #d35400; } .type-flying { background: #5d6d7e; }
+        .type-psychic { background: #e91e63; } .type-bug { background: #689f38; } .type-rock { background: #795548; }
+        .type-ghost { background: #3f51b5; } .type-dragon { background: #673ab7; } .type-dark { background: #212121; }
+        .type-steel { background: #607d8b; } .type-fairy { background: #d81b60; } .type-normal { background: #757575; }
+
+        .league-chip.active { background: #cc0000; color: white; border-color: #ff0000; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
+        input::placeholder { color: #444; }
     </style>
 </head>
 <body class="pb-20">
     <div class="max-w-6xl mx-auto p-4 md:p-8">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <h1 class="text-3xl font-black text-gray-800 tracking-tighter"><i class="fa-solid fa-bolt-lightning text-blue-600 mr-2"></i>POKEMASTER <span class="text-blue-600 text-lg">PRO</span></h1>
-            <div class="flex items-center gap-2">
-                 <button onclick="toggleSettings()" class="bg-white p-3 rounded-full shadow-sm hover:shadow-md transition"><i class="fa-solid fa-gear text-gray-600"></i> 設定常用聯盟</button>
-            </div>
-        </div>
-
-        <div class="glass p-2 rounded-2xl shadow-xl flex mb-8 overflow-hidden">
-            <input type="text" id="searchInput" placeholder="輸入寶可夢名稱..." class="flex-1 bg-transparent p-4 text-xl focus:outline-none font-bold">
-            <button onclick="performSearch()" class="bg-blue-600 text-white px-8 rounded-xl font-black hover:bg-blue-700 transition">搜尋</button>
-        </div>
-
-        <div id="settingsModal" class="hidden glass p-6 rounded-2xl shadow-2xl mb-8 border-2 border-blue-100">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-black text-xl text-gray-800">常用聯盟設定 (自動儲存)</h2>
-                <button onclick="toggleSettings()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="leaguePicker" class="flex flex-wrap gap-2">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 btn-red rounded-lg flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-microchip"></i>
                 </div>
+                <h1 class="text-3xl font-black tracking-tighter tech-font uppercase">PokeMaster <span class="neon-text-red">PRO</span></h1>
+            </div>
+            <button onclick="toggleSettings()" class="border border-red-900 px-5 py-2 rounded-full text-sm font-bold hover:bg-red-900 transition">
+                <i class="fa-solid fa-sliders mr-2"></i> 設定監控聯盟
+            </button>
         </div>
 
-        <div id="evolutionChain" class="hidden mb-8 flex flex-wrap justify-center items-center gap-4 bg-white p-6 rounded-2xl shadow-sm"></div>
-        
-        <div id="eventBanner" class="hidden mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 p-4 rounded-2xl text-white shadow-lg animate-pulse"></div>
+        <div class="relative mb-12">
+            <div class="absolute inset-0 bg-red-600 blur-2xl opacity-10"></div>
+            <div class="relative bg-zinc-900 p-2 rounded-2xl flex neon-border">
+                <input type="text" id="searchInput" placeholder="輸入寶可夢序列代碼..." 
+                       class="flex-1 bg-transparent p-4 text-2xl focus:outline-none font-bold text-red-500 tech-font">
+                <button onclick="performSearch()" class="btn-red text-white px-10 rounded-xl font-black uppercase tracking-widest transition">執行搜尋</button>
+            </div>
+        </div>
 
-        <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="col-span-full text-center py-20 text-gray-400">
-                <i class="fa-solid fa-magnifying-glass text-6xl mb-4 opacity-20"></i>
-                <p class="text-xl">請輸入寶可夢名稱開始專業分析</p>
+        <div id="settingsModal" class="hidden bg-zinc-900 p-8 rounded-3xl mb-12 border-2 border-red-900/50 shadow-2xl">
+            <h2 class="font-black text-xl mb-6 neon-text-red tech-font uppercase">League Config</h2>
+            <div id="leaguePicker" class="flex flex-wrap gap-3"></div>
+        </div>
+
+        <div id="evoSection" class="hidden mb-12">
+            <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 ml-2">Evolution Chain</h2>
+            <div id="evolutionChain" class="flex flex-wrap justify-center items-center gap-8 bg-zinc-900/50 p-8 rounded-3xl border border-zinc-800"></div>
+        </div>
+
+        <div id="eventBanner" class="hidden mb-12 border-l-4 border-red-600 bg-red-950/20 p-6 rounded-2xl"></div>
+
+        <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="col-span-full text-center py-32">
+                <i class="fa-solid fa-radar fa-beat text-6xl mb-6 text-zinc-800"></i>
+                <p class="text-zinc-500 tech-font uppercase tracking-widest">Awaiting Command...</p>
             </div>
         </div>
     </div>
 
     <script>
         let allLeagues = [];
+        let typeChart = {};
         let selectedLeagues = JSON.parse(localStorage.getItem('fav_leagues')) || ['great_league_top', 'ultra_league_top', 'master_league_top'];
 
         const typeNames = {
-          normal: "一般", fire: "火", water: "水", electric: "電", grass: "草",
-          ice: "冰", fighting: "格鬥", poison: "毒", ground: "地面", flying: "飛行",
-          psychic: "超能", bug: "蟲", rock: "岩石", ghost: "幽靈", dragon: "龍",
-          dark: "惡", steel: "鋼", fairy: "妖精"
+          normal: "一般", fire: "火", water: "水", electric: "電", grass: "草", ice: "冰", fighting: "格鬥", poison: "毒", ground: "地面", flying: "飛行", psychic: "超能", bug: "蟲", rock: "岩石", ghost: "幽靈", dragon: "龍", dark: "惡", steel: "鋼", fairy: "妖精"
         };
 
-        // 初始化
         window.onload = async () => {
-            const res = await fetch('/api/search?q=pikachu'); // 隨便抓個東西來取得聯盟清單
+            const res = await fetch('/api/search?q=piplup');
             const data = await res.json();
             allLeagues = data.allLeagues || [];
+            typeChart = data.typeChart || {};
             renderLeaguePicker();
         };
 
-        function toggleSettings() {
-            document.getElementById('settingsModal').classList.toggle('hidden');
-        }
+        function toggleSettings() { document.getElementById('settingsModal').classList.toggle('hidden'); }
 
         function renderLeaguePicker() {
             const picker = document.getElementById('leaguePicker');
             picker.innerHTML = allLeagues.map(l => \`
-                <button onclick="toggleLeague('\${l.id}')" id="chip-\${l.id}" 
-                        class="league-chip px-4 py-2 rounded-full border-2 border-gray-200 text-sm font-bold transition hover:border-blue-300 \${selectedLeagues.includes(l.id) ? 'active' : ''}">
+                <button onclick="toggleLeague('\${l.id}')" 
+                        class="league-chip px-5 py-2 rounded-xl border border-zinc-800 text-xs font-bold uppercase tracking-tighter transition \${selectedLeagues.includes(l.id) ? 'active' : ''}">
                     \${l.name}
                 </button>
             \`).join('');
         }
 
         function toggleLeague(id) {
-            if (selectedLeagues.includes(id)) {
-                selectedLeagues = selectedLeagues.filter(i => i !== id);
-            } else {
-                selectedLeagues.push(id);
-            }
+            selectedLeagues = selectedLeagues.includes(id) ? selectedLeagues.filter(i => i !== id) : [...selectedLeagues, id];
             localStorage.setItem('fav_leagues', JSON.stringify(selectedLeagues));
             renderLeaguePicker();
-            performSearch(); // 重新渲染目前的搜尋結果
+            performSearch();
+        }
+
+        // 計算屬性相剋
+        function calculateEffectiveness(types) {
+            const results = {};
+            Object.keys(typeNames).forEach(t => results[t] = 1);
+
+            types.forEach(type => {
+                const typeLower = type.toLowerCase();
+                Object.keys(typeChart).forEach(attacker => {
+                    if (typeChart[attacker][typeLower]) {
+                        results[attacker] *= typeChart[attacker][typeLower];
+                    }
+                });
+            });
+            return results;
         }
 
         async function performSearch() {
             const query = document.getElementById('searchInput').value.trim();
             if (!query) return;
-
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '<div class="col-span-full text-center py-10"><i class="fa-solid fa-spinner fa-spin text-3xl text-blue-500"></i></div>';
+            resultsDiv.innerHTML = '<div class="col-span-full text-center py-20"><i class="fa-solid fa-atom fa-spin text-4xl text-red-600"></i></div>';
 
             try {
                 const res = await fetch(\`/api/search?q=\${encodeURIComponent(query)}\`);
                 const data = await res.json();
-
                 if (!data.results || data.results.length === 0) {
-                    resultsDiv.innerHTML = '<div class="col-span-full text-center py-10 text-red-500 font-bold">找不到該寶可夢資料</div>';
+                    resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 font-bold tech-font uppercase">Error: Entity Not Found</div>';
                     return;
                 }
 
-                // 1. 渲染進化鏈
+                // 1. 進化鏈
+                const evoSection = document.getElementById('evoSection');
                 const evoDiv = document.getElementById('evolutionChain');
                 evoDiv.innerHTML = data.evolutionChain.map((p, idx) => \`
                     <div class="flex items-center">
-                        <div class="text-center">
-                            <div class="font-black text-gray-800">\${p.name}</div>
-                            <div class="flex gap-1 justify-center mt-1">
-                                \${p.types.map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()] || t}</span>\`).join('')}
+                        <div class="bg-zinc-800 p-5 rounded-2xl border border-zinc-700 min-w-[120px] text-center">
+                            <div class="font-black text-white mb-2">\${p.name}</div>
+                            <div class="flex gap-1 justify-center">
+                                \${p.types.map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()]}</span>\`).join('')}
                             </div>
                         </div>
-                        \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-chevron-right mx-4 text-gray-300"></i>' : ''}
+                        \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-arrow-right-long mx-6 text-red-900 text-xl"></i>' : ''}
                     </div>
                 \`).join('');
-                evoDiv.classList.remove('hidden');
+                evoSection.classList.remove('hidden');
 
-                // 2. 渲染活動
-                const banner = document.getElementById('eventBanner');
-                if (data.events && data.events.length > 0) {
-                    banner.innerHTML = data.events.map(e => \`
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-calendar-star text-2xl"></i>
-                            <div>
-                                <div class="font-black text-lg">活動提醒：\${e.eventName}</div>
-                                <div class="text-sm opacity-90">日期：\${e.date} · <a href="\${e.link}" target="_blank" class="underline">查看詳情</a></div>
+                // 2. 排名渲染
+                const filtered = data.results.filter(r => selectedLeagues.includes(r.leagueId));
+                const others = data.results.filter(r => !selectedLeagues.includes(r.leagueId));
+
+                const renderCard = (league) => {
+                    // 計算該卡片第一隻寶可夢的屬性圖
+                    const firstPoke = league.pokemons[0];
+                    const eff = calculateEffectiveness(firstPoke.types);
+                    const weaknesses = Object.entries(eff).filter(([t, val]) => val > 1).sort((a,b) => b[1]-a[1]);
+                    const resists = Object.entries(eff).filter(([t, val]) => val < 1).sort((a,b) => a[1]-b[1]);
+
+                    return \`
+                        <div class="card-dark rounded-3xl overflow-hidden hover:scale-[1.02] transition duration-500 shadow-2xl">
+                            <div class="p-6 bg-zinc-900 flex justify-between items-center border-b border-zinc-800">
+                                <h3 class="font-black tech-font uppercase text-sm tracking-widest text-zinc-400">\${league.leagueName}</h3>
+                                <i class="fa-solid fa-chart-line text-red-600"></i>
+                            </div>
+                            <div class="p-5 space-y-4">
+                                <div class="grid grid-cols-2 gap-2 bg-black/40 p-3 rounded-2xl border border-zinc-800 text-[10px]">
+                                    <div>
+                                        <div class="text-red-500 font-bold mb-1 uppercase tracking-tighter">Weaknesses</div>
+                                        <div class="flex flex-wrap gap-1">\${weaknesses.map(([t, v]) => \`<span class="text-zinc-300">\${typeNames[t]}<small class="text-red-400">x\${v}</small></span>\`).join('·')}</div>
+                                    </div>
+                                    <div class="border-l border-zinc-800 pl-2">
+                                        <div class="text-green-500 font-bold mb-1 uppercase tracking-tighter">Resistances</div>
+                                        <div class="flex flex-wrap gap-1">\${resists.map(([t, v]) => \`<span class="text-zinc-300">\${typeNames[t]}<small class="text-green-400">x\${v}</small></span>\`).join('·')}</div>
+                                    </div>
+                                </div>
+
+                                \${league.pokemons.map(p => \`
+                                    <div class="p-4 rounded-2xl bg-zinc-800/30 border border-zinc-800/50">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <span class="text-[10px] font-bold text-red-600 tech-font">RANK #\${p.rank}</span>
+                                                <div class="text-lg font-black">\${p.name}</div>
+                                            </div>
+                                            <span class="text-[10px] bg-red-600 text-white px-2 py-1 rounded tech-font">\${p.rating}</span>
+                                        </div>
+                                        <div class="flex gap-1 mb-3">\${p.types.map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()]}</span>\`).join('')}</div>
+                                        <div class="text-[11px] font-mono text-zinc-500 bg-black/50 p-2 rounded-xl border border-zinc-800">
+                                            <i class="fa-solid fa-bolt-lightning mr-1 text-red-900"></i> \${p.moves}
+                                        </div>
+                                    </div>
+                                \`).join('')}
                             </div>
                         </div>
-                    \`).join('');
-                    banner.classList.remove('hidden');
-                } else {
-                    banner.classList.add('hidden');
-                }
+                    \`;
+                };
 
-                // 3. 篩選並渲染排名卡片
-                // 優先顯示使用者勾選的聯盟
-                const filteredResults = data.results.filter(r => selectedLeagues.includes(r.leagueId));
-                const otherResults = data.results.filter(r => !selectedLeagues.includes(r.leagueId));
+                resultsDiv.innerHTML = filtered.map(renderCard).join('') + 
+                                     (others.length > 0 ? '<div class="col-span-full py-4 text-center text-zinc-800 tech-font">--- Declassified Data ---</div>' : '') +
+                                     others.map(renderCard).join('');
 
-                const renderCard = (league) => \`
-                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                            <h3 class="font-black text-gray-700">\${league.leagueName}</h3>
-                            <i class="fa-solid fa-trophy text-yellow-500"></i>
-                        </div>
-                        <div class="p-4 space-y-3">
-                            \${league.pokemons.map(p => \`
-                                <div class="relative p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <span class="text-xs font-bold text-blue-600 block">RANK #\${p.rank}</span>
-                                            <span class="text-lg font-black text-gray-800">\${p.name}</span>
-                                        </div>
-                                        <span class="text-xs font-black px-2 py-1 bg-white shadow-sm rounded-lg">\${p.rating}</span>
-                                    </div>
-                                    <div class="flex gap-1 mb-3">
-                                        \${p.types.map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()] || t}</span>\`).join('')}
-                                    </div>
-                                    <div class="text-sm font-mono text-gray-500 bg-white p-2 rounded-xl border border-dashed border-gray-200">
-                                        <i class="fa-solid fa-wand-sparkles mr-1"></i> \${p.moves}
-                                    </div>
-                                    <div class="mt-2 text-right text-[10px] font-bold text-gray-300">SCORE: \${p.score}</div>
-                                </div>
-                            \`).join('')}
-                        </div>
-                    </div>
-                \`;
-
-                resultsDiv.innerHTML = filteredResults.map(renderCard).join('') + 
-                                     (otherResults.length > 0 ? '<div class="col-span-full h-px bg-gray-200 my-8"></div>' : '') +
-                                     otherResults.map(renderCard).join('');
-
-            } catch (e) {
-                resultsDiv.innerHTML = '<div class="col-span-full text-center py-10 text-red-500 font-bold">搜尋失敗：' + e.message + '</div>';
-            }
+            } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 font-bold">FATAL ERROR: SYSTEM CORRUPTED</div>'; }
         }
 
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
@@ -993,26 +1016,26 @@ async function getPokemonDataOnly(query, env, ctx) {
   const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
   const lower = finalQuery.toLowerCase();
 
-  // 1. 找到目標寶可夢
   const target = data.find(p => isChi ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lower));
   if (!target) return { results: [], allLeagues: leagues };
 
-  // 2. 獲取進化鏈 (同家族所有成员)
+  // --- 進化鏈邏輯：排除暗影 ---
   const familyMembers = target.family && target.family.id 
     ? data.filter(p => p.family && p.family.id === target.family.id)
     : [target];
 
-  // 排序進化鏈 (按 ID 或階段，這裡簡單處理)
-  const evolutionChain = familyMembers.map(m => ({
-    name: getTranslatedName(m.speciesId, m.speciesName),
-    id: m.speciesId,
-    types: m.types || []
-  }));
+  const evolutionChain = familyMembers
+    .filter(m => !m.speciesId.toLowerCase().includes("_shadow") && !m.speciesName.includes("暗影"))
+    .map(m => ({
+      name: getTranslatedName(m.speciesId, m.speciesName),
+      id: m.speciesId,
+      types: m.types || []
+    }));
 
   const ids = new Set(familyMembers.map(p => p.speciesId.toLowerCase()));
   const pokemonMap = new Map(familyMembers.map(p => [p.speciesId.toLowerCase(), p]));
 
-  // 3. 讀取排名
+  // --- 讀取排名 ---
   const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
 
   const finalResults = [];
@@ -1083,8 +1106,9 @@ async function getPokemonDataOnly(query, env, ctx) {
     evolutionChain,
     results: finalResults,
     events: upcomingEvents,
-    allLeagues: leagues.map(l => ({ id: l.command, name: l.name })), // 傳給前端畫選單
-    hasEliteWarning: hasElite
+    allLeagues: leagues.map(l => ({ id: l.command, name: l.name })),
+    hasEliteWarning: hasElite,
+    typeChart: typeChart // 傳送屬性表給前端計算
   };
 }
 // =========================================================
