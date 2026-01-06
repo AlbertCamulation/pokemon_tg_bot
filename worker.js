@@ -791,7 +791,6 @@ function generateHTML() {
         body { font-family: 'Noto Sans TC', sans-serif; background: #050505; color: #eee; }
         .tech-font { font-family: 'Orbitron', sans-serif; }
         
-        /* 霓虹紅風格 */
         .neon-border { border: 1px solid rgba(255, 0, 0, 0.3); box-shadow: 0 0 15px rgba(255, 0, 0, 0.1); }
         .neon-text-red { color: #ff3333; text-shadow: 0 0 10px rgba(255, 51, 51, 0.5); }
         .btn-red { background: #cc0000; box-shadow: 0 0 20px rgba(204, 0, 0, 0.4); transition: 0.3s; }
@@ -800,7 +799,6 @@ function generateHTML() {
         .card-dark { background: #111; border: 1px solid #222; border-top: 3px solid #cc0000; }
         .type-badge { padding: 2px 8px; border-radius: 4px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 屬性顏色 (深色優化) */
         .type-fire { background: #c0392b; } .type-water { background: #2980b9; } .type-grass { background: #27ae60; }
         .type-electric { background: #f1c40f; color: #000; } .type-ice { background: #3498db; } .type-fighting { background: #962d22; }
         .type-poison { background: #8e44ad; } .type-ground { background: #d35400; } .type-flying { background: #5d6d7e; }
@@ -829,8 +827,8 @@ function generateHTML() {
         <div class="relative mb-12">
             <div class="absolute inset-0 bg-red-600 blur-2xl opacity-10"></div>
             <div class="relative bg-zinc-900 p-2 rounded-2xl flex neon-border">
-                <input type="text" id="searchInput" placeholder="輸入寶可夢序列代碼..." 
-                       class="flex-1 bg-transparent p-4 text-2xl focus:outline-none font-bold text-red-500 tech-font">
+                <input type="text" id="searchInput" placeholder="輸入寶可夢名稱 (例: 瑪力露麗)..." 
+                       class="flex-1 bg-transparent p-4 text-2xl focus:outline-none font-bold text-red-500">
                 <button onclick="performSearch()" class="btn-red text-white px-10 rounded-xl font-black uppercase tracking-widest transition">執行搜尋</button>
             </div>
         </div>
@@ -845,12 +843,12 @@ function generateHTML() {
             <div id="evolutionChain" class="flex flex-wrap justify-center items-center gap-8 bg-zinc-900/50 p-8 rounded-3xl border border-zinc-800"></div>
         </div>
 
-        <div id="eventBanner" class="hidden mb-12 border-l-4 border-red-600 bg-red-950/20 p-6 rounded-2xl"></div>
+        <div id="eventBanner" class="hidden mb-12 border-l-4 border-red-600 bg-red-950/20 p-6 rounded-2xl text-red-200"></div>
 
         <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="col-span-full text-center py-32">
-                <i class="fa-solid fa-radar fa-beat text-6xl mb-6 text-zinc-800"></i>
-                <p class="text-zinc-500 tech-font uppercase tracking-widest">Awaiting Command...</p>
+            <div class="col-span-full text-center py-32 text-zinc-800">
+                <i class="fa-solid fa-radar fa-beat text-6xl mb-6"></i>
+                <p class="tech-font uppercase tracking-widest">Awaiting Command...</p>
             </div>
         </div>
     </div>
@@ -891,15 +889,24 @@ function generateHTML() {
             performSearch();
         }
 
-        // 計算屬性相剋
+        // 輔助：安全取得屬性標籤 (排除 undefined/None)
+        function getTypeBadges(types) {
+            if (!types) return '';
+            return types
+                .filter(t => t && t.toLowerCase() !== 'none') // ★ 過濾掉無效屬性
+                .map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()] || t}</span>\`)
+                .join('');
+        }
+
         function calculateEffectiveness(types) {
             const results = {};
             Object.keys(typeNames).forEach(t => results[t] = 1);
-
-            types.forEach(type => {
+            
+            const validTypes = types.filter(t => t && t.toLowerCase() !== 'none'); // ★ 只計算有效屬性
+            validTypes.forEach(type => {
                 const typeLower = type.toLowerCase();
                 Object.keys(typeChart).forEach(attacker => {
-                    if (typeChart[attacker][typeLower]) {
+                    if (typeChart[attacker] && typeChart[attacker][typeLower]) {
                         results[attacker] *= typeChart[attacker][typeLower];
                     }
                 });
@@ -921,28 +928,37 @@ function generateHTML() {
                     return;
                 }
 
-                // 1. 進化鏈
                 const evoSection = document.getElementById('evoSection');
                 const evoDiv = document.getElementById('evolutionChain');
                 evoDiv.innerHTML = data.evolutionChain.map((p, idx) => \`
                     <div class="flex items-center">
-                        <div class="bg-zinc-800 p-5 rounded-2xl border border-zinc-700 min-w-[120px] text-center">
+                        <div class="bg-zinc-800 p-5 rounded-2xl border border-zinc-700 min-w-[120px] text-center shadow-lg">
                             <div class="font-black text-white mb-2">\${p.name}</div>
-                            <div class="flex gap-1 justify-center">
-                                \${p.types.map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()]}</span>\`).join('')}
-                            </div>
+                            <div class="flex gap-1 justify-center">\${getTypeBadges(p.types)}</div>
                         </div>
                         \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-arrow-right-long mx-6 text-red-900 text-xl"></i>' : ''}
                     </div>
                 \`).join('');
                 evoSection.classList.remove('hidden');
 
-                // 2. 排名渲染
+                const banner = document.getElementById('eventBanner');
+                if (data.events && data.events.length > 0) {
+                    banner.innerHTML = data.events.map(e => \`
+                        <div class="flex items-center gap-4">
+                            <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i>
+                            <div>
+                                <div class="font-black">DETECTED EVENT: \${e.eventName}</div>
+                                <div class="text-xs opacity-70">DATE: \${e.date} · <a href="\${e.link}" target="_blank" class="underline decoration-red-500">ACCESS DETAILS</a></div>
+                            </div>
+                        </div>
+                    \`).join('');
+                    banner.classList.remove('hidden');
+                } else { banner.classList.add('hidden'); }
+
                 const filtered = data.results.filter(r => selectedLeagues.includes(r.leagueId));
                 const others = data.results.filter(r => !selectedLeagues.includes(r.leagueId));
 
                 const renderCard = (league) => {
-                    // 計算該卡片第一隻寶可夢的屬性圖
                     const firstPoke = league.pokemons[0];
                     const eff = calculateEffectiveness(firstPoke.types);
                     const weaknesses = Object.entries(eff).filter(([t, val]) => val > 1).sort((a,b) => b[1]-a[1]);
@@ -958,11 +974,11 @@ function generateHTML() {
                                 <div class="grid grid-cols-2 gap-2 bg-black/40 p-3 rounded-2xl border border-zinc-800 text-[10px]">
                                     <div>
                                         <div class="text-red-500 font-bold mb-1 uppercase tracking-tighter">Weaknesses</div>
-                                        <div class="flex flex-wrap gap-1">\${weaknesses.map(([t, v]) => \`<span class="text-zinc-300">\${typeNames[t]}<small class="text-red-400">x\${v}</small></span>\`).join('·')}</div>
+                                        <div class="flex flex-wrap gap-1">\${weaknesses.map(([t, v]) => \`<span class="text-zinc-300">\${typeNames[t]}<small class="text-red-400">x\${v.toFixed(1)}</small></span>\`).join('·')}</div>
                                     </div>
                                     <div class="border-l border-zinc-800 pl-2">
                                         <div class="text-green-500 font-bold mb-1 uppercase tracking-tighter">Resistances</div>
-                                        <div class="flex flex-wrap gap-1">\${resists.map(([t, v]) => \`<span class="text-zinc-300">\${typeNames[t]}<small class="text-green-400">x\${v}</small></span>\`).join('·')}</div>
+                                        <div class="flex flex-wrap gap-1">\${resists.map(([t, v]) => \`<span class="text-zinc-300">\${typeNames[t]}<small class="text-green-400">x\${v.toFixed(1)}</small></span>\`).join('·')}</div>
                                     </div>
                                 </div>
 
@@ -971,12 +987,12 @@ function generateHTML() {
                                         <div class="flex justify-between items-start mb-2">
                                             <div>
                                                 <span class="text-[10px] font-bold text-red-600 tech-font">RANK #\${p.rank}</span>
-                                                <div class="text-lg font-black">\${p.name}</div>
+                                                <div class="text-lg font-black text-white">\${p.name}</div>
                                             </div>
                                             <span class="text-[10px] bg-red-600 text-white px-2 py-1 rounded tech-font">\${p.rating}</span>
                                         </div>
-                                        <div class="flex gap-1 mb-3">\${p.types.map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()]}</span>\`).join('')}</div>
-                                        <div class="text-[11px] font-mono text-zinc-500 bg-black/50 p-2 rounded-xl border border-zinc-800">
+                                        <div class="flex gap-1 mb-3">\${getTypeBadges(p.types)}</div>
+                                        <div class="text-[11px] font-mono text-zinc-400 bg-black/50 p-2 rounded-xl border border-zinc-800">
                                             <i class="fa-solid fa-bolt-lightning mr-1 text-red-900"></i> \${p.moves}
                                         </div>
                                     </div>
@@ -987,7 +1003,7 @@ function generateHTML() {
                 };
 
                 resultsDiv.innerHTML = filtered.map(renderCard).join('') + 
-                                     (others.length > 0 ? '<div class="col-span-full py-4 text-center text-zinc-800 tech-font">--- Declassified Data ---</div>' : '') +
+                                     (others.length > 0 ? '<div class="col-span-full py-8 text-center text-zinc-800 tech-font uppercase tracking-widest text-xs">--- Secondary Data Buffers ---</div>' : '') +
                                      others.map(renderCard).join('');
 
             } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 font-bold">FATAL ERROR: SYSTEM CORRUPTED</div>'; }
