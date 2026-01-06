@@ -768,16 +768,143 @@ async function unRegisterWebhook(env) {
   const res = await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/deleteWebhook`);
   return new Response(await res.text());
 }
+function generateHTML() {
+  return `
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PvP 寶可夢大師查詢</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .rank-platinum { background-color: #E2E8F0; border-left: 5px solid #3B82F6; }
+        .rank-gold { background-color: #FEF3C7; border-left: 5px solid #D97706; }
+        .rank-silver { background-color: #F3F4F6; border-left: 5px solid #6B7280; }
+        .rank-bronze { background-color: #FFEDD5; border-left: 5px solid #9A3412; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="max-w-4xl mx-auto p-4">
+        <header class="text-center py-10">
+            <h1 class="text-4xl font-extrabold text-blue-600 mb-2">Pokémon PvP Rankings</h1>
+            <p class="text-gray-600">一次查詢所有聯盟排名，資料同步 PvPoke</p>
+        </header>
 
+        <div class="flex gap-2 mb-8">
+            <input type="text" id="searchInput" placeholder="輸入寶可夢名稱 (例: 瑪力露麗)" 
+                   class="flex-1 p-4 rounded-lg border-2 border-blue-300 focus:outline-none focus:border-blue-500 shadow-sm text-lg">
+            <button onclick="performSearch()" class="bg-blue-500 text-white px-8 py-4 rounded-lg font-bold hover:bg-blue-600 transition">搜尋</button>
+        </div>
+
+        <div id="eventArea" class="hidden mb-6 bg-blue-100 p-4 rounded-lg border border-blue-200"></div>
+
+        <div id="results" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="text-center text-gray-400 col-span-full py-10">請在上方輸入名稱開始搜尋</p>
+        </div>
+    </div>
+
+    <script>
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            
+            const resultsDiv = document.getElementById('results');
+            const eventArea = document.getElementById('eventArea');
+            resultsDiv.innerHTML = '<div class="col-span-full text-center">搜尋中...</div>';
+            eventArea.classList.add('hidden');
+
+            try {
+                const res = await fetch(\`/api/search?q=\${encodeURIComponent(query)}\`);
+                const data = await res.json();
+                
+                if (data.error || !data.results || data.results.length === 0) {
+                    resultsDiv.innerHTML = '<div class="col-span-full text-center text-red-500">找不到相關寶可夢</div>';
+                    return;
+                }
+
+                // 渲染活動
+                if (data.events && data.events.length > 0) {
+                    eventArea.innerHTML = data.events.map(e => \`
+                        <div class="mb-2 last:mb-0 text-blue-800">
+                            <strong>🎉 即將到來：</strong> <a href="\${e.link}" target="_blank" class="underline">\${e.eventName}</a> (\${e.date})
+                            <p class="text-sm">\${e.note}</p>
+                        </div>
+                    \`).join('');
+                    eventArea.classList.remove('hidden');
+                }
+
+                // 渲染排名卡片
+                resultsDiv.innerHTML = data.results.map(league => \`
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                        <h3 class="font-bold text-xl mb-4 text-gray-800 border-b pb-2">\${league.leagueName}</h3>
+                        <div class="space-y-4">
+                            \${league.pokemons.map(p => {
+                                let rankClass = "rank-silver";
+                                if (p.rating.includes("白金")) rankClass = "rank-platinum";
+                                else if (p.rating.includes("金")) rankClass = "rank-gold";
+                                else if (p.rating.includes("銅")) rankClass = "rank-bronze";
+
+                                return \`
+                                    <div class="p-3 rounded-lg \${rankClass}">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="font-bold text-blue-900 text-lg">#\${p.rank} \${p.name}</span>
+                                            <span class="text-sm font-semibold">\${p.rating}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-600 mb-1">分數: \${p.score}</p>
+                                        <p class="text-sm text-gray-700 font-mono">└ \${p.moves}</p>
+                                    </div>
+                                \`;
+                            }).join('')}
+                        </div>
+                    </div>
+                \`).join('');
+
+            } catch (e) {
+                resultsDiv.innerHTML = '<div class="col-span-full text-center text-red-500">發生錯誤: ' + e.message + '</div>';
+            }
+        }
+
+        // 支援 Enter 鍵搜尋
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+    </script>
+</body>
+</html>
+`;
+}
 // =========================================================
 //  5. Worker Entry Point (必須放在最後)
 // =========================================================
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
-    if (url.pathname === "/registerWebhook") return registerWebhook(request, url, env);
-    if (url.pathname === "/unRegisterWebhook") return unRegisterWebhook(env);
-    return new Response("Pokemon Bot Running (Sorted & Fixed).", { status: 200 });
+    const path = url.pathname;
+
+    // 1. Telegram Bot 原有路徑
+    if (path === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
+    if (path === "/registerWebhook") return registerWebhook(request, url, env);
+    if (path === "/unRegisterWebhook") return unRegisterWebhook(env);
+
+    // 2. 網頁版 API 路徑 (回傳 JSON)
+    if (path === "/api/search") {
+      const query = url.searchParams.get("q");
+      if (!query) return new Response(JSON.stringify({ error: "No query" }), { status: 400 });
+      // 這裡呼叫一個我們稍後建立的「純資料搜尋函數」
+      const data = await getPokemonDataOnly(query, env, ctx);
+      return new Response(JSON.stringify(data), { 
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } 
+      });
+    }
+
+    // 3. 網頁版首頁 (回傳 HTML)
+    if (path === "/") {
+      return new Response(generateHTML(), { 
+        headers: { "Content-Type": "text/html; charset=utf-8" } 
+      });
+    }
+
+    return new Response("Not Found", { status: 404 });
   }
 };
