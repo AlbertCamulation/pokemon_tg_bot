@@ -867,13 +867,10 @@ function generateHTML() {
         </div>
     </div>
 
-    <script>
-        // --- 沿用之前的過濾變數 ---
-        const NAME_CLEANER_REGEX = /(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/;
-
+   <script>
         let allLeagues = [];
         let typeChart = {};
-        let allPokemonNames = [];
+        let allPokemonNames = []; 
         let selectedLeagues = JSON.parse(localStorage.getItem('fav_leagues')) || ['great_league_top', 'ultra_league_top', 'master_league_top'];
 
         const typeNames = {
@@ -881,39 +878,38 @@ function generateHTML() {
         };
 
         window.onload = async () => {
-            const res = await fetch('/api/search?q=piplup'); 
-            const data = await res.json();
-            allLeagues = data.allLeagues || [];
-            typeChart = data.typeChart || {};
-            renderLeaguePicker();
+            try {
+                // 1. 取得初始化資料
+                const res = await fetch('/api/search?q=piplup'); 
+                const data = await res.json();
+                allLeagues = data.allLeagues || [];
+                typeChart = data.typeChart || {};
+                renderLeaguePicker();
 
-            // 抓取清單並進行「嚴格過濾」
-            const transRes = await fetch('https://raw.githubusercontent.com/AlbertCamulation/pokemon_tg_bot/main/data/chinese_translation.json');
-            const transData = await transRes.json();
-            
-            const namesSet = new Set();
-            transData.forEach(p => {
-                const name = p.speciesName;
-                // ★ 關鍵過濾：只要名稱內含有不想要的關鍵字，就完全不顯示在預測清單中
-                if (!NAME_CLEANER_REGEX.test(name)) {
-                    namesSet.add(name);
-                }
-            });
-            allPokemonNames = Array.from(namesSet).sort();
-            setupAutocomplete();
+                // 2. ★ 改從自己的 API 取得過濾後的乾淨清單 ★
+                const namesRes = await fetch('/api/names');
+                allPokemonNames = await namesRes.json();
+                
+                setupAutocomplete();
+            } catch(e) {
+                console.error("System Init Failed:", e);
+            }
         };
 
         function toggleSettings() { document.getElementById('settingsModal').classList.toggle('hidden'); }
+        
         function renderLeaguePicker() {
             const picker = document.getElementById('leaguePicker');
             picker.innerHTML = allLeagues.map(l => \`
                 <button onclick="toggleLeague('\${l.id}')" class="league-chip px-6 py-3 rounded-2xl border border-zinc-800 text-xs font-black uppercase transition \${selectedLeagues.includes(l.id) ? 'active' : ''}">\${l.name}</button>
             \`).join('');
         }
+
         function toggleLeague(id) {
             selectedLeagues = selectedLeagues.includes(id) ? selectedLeagues.filter(i => i !== id) : [...selectedLeagues, id];
             localStorage.setItem('fav_leagues', JSON.stringify(selectedLeagues));
-            renderLeaguePicker(); performSearch();
+            renderLeaguePicker(); 
+            performSearch();
         }
 
         function setupAutocomplete() {
@@ -923,14 +919,15 @@ function generateHTML() {
             input.addEventListener('input', () => {
                 const val = input.value.trim();
                 list.innerHTML = '';
-                if (!val) { list.style.display = 'none'; return; }
+                if (val.length < 1) { list.style.display = 'none'; return; }
 
+                // 在過濾後的清單中搜尋
                 const matches = allPokemonNames.filter(name => name.includes(val)).slice(0, 10);
 
                 if (matches.length > 0) {
                     list.innerHTML = matches.map(name => \`
                         <div class="suggestion-item font-bold text-xl" onclick="selectSuggestion('\${name}')">
-                            <i class="fa-solid fa-magnifying-glass-chart mr-3 text-red-900 opacity-40 text-sm"></i>\${name}
+                            <i class="fa-solid fa-crosshairs mr-3 text-red-600 opacity-40 text-sm"></i>\${name}
                         </div>
                     \`).join('');
                     list.style.display = 'block';
@@ -949,6 +946,7 @@ function generateHTML() {
             document.getElementById('suggestionList').style.display = 'none';
             performSearch();
         }
+
 
         function getTypeBadges(types) {
             if (!types) return '';
@@ -1208,41 +1206,38 @@ export default {
     const path = url.pathname;
 
     try {
-      // 1. Telegram Bot 原有路徑
       if (path === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
-      if (path === "/registerWebhook") return registerWebhook(request, url, env);
-      if (path === "/unRegisterWebhook") return unRegisterWebhook(env);
+      
+      // --- 新增：供網頁預測使用的 API ---
+      if (path === "/api/names") {
+        const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+        const data = await res.json();
+        
+        // 使用你原本定義的 NAME_CLEANER_REGEX 進行過濾
+        const cleanNames = Array.from(new Set(data
+          .map(p => p.speciesName)
+          .filter(name => !name.match(NAME_CLEANER_REGEX)) // 排除特殊形態
+        )).sort();
 
-      // 2. 網頁版 API 路徑
+        return new Response(JSON.stringify(cleanNames), { 
+          headers: { "Content-Type": "application/json; charset=utf-8" } 
+        });
+      }
+
       if (path === "/api/search") {
         const query = url.searchParams.get("q");
         if (!query) return new Response(JSON.stringify({ error: "No query" }), { status: 400 });
-        
-        // 呼叫下方新增的資料處理函數
         const result = await getPokemonDataOnly(query, env, ctx);
-        return new Response(JSON.stringify(result), { 
-          headers: { 
-            "Content-Type": "application/json; charset=utf-8",
-            "Access-Control-Allow-Origin": "*" 
-          } 
-        });
+        return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
 
-      // 3. 網頁版首頁
       if (path === "/") {
-        return new Response(generateHTML(), { 
-          headers: { "Content-Type": "text/html; charset=utf-8" } 
-        });
+        return new Response(generateHTML(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
       }
 
       return new Response("Not Found", { status: 404 });
-
     } catch (e) {
-      // 如果發生任何錯誤，回傳 JSON 格式的錯誤訊息，避免前端解析失敗
-      return new Response(JSON.stringify({ error: e.message }), { 
-        status: 500, 
-        headers: { "Content-Type": "application/json" } 
-      });
+      return new Response(JSON.stringify({ error: e.message }), { status: 500 });
     }
   }
 };
