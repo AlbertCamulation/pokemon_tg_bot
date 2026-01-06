@@ -783,21 +783,22 @@ function generateHTML() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeMaster PRO | PvP 科技儀表板</title>
+    <title>PokeMaster PRO | 屬性掃描系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Noto+Sans+TC:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background: #050505; color: #eee; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #050505; color: #eee; overflow-x: hidden; }
         .tech-font { font-family: 'Orbitron', sans-serif; }
         
+        /* 霓虹與科技效果 */
         .neon-border { border: 1px solid rgba(255, 0, 0, 0.3); box-shadow: 0 0 15px rgba(255, 0, 0, 0.1); }
         .neon-text-red { color: #ff3333; text-shadow: 0 0 10px rgba(255, 51, 51, 0.5); }
         .btn-red { background: #cc0000; box-shadow: 0 0 20px rgba(204, 0, 0, 0.4); transition: 0.3s; }
         .btn-red:hover { background: #ff0000; box-shadow: 0 0 30px rgba(255, 0, 0, 0.6); }
         
         .card-dark { background: #111; border: 1px solid #222; border-top: 3px solid #cc0000; }
-        .type-badge { padding: 2px 8px; border-radius: 4px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); }
+        .type-badge { padding: 2px 8px; border-radius: 4px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         
         .type-fire { background: #c0392b; } .type-water { background: #2980b9; } .type-grass { background: #27ae60; }
         .type-electric { background: #f1c40f; color: #000; } .type-ice { background: #3498db; } .type-fighting { background: #962d22; }
@@ -806,58 +807,66 @@ function generateHTML() {
         .type-ghost { background: #3f51b5; } .type-dragon { background: #673ab7; } .type-dark { background: #212121; }
         .type-steel { background: #607d8b; } .type-fairy { background: #d81b60; } .type-normal { background: #757575; }
 
-        .league-chip.active { background: #cc0000; color: white; border-color: #ff0000; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
-        input::placeholder { color: #444; }
+        .league-chip.active { background: #cc0000; color: white; border-color: #ff0000; }
+        
+        /* 浮動 HUD 樣式 */
+        #typeHUD {
+            position: absolute;
+            pointer-events: none;
+            z-index: 9999;
+            background: rgba(10, 0, 0, 0.95);
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
+            transform: translate(15px, 15px);
+            display: none;
+        }
     </style>
 </head>
 <body class="pb-20">
+    <div id="typeHUD" class="p-4 rounded-xl min-w-[240px]">
+        <div id="hudContent"></div>
+        <div class="mt-3 pt-2 border-t border-red-900/50 flex justify-between items-center">
+            <span class="text-[8px] tech-font text-red-500 animate-pulse">ANALYZING...</span>
+            <i class="fa-solid fa-crosshairs text-red-700 text-xs"></i>
+        </div>
+    </div>
+
     <div class="max-w-6xl mx-auto p-4 md:p-8">
         <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 btn-red rounded-lg flex items-center justify-center text-2xl">
-                    <i class="fa-solid fa-microchip"></i>
-                </div>
-                <h1 class="text-3xl font-black tracking-tighter tech-font uppercase">PokeMaster <span class="neon-text-red">PRO</span></h1>
+                <div class="w-12 h-12 btn-red rounded-lg flex items-center justify-center text-2xl"><i class="fa-solid fa-eye"></i></div>
+                <h1 class="text-3xl font-black tracking-tighter tech-font uppercase">PokeMaster <span class="neon-text-red">SCAN</span></h1>
             </div>
-            <button onclick="toggleSettings()" class="border border-red-900 px-5 py-2 rounded-full text-sm font-bold hover:bg-red-900 transition">
-                <i class="fa-solid fa-sliders mr-2"></i> 設定監控聯盟
-            </button>
+            <button onclick="toggleSettings()" class="border border-red-900 px-5 py-2 rounded-full text-sm font-bold hover:bg-red-900 transition">⚙️ 聯盟配置</button>
         </div>
 
         <div class="relative mb-12">
             <div class="absolute inset-0 bg-red-600 blur-2xl opacity-10"></div>
             <div class="relative bg-zinc-900 p-2 rounded-2xl flex neon-border">
-                <input type="text" id="searchInput" placeholder="輸入寶可夢名稱 (例: 瑪力露麗)..." 
-                       class="flex-1 bg-transparent p-4 text-2xl focus:outline-none font-bold text-red-500">
-                <button onclick="performSearch()" class="btn-red text-white px-10 rounded-xl font-black uppercase tracking-widest transition">執行搜尋</button>
+                <input type="text" id="searchInput" placeholder="輸入搜尋目標名稱..." class="flex-1 bg-transparent p-4 text-2xl focus:outline-none font-bold text-red-500">
+                <button onclick="performSearch()" class="btn-red text-white px-10 rounded-xl font-black uppercase tracking-widest">開始掃描</button>
             </div>
         </div>
 
         <div id="settingsModal" class="hidden bg-zinc-900 p-8 rounded-3xl mb-12 border-2 border-red-900/50 shadow-2xl">
-            <h2 class="font-black text-xl mb-6 neon-text-red tech-font uppercase">League Config</h2>
+            <h2 class="font-black text-xl mb-6 neon-text-red tech-font uppercase tracking-tighter">Monitoring Leagues</h2>
             <div id="leaguePicker" class="flex flex-wrap gap-3"></div>
         </div>
 
-        <div id="infoSection" class="hidden mb-12 space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-zinc-900/50 p-8 rounded-3xl border border-zinc-800 relative overflow-hidden">
-                    <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Family Evolution Sequence</h2>
-                    <div id="evolutionChain" class="flex flex-wrap justify-center items-center gap-6 relative z-10"></div>
-                </div>
-                
-                <div class="bg-zinc-900/80 p-6 rounded-3xl border border-red-900/30 flex flex-col justify-center">
-                    <h2 class="text-[10px] font-bold text-red-500 uppercase tracking-[0.2em] mb-4">Tactical Attribute Analysis</h2>
-                    <div id="attributeAnalysis" class="space-y-4"></div>
-                </div>
+        <div id="evoSection" class="hidden mb-16">
+            <div class="text-center mb-6">
+                <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.5em]">Evolution Family Sequence</span>
             </div>
+            <div id="evolutionChain" class="flex flex-wrap justify-center items-center gap-6"></div>
+            <p class="text-center text-[10px] text-zinc-700 mt-6 tech-font uppercase italic">Hover Stage to inspect attributes</p>
         </div>
 
         <div id="eventBanner" class="hidden mb-12 border-l-4 border-red-600 bg-red-950/20 p-6 rounded-2xl text-red-200"></div>
 
         <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div class="col-span-full text-center py-32 text-zinc-800">
-                <i class="fa-solid fa-radar fa-beat text-6xl mb-6"></i>
-                <p class="tech-font uppercase tracking-widest text-sm">System Ready / Awaiting Command</p>
+                <i class="fa-solid fa-circle-nodes fa-spin text-6xl mb-6"></i>
+                <p class="tech-font uppercase tracking-widest">Standby...</p>
             </div>
         </div>
     </div>
@@ -880,140 +889,126 @@ function generateHTML() {
         };
 
         function toggleSettings() { document.getElementById('settingsModal').classList.toggle('hidden'); }
-
         function renderLeaguePicker() {
             const picker = document.getElementById('leaguePicker');
             picker.innerHTML = allLeagues.map(l => \`
-                <button onclick="toggleLeague('\${l.id}')" 
-                        class="league-chip px-5 py-2 rounded-xl border border-zinc-800 text-xs font-bold uppercase tracking-tighter transition \${selectedLeagues.includes(l.id) ? 'active' : ''}">
-                    \${l.name}
-                </button>
+                <button onclick="toggleLeague('\${l.id}')" class="league-chip px-5 py-2 rounded-xl border border-zinc-800 text-xs font-bold transition \${selectedLeagues.includes(l.id) ? 'active' : ''}">\${l.name}</button>
             \`).join('');
         }
-
         function toggleLeague(id) {
             selectedLeagues = selectedLeagues.includes(id) ? selectedLeagues.filter(i => i !== id) : [...selectedLeagues, id];
             localStorage.setItem('fav_leagues', JSON.stringify(selectedLeagues));
-            renderLeaguePicker();
-            performSearch();
-        }
-
-        function getTypeBadges(types) {
-            if (!types) return '';
-            return types
-                .filter(t => t && t.toLowerCase() !== 'none')
-                .map(t => \`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()] || t}</span>\`)
-                .join('');
+            renderLeaguePicker(); performSearch();
         }
 
         function calculateEffectiveness(types) {
             const results = {};
             Object.keys(typeNames).forEach(t => results[t] = 1);
-            const validTypes = types.filter(t => t && t.toLowerCase() !== 'none');
-            validTypes.forEach(type => {
+            const vTypes = types.filter(t => t && t.toLowerCase() !== 'none');
+            vTypes.forEach(type => {
                 const typeLower = type.toLowerCase();
                 Object.keys(typeChart).forEach(attacker => {
-                    if (typeChart[attacker] && typeChart[attacker][typeLower]) {
-                        results[attacker] *= typeChart[attacker][typeLower];
-                    }
+                    if (typeChart[attacker][typeLower]) results[attacker] *= typeChart[attacker][typeLower];
                 });
             });
             return results;
         }
 
+        // --- HUD 核心邏輯 ---
+        const hud = document.getElementById('typeHUD');
+        document.addEventListener('mousemove', (e) => {
+            if (hud.style.display === 'block') {
+                hud.style.left = e.pageX + 'px';
+                hud.style.top = e.pageY + 'px';
+            }
+        });
+
+        function inspectType(name, types) {
+            const eff = calculateEffectiveness(types);
+            const weaknesses = Object.entries(eff).filter(([t, v]) => v > 1).sort((a,b) => b[1]-a[1]);
+            const resists = Object.entries(eff).filter(([t, v]) => v < 1).sort((a,b) => a[1]-b[1]);
+            
+            document.getElementById('hudContent').innerHTML = \`
+                <div class="text-white font-black text-lg border-b border-red-900 pb-2 mb-3 tech-font uppercase tracking-tighter">\${name}</div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="text-[9px] font-bold text-red-500 uppercase mb-1">Weaknesses</div>
+                        <div class="flex flex-wrap gap-1">\${weaknesses.map(([t, v]) => \`<span class="text-[10px] bg-red-950/40 px-1 rounded border border-red-900/30 text-zinc-300">\${typeNames[t]} x\${v.toFixed(1)}</span>\`).join('')}</div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] font-bold text-green-500 uppercase mb-1">Resistances</div>
+                        <div class="flex flex-wrap gap-1">\${resists.map(([t, v]) => \`<span class="text-[10px] bg-green-950/40 px-1 rounded border border-green-900/30 text-zinc-300">\${typeNames[t]} x\${v.toFixed(1)}</span>\`).join('')}</div>
+                    </div>
+                </div>
+            \`;
+            hud.style.display = 'block';
+        }
+
+        function clearInspect() { hud.style.display = 'none'; }
+
         async function performSearch() {
             const query = document.getElementById('searchInput').value.trim();
             if (!query) return;
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '<div class="col-span-full text-center py-20"><i class="fa-solid fa-atom fa-spin text-4xl text-red-600"></i></div>';
+            resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600"><i class="fa-solid fa-gear fa-spin text-4xl"></i></div>';
 
             try {
                 const res = await fetch(\`/api/search?q=\${encodeURIComponent(query)}\`);
                 const data = await res.json();
                 if (!data.results || data.results.length === 0) {
-                    resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 font-bold tech-font uppercase">Error: Entity Not Found</div>';
-                    return;
+                    resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 font-black uppercase">Data Link Failed</div>'; return;
                 }
 
-                // 1. 渲染進化鏈與屬性分析區
-                document.getElementById('infoSection').classList.remove('hidden');
-                
-                // 進化鏈
+                const evoSection = document.getElementById('evoSection');
                 const evoDiv = document.getElementById('evolutionChain');
                 evoDiv.innerHTML = data.evolutionChain.map((p, idx) => \`
                     <div class="flex items-center">
-                        <div class="bg-zinc-800 p-4 rounded-2xl border border-zinc-700 min-w-[110px] text-center shadow-lg relative">
+                        <div onmouseenter="inspectType('\${p.name}', \${JSON.stringify(p.types)})" onmouseleave="clearInspect()"
+                             class="bg-zinc-900/80 p-5 rounded-2xl border border-zinc-800 hover:border-red-600 hover:bg-zinc-800 transition-all cursor-crosshair min-w-[120px] text-center shadow-2xl relative">
                             <div class="font-black text-white text-sm mb-2">\${p.name}</div>
-                            <div class="flex gap-1 justify-center">\${getTypeBadges(p.types)}</div>
+                            <div class="flex gap-1 justify-center">
+                                \${p.types.filter(t=>t&&t.toLowerCase()!=='none').map(t=>\`<span class="type-badge type-\${t.toLowerCase()}">\${typeNames[t.toLowerCase()]}</span>\`).join('')}
+                            </div>
                         </div>
-                        \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-angles-right mx-4 text-red-900 text-sm opacity-50"></i>' : ''}
+                        \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-angle-right mx-4 text-red-900 animate-pulse"></i>' : ''}
                     </div>
                 \`).join('');
+                evoSection.classList.remove('hidden');
 
-                // 屬性分析 (取進化鏈中最後一個成員，通常是最終進化型)
-                const lastPoke = data.evolutionChain[data.evolutionChain.length - 1];
-                const eff = calculateEffectiveness(lastPoke.types);
-                const weaknesses = Object.entries(eff).filter(([t, val]) => val > 1).sort((a,b) => b[1]-a[1]);
-                const resists = Object.entries(eff).filter(([t, val]) => val < 1).sort((a,b) => a[1]-b[1]);
-                
-                const attrDiv = document.getElementById('attributeAnalysis');
-                attrDiv.innerHTML = \`
-                    <div class="bg-black/40 p-4 rounded-2xl border border-zinc-800">
-                        <div class="text-[10px] font-bold text-red-500 mb-2 uppercase tracking-tighter">Target: \${lastPoke.name} Weaknesses</div>
-                        <div class="flex flex-wrap gap-2 text-xs">
-                            \${weaknesses.map(([t, v]) => \`
-                                <span class="bg-red-950/30 text-zinc-300 px-2 py-1 rounded border border-red-900/20">\${typeNames[t]} <b class="text-red-500">x\${v.toFixed(1)}</b></span>
-                            \`).join('')}
+                const filtered = data.results.filter(r => selectedLeagues.includes(r.leagueId));
+                const others = data.results.filter(r => !selectedLeagues.includes(r.leagueId));
+
+                const renderCard = (league) => \`
+                    <div class="card-dark rounded-3xl overflow-hidden hover:scale-[1.01] transition duration-300">
+                        <div class="p-5 bg-zinc-900 flex justify-between items-center border-b border-zinc-800">
+                            <h3 class="font-black tech-font text-[10px] tracking-[0.2em] text-zinc-400 uppercase">\${league.leagueName}</h3>
+                            <i class="fa-solid fa-dna text-red-900 text-xs"></i>
                         </div>
-                    </div>
-                    <div class="bg-black/40 p-4 rounded-2xl border border-zinc-800">
-                        <div class="text-[10px] font-bold text-green-500 mb-2 uppercase tracking-tighter">Resistances</div>
-                        <div class="flex flex-wrap gap-2 text-xs">
-                            \${resists.map(([t, v]) => \`
-                                <span class="bg-green-950/30 text-zinc-300 px-2 py-1 rounded border border-green-900/20">\${typeNames[t]} <b class="text-green-500">x\${v.toFixed(1)}</b></span>
+                        <div class="p-4 space-y-3">
+                            \${league.pokemons.map(p => \`
+                                <div class="p-4 rounded-2xl bg-zinc-800/30 border border-zinc-800/50">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <span class="text-[8px] font-bold text-red-600 tech-font">ID: \${p.rank}</span>
+                                            <div class="text-lg font-black text-white">\${p.name}</div>
+                                        </div>
+                                        <span class="text-[9px] bg-red-600 text-white px-2 py-0.5 rounded tech-font uppercase">\${p.rating}</span>
+                                    </div>
+                                    <div class="flex gap-1 mb-3">\${p.types.filter(t=>t&&t.toLowerCase()!=='none').map(t=>\`<span class="type-badge type-\${t.toLowerCase()} text-[8px]">\${typeNames[t.toLowerCase()]}</span>\`).join('')}</div>
+                                    <div class="text-[11px] font-mono text-zinc-500 bg-black/40 p-2 rounded-xl border border-zinc-800">
+                                        <i class="fa-solid fa-shield-halved mr-1 text-red-900 opacity-50"></i> \${p.moves}
+                                    </div>
+                                </div>
                             \`).join('')}
                         </div>
                     </div>
                 \`;
 
-                // 2. 排名卡片渲染
-                const filtered = data.results.filter(r => selectedLeagues.includes(r.leagueId));
-                const others = data.results.filter(r => !selectedLeagues.includes(r.leagueId));
-
-                const renderCard = (league) => {
-                    return \`
-                        <div class="card-dark rounded-3xl overflow-hidden hover:scale-[1.02] transition duration-500 shadow-2xl">
-                            <div class="p-5 bg-zinc-900 flex justify-between items-center border-b border-zinc-800">
-                                <h3 class="font-black tech-font uppercase text-[11px] tracking-widest text-zinc-400">\${league.leagueName}</h3>
-                                <i class="fa-solid fa-chart-line text-red-600 text-xs"></i>
-                            </div>
-                            <div class="p-4 space-y-3">
-                                \${league.pokemons.map(p => \`
-                                    <div class="p-4 rounded-2xl bg-zinc-800/30 border border-zinc-800/50">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <div>
-                                                <span class="text-[9px] font-bold text-red-600 tech-font">RANK #\${p.rank}</span>
-                                                <div class="text-lg font-black text-white">\${p.name}</div>
-                                            </div>
-                                            <span class="text-[10px] bg-red-600 text-white px-2 py-1 rounded tech-font font-bold">\${p.rating}</span>
-                                        </div>
-                                        <div class="flex gap-1 mb-3">\${getTypeBadges(p.types)}</div>
-                                        <div class="text-[11px] font-mono text-zinc-400 bg-black/50 p-2 rounded-xl border border-zinc-800">
-                                            <i class="fa-solid fa-bolt-lightning mr-1 text-red-900"></i> \${p.moves}
-                                        </div>
-                                        <div class="mt-2 text-right text-[9px] font-bold text-zinc-700 tech-font tracking-tighter">DATA_SCORE: \${p.score}</div>
-                                    </div>
-                                \`).join('')}
-                            </div>
-                        </div>
-                    \`;
-                };
-
                 resultsDiv.innerHTML = filtered.map(renderCard).join('') + 
-                                     (others.length > 0 ? '<div class="col-span-full py-8 text-center text-zinc-800 tech-font uppercase tracking-[0.5em] text-[10px]">End of Favorite Stream / Accessing Secondary Buffers</div>' : '') +
+                                     (others.length > 0 ? '<div class="col-span-full py-10 opacity-20 text-center tech-font text-xs tracking-[1em]">END_DATA_STREAM</div>' : '') +
                                      others.map(renderCard).join('');
 
-            } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 font-bold">FATAL ERROR: SYSTEM CORRUPTED</div>'; }
+            } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-500 font-bold">CRITICAL_SYSTEM_FAILURE</div>'; }
         }
 
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
