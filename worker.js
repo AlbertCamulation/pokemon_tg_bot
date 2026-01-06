@@ -809,24 +809,23 @@ function generateHTML() {
         .league-chip.active { background: #ff0000; color: white; border-color: #ff0000; }
         .trash-text { background: linear-gradient(to bottom, #ff0000, #660000); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(255,0,0,0.5)); }
 
-        /* 建議清單樣式 */
         #suggestionList {
             position: absolute; width: 100%; top: 100%; left: 0; z-index: 1000;
-            background: rgba(10, 10, 10, 0.95); border: 1px solid #440000;
-            border-top: none; border-radius: 0 0 1.5rem 1.5rem;
-            max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            background: rgba(10, 10, 10, 0.98); border: 1px solid #660000;
+            border-top: none; border-radius: 0 0 2rem 2rem;
+            max-height: 350px; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.9);
             display: none;
         }
-        .suggestion-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #1a1a1a; transition: 0.2s; }
-        .suggestion-item:hover { background: #330000; color: #ff3333; padding-left: 30px; }
-        .suggestion-item:last-child { border-bottom: none; border-radius: 0 0 1.5rem 1.5rem; }
+        .suggestion-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #1a1a1a; transition: 0.3s; }
+        .suggestion-item:hover { background: #440000; color: #ff4444; padding-left: 40px; }
+        .suggestion-item:last-child { border-bottom: none; border-radius: 0 0 2rem 2rem; }
     </style>
 </head>
 <body class="pb-20">
     <div class="max-w-6xl mx-auto p-4 md:p-8">
         <div class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 btn-red rounded-2xl flex items-center justify-center text-3xl"><i class="fa-solid fa-bolt"></i></div>
+                <div class="w-14 h-14 btn-red rounded-2xl flex items-center justify-center text-3xl"><i class="fa-solid fa-microchip"></i></div>
                 <div>
                     <h1 class="text-4xl font-black tracking-tighter tech-font uppercase">PokeMaster <span class="neon-text-red">PRO</span></h1>
                     <p class="text-[10px] tech-font text-zinc-600 tracking-[0.3em]">AI-DRIVEN PREDICTION ENGINE</p>
@@ -843,14 +842,8 @@ function generateHTML() {
                 <input type="text" id="searchInput" placeholder="輸入寶可夢名稱 (例: 瑪力露麗)..." autocomplete="off"
                        class="flex-1 bg-transparent p-5 text-2xl focus:outline-none font-bold text-red-500 placeholder:text-zinc-800">
                 <button onclick="performSearch()" class="btn-red text-white px-12 rounded-2xl font-black uppercase tech-font">SCAN</button>
-                
                 <div id="suggestionList"></div>
             </div>
-        </div>
-
-        <div id="settingsModal" class="hidden bg-zinc-950 p-10 rounded-[3rem] mb-12 border-2 border-red-900 shadow-2xl">
-            <h2 class="font-black text-xl mb-8 neon-text-red tech-font uppercase">Module Selection</h2>
-            <div id="leaguePicker" class="flex flex-wrap gap-4"></div>
         </div>
 
         <div id="infoSection" class="hidden mb-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -868,38 +861,43 @@ function generateHTML() {
 
         <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             <div class="col-span-full text-center py-40 text-zinc-800">
-                <i class="fa-solid fa-microchip fa-beat text-8xl mb-8 opacity-20"></i>
-                <p class="tech-font uppercase tracking-widest text-sm">Engine Warmup / Ready</p>
+                <i class="fa-solid fa-ghost fa-beat text-8xl mb-8 opacity-20"></i>
+                <p class="tech-font uppercase tracking-widest text-sm">System Ready / Awaiting Target</p>
             </div>
         </div>
     </div>
 
     <script>
+        // --- 沿用之前的過濾變數 ---
+        const NAME_CLEANER_REGEX = /(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/;
+
         let allLeagues = [];
         let typeChart = {};
-        let allPokemonNames = []; // 存放所有寶可夢清單
+        let allPokemonNames = [];
         let selectedLeagues = JSON.parse(localStorage.getItem('fav_leagues')) || ['great_league_top', 'ultra_league_top', 'master_league_top'];
 
         const typeNames = {
           normal: "一般", fire: "火", water: "水", electric: "電", grass: "草", ice: "冰", fighting: "格鬥", poison: "毒", ground: "地面", flying: "飛行", psychic: "超能", bug: "蟲", rock: "岩石", ghost: "幽靈", dragon: "龍", dark: "惡", steel: "鋼", fairy: "妖精"
         };
 
-        // 頁面加載時初始化
         window.onload = async () => {
-            // 抓取初始化資料
             const res = await fetch('/api/search?q=piplup'); 
             const data = await res.json();
             allLeagues = data.allLeagues || [];
             typeChart = data.typeChart || {};
             renderLeaguePicker();
 
-            // 抓取完整翻譯檔用於預測功能 (從你的 GitHub Repo 直接讀取)
+            // 抓取清單並進行「嚴格過濾」
             const transRes = await fetch('https://raw.githubusercontent.com/AlbertCamulation/pokemon_tg_bot/main/data/chinese_translation.json');
             const transData = await transRes.json();
-            // 過濾出唯一名稱，排除重複（例如暗影）讓清單乾淨
+            
             const namesSet = new Set();
             transData.forEach(p => {
-                if(!p.speciesName.includes("暗影")) namesSet.add(p.speciesName);
+                const name = p.speciesName;
+                // ★ 關鍵過濾：只要名稱內含有不想要的關鍵字，就完全不顯示在預測清單中
+                if (!NAME_CLEANER_REGEX.test(name)) {
+                    namesSet.add(name);
+                }
             });
             allPokemonNames = Array.from(namesSet).sort();
             setupAutocomplete();
@@ -918,7 +916,6 @@ function generateHTML() {
             renderLeaguePicker(); performSearch();
         }
 
-        // --- 預測功能核心邏輯 ---
         function setupAutocomplete() {
             const input = document.getElementById('searchInput');
             const list = document.getElementById('suggestionList');
@@ -928,13 +925,12 @@ function generateHTML() {
                 list.innerHTML = '';
                 if (!val) { list.style.display = 'none'; return; }
 
-                // 搜尋匹配的寶可夢 (最多顯示 8 個)
-                const matches = allPokemonNames.filter(name => name.includes(val)).slice(0, 8);
+                const matches = allPokemonNames.filter(name => name.includes(val)).slice(0, 10);
 
                 if (matches.length > 0) {
                     list.innerHTML = matches.map(name => \`
-                        <div class="suggestion-item font-bold text-lg" onclick="selectSuggestion('\${name}')">
-                            <i class="fa-solid fa-dna mr-2 text-red-900 opacity-50 text-xs"></i>\${name}
+                        <div class="suggestion-item font-bold text-xl" onclick="selectSuggestion('\${name}')">
+                            <i class="fa-solid fa-magnifying-glass-chart mr-3 text-red-900 opacity-40 text-sm"></i>\${name}
                         </div>
                     \`).join('');
                     list.style.display = 'block';
@@ -943,7 +939,6 @@ function generateHTML() {
                 }
             });
 
-            // 點擊外面關閉選單
             document.addEventListener('click', (e) => {
                 if (e.target !== input) list.style.display = 'none';
             });
@@ -952,10 +947,9 @@ function generateHTML() {
         function selectSuggestion(name) {
             document.getElementById('searchInput').value = name;
             document.getElementById('suggestionList').style.display = 'none';
-            performSearch(); // 直接執行搜尋
+            performSearch();
         }
 
-        // --- 搜尋與渲染邏輯 (保持原有優化內容) ---
         function getTypeBadges(types) {
             if (!types) return '';
             return types.filter(t => t && t.toLowerCase() !== 'none')
@@ -985,11 +979,15 @@ function generateHTML() {
                 <div class="space-y-5">
                     <div>
                         <div class="text-[10px] font-black text-red-500 uppercase mb-2 tracking-[0.2em]">Weakness Logic</div>
-                        <div class="flex flex-wrap gap-2">\${weaknesses.map(([t, v]) => \`<span class="text-[11px] bg-red-950/40 px-2 py-1 rounded border border-red-600/30 text-white font-bold">\${typeNames[t]} <span class="text-red-500 ml-1">x\${v.toFixed(1)}</span></span>\`).join('')}</div>
+                        <div class="flex flex-wrap gap-2">\${weaknesses.map(([t, v]) => \`
+                            <span class="text-[11px] bg-red-950/40 px-2 py-1 rounded border border-red-600/30 text-white font-bold">\${typeNames[t]} <span class="text-red-500 ml-1">x\${v.toFixed(1)}</span></span>
+                        \`).join('')}</div>
                     </div>
                     <div>
                         <div class="text-[10px] font-black text-green-500 uppercase mb-2 tracking-[0.2em]">Resist Data</div>
-                        <div class="flex flex-wrap gap-2">\${resists.map(([t, v]) => \`<span class="text-[11px] bg-green-950/20 px-2 py-1 rounded border border-green-600/30 text-white font-bold">\${typeNames[t]} <span class="text-green-500 ml-1">x\${v.toFixed(1)}</span></span>\`).join('')}</div>
+                        <div class="flex flex-wrap gap-2">\${resists.map(([t, v]) => \`
+                            <span class="text-[11px] bg-green-950/20 px-2 py-1 rounded border border-green-600/30 text-white font-bold">\${typeNames[t]} <span class="text-green-500 ml-1">x\${v.toFixed(1)}</span></span>
+                        \`).join('')}</div>
                     </div>
                 </div>
             \`;
@@ -1016,7 +1014,7 @@ function generateHTML() {
                             <h2 class="text-4xl font-black trash-text uppercase tracking-tighter mb-4">評價等級：垃圾</h2>
                             <p class="text-red-500 tech-font tracking-widest text-lg mb-8 uppercase">Analysis: No Tactical Value</p>
                             <div class="inline-block bg-red-950/30 border border-red-900 p-6 rounded-3xl text-zinc-400 max-w-lg">
-                                系統查無此物種在各大聯盟的有效數據。建議轉送資源給其他 Meta 成員。
+                                系統查無此物種在各大聯盟的排名數據。建議直接轉送或作為收藏，不具備 PvP 投資價值。
                             </div>
                         </div>
                     \`;
@@ -1028,11 +1026,11 @@ function generateHTML() {
                 evoDiv.innerHTML = data.evolutionChain.map((p, idx) => \`
                     <div class="flex items-center">
                         <div onmouseenter="updateHUD('\${p.name}', \${JSON.stringify(p.types)})"
-                             class="bg-zinc-950 p-6 rounded-[2.5rem] border border-zinc-800 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_30px_rgba(255,0,0,0.2)] transition-all duration-300 cursor-pointer min-w-[130px] text-center shadow-2xl relative group">
+                             class="bg-zinc-950 p-6 rounded-[2.5rem] border border-zinc-900 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_30px_rgba(255,0,0,0.2)] transition-all duration-300 cursor-pointer min-w-[130px] text-center shadow-2xl relative group">
                             <div class="font-black text-white text-base mb-3 group-hover:neon-text-red transition-colors">\${p.name}</div>
                             <div class="flex gap-1.5 justify-center">\${getTypeBadges(p.types)}</div>
                         </div>
-                        \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-chevron-right mx-6 text-red-600 opacity-20 text-xl"></i>' : ''}
+                        \${idx < data.evolutionChain.length - 1 ? '<i class="fa-solid fa-angles-right mx-6 text-red-600 opacity-20 text-xl"></i>' : ''}
                     </div>
                 \`).join('');
                 
@@ -1041,9 +1039,9 @@ function generateHTML() {
 
                 if (data.events && data.events.length > 0) {
                     eventBanner.innerHTML = data.events.map(e => \`
-                        <div class="flex items-center gap-4 text-red-200"><i class="fa-solid fa-circle-exclamation text-red-600 text-2xl"></i>
-                        <div><div class="font-black text-xl uppercase italic underline">EVENT ALERT: \${e.eventName}</div>
-                        <div class="text-xs opacity-70">\${e.date} · <a href="\${e.link}" target="_blank" class="underline decoration-red-600">LINK_ACCESS</a></div></div></div>
+                        <div class="flex items-center gap-4 text-red-200"><i class="fa-solid fa-radiation text-red-600 text-2xl"></i>
+                        <div><div class="font-black text-xl uppercase tracking-tighter">EVENT_DETECTION: \${e.eventName}</div>
+                        <div class="text-xs opacity-70">\${e.date} · <a href="\${e.link}" target="_blank" class="underline decoration-red-600">LINK_STUB</a></div></div></div>
                     \`).join('');
                     eventBanner.classList.remove('hidden');
                 }
@@ -1055,13 +1053,13 @@ function generateHTML() {
                     <div class="card-dark rounded-[3rem] overflow-hidden hover:scale-[1.02] transition-all duration-500 shadow-2xl border border-zinc-900">
                         <div class="p-10 bg-zinc-950/80 border-b border-zinc-900">
                             <h3 class="text-2xl font-black text-white tech-font uppercase tracking-tighter mb-2">\${league.leagueName}</h3>
-                            <div class="flex items-center gap-3"><span class="w-12 h-1 bg-red-600"></span><span class="text-[9px] text-zinc-500 tech-font tracking-widest uppercase">Target Stream Analysis</span></div>
+                            <div class="flex items-center gap-3"><span class="w-12 h-1 bg-red-600"></span><span class="text-[9px] text-zinc-500 tech-font tracking-widest uppercase">Combat Stream Analysis</span></div>
                         </div>
                         <div class="p-8 space-y-5">
                             \${league.pokemons.map(p => \`
                                 <div class="p-6 rounded-[2rem] bg-zinc-900/40 border border-zinc-800/40 group hover:bg-zinc-900/70 transition-colors shadow-lg">
                                     <div class="flex justify-between items-start mb-4">
-                                        <div><span class="text-[10px] font-black text-red-500 tech-font opacity-60 tracking-widest mb-1 block">R-INDEX #\${p.rank}</span>
+                                        <div><span class="text-[10px] font-black text-red-500 tech-font opacity-60 tracking-widest mb-1 block">RANKING_ID #\${p.rank}</span>
                                         <div class="text-2xl font-black text-zinc-100 group-hover:text-white">\${p.name}</div></div>
                                         <div class="text-right"><span class="text-[11px] bg-red-600 text-white px-3 py-1.5 rounded-xl tech-font font-black">\${p.rating}</span></div>
                                     </div>
@@ -1069,7 +1067,7 @@ function generateHTML() {
                                     <div class="text-[13px] font-medium text-zinc-400 bg-black/60 p-5 rounded-[1.5rem] border border-zinc-800/50 font-mono italic shadow-inner">
                                         <div class="flex items-center gap-4"><i class="fa-solid fa-microchip text-red-900"></i><span>\${p.moves}</span></div>
                                     </div>
-                                    <div class="mt-4 flex justify-between items-center opacity-40 text-[9px] tech-font font-bold"><span>LINK_STABLE</span><span>VAL: \${p.score}</span></div>
+                                    <div class="mt-4 flex justify-between items-center opacity-40 text-[9px] tech-font font-bold"><span>SECURE_LINK</span><span>SCORE_VAL: \${p.score}</span></div>
                                 </div>
                             \`).join('')}
                         </div>
@@ -1077,7 +1075,7 @@ function generateHTML() {
                 \`;
 
                 resultsDiv.innerHTML = filtered.map(renderCard).join('') + 
-                                     (others.length > 0 ? '<div class="col-span-full py-20 opacity-10 text-center tech-font text-sm tracking-[1.5em] text-zinc-800">--- END OF BUFFERED STREAM ---</div>' : '') +
+                                     (others.length > 0 ? '<div class="col-span-full py-20 opacity-10 text-center tech-font text-sm tracking-[1.5em] text-zinc-800">--- END_OF_SECONDARY_BUFFERS ---</div>' : '') +
                                      others.map(renderCard).join('');
 
             } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600 font-black">FATAL_ERROR: ' + e.message + '</div>'; }
