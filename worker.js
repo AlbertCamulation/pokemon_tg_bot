@@ -368,15 +368,23 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
         if (hasEliteRequirement) {
             msg += `\n⚠️ <b>注意：部分推薦招式 (*) 需使用厲害招式學習器。</b>`;
         }
-
+        // --- 活動檢查 (增加日期過濾) ---
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' }); // 取得台灣時間 YYYY-MM-DD
         // --- 活動檢查 ---
         // 檢查搜尋結果中的任何一隻寶可夢 (initialMatches)，是否出現在 eventsData 的 pokemonId 列表中
         const upcoming = eventsData.filter(e => {
-            return initialMatches.some(p => {
-                // e.pokemonId 是一個陣列 (例如 ["spheal"])
-                // p.speciesId 是搜尋到的寶可夢 (例如 "spheal")
+            // 1. 檢查寶可夢是否匹配
+            const isMatch = initialMatches.some(p => {
+                if (!e.pokemonId || !Array.isArray(e.pokemonId)) return false;
                 return e.pokemonId.includes(p.speciesId.toLowerCase());
             });
+            if (!isMatch) return false;
+
+            // 2. 檢查活動是否結束
+            if (!e.date) return true; // 沒日期的就顯示
+            const parts = e.date.split(/[~～]/);
+            const endDate = (parts.length > 1 ? parts[1] : parts[0]).trim(); // 取得結束日期 (如果是範圍)
+            return endDate >= today; // 結束日期必須大於等於今天
         });
 
         if (upcoming.length > 0) {
@@ -968,9 +976,19 @@ async function getPokemonDataOnly(query, env, ctx) {
     }
   });
 
-  // 5. 處理活動資料
+  // 5. 處理活動資料 (增加日期過濾)
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+
   const upcomingEvents = eventsData.filter(e => {
-    return initialMatches.some(p => e.pokemonId && e.pokemonId.includes(p.speciesId.toLowerCase()));
+    // 檢查寶可夢匹配
+    const isMatch = initialMatches.some(p => e.pokemonId && e.pokemonId.includes(p.speciesId.toLowerCase()));
+    if (!isMatch) return false;
+
+    // 檢查活動是否結束
+    if (!e.date) return true;
+    const parts = e.date.split(/[~～]/);
+    const endDate = (parts.length > 1 ? parts[1] : parts[0]).trim();
+    return endDate >= today;
   }).map(e => ({
     eventName: e.eventName,
     date: e.date,
