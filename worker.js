@@ -874,6 +874,116 @@ function generateHTML() {
 </html>
 `;
 }
+async function getPokemonDataOnly(query, env, ctx) {
+  const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
+  const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
+
+  // 1. 讀取基礎資料
+  const [resTrans, resMoves, resEvents] = await Promise.all([
+    fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
+    fetchWithCache(getDataUrl("data/move.json"), env, ctx),
+    fetchWithCache(getDataUrl("data/events.json"), env, ctx)
+  ]);
+
+  const data = await resTrans.json();
+  const movesData = resMoves.ok ? await resMoves.json() : {};
+  const eventsData = resEvents.ok ? await resEvents.json() : [];
+
+  const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
+  const lower = finalQuery.toLowerCase();
+
+  // 2. 匹配寶可夢
+  const initialMatches = data.filter(p => isChi ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lower));
+  if (!initialMatches.length) return { results: [] };
+
+  const familyIds = new Set();
+  initialMatches.forEach(p => { if (p.family && p.family.id) familyIds.add(p.family.id); });
+  const finalMatches = data.filter(p => (p.family && familyIds.has(p.family.id)) || initialMatches.includes(p));
+  
+  const pokemonMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p]));
+  const ids = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
+
+  // 3. 讀取所有聯盟排名
+  const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
+
+  const finalResults = [];
+  let hasElite = false;
+
+  // 輔助：格式化招式
+  const formatMove = (moveId, eliteList, speciesId) => {
+    if (!moveId) return "";
+    let name = movesData[moveId] || moveId;
+    let isElite = (eliteList && eliteList.includes(moveId)) || (speciesId === "florges" && moveId === "CHILLING_WATER");
+    if (isElite) { name += "*"; hasElite = true; }
+    return name;
+  };
+
+  // 4. 處理排名資料
+  leagues.forEach((league, i) => {
+    const list = rankResults[i];
+    if (!list) return;
+
+    const leaguePokemons = [];
+    list.forEach((p, rankIndex) => {
+      const speciesIdLower = p.speciesId.toLowerCase();
+      if (ids.has(speciesIdLower)) {
+        const rank = p.rank || p.tier || rankIndex + 1;
+        const rating = getPokemonRating(rank);
+        if (rating === "垃圾" || (typeof rank === "number" && rank > 100)) return;
+
+        const pDetail = pokemonMap.get(speciesIdLower);
+        const name = getTranslatedName(p.speciesId, pDetail ? pDetail.speciesName : p.speciesName);
+        const eliteList = pDetail ? pDetail.eliteMoves : [];
+
+        let fastMoveId = p.moveFast;
+        let chargedMoveIds = p.moveCharged;
+        if (!fastMoveId && p.moveset && p.moveset.length > 0) {
+          fastMoveId = p.moveset[0];
+          chargedMoveIds = p.moveset.slice(1);
+        }
+
+        let movesStr = "";
+        if (fastMoveId) {
+          const fast = formatMove(fastMoveId, eliteList, speciesIdLower);
+          const chargedArray = Array.isArray(chargedMoveIds) ? chargedMoveIds : [chargedMoveIds];
+          const charged = chargedArray.filter(m => m).map(m => formatMove(m, eliteList, speciesIdLower)).join(", ");
+          movesStr = `${fast} / ${charged}`;
+        }
+
+        leaguePokemons.push({
+          rank: rank,
+          name: name,
+          score: p.score ? p.score.toFixed(1) : "N/A",
+          rating: rating,
+          moves: movesStr
+        });
+      }
+    });
+
+    if (leaguePokemons.length > 0) {
+      finalResults.push({
+        leagueName: league.name,
+        pokemons: leaguePokemons
+      });
+    }
+  });
+
+  // 5. 處理活動資料
+  const upcomingEvents = eventsData.filter(e => {
+    return initialMatches.some(p => e.pokemonId && e.pokemonId.includes(p.speciesId.toLowerCase()));
+  }).map(e => ({
+    eventName: e.eventName,
+    date: e.date,
+    link: e.link,
+    note: (e.eventName.includes("社群日") && hasElite) ? "💡 建議保留體質好的，等待社群再進化學習特殊招式！" : "📢 相關寶可夢活動即將到來！"
+  }));
+
+  return {
+    results: finalResults,
+    events: upcomingEvents,
+    hasEliteWarning: hasElite
+  };
+}
 // =========================================================
 //  5. Worker Entry Point (必須放在最後)
 // =========================================================
@@ -882,29 +992,42 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // 1. Telegram Bot 原有路徑
-    if (path === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
-    if (path === "/registerWebhook") return registerWebhook(request, url, env);
-    if (path === "/unRegisterWebhook") return unRegisterWebhook(env);
+    try {
+      // 1. Telegram Bot 原有路徑
+      if (path === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
+      if (path === "/registerWebhook") return registerWebhook(request, url, env);
+      if (path === "/unRegisterWebhook") return unRegisterWebhook(env);
 
-    // 2. 網頁版 API 路徑 (回傳 JSON)
-    if (path === "/api/search") {
-      const query = url.searchParams.get("q");
-      if (!query) return new Response(JSON.stringify({ error: "No query" }), { status: 400 });
-      // 這裡呼叫一個我們稍後建立的「純資料搜尋函數」
-      const data = await getPokemonDataOnly(query, env, ctx);
-      return new Response(JSON.stringify(data), { 
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } 
+      // 2. 網頁版 API 路徑
+      if (path === "/api/search") {
+        const query = url.searchParams.get("q");
+        if (!query) return new Response(JSON.stringify({ error: "No query" }), { status: 400 });
+        
+        // 呼叫下方新增的資料處理函數
+        const result = await getPokemonDataOnly(query, env, ctx);
+        return new Response(JSON.stringify(result), { 
+          headers: { 
+            "Content-Type": "application/json; charset=utf-8",
+            "Access-Control-Allow-Origin": "*" 
+          } 
+        });
+      }
+
+      // 3. 網頁版首頁
+      if (path === "/") {
+        return new Response(generateHTML(), { 
+          headers: { "Content-Type": "text/html; charset=utf-8" } 
+        });
+      }
+
+      return new Response("Not Found", { status: 404 });
+
+    } catch (e) {
+      // 如果發生任何錯誤，回傳 JSON 格式的錯誤訊息，避免前端解析失敗
+      return new Response(JSON.stringify({ error: e.message }), { 
+        status: 500, 
+        headers: { "Content-Type": "application/json" } 
       });
     }
-
-    // 3. 網頁版首頁 (回傳 HTML)
-    if (path === "/") {
-      return new Response(generateHTML(), { 
-        headers: { "Content-Type": "text/html; charset=utf-8" } 
-      });
-    }
-
-    return new Response("Not Found", { status: 404 });
   }
 };
