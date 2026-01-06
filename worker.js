@@ -783,7 +783,7 @@ function generateHTML() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeMaster PRO | PvP 戰術終端</title>
+    <title>PokeMaster PRO | 戰術評價系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -791,7 +791,6 @@ function generateHTML() {
         body { font-family: 'Noto Sans TC', sans-serif; background: #000; color: #eee; }
         .tech-font { font-family: 'Orbitron', sans-serif; }
         
-        /* 霓虹紅科技主題 */
         .neon-border { border: 1px solid rgba(255, 0, 0, 0.4); box-shadow: 0 0 20px rgba(255, 0, 0, 0.15); }
         .neon-text-red { color: #ff0000; text-shadow: 0 0 12px rgba(255, 0, 0, 0.6); }
         .btn-red { background: #b90000; box-shadow: 0 0 20px rgba(185, 0, 0, 0.4); transition: 0.3s; }
@@ -808,6 +807,9 @@ function generateHTML() {
         .type-steel { background: #607d8b; } .type-fairy { background: #d81b60; } .type-normal { background: #757575; }
 
         .league-chip.active { background: #ff0000; color: white; border-color: #ff0000; }
+        
+        /* 垃圾評價特效 */
+        .trash-text { background: linear-gradient(to bottom, #ff0000, #660000); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(255,0,0,0.5)); }
     </style>
 </head>
 <body class="pb-20">
@@ -815,15 +817,15 @@ function generateHTML() {
         <div class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 btn-red rounded-2xl flex items-center justify-center text-3xl">
-                    <i class="fa-solid fa-terminal"></i>
+                    <i class="fa-solid fa-skull-crossbones"></i>
                 </div>
                 <div>
                     <h1 class="text-4xl font-black tracking-tighter tech-font uppercase">PokeMaster <span class="neon-text-red">PRO</span></h1>
-                    <p class="text-[10px] tech-font text-zinc-600 tracking-[0.3em]">TACTICAL ANALYSIS TERMINAL</p>
+                    <p class="text-[10px] tech-font text-zinc-600 tracking-[0.3em]">ELITE TACTICAL ANALYZER</p>
                 </div>
             </div>
             <button onclick="toggleSettings()" class="bg-zinc-950 border border-red-900/50 px-6 py-3 rounded-full text-xs font-black tech-font hover:bg-red-950 transition">
-                <i class="fa-solid fa-gear mr-2"></i> LEAGUE_CONFIG
+                <i class="fa-solid fa-sliders mr-2"></i> LEAGUE_CONFIG
             </button>
         </div>
 
@@ -837,7 +839,7 @@ function generateHTML() {
         </div>
 
         <div id="settingsModal" class="hidden bg-zinc-950 p-10 rounded-[3rem] mb-12 border-2 border-red-900 shadow-2xl">
-            <h2 class="font-black text-xl mb-8 neon-text-red tech-font uppercase">System Configuration</h2>
+            <h2 class="font-black text-xl mb-8 neon-text-red tech-font uppercase">Settings Override</h2>
             <div id="leaguePicker" class="flex flex-wrap gap-4"></div>
         </div>
 
@@ -846,21 +848,18 @@ function generateHTML() {
                 <h2 class="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.4em] mb-8">Evolution Sequence</h2>
                 <div id="evolutionChain" class="flex flex-wrap justify-center items-center gap-8"></div>
             </div>
-
             <div class="bg-zinc-900/80 p-8 rounded-[3rem] border border-red-950/50 shadow-2xl">
-                <h2 class="text-[10px] font-bold text-red-600 uppercase tracking-[0.4em] mb-6">Tactical HUD</h2>
-                <div id="attributeHUD" class="space-y-6">
-                    <div class="animate-pulse text-zinc-800 text-xs tech-font">AWAITING_BIO_SCAN...</div>
-                </div>
+                <h2 class="text-[10px] font-bold text-red-500 uppercase tracking-[0.4em] mb-6">Tactical HUD</h2>
+                <div id="attributeHUD" class="space-y-6"></div>
             </div>
         </div>
 
-        <div id="eventBanner" class="hidden mb-12 border-l-8 border-red-600 bg-red-950/30 p-8 rounded-3xl text-red-200"></div>
+        <div id="eventBanner" class="hidden mb-12 border-l-8 border-red-600 bg-red-950/30 p-8 rounded-3xl text-red-200 shadow-2xl shadow-red-900/10"></div>
 
         <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            <div class="col-span-full text-center py-40">
-                <i class="fa-solid fa-circle-nodes fa-beat text-8xl mb-8 text-zinc-900"></i>
-                <p class="text-zinc-700 tech-font uppercase tracking-[1em] text-sm">System Standby / Ready</p>
+            <div class="col-span-full text-center py-40 text-zinc-800">
+                <i class="fa-solid fa-satellite-dish fa-beat text-8xl mb-8"></i>
+                <p class="tech-font uppercase tracking-[1em] text-sm">System Standby / Ready</p>
             </div>
         </div>
     </div>
@@ -942,24 +941,44 @@ function generateHTML() {
         async function performSearch() {
             const query = document.getElementById('searchInput').value.trim();
             if (!query) return;
+
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '<div class="col-span-full text-center py-40 text-red-600"><i class="fa-solid fa-dna fa-spin text-7xl"></i><p class="mt-6 tech-font uppercase tracking-[0.5em] animate-pulse">Syncing DNA Database...</p></div>';
+            const infoSection = document.getElementById('infoSection');
+            const eventBanner = document.getElementById('eventBanner');
+
+            // ★ 修正重點 1：每次搜尋前先隱藏與清空上一次的結果
+            infoSection.classList.add('hidden');
+            eventBanner.classList.add('hidden');
+            resultsDiv.innerHTML = '<div class="col-span-full text-center py-40 text-red-600"><i class="fa-solid fa-dna fa-spin text-7xl"></i><p class="mt-6 tech-font uppercase tracking-[0.5em] animate-pulse">Decrypting Bio-Signature...</p></div>';
 
             try {
                 const res = await fetch(\`/api/search?q=\${encodeURIComponent(query)}\`);
                 const data = await res.json();
+
+                // ★ 修正重點 2：若找不到資料，顯示「評價為垃圾」的訊息
                 if (!data.results || data.results.length === 0) {
-                    resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600 font-black tech-font text-2xl tracking-tighter">DATA_FETCH_FAILED: UNKNOWN_SPECIES</div>'; return;
+                    resultsDiv.innerHTML = \`
+                        <div class="col-span-full text-center py-20 px-10">
+                            <i class="fa-solid fa-trash-can text-red-900 text-8xl mb-8 opacity-40"></i>
+                            <h2 class="text-4xl font-black trash-text uppercase tracking-tighter mb-4">評價等級：垃圾</h2>
+                            <p class="text-red-500 tech-font tracking-widest text-lg mb-8 uppercase">Analysis: No Tactical Value Detected</p>
+                            <div class="inline-block bg-red-950/30 border border-red-900 p-6 rounded-3xl text-zinc-400 max-w-lg leading-relaxed">
+                                系統在所有戰鬥聯盟排名中皆查無此物種數據。這代表該寶可夢在目前的 PvP 生態中不具備任何競技優勢，<br>
+                                <b class="text-red-600 font-black italic underline">建議直接丟掉或轉送，不需浪費資源。</b>
+                            </div>
+                        </div>
+                    \`;
+                    return;
                 }
 
-                document.getElementById('infoSection').classList.remove('hidden');
+                // 搜尋成功，顯示資訊區
+                infoSection.classList.remove('hidden');
 
-                // 1. 渲染進化鏈 + 初始化 HUD (預設顯示最後一個進化型)
                 const evoDiv = document.getElementById('evolutionChain');
                 evoDiv.innerHTML = data.evolutionChain.map((p, idx) => \`
                     <div class="flex items-center">
                         <div onmouseenter="updateHUD('\${p.name}', \${JSON.stringify(p.types)})"
-                             class="bg-zinc-950 p-6 rounded-[2.5rem] border border-zinc-900 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_30px_rgba(255,0,0,0.2)] transition-all duration-300 cursor-pointer min-w-[130px] text-center shadow-2xl relative group">
+                             class="bg-zinc-950 p-6 rounded-[2.5rem] border border-zinc-800 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_30px_rgba(255,0,0,0.2)] transition-all duration-300 cursor-pointer min-w-[130px] text-center shadow-2xl relative group">
                             <div class="font-black text-white text-base mb-3 group-hover:neon-text-red transition-colors">\${p.name}</div>
                             <div class="flex gap-1.5 justify-center">\${getTypeBadges(p.types)}</div>
                         </div>
@@ -967,19 +986,17 @@ function generateHTML() {
                     </div>
                 \`).join('');
                 
-                // 初始化 HUD
                 const lastPoke = data.evolutionChain[data.evolutionChain.length - 1];
                 updateHUD(lastPoke.name, lastPoke.types);
 
-                const banner = document.getElementById('eventBanner');
                 if (data.events && data.events.length > 0) {
-                    banner.innerHTML = data.events.map(e => \`
-                        <div class="flex items-center gap-4 text-red-200"><i class="fa-solid fa-triangle-exclamation text-red-600 text-2xl"></i>
-                        <div><div class="font-black text-xl uppercase tracking-tighter">Event Detected: \${e.eventName}</div>
-                        <div class="text-xs opacity-70 tech-font">DATE: \${e.date} · <a href="\${e.link}" target="_blank" class="underline">DETAILS_LINK</a></div></div></div>
+                    eventBanner.innerHTML = data.events.map(e => \`
+                        <div class="flex items-center gap-4 text-red-200"><i class="fa-solid fa-circle-exclamation text-red-600 text-2xl"></i>
+                        <div><div class="font-black text-xl uppercase tracking-tighter italic">Warning: Active Event Window Detected</div>
+                        <div class="text-sm opacity-80 tech-font">\${e.eventName} [\${e.date}] · <a href="\${e.link}" target="_blank" class="underline decoration-red-600">LINK_ACCESS</a></div></div></div>
                     \`).join('');
-                    banner.classList.remove('hidden');
-                } else { banner.classList.add('hidden'); }
+                    eventBanner.classList.remove('hidden');
+                }
 
                 const filtered = data.results.filter(r => selectedLeagues.includes(r.leagueId));
                 const others = data.results.filter(r => !selectedLeagues.includes(r.leagueId));
@@ -988,21 +1005,21 @@ function generateHTML() {
                     <div class="card-dark rounded-[3rem] overflow-hidden hover:scale-[1.02] transition-all duration-500 shadow-2xl border border-zinc-900">
                         <div class="p-10 bg-zinc-950/80 border-b border-zinc-900">
                             <h3 class="text-2xl font-black text-white tech-font uppercase tracking-tighter mb-2">\${league.leagueName}</h3>
-                            <div class="flex items-center gap-3"><span class="w-12 h-1 bg-red-600"></span><span class="text-[9px] text-zinc-500 tech-font tracking-widest uppercase">Combat Rankings</span></div>
+                            <div class="flex items-center gap-3"><span class="w-12 h-1 bg-red-600"></span><span class="text-[9px] text-zinc-500 tech-font tracking-widest uppercase">Target Rankings</span></div>
                         </div>
                         <div class="p-8 space-y-5">
                             \${league.pokemons.map(p => \`
                                 <div class="p-6 rounded-[2rem] bg-zinc-900/40 border border-zinc-800/40 group hover:bg-zinc-900/70 transition-colors">
                                     <div class="flex justify-between items-start mb-4">
-                                        <div><span class="text-[10px] font-black text-red-600 tech-font uppercase opacity-60 tracking-widest mb-1 block">R-INDEX #\${p.rank}</span>
+                                        <div><span class="text-[10px] font-black text-red-500 tech-font uppercase opacity-60 tracking-widest mb-1 block">R-INDEX #\${p.rank}</span>
                                         <div class="text-2xl font-black text-zinc-100 group-hover:text-white">\${p.name}</div></div>
                                         <div class="text-right"><span class="text-[11px] bg-red-600 text-white px-3 py-1.5 rounded-xl tech-font font-black shadow-lg shadow-red-900/20">\${p.rating}</span></div>
                                     </div>
                                     <div class="flex gap-2 mb-5">\${getTypeBadges(p.types)}</div>
-                                    <div class="text-[13px] font-medium text-zinc-400 bg-black/60 p-5 rounded-[1.5rem] border border-zinc-800/50 leading-relaxed shadow-inner font-mono italic">
-                                        <div class="flex items-center gap-4"><i class="fa-solid fa-burst text-red-900"></i><span>\${p.moves}</span></div>
+                                    <div class="text-[13px] font-medium text-zinc-400 bg-black/60 p-5 rounded-[1.5rem] border border-zinc-800/50 leading-relaxed font-mono italic shadow-inner">
+                                        <div class="flex items-center gap-4"><i class="fa-solid fa-shield-virus text-red-900"></i><span>\${p.moves}</span></div>
                                     </div>
-                                    <div class="mt-4 flex justify-between items-center opacity-40 text-[9px] tech-font font-bold"><span>LOCK_STATUS: OK</span><span>VAL: \${p.score}</span></div>
+                                    <div class="mt-4 flex justify-between items-center opacity-40 text-[9px] tech-font font-bold"><span>BIO_LOCK_STABLE</span><span class="text-red-500">VAL: \${p.score}</span></div>
                                 </div>
                             \`).join('')}
                         </div>
@@ -1010,10 +1027,10 @@ function generateHTML() {
                 \`;
 
                 resultsDiv.innerHTML = filtered.map(renderCard).join('') + 
-                                     (others.length > 0 ? '<div class="col-span-full py-20 opacity-20 text-center tech-font text-sm tracking-[1.5em] text-zinc-700 uppercase italic">--- Buffering Secondary Data Streams ---</div>' : '') +
+                                     (others.length > 0 ? '<div class="col-span-full py-20 opacity-30 text-center tech-font text-sm tracking-[1.5em] text-zinc-800 uppercase italic">--- Buffering Secondary Data Buffers ---</div>' : '') +
                                      others.map(renderCard).join('');
 
-            } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600 font-bold">SYSTEM_KERNEL_PANIC: ' + e.message + '</div>'; }
+            } catch (e) { resultsDiv.innerHTML = '<div class="col-span-full text-center py-20 text-red-600 font-bold tech-font uppercase">FATAL_KERNEL_ERROR: SYSTEM_HALTED</div>'; }
         }
 
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
