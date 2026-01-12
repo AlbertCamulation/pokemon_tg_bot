@@ -18,6 +18,7 @@ const leagues = [
   { command: "little_league_top", name: "小小盃 (500)", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "超級聯盟 (1500)", cp: "1500", path: "data/rankings_1500.json" },
   { command: "great_league_top_scroll", name: "假日盃 (1500)", cp: "1500", path: "data/rankings_1500_holiday.json" },
+  { command: "great_league_top_sunshine", name: "陽光盃 (1500)", cp: "1500", path: "data/rankings_1500_sunshine.json" },
   { command: "great_league_top_holiday", name: "掛軸盃 (1500)", cp: "1500", path: "data/rankings_1500_scroll.json" },
   { command: "great_league_top_remix", name: "超級 Remix (1500)", cp: "1500", path: "data/rankings_1500_remix.json" },
   { command: "great_league_top_championship2025", name: "冠軍賽 2025 (1500)", cp: "1500", path: "data/rankings_1500_LAIC_2025_Championship_Series_Cup.json" },
