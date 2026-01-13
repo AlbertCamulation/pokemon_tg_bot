@@ -104,6 +104,7 @@ async function getJsonData(key, filename, env, ctx) {
 }
 
 // 2. 聯盟排名快取 (救命關鍵)
+// 2. 聯盟排名快取 (修正版)
 async function getLeagueRanking(league, env, ctx) {
   // A. 檢查 Map 快取
   if (GLOBAL_RANKINGS_CACHE.has(league.command)) {
@@ -113,11 +114,13 @@ async function getLeagueRanking(league, env, ctx) {
   // B. Fetch 下載
   try {
     const res = await fetchWithCache(getDataUrl(league.path), env, ctx);
-    if (!res.ok) return [];
+    // 如果下載失敗，直接回傳空陣列，但【不要】存入全域快取
+    if (!res.ok) return []; 
+    
     const data = await res.json();
     
-    // C. 存入 Map
-    if (data && Array.isArray(data)) {
+    // C. 存入 Map (修正：只有當資料長度大於 0 才快取)
+    if (data && Array.isArray(data) && data.length > 0) {
       GLOBAL_RANKINGS_CACHE.set(league.command, data);
     }
     return data;
@@ -173,7 +176,7 @@ async function fetchWithCache(url, env, ctx) {
 }
 
 function getDataUrl(filename) {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=1003`;
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=1006`;
 }
 
 function getPokemonRating(rank) {
@@ -354,7 +357,8 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
         if(ids.has(p.speciesId.toLowerCase())) {
            const rank = p.rank || p.tier;
            // 稍微過濾掉 300 名後的，節省字串長度
-           if (typeof rank === "number" && rank > 300) continue; 
+           // 改成 100 名
+           if (typeof rank === "number" && rank > 100) continue; 
 
            const rating = getPokemonRating(rank);
            if (rating === "垃圾") continue;
