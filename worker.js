@@ -80,7 +80,7 @@ const GLOBAL_RANKINGS_CACHE = new Map();
 // =========================================================
 // 1. 通用資料快取 (翻譯、招式、活動)
 async function getJsonData(key, filename, env, ctx) {
-  // A. 檢查全域變數 (最快，0ms CPU, 0 subrequests)
+  // A. 檢查全域變數 (最快，不耗 CPU)
   if (key === 'trans' && GLOBAL_TRANS_CACHE) return GLOBAL_TRANS_CACHE;
   if (key === 'moves' && GLOBAL_MOVES_CACHE) return GLOBAL_MOVES_CACHE;
   if (key === 'events' && GLOBAL_EVENTS_CACHE) return GLOBAL_EVENTS_CACHE;
@@ -103,8 +103,7 @@ async function getJsonData(key, filename, env, ctx) {
   return data;
 }
 
-// 2. 聯盟排名快取 (救命關鍵)
-// 2. 聯盟排名快取 (修正版)
+// 2. 聯盟排名快取 (這是救命關鍵)
 async function getLeagueRanking(league, env, ctx) {
   // A. 檢查 Map 快取
   if (GLOBAL_RANKINGS_CACHE.has(league.command)) {
@@ -114,13 +113,11 @@ async function getLeagueRanking(league, env, ctx) {
   // B. Fetch 下載
   try {
     const res = await fetchWithCache(getDataUrl(league.path), env, ctx);
-    // 如果下載失敗，直接回傳空陣列，但【不要】存入全域快取
-    if (!res.ok) return []; 
-    
+    if (!res.ok) return [];
     const data = await res.json();
     
-    // C. 存入 Map (修正：只有當資料長度大於 0 才快取)
-    if (data && Array.isArray(data) && data.length > 0) {
+    // C. 存入 Map
+    if (data && Array.isArray(data)) {
       GLOBAL_RANKINGS_CACHE.set(league.command, data);
     }
     return data;
@@ -130,7 +127,7 @@ async function getLeagueRanking(league, env, ctx) {
 }
 
 
-// 修改後的 fetchWithCache (為了免費版限制，取消重試)
+// 修改後的 fetchWithCache (加入重試機制與錯誤處理)
 async function fetchWithCache(url, env, ctx) {
   const cache = caches.default;
   const cacheKey = new Request(url, { method: "GET" });
@@ -139,20 +136,30 @@ async function fetchWithCache(url, env, ctx) {
   let cachedRes = await cache.match(cacheKey);
   if (cachedRes) return cachedRes;
 
-  // 2. 直接請求，不重試 (免費版額度有限)
+  // 2. 定義重試邏輯 (最多重試 2 次，共 3 次機會)
+  const maxRetries = 2;
   let response = null;
-  try {
-    response = await fetch(url);
-  } catch (e) {
-    console.error(`Fetch failed: ${e.message}`);
+  
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      response = await fetch(url);
+      // 如果成功 (200 OK) 就跳出迴圈
+      if (response.ok) break; 
+    } catch (e) {
+      console.error(`Fetch attempt ${i + 1} failed: ${e.message}`);
+    }
+    // 如果不是最後一次嘗試，稍微等待一下 (50ms) 再重試
+    if (i < maxRetries) await new Promise(r => setTimeout(r, 50));
   }
 
-  // 3. 失敗回傳空陣列
+  // 3. 如果重試後還是失敗，回傳空陣列避免程式崩潰
   if (!response || !response.ok) {
+    console.error(`Failed to fetch ${url} after retries.`);
     return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" }});
   }
 
-  // 4. 寫入快取
+  // 4. 讀取並複製資料
+  // 這裡使用 try-catch 防止讀取 body 時發生錯誤
   let bodyText;
   try {
     bodyText = await response.text();
@@ -160,15 +167,22 @@ async function fetchWithCache(url, env, ctx) {
     return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" }});
   }
 
+  if (!bodyText || bodyText.trim().length === 0) {
+    return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" }});
+  }
+
+  // 5. 設定快取 Header 並存入快取
   const headers = new Headers(response.headers);
   headers.set("Cache-Control", `public, max-age=${CACHE_TTL}`);
   headers.set("Content-Type", "application/json");
 
   const responseToCache = new Response(bodyText, { status: response.status, headers: headers });
   
+  // 使用 waitUntil 確保快取寫入不會被中斷
   if (ctx && ctx.waitUntil) {
     ctx.waitUntil(cache.put(cacheKey, responseToCache.clone()));
   } else {
+    // 如果沒有 ctx (極少見)，就非同步寫入
     cache.put(cacheKey, responseToCache.clone()).catch(console.error);
   }
 
@@ -176,7 +190,7 @@ async function fetchWithCache(url, env, ctx) {
 }
 
 function getDataUrl(filename) {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=1006`;
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=1003`;
 }
 
 function getPokemonRating(rank) {
@@ -292,54 +306,42 @@ async function handleUntrashCommand(chatId, userId, pokemonNames, env) {
   return sendMessage(chatId, "清單中找不到這些寶可夢。", null, env);
 }
 async function handlePokemonSearch(chatId, userId, query, env, ctx) {
-  // 1. 字串清理 (簡單替換省 CPU)
-  let cleanQuery = query.trim();
-  // 簡單過濾掉常見干擾字元 (比 Regex 快且安全)
-  const CLEAN_CHARS = [" ", ".", "。", "!", "?", "！", "？", "(", ")", "（", "）", "shadow", "暗影"];
-  CLEAN_CHARS.forEach(char => { cleanQuery = cleanQuery.split(char).join(""); });
+  const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
   const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
 
-  const loadingMsg = await sendMessage(chatId, `\u{1F50D} 全雷達掃描 "<b>${finalQuery}</b>"...`, { parse_mode: "HTML" }, env);
+  const loadingMsg = await sendMessage(chatId, `\u{1F50D} \u67E5\u8A62 "<b>${finalQuery}</b>" (\u542B\u62db\u5f0f)...`, { parse_mode: "HTML" }, env);
+  // 取得該訊息的 ID，以便稍後編輯
   const loadingMsgId = loadingMsg.result ? loadingMsg.result.message_id : null;
-
   try {
-    // 2. 取得基礎資料 (使用 getJsonData 快取)
-    const [data, movesData, eventsData] = await Promise.all([
-      getJsonData('trans', "data/chinese_translation.json", env, ctx),
-      getJsonData('moves', "data/move.json", env, ctx),
-      getJsonData('events', "data/events.json", env, ctx)
+    const [resTrans, resMoves, resEvents] = await Promise.all([
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
+      fetchWithCache(getDataUrl("data/move.json"), env, ctx),
+      fetchWithCache(getDataUrl("data/events.json"), env, ctx)
     ]);
 
-    // 3. 搜尋寶可夢 ID
+    const data = await resTrans.json();
+    const movesData = resMoves.ok ? await resMoves.json() : {};
+    const eventsData = resEvents.ok ? await resEvents.json() : [];
     const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
     const lower = finalQuery.toLowerCase();
+
     const initialMatches = data.filter(p => isChi ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lower));
     
-    if(!initialMatches.length) {
-        const errText = "❌ 找不到寶可夢";
-        if(loadingMsgId) await editMessage(chatId, loadingMsgId, errText, null, env);
-        else await sendMessage(chatId, errText, null, env);
-        return;
-    }
+    if(!initialMatches.length) return sendMessage(chatId, "找不到寶可夢", null, env);
     
-    // 4. 準備家族與 Map
     const familyIds = new Set();
-    initialMatches.forEach(p => { if (p.family?.id) familyIds.add(p.family.id); });
+    initialMatches.forEach(p => { if (p.family && p.family.id) familyIds.add(p.family.id); });
     const finalMatches = data.filter(p => (p.family && familyIds.has(p.family.id)) || initialMatches.includes(p));
+    
+    const pokemonMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p]));
     const ids = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
     
-    const pokemonMap = new Map();
-    finalMatches.forEach(p => pokemonMap.set(p.speciesId.toLowerCase(), p));
-
-    // 5. 取得所有聯盟排名 (使用 getLeagueRanking 快取)
-    const allRankingsData = await Promise.all(
-        leagues.map(l => getLeagueRanking(l, env, ctx))
-    );
+    const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
     
-    let msg = `🏆 <b>"${finalQuery}" 全聯盟戰略報告</b>\n`;
+    let msg = `🏆 <b>"${finalQuery}" 家族相關排名</b>\n`;
     const resultsByLeague = {}; 
-    let hasEliteRequirement = false; // 用於判斷是否需要厲害券/社群日
-    
+    let hasEliteRequirement = false;
+    // 招式格式化函數
     const formatMove = (moveId, eliteList) => {
       if (!moveId) return "";
       let name = movesData[moveId] || moveId;
@@ -347,70 +349,74 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
       return name;
     };
 
-    // 6. 遍歷資料
-    allRankingsData.forEach((list, i) => {
-      if(!list || list.length === 0) return;
-      const leagueName = leagues[i].name;
-      const leagueLines = [];
-
-      for (const p of list) {
+    rankResults.forEach((list, i) => {
+      if(!list) return;
+      list.forEach((p, rankIndex) => {
         if(ids.has(p.speciesId.toLowerCase())) {
-           const rank = p.rank || p.tier;
-           // 稍微過濾掉 300 名後的，節省字串長度
-           // 改成 100 名
-           if (typeof rank === "number" && rank > 100) continue; 
-
+           const rank = p.rank || p.tier || rankIndex + 1;
            const rating = getPokemonRating(rank);
-           if (rating === "垃圾") continue;
+           
+           if (rating === "垃圾") return;
+           if (typeof rank === "number" && rank > 100) return;
 
+           const rankDisplay = typeof rank === 'number' ? `#${rank}` : `#${rank}`; 
+           
            const pDetail = pokemonMap.get(p.speciesId.toLowerCase());
-           const displayName = pDetail ? pDetail.speciesName : p.speciesId; 
+           const rawName = pDetail ? pDetail.speciesName : p.speciesName; 
+           let name = getTranslatedName(p.speciesId, rawName);
+
            const eliteList = pDetail ? pDetail.eliteMoves : []; 
 
+           // ★★★ 修正重點：兼容 moveset 陣列格式 ★★★
            let fastMoveId = p.moveFast;
            let chargedMoveIds = p.moveCharged;
-           if (!fastMoveId && p.moveset && p.moveset.length) {
+
+           // 如果沒有 moveFast，但有 moveset 陣列 (PvPoke 格式)
+           // moveset[0] = 小招, moveset[1...] = 大招
+           if (!fastMoveId && p.moveset && Array.isArray(p.moveset) && p.moveset.length > 0) {
                fastMoveId = p.moveset[0];
                chargedMoveIds = p.moveset.slice(1);
            }
 
+           // 組合招式字串
            let moveStr = "";
            if (fastMoveId) {
              const fast = formatMove(fastMoveId, eliteList);
-             const cMoves = Array.isArray(chargedMoveIds) ? chargedMoveIds : [chargedMoveIds];
-             const charged = cMoves.filter(Boolean).map(m => formatMove(m, eliteList)).join(", ");
-             moveStr = `\n└ ${fast} / ${charged}`;
+             // 確保 chargedMoveIds 是陣列
+             const chargedArray = Array.isArray(chargedMoveIds) ? chargedMoveIds : [chargedMoveIds];
+             const charged = chargedArray.filter(m => m).map(m => formatMove(m, eliteList)).join(", ");
              
-             // ★ 關鍵：如果有星號，標記需要特殊招式
-             if (moveStr.includes("*")) hasEliteRequirement = true;
+             if (charged) {
+                moveStr = `\n└ ${fast} / ${charged}`;
+             } else {
+                moveStr = `\n└ ${fast}`;
+             }
            }
            
-           const scoreStr = p.score ? `(${p.score.toFixed(1)})` : "";
-           leagueLines.push(`#${rank} <b>${displayName}</b> ${scoreStr} ${rating}${moveStr}`);
+           const line = `${rankDisplay} <code>${name}</code> ${p.score ? `(${p.score.toFixed(2)})` : ""} - ${rating}${moveStr}`;
+           
+           const leagueName = leagues[i].name;
+           if (!resultsByLeague[leagueName]) resultsByLeague[leagueName] = [];
+           resultsByLeague[leagueName].push(line);
         }
-      }
-      
-      if (leagueLines.length > 0) {
-          resultsByLeague[leagueName] = leagueLines;
-      }
+      });
     });
 
-    // 7. 組合訊息
     let hasContent = false;
     for (const [league, lines] of Object.entries(resultsByLeague)) {
-      msg += `\n<b>${league}:</b>\n${lines.join("\n")}\n`;
-      hasContent = true;
+      if (lines.length > 0) {
+        msg += `\n<b>${league}:</b>\n${lines.join("\n")}\n`;
+        hasContent = true;
+      }
     }
-    
-    // ★★★ 8. 結論與活動判斷邏輯 (完整補回) ★★★
+    // ★★★ 結論與活動判斷邏輯 ★★★
     if (hasContent) {
-        // 結論建議
         const keepCategories = new Set();
         Object.keys(resultsByLeague).forEach(leagueName => {
-            if (leagueName.includes("500") && !leagueName.includes("1500")) keepCategories.add(500);
+            if (leagueName.includes("500") && !leagueName.includes("1500") && !leagueName.includes("2500")) keepCategories.add(500);
             else if (leagueName.includes("1500")) keepCategories.add(1500);
             else if (leagueName.includes("2500")) keepCategories.add(2500);
-            else if (leagueName.includes("10000") || leagueName.includes("無上限")) keepCategories.add(10000);
+            else if (leagueName.includes("10000") || leagueName.includes("無上限") || leagueName.includes("最佳")) keepCategories.add(10000);
         });
 
         if (keepCategories.size > 0) {
@@ -421,60 +427,67 @@ async function handlePokemonSearch(chatId, userId, query, env, ctx) {
         if (hasEliteRequirement) {
             msg += `\n⚠️ <b>注意：部分推薦招式 (*) 需使用厲害招式學習器。</b>`;
         }
-
+        // --- 活動檢查 (增加日期過濾) ---
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' }); // 取得台灣時間 YYYY-MM-DD
         // --- 活動檢查 ---
-        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+        // 檢查搜尋結果中的任何一隻寶可夢 (initialMatches)，是否出現在 eventsData 的 pokemonId 列表中
         const upcoming = eventsData.filter(e => {
-            // 1. 檢查寶可夢是否匹配 (任一進化鏈成員)
+            // 1. 檢查寶可夢是否匹配
             const isMatch = initialMatches.some(p => {
-                if (!e.pokemonId) return false;
-                const targetIds = Array.isArray(e.pokemonId) ? e.pokemonId : [e.pokemonId];
-                // 使用 includes 檢查字串 (因為 events.json 格式可能較寬鬆)
-                return targetIds.some(tid => p.speciesId.toLowerCase().includes(tid.toLowerCase()));
+                if (!e.pokemonId || !Array.isArray(e.pokemonId)) return false;
+                return e.pokemonId.includes(p.speciesId.toLowerCase());
             });
             if (!isMatch) return false;
 
-            // 2. 檢查活動是否過期
-            if (!e.date) return true;
+            // 2. 檢查活動是否結束
+            if (!e.date) return true; // 沒日期的就顯示
             const parts = e.date.split(/[~～]/);
-            const endDate = (parts.length > 1 ? parts[1] : parts[0]).trim();
-            return endDate >= today;
+            const endDate = (parts.length > 1 ? parts[1] : parts[0]).trim(); // 取得結束日期 (如果是範圍)
+            return endDate >= today; // 結束日期必須大於等於今天
         });
 
         if (upcoming.length > 0) {
             upcoming.forEach(e => {
                 msg += `\n🎉 <b>即將到來：<a href="${e.link}">${e.eventName}</a> (${e.date})</b>`;
                 
-                // 社群日特殊建議
+                // ★★★ 改動在這裡 ★★★
+                // 邏輯：如果是 "社群日" 且 "這隻寶可夢推薦招式裡有星號(*)"
                 if (e.eventName.includes("社群日") && hasEliteRequirement) {
                     msg += `\n💡 建議保留體質好的，等待社群再進化學習特殊招式！`;
                 } else {
+                    // 其他情況 (聚焦時刻、團體戰，或不需要特殊招式的社群日)
                     msg += `\n📢 相關寶可夢活動即將到來！`;
                 }
             });
         }
-    } else {
-       // 無內容時的處理
-       const cleanName = finalMatches[0] ? finalMatches[0].speciesName : finalQuery;
-       msg = `與 <b>"${finalQuery}"</b> 相關的寶可夢在所有聯盟中皆無上榜。\n\n建議輸入 <code>/trash ${cleanName}</code> 加入清單。`;
+    }
+    // --------------------------------
+    if (!hasContent) {
+       const representative = initialMatches[0] || finalMatches[0];
+       const cleanName = representative ? representative.speciesName.replace(NAME_CLEANER_REGEX, "").trim() : finalQuery;
+       msg = `與 <b>"${finalQuery}"</b> 相關的寶可夢在所有聯盟中評價皆為垃圾。\n\n建議輸入 <code>/trash ${cleanName}</code> 加入清單。`;
     }
 
-    // 9. 垃圾清單按鈕
     let options = { parse_mode: "HTML" };
     const trashList = await getTrashList(userId, env);
     const foundInTrash = finalMatches.find(p => trashList.includes(p.speciesName));
 
     if (foundInTrash) {
-      msg += `\n\n🗑️ <b>${foundInTrash.speciesName} 已在垃圾清單</b>`;
-      options.inline_keyboard = [[ { text: `♻️ 移出垃圾清單`, callback_data: `untrash_btn_${foundInTrash.speciesName}` } ]];
+      msg += `\n\n⚠️ <b>注意：${foundInTrash.speciesName} 目前在您的垃圾清單中</b>`;
+      options.inline_keyboard = [[
+        { text: `♻️ 將 "${foundInTrash.speciesName}" 移出垃圾清單`, callback_data: `untrash_btn_${foundInTrash.speciesName}` }
+      ]];
     }
-    
-    if (loadingMsgId) await editMessage(chatId, loadingMsgId, msg, options, env);
-    else await sendMessage(chatId, msg, options, env);
+    // ★★★ 關鍵修改：如果有 loadingMsgId，就編輯它；否則發送新訊息 ★★★
+    if (loadingMsgId) {
+        await editMessage(chatId, loadingMsgId, msg, options, env);
+    } else {
+        await sendMessage(chatId, msg, options, env);
+    }
 
   } catch(e) { 
-    console.error(e); 
-    const errorMsg = `⚠️ 系統繁忙，請稍後再試`;
+    // 發生錯誤時也嘗試編輯原本的訊息
+    const errorMsg = `⚠️ 發生錯誤: ${e.message}`;
     if (loadingMsgId) await editMessage(chatId, loadingMsgId, errorMsg, null, env);
     else await sendMessage(chatId, errorMsg, null, env);
   }
@@ -734,11 +747,23 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
   const chatId = callbackQuery.message.chat.id;
   const data = callbackQuery.data; 
   const callbackQueryId = callbackQuery.id;
+  const userId = callbackQuery.from.id;
+  const userName = callbackQuery.from.first_name || "Unknown";
+
+  // ★ 1. 重點顯示：Log 按鈕點擊者
+  console.log(`🔘 [BTN] UID: ${userId} | Name: ${userName} | Data: ${data}`);
+
+  // ★ 2. 限制檢查 (針對按鈕)
+  const allowedIds = await getAllowedUserIds(env);
+  if (allowedIds.length > 0 && !allowedIds.includes(userId)) {
+      await answerCallbackQuery(callbackQueryId, `⛔ 權限不足 (UID: ${userId})`, env);
+      return;
+  }
 
   if (data.startsWith("untrash_btn_")) {
     const name = data.replace("untrash_btn_", "");
     await answerCallbackQuery(callbackQueryId, "正在移除...", env);
-    return handleUntrashCommand(chatId, callbackQuery.from.id, [name], env);
+    return handleUntrashCommand(chatId, userId, [name], env);
   }
 
   if (data === "menu_atk_types") return sendTypeSelectionMenu(chatId, "atk", env);
@@ -753,21 +778,37 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
 
   switch (data) {
     case "meta_analysis": return handleMetaAnalysis(chatId, env, ctx);
-    case "trash_list": return handleTrashCommand(chatId, callbackQuery.from.id, callbackQuery.from, env);
+    case "trash_list": return handleTrashCommand(chatId, userId, callbackQuery.from, env);
     case "help_menu": return sendHelpMessage(chatId, env);
     case "main_menu": return sendMainMenu(chatId, env);
     default: return;
   }
 }
-
 async function onMessage(message, env, ctx) {
   if (!message.text) return;
+  
   const text = message.text.trim();
+  const chatId = message.chat.id;
+  const userId = message.from.id;
+  const firstName = message.from.first_name || "Unknown";
+  
+  // ★ 1. 重點顯示：Log 使用者資訊
+  console.log(`🚨 [MSG] UID: ${userId} | Name: ${firstName} | Text: "${text}"`);
+
+  // ★ 2. 限制檢查
+  // 邏輯：只有當「白名單不為空」時才檢查。如果是空的，代表沒設定，預設開放給所有人。
+  const allowedIds = await getAllowedUserIds(env);
+  if (allowedIds.length > 0 && !allowedIds.includes(userId)) {
+      // 只有在對方輸入指令時才回覆拒絕，避免群組內普通聊天一直跳錯誤
+      if (text.startsWith("/")) {
+          await sendMessage(chatId, `⛔ 抱歉，您 (${firstName}, UID: ${userId}) 沒有使用權限。`, null, env);
+      }
+      return; // 直接中斷，不執行後續搜尋
+  }
+
   const parts = text.split(" ");
   const command = parts[0].startsWith("/") ? parts[0].split("@")[0].substring(1) : null;
   const args = parts.slice(1);
-  const chatId = message.chat.id;
-  const userId = message.from.id;
 
   const leagueInfo = leagues.find((l) => l.command === command);
   if (leagueInfo) return await handleLeagueCommand(chatId, command, LIMIT_LEAGUES_SHOW, env, ctx);
@@ -783,9 +824,11 @@ async function onMessage(message, env, ctx) {
         }
         return handleTrashCommand(chatId, userId, message.from, env);
       case "untrash": return handleUntrashCommand(chatId, userId, args, env);
+      
+      // 白名單管理指令 (建議只讓原本就在白名單內的人用，或者自行設定一個 ADMIN_UID 環境變數來保護)
       case "list_allowed_uid":
         const ids = await getAllowedUserIds(env);
-        return sendMessage(chatId, ids.length ? `白名單:\n${ids.join("\n")}` : "白名單為空", null, env);
+        return sendMessage(chatId, ids.length ? `📋 白名單列表:\n${ids.join("\n")}` : "⚪ 白名單目前為空 (所有人皆可使用)", null, env);
       case "allow_uid": return handleAllowUidCommand(chatId, args[0], env);
       case "del_uid": return handleDelUidCommand(chatId, args[0], env);
       default: return;
