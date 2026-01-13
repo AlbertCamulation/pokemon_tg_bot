@@ -207,7 +207,16 @@ function getPokemonRating(rank) {
   }
   return "垃圾";
 }
-
+// Add this helper function to your code
+function escapeHtml(unsafe) {
+  if (!unsafe) return "";
+  return String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 // 修改後的 sendMessage (會回傳結果，讓我們拿到 message_id)
 async function sendMessage(chatId, text, options = null, env) {
   if (!text) return;
