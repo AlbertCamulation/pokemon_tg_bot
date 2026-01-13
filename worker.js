@@ -842,7 +842,6 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
     default: return;
   }
 }
-
 async function onMessage(message, env, ctx) {
   if (!message.text) return;
   
@@ -852,63 +851,71 @@ async function onMessage(message, env, ctx) {
   const firstName = message.from.first_name || "Unknown";
   const username = message.from.username ? `@${message.from.username}` : "無";
   
-  // Log 原始訊息
-  console.log(`🚨 [MSG] User: ${userId} (${firstName}) | Chat: ${chatId} | Text: ${text}`);
+  console.log(`🚨 [MSG] UID: ${userId} | Chat: ${chatId} | Text: ${text}`);
+
   // =======================================================
   // ★ 權限控管邏輯
   // =======================================================
   
-  // 1. 判斷是否在「管理員群組」內說話 (特權通道)
-  // 如果 Bot 在管理群組內被呼叫，無條件允許 (方便管理員測試)
-  const isInAdminGroup = String(chatId) === String(env.ADMIN_UID);
+  // 1. 判斷是否在「管理員群組」內 (特權通道)
+  // 強制轉字串比對，避免型別問題
+  const adminGroupId = env.ADMIN_UID ? String(env.ADMIN_UID).trim() : null;
+  const currentChatId = String(chatId);
+  const isInAdminGroup = adminGroupId && (currentChatId === adminGroupId);
 
   if (isInAdminGroup) {
-      // Pass: 在管理群組內，直接允許執行
+      // Pass: 管理群組內直接放行
   } else {
-      // 2. 檢查是否在黑名單 (Ban List)
+      // 2. 檢查黑名單
       const bannedIds = await getBannedUserIds(env);
-      if (bannedIds.includes(userId)) {
-          // 在黑名單中：沉默阻擋，不回覆也不通知管理員
-          return; 
-      }
+      if (bannedIds.includes(userId)) return; 
 
-      // 3. 檢查是否在白名單 (Allow List)
+      // 3. 檢查白名單
       const allowedIds = await getAllowedUserIds(env);
       if (!allowedIds.includes(userId)) {
           // --- 未授權使用者 ---
           
-          // A. 回覆使用者：權限不足
-          await sendMessage(chatId, `⛔ <b>存取被拒</b>\n您的 UID (<code>${userId}</code>) 尚未獲得授權。\n系統已通知管理員進行審核。`, { parse_mode: "HTML" }, env);
-          // B. 通知管理員群組 (增加 Debug Log)
+          // A. 回覆使用者
+          await sendMessage(chatId, `⛔ <b>權限不足</b>\n您的 UID (<code>${userId}</code>) 未授權。\n已自動提交申請給管理員。`, { parse_mode: "HTML" }, env);
+
+          // B. 通知管理員群組
           if (!adminGroupId) {
-              console.error("❌ [ERROR] env.ADMIN_UID 未設定，無法發送通知！");
+              console.error("❌ [ERROR] env.ADMIN_UID 未設定！");
               return;
           }
-          // B. 通知管理員群組 (env.ADMIN_UID)
-          const adminMsg = `🚨 <b>未授權存取偵測</b>\n\n👤 <b>使用者:</b> ${firstName} (${username})\n🆔 <b>UID:</b> <code>${userId}</code>\n💬 <b>訊息:</b> ${text}`;
+
+          // ★ 安全修正：使用 escapeHtml 避免特殊字元導致發送失敗
+          const safeName = escapeHtml(firstName);
+          const safeText = escapeHtml(text);
+          const safeUser = escapeHtml(username);
+
+          const adminMsg = `🚨 <b>申請存取</b>\n\n👤 <b>使用者:</b> ${safeName} (${safeUser})\n🆔 <b>UID:</b> <code>${userId}</code>\n💬 <b>訊息:</b> ${safeText}`;
           
           const adminOptions = {
               parse_mode: "HTML",
               inline_keyboard: [[
-                  { text: "✅ 允許 (加入白名單)", callback_data: `approve_uid_${userId}` },
-                  { text: "🚫 永封 (加入黑名單)", callback_data: `ban_uid_${userId}` }
+                  { text: "✅ 批准", callback_data: `approve_uid_${userId}` },
+                  { text: "🚫 封禁", callback_data: `ban_uid_${userId}` }
               ]]
           };
           
-          console.log(`📤 [DEBUG] 嘗試發送通知到群組 ID: ${adminGroupId}`);
+          console.log(`📤 [DEBUG] 正在發送通知給群組: ${adminGroupId}`);
           
+          // 發送並記錄結果
           try {
               const res = await sendMessage(adminGroupId, adminMsg, adminOptions, env);
               if (res.ok) {
-                  console.log("✅ [SUCCESS] 通知已發送");
+                  console.log("✅ [SUCCESS] 通知發送成功！Message ID:", res.result.message_id);
               } else {
-                  console.error("❌ [FAIL] Telegram API 回傳錯誤:", JSON.stringify(res));
+                  // ★★★ 如果發送失敗，這裡是關鍵線索 ★★★
+                  console.error("❌ [FAIL] Telegram API 錯誤:", JSON.stringify(res));
               }
-          } catch (err) {
-              console.error("❌ [FAIL] 發送過程發生異常:", err);
+          } catch (e) {
+              console.error("❌ [FAIL] 網絡或代碼異常:", e);
           }
           
           return; // 中斷
+      }
   }
   // =======================================================
 
@@ -930,32 +937,13 @@ async function onMessage(message, env, ctx) {
         }
         return handleTrashCommand(chatId, userId, message.from, env);
       case "untrash": return handleUntrashCommand(chatId, userId, args, env);
-      
-      // 管理指令
-      case "list_allowed_uid":
-        // 只有在管理群組內，或白名單用戶可查
-        if (!isInAdminGroup) return; 
-        const ids = await getAllowedUserIds(env);
-        return sendMessage(chatId, ids.length ? `📋 白名單:\n${ids.join("\n")}` : "白名單為空", null, env);
-        
-      case "list_banned_uid":
-        if (!isInAdminGroup) return;
-        const bans = await getBannedUserIds(env);
-        return sendMessage(chatId, bans.length ? `💀 黑名單:\n${bans.join("\n")}` : "黑名單為空", null, env);
-
-      case "allow_uid": 
-        if (!isInAdminGroup) return;
-        return handleAllowUidCommand(chatId, args[0], env);
-      case "del_uid": 
-        if (!isInAdminGroup) return;
-        return handleDelUidCommand(chatId, args[0], env);
-        
       default: return;
     }
   }
 
   if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, userId, text, env, ctx);
 }
+
 async function handleWebhook(request, env, ctx) {
   if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
   const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
