@@ -842,6 +842,7 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
     default: return;
   }
 }
+
 async function onMessage(message, env, ctx) {
   if (!message.text) return;
   
