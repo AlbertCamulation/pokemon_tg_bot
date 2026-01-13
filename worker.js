@@ -67,8 +67,66 @@ const typeNames = {
 };
 
 // =========================================================
+//  ★ 關鍵優化：全域記憶體快取
+// =========================================================
+let GLOBAL_TRANS_CACHE = null;
+let GLOBAL_MOVES_CACHE = null;
+let GLOBAL_EVENTS_CACHE = null;
+// ★ 新增：用來存所有聯盟排名的快取，避免重複 Fetch
+const GLOBAL_RANKINGS_CACHE = new Map();
+
+// =========================================================
 //  2. 基礎工具函數 (Utils & API Wrappers)
 // =========================================================
+// 1. 通用資料快取 (翻譯、招式、活動)
+async function getJsonData(key, filename, env, ctx) {
+  // A. 檢查全域變數 (最快，不耗 CPU)
+  if (key === 'trans' && GLOBAL_TRANS_CACHE) return GLOBAL_TRANS_CACHE;
+  if (key === 'moves' && GLOBAL_MOVES_CACHE) return GLOBAL_MOVES_CACHE;
+  if (key === 'events' && GLOBAL_EVENTS_CACHE) return GLOBAL_EVENTS_CACHE;
+
+  // B. 沒有快取，才去 Fetch
+  const res = await fetchWithCache(getDataUrl(filename), env, ctx);
+  let data = [];
+  try {
+    data = await res.json();
+  } catch (e) {
+    console.error(`JSON Parse Error: ${filename}`);
+  }
+
+  // C. 寫入全域變數
+  if (data) {
+    if (key === 'trans') GLOBAL_TRANS_CACHE = data;
+    if (key === 'moves') GLOBAL_MOVES_CACHE = data;
+    if (key === 'events') GLOBAL_EVENTS_CACHE = data;
+  }
+  return data;
+}
+
+// 2. 聯盟排名快取 (這是救命關鍵)
+async function getLeagueRanking(league, env, ctx) {
+  // A. 檢查 Map 快取
+  if (GLOBAL_RANKINGS_CACHE.has(league.command)) {
+    return GLOBAL_RANKINGS_CACHE.get(league.command);
+  }
+
+  // B. Fetch 下載
+  try {
+    const res = await fetchWithCache(getDataUrl(league.path), env, ctx);
+    if (!res.ok) return [];
+    const data = await res.json();
+    
+    // C. 存入 Map
+    if (data && Array.isArray(data)) {
+      GLOBAL_RANKINGS_CACHE.set(league.command, data);
+    }
+    return data;
+  } catch (e) {
+    return [];
+  }
+}
+
+
 // 修改後的 fetchWithCache (加入重試機制與錯誤處理)
 async function fetchWithCache(url, env, ctx) {
   const cache = caches.default;
@@ -1043,26 +1101,27 @@ function generateHTML() {
 `;
 }
 async function getPokemonDataOnly(query, env, ctx) {
-  const cleanQuery = query.replace(QUERY_CLEANER_REGEX, "");
+  // 1. 字串處理 (使用簡單替換代替複雜 Regex，省 CPU)
+  let cleanQuery = query.trim();
+  const CLEAN_CHARS = [" ", ".", "。", "!", "?", "！", "？", "(", ")", "（", "）", "shadow", "暗影"];
+  CLEAN_CHARS.forEach(char => { cleanQuery = cleanQuery.split(char).join(""); });
   const finalQuery = cleanQuery.length > 0 ? cleanQuery : query;
 
-  const [resTrans, resMoves, resEvents] = await Promise.all([
-    fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
-    fetchWithCache(getDataUrl("data/move.json"), env, ctx),
-    fetchWithCache(getDataUrl("data/events.json"), env, ctx)
+  // 2. 取得基礎資料 (改用快取函數)
+  const [data, movesData, eventsData] = await Promise.all([
+    getJsonData('trans', "data/chinese_translation.json", env, ctx),
+    getJsonData('moves', "data/move.json", env, ctx),
+    getJsonData('events', "data/events.json", env, ctx)
   ]);
 
-  const data = await resTrans.json();
-  const movesData = resMoves.ok ? await resMoves.json() : {};
-  const eventsData = resEvents.ok ? await resEvents.json() : [];
-
+  // 3. 搜尋匹配 (邏輯不變)
   const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
   const lower = finalQuery.toLowerCase();
-
   const target = data.find(p => isChi ? p.speciesName.includes(finalQuery) : p.speciesId.toLowerCase().includes(lower));
+  
   if (!target) return { results: [], allLeagues: leagues };
 
-  // --- 進化鏈邏輯：排除暗影 ---
+  // 4. 進化鏈處理
   const familyMembers = target.family && target.family.id 
     ? data.filter(p => p.family && p.family.id === target.family.id)
     : [target];
@@ -1078,8 +1137,11 @@ async function getPokemonDataOnly(query, env, ctx) {
   const ids = new Set(familyMembers.map(p => p.speciesId.toLowerCase()));
   const pokemonMap = new Map(familyMembers.map(p => [p.speciesId.toLowerCase(), p]));
 
-  // --- 讀取排名 ---
-  const rankResults = await Promise.all(leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null)));
+  // 5. ★★★ 關鍵修改：使用快取函數平行讀取所有聯盟 ★★★
+  // 這一步原本最耗時，現在有快取後會變成 0ms
+  const rankResults = await Promise.all(
+    leagues.map(l => getLeagueRanking(l, env, ctx))
+  );
 
   const finalResults = [];
   let hasElite = false;
@@ -1092,17 +1154,22 @@ async function getPokemonDataOnly(query, env, ctx) {
     return name;
   };
 
-  leagues.forEach((league, i) => {
-    const list = rankResults[i];
-    if (!list) return;
+  // 6. 遍歷排名 (邏輯優化)
+  rankResults.forEach((list, i) => {
+    if (!list || list.length === 0) return;
 
     const leaguePokemons = [];
-    list.forEach((p, rankIndex) => {
+    // 使用 for...of 迴圈比 forEach 稍微省一點點 CPU
+    for (const p of list) {
       const sid = p.speciesId.toLowerCase();
+      // 使用 Set.has() 進行 O(1) 快速查找
       if (ids.has(sid)) {
-        const rank = p.rank || p.tier || rankIndex + 1;
+        const rank = p.rank || p.tier || 0;
+        // 稍微過濾掉太後面的排名以節省運算 (可選)
+        if (typeof rank === "number" && rank > 300) continue;
+
         const rating = getPokemonRating(rank);
-        if (rating === "垃圾" || (typeof rank === "number" && rank > 150)) return;
+        if (rating === "垃圾") continue;
 
         const pDetail = pokemonMap.get(sid);
         const eliteList = pDetail ? pDetail.eliteMoves : [];
@@ -1117,8 +1184,8 @@ async function getPokemonDataOnly(query, env, ctx) {
 
         if (fastMoveId) {
           const fast = formatMove(fastMoveId, eliteList, sid);
-          const charged = (Array.isArray(chargedMoveIds) ? chargedMoveIds : [chargedMoveIds])
-            .filter(m => m).map(m => formatMove(m, eliteList, sid)).join(", ");
+          const cMoves = Array.isArray(chargedMoveIds) ? chargedMoveIds : [chargedMoveIds];
+          const charged = cMoves.filter(m => m).map(m => formatMove(m, eliteList, sid)).join(", ");
           movesStr = `${fast} / ${charged}`;
         }
 
@@ -1131,10 +1198,10 @@ async function getPokemonDataOnly(query, env, ctx) {
           moves: movesStr
         });
       }
-    });
+    }
 
     if (leaguePokemons.length > 0) {
-      finalResults.push({ leagueId: league.command, leagueName: league.name, pokemons: leaguePokemons });
+      finalResults.push({ leagueId: leagues[i].command, leagueName: leagues[i].name, pokemons: leaguePokemons });
     }
   });
 
@@ -1151,7 +1218,7 @@ async function getPokemonDataOnly(query, env, ctx) {
     events: upcomingEvents,
     allLeagues: leagues.map(l => ({ id: l.command, name: l.name })),
     hasEliteWarning: hasElite,
-    typeChart: typeChart // 傳送屬性表給前端計算
+    typeChart: typeChart
   };
 }
 // =========================================================
