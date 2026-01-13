@@ -851,8 +851,8 @@ async function onMessage(message, env, ctx) {
   const firstName = message.from.first_name || "Unknown";
   const username = message.from.username ? `@${message.from.username}` : "無";
   
-  console.log(`🚨 [MSG] UID: ${userId} | Name: ${firstName} | Chat: ${chatId}`);
-
+  // Log 原始訊息
+  console.log(`🚨 [MSG] User: ${userId} (${firstName}) | Chat: ${chatId} | Text: ${text}`);
   // =======================================================
   // ★ 權限控管邏輯
   // =======================================================
@@ -878,7 +878,11 @@ async function onMessage(message, env, ctx) {
           
           // A. 回覆使用者：權限不足
           await sendMessage(chatId, `⛔ <b>存取被拒</b>\n您的 UID (<code>${userId}</code>) 尚未獲得授權。\n系統已通知管理員進行審核。`, { parse_mode: "HTML" }, env);
-
+          // B. 通知管理員群組 (增加 Debug Log)
+          if (!adminGroupId) {
+              console.error("❌ [ERROR] env.ADMIN_UID 未設定，無法發送通知！");
+              return;
+          }
           // B. 通知管理員群組 (env.ADMIN_UID)
           const adminMsg = `🚨 <b>未授權存取偵測</b>\n\n👤 <b>使用者:</b> ${firstName} (${username})\n🆔 <b>UID:</b> <code>${userId}</code>\n💬 <b>訊息:</b> ${text}`;
           
@@ -890,11 +894,20 @@ async function onMessage(message, env, ctx) {
               ]]
           };
           
-          // 發送到環境變數設定的群組 ID
-          await sendMessage(env.ADMIN_UID, adminMsg, adminOptions, env);
+          console.log(`📤 [DEBUG] 嘗試發送通知到群組 ID: ${adminGroupId}`);
           
-          return; // 中斷執行
-      }
+          try {
+              const res = await sendMessage(adminGroupId, adminMsg, adminOptions, env);
+              if (res.ok) {
+                  console.log("✅ [SUCCESS] 通知已發送");
+              } else {
+                  console.error("❌ [FAIL] Telegram API 回傳錯誤:", JSON.stringify(res));
+              }
+          } catch (err) {
+              console.error("❌ [FAIL] 發送過程發生異常:", err);
+          }
+          
+          return; // 中斷
   }
   // =======================================================
 
