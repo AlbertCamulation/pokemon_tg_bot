@@ -749,58 +749,75 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
   const data = callbackQuery.data; 
   const callbackQueryId = callbackQuery.id;
   const userId = callbackQuery.from.id;
+  const userName = callbackQuery.from.first_name || "Unknown";
 
-  // --- 管理員審核功能 ---
+  console.log(`🔘 [BTN] UID: ${userId} | Data: ${data} | Chat: ${chatId}`);
+
+  // ★ 關鍵修改：判斷是否在「管理員群組」內操作
+  // 如果目前的 Chat ID 等於設定的 ADMIN_UID (群組ID)，視為特權環境
+  const isInAdminGroup = String(chatId) === String(env.ADMIN_UID);
+
+  // --- 管理員審核功能 (允許/封禁) ---
   if (data.startsWith("approve_uid_") || data.startsWith("ban_uid_")) {
-      // ★ 修改點：從 env 讀取 ADMIN_UID
-      if (String(userId) !== String(env.ADMIN_UID)) {
-          await answerCallbackQuery(callbackQueryId, "⛔ 您沒有權限執行此操作", env);
+      
+      // 只有在「管理群組內」或是「白名單內的用戶」可以按這些按鈕
+      const allowedIdsCheck = await getAllowedUserIds(env);
+      if (!isInAdminGroup && !allowedIdsCheck.includes(userId)) {
+          await answerCallbackQuery(callbackQueryId, "⛔ 權限不足", env);
           return;
       }
 
       const targetUid = parseInt(data.split("_")[2]);
       
       if (data.startsWith("approve_uid_")) {
+          // 1. 加入白名單
           const allowed = await getAllowedUserIds(env);
           if (!allowed.includes(targetUid)) {
               allowed.push(targetUid);
               await setAllowedUserIds(allowed, env);
           }
+          // 2. 移出黑名單
           let banned = await getBannedUserIds(env);
           if (banned.includes(targetUid)) {
               banned = banned.filter(id => id !== targetUid);
               await setBannedUserIds(banned, env);
           }
 
-          await editMessage(chatId, callbackQuery.message.message_id, `✅ <b>已核准</b>\nUID: ${targetUid} 已加入白名單。`, null, env);
-          await sendMessage(targetUid, "✅ 管理員已開通您的使用權限，現在可以開始查詢了！", null, env);
+          // 3. 更新群組訊息 & 通知使用者
+          await editMessage(chatId, callbackQuery.message.message_id, `✅ <b>已核准</b>\n使用者: ${userName}\nUID: ${targetUid} 已加入白名單。`, null, env);
+          // 嘗試通知使用者 (如果對方沒封鎖 Bot)
+          try { await sendMessage(targetUid, "✅ 管理員已開通您的權限，現在可以開始查詢了！", null, env); } catch(e){}
           await answerCallbackQuery(callbackQueryId, "已核准", env);
       } 
       else if (data.startsWith("ban_uid_")) {
+          // 1. 加入黑名單
           const banned = await getBannedUserIds(env);
           if (!banned.includes(targetUid)) {
               banned.push(targetUid);
               await setBannedUserIds(banned, env);
           }
+          // 2. 移出白名單
           let allowed = await getAllowedUserIds(env);
           if (allowed.includes(targetUid)) {
               allowed = allowed.filter(id => id !== targetUid);
               await setAllowedUserIds(allowed, env);
           }
 
-          await editMessage(chatId, callbackQuery.message.message_id, `🚫 <b>已永久封禁</b>\nUID: ${targetUid} 已列入黑名單，不再通知。`, null, env);
+          await editMessage(chatId, callbackQuery.message.message_id, `🚫 <b>已永久封禁</b>\nUID: ${targetUid} 已列入黑名單。`, null, env);
           await answerCallbackQuery(callbackQueryId, "已封禁", env);
       }
       return;
   }
 
+  // --- 一般功能按鈕權限檢查 ---
   const allowedIds = await getAllowedUserIds(env);
-  // ★ 修改點：從 env 讀取 ADMIN_UID
-  if (String(userId) !== String(env.ADMIN_UID) && !allowedIds.includes(userId)) {
-      await answerCallbackQuery(callbackQueryId, `⛔ 權限不足 (UID: ${userId})`, env);
+  // 如果 不在管理群組 且 不在白名單 -> 拒絕
+  if (!isInAdminGroup && !allowedIds.includes(userId)) {
+      await answerCallbackQuery(callbackQueryId, `⛔ 權限不足`, env);
       return;
   }
 
+  // ... (以下保留您原本的 untrash_btn, menu_types 等邏輯) ...
   if (data.startsWith("untrash_btn_")) {
     const name = data.replace("untrash_btn_", "");
     await answerCallbackQuery(callbackQueryId, "正在移除...", env);
@@ -834,37 +851,49 @@ async function onMessage(message, env, ctx) {
   const firstName = message.from.first_name || "Unknown";
   const username = message.from.username ? `@${message.from.username}` : "無";
   
-  console.log(`🚨 [MSG] UID: ${userId} | Name: ${firstName} | Text: "${text}"`);
+  console.log(`🚨 [MSG] UID: ${userId} | Name: ${firstName} | Chat: ${chatId}`);
 
   // =======================================================
   // ★ 權限控管邏輯
   // =======================================================
   
-  // ★ 修改點：從 env 讀取 ADMIN_UID
-  if (String(userId) === String(env.ADMIN_UID)) {
-      // Admin Pass
-  } else {
-      const bannedIds = await getBannedUserIds(env);
-      if (bannedIds.includes(userId)) return; // Silent Ban
+  // 1. 判斷是否在「管理員群組」內說話 (特權通道)
+  // 如果 Bot 在管理群組內被呼叫，無條件允許 (方便管理員測試)
+  const isInAdminGroup = String(chatId) === String(env.ADMIN_UID);
 
+  if (isInAdminGroup) {
+      // Pass: 在管理群組內，直接允許執行
+  } else {
+      // 2. 檢查是否在黑名單 (Ban List)
+      const bannedIds = await getBannedUserIds(env);
+      if (bannedIds.includes(userId)) {
+          // 在黑名單中：沉默阻擋，不回覆也不通知管理員
+          return; 
+      }
+
+      // 3. 檢查是否在白名單 (Allow List)
       const allowedIds = await getAllowedUserIds(env);
       if (!allowedIds.includes(userId)) {
-          await sendMessage(chatId, `⛔ <b>存取被拒</b>\n您的 UID (${userId}) 尚未獲得授權。\n系統已通知管理員進行審核。`, { parse_mode: "HTML" }, env);
+          // --- 未授權使用者 ---
+          
+          // A. 回覆使用者：權限不足
+          await sendMessage(chatId, `⛔ <b>存取被拒</b>\n您的 UID (<code>${userId}</code>) 尚未獲得授權。\n系統已通知管理員進行審核。`, { parse_mode: "HTML" }, env);
 
+          // B. 通知管理員群組 (env.ADMIN_UID)
           const adminMsg = `🚨 <b>未授權存取偵測</b>\n\n👤 <b>使用者:</b> ${firstName} (${username})\n🆔 <b>UID:</b> <code>${userId}</code>\n💬 <b>訊息:</b> ${text}`;
           
           const adminOptions = {
               parse_mode: "HTML",
               inline_keyboard: [[
                   { text: "✅ 允許 (加入白名單)", callback_data: `approve_uid_${userId}` },
-                  { text: "🚫 永封 (不再通知)", callback_data: `ban_uid_${userId}` }
+                  { text: "🚫 永封 (加入黑名單)", callback_data: `ban_uid_${userId}` }
               ]]
           };
           
-          // ★ 修改點：發送通知給 env.ADMIN_UID
+          // 發送到環境變數設定的群組 ID
           await sendMessage(env.ADMIN_UID, adminMsg, adminOptions, env);
           
-          return; 
+          return; // 中斷執行
       }
   }
   // =======================================================
@@ -888,22 +917,23 @@ async function onMessage(message, env, ctx) {
         return handleTrashCommand(chatId, userId, message.from, env);
       case "untrash": return handleUntrashCommand(chatId, userId, args, env);
       
-      // ★ 修改點：以下管理指令都檢查 env.ADMIN_UID
+      // 管理指令
       case "list_allowed_uid":
-        if (String(userId) !== String(env.ADMIN_UID)) return;
+        // 只有在管理群組內，或白名單用戶可查
+        if (!isInAdminGroup) return; 
         const ids = await getAllowedUserIds(env);
         return sendMessage(chatId, ids.length ? `📋 白名單:\n${ids.join("\n")}` : "白名單為空", null, env);
         
       case "list_banned_uid":
-        if (String(userId) !== String(env.ADMIN_UID)) return;
+        if (!isInAdminGroup) return;
         const bans = await getBannedUserIds(env);
         return sendMessage(chatId, bans.length ? `💀 黑名單:\n${bans.join("\n")}` : "黑名單為空", null, env);
 
       case "allow_uid": 
-        if (String(userId) !== String(env.ADMIN_UID)) return;
+        if (!isInAdminGroup) return;
         return handleAllowUidCommand(chatId, args[0], env);
       case "del_uid": 
-        if (String(userId) !== String(env.ADMIN_UID)) return;
+        if (!isInAdminGroup) return;
         return handleDelUidCommand(chatId, args[0], env);
         
       default: return;
@@ -912,7 +942,6 @@ async function onMessage(message, env, ctx) {
 
   if (text.length >= 2 && !text.startsWith("/")) return handlePokemonSearch(chatId, userId, text, env, ctx);
 }
-
 async function handleWebhook(request, env, ctx) {
   if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
   const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
