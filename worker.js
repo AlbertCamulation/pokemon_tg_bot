@@ -11,7 +11,7 @@ const BANNED_UID_KEY = "banned_user_ids";
 const LIMIT_LEAGUES_SHOW = 50;
 // 原本是 3600 (1小時)，改成 86400 (24小時)
 const CACHE_TTL = 86400;
-const ADMIN_UID = 123456789;
+const ADMIN_GROUP_UID = 123456789;
 const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/g;
 const QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
 
@@ -771,8 +771,8 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
   console.log(`🔘 [BTN] UID: ${userId} | Data: ${data} | Chat: ${chatId}`);
 
   // ★ 關鍵修改：判斷是否在「管理員群組」內操作
-  // 如果目前的 Chat ID 等於設定的 ADMIN_UID (群組ID)，視為特權環境
-  const isInAdminGroup = String(chatId) === String(env.ADMIN_UID);
+  // 如果目前的 Chat ID 等於設定的 ADMIN_GROUP_UID (群組ID)，視為特權環境
+  const isInAdminGroup = String(chatId) === String(env.ADMIN_GROUP_UID);
 
   // --- 管理員審核功能 (允許/封禁) ---
   if (data.startsWith("approve_uid_") || data.startsWith("ban_uid_")) {
@@ -876,7 +876,7 @@ async function onMessage(message, env, ctx) {
   
   // 1. 判斷是否在「管理員群組」內 (特權通道)
   // 強制轉字串比對，避免型別問題
-  const adminGroupId = env.ADMIN_UID ? String(env.ADMIN_UID).trim() : null;
+  const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const currentChatId = String(chatId);
   const isInAdminGroup = adminGroupId && (currentChatId === adminGroupId);
 
@@ -897,7 +897,7 @@ async function onMessage(message, env, ctx) {
 
           // B. 通知管理員群組
           if (!adminGroupId) {
-              console.error("❌ [ERROR] env.ADMIN_UID 未設定！");
+              console.error("❌ [ERROR] env.ADMIN_GROUP_UID 未設定！");
               return;
           }
 
