@@ -47,8 +47,8 @@
 | :--- | :--- | :--- |
 | `ENV_BOT_TOKEN` | Telegram Bot Token (從 BotFather 取得) | `123456:ABC-def...` |
 | `ENV_BOT_SECRET` | Webhook Secret Token (自訂，用於驗證請求) | `my-secret-token` |
-| `ADMIN_UID` | **超級管理員 UID** (個人)<br>擁有最高權限，可操作 `/banlist` 與解封。 | `634577314` |
-| `ADMIN_GROUP_UID` | **管理群組 ID**<br>用於接收審核通知與操作一般審核按鈕。 | `-100123456789` |
+| `ADMIN_UID` | **超級管理員 UID** (個人)<br>擁有最高權限，可操作 `/banlist` 與解封。 | `123456789` (請填入您的 UID) |
+| `ADMIN_GROUP_UID` | **管理群組 ID**<br>用於接收審核通知與操作一般審核按鈕。 | `-100xxxxxxxx` |
 | `POKEMON_KV` | **KV Namespace Binding**<br>綁定您的 KV 儲存空間。 | (在 wrangler.toml 或後台綁定) |
 
 > **注意**：`ADMIN_UID` 必須是個人的正數 ID，`ADMIN_GROUP_UID` 通常是 `-100` 開頭的群組 ID。
