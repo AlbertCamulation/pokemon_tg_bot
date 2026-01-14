@@ -912,7 +912,11 @@ async function onMessage(message, env, ctx) {
   const userId = message.from.id;
   const firstName = message.from.first_name || "Unknown";
   const username = message.from.username ? `@${message.from.username}` : "無";
-  
+  // ★★★ 加入這幾行 Debug Log ★★★
+  console.log(`[DEBUG] User ID: ${userId}`);
+  console.log(`[DEBUG] Env ADMIN_UID: ${env.ADMIN_UID}`);
+  console.log(`[DEBUG] Is Super Admin? ${String(userId) === String(env.ADMIN_UID)}`);
+  console.log(`[DEBUG] Command: ${text}`);
   // =======================================================
   // ★ 權限控管邏輯
   // =======================================================
