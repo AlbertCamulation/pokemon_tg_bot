@@ -301,15 +301,7 @@ async function setAllowedUserIds(ids, env) {
   await env.POKEMON_KV.put(ALLOWED_UID_KEY, JSON.stringify(ids));
 }
 
-async function getBannedUserIds(env) {
-  if (!env.POKEMON_KV) return [];
-  return await env.POKEMON_KV.get(BANNED_UID_KEY, "json") || [];
-}
 
-async function setBannedUserIds(ids, env) {
-  if (!env.POKEMON_KV) return;
-  await env.POKEMON_KV.put(BANNED_UID_KEY, JSON.stringify(ids));
-}
 // =========================================================
 //  3. 核心功能邏輯 (Features Logic)
 // =========================================================
