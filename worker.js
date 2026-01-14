@@ -11,7 +11,6 @@ const BANNED_UID_KEY = "banned_user_ids";
 const LIMIT_LEAGUES_SHOW = 50;
 // 原本是 3600 (1小時)，改成 86400 (24小時)
 const CACHE_TTL = 86400;
-const ADMIN_GROUP_UID = 123456789;
 const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/g;
 const QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
 
