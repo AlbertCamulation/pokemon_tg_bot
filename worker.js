@@ -295,10 +295,12 @@ async function getBannedUserIds(env) {
     const map = await getBannedUsers(env);
     return Object.keys(map).map(Number);
 }
+
 async function setAllowedUserIds(ids, env) {
   if (!env.POKEMON_KV) return;
   await env.POKEMON_KV.put(ALLOWED_UID_KEY, JSON.stringify(ids));
 }
+
 async function getBannedUserIds(env) {
   if (!env.POKEMON_KV) return [];
   return await env.POKEMON_KV.get(BANNED_UID_KEY, "json") || [];
@@ -902,8 +904,6 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
       return;
   }
 
-  // ... (後續程式碼保持不變，包含一般權限檢查與其他 case)
-  // 請確保之後的程式碼都沒動到
   const allowedIds = await getAllowedUserIds(env);
   if (!isSuperAdmin && !isInAdminGroup && !allowedIds.includes(userId)) {
       await answerCallbackQuery(callbackQueryId, `⛔ 權限不足`, env);
@@ -934,6 +934,7 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
     default: return;
   }
 }
+
 async function onMessage(message, env, ctx) {
   if (!message.text) return;
   
