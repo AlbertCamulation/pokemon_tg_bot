@@ -536,6 +536,7 @@ function getTranslatedName(id, nameStr) {
   if (name === "Giratina (Altered)") return "騎拉帝納 別種";
   if (name === "Giratina (Altered) (Shadow)") return "騎拉帝納 別種 暗影";
   if (name === "Claydol (Shadow)") return "念力土偶 暗影";
+  if (name === "Cradily") return "搖籃百合";
   
   // 安全的 includes 檢查
   if (name.includes("Hydreigon") && name.includes("Shadow")) return "三首惡龍 暗影";
