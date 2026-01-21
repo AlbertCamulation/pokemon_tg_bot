@@ -1,5 +1,23 @@
 [
   {
+    "date": "2026-02-01",
+    "raw_time": "2026-02-01 14:00:00 ~ 2026-02-01 17:00:00",
+    "pokemonId": [
+      "vulpix"
+    ],
+    "eventName": "2026年2月社群日：六尾＆六尾（阿羅拉的樣子）",
+    "link": "https://pokemon.wingzero.tw/page/archive/1514/tw"
+  },
+  {
+    "date": "2026-01-31 ~ 2026-02-01",
+    "raw_time": "2026-01-31 06:00:00 ~ 2026-02-01 21:00:00",
+    "pokemonId": [
+      "ho_oh"
+    ],
+    "eventName": "極巨化鳳王極巨對戰週末",
+    "link": ""
+  },
+  {
     "date": "2026-01-27",
     "raw_time": "2026-01-27 18:00:00 ~ 2026-01-27 19:00:00",
     "pokemonId": [
@@ -16,6 +34,15 @@
     ],
     "eventName": "超級電龍超級團體戰",
     "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
+  },
+  {
+    "date": "2026-01-24",
+    "raw_time": "2026-01-24 14:00:00 ~ 2026-01-24 17:00:00",
+    "pokemonId": [
+      "raikou"
+    ],
+    "eventName": "雷公暗影團體戰日",
+    "link": "https://pokemon.wingzero.tw/page/archive/1510/tw"
   },
   {
     "date": "2026-01-20",
@@ -69,42 +96,6 @@
       "barboach"
     ],
     "eventName": "泥泥鰍聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
-  },
-  {
-    "date": "2026-01-05 ~ 2026-01-16",
-    "raw_time": "2026-01-05 10:00:00 ~ 2026-01-16 10:00:00",
-    "pokemonId": [
-      "genesect"
-    ],
-    "eventName": "蓋諾賽克特（火焰卡帶）、蓋諾賽克特（冰凍卡帶）傳說團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
-  },
-  {
-    "date": "2026-01-05 ~ 2026-01-16",
-    "raw_time": "2026-01-05 10:00:00 ~ 2026-01-16 10:00:00",
-    "pokemonId": [
-      "blaziken"
-    ],
-    "eventName": "超級火焰雞超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
-  },
-  {
-    "date": "2026-01-04",
-    "raw_time": "2026-01-04 14:00:00 ~ 2026-01-04 17:00:00",
-    "pokemonId": [
-      "piplup"
-    ],
-    "eventName": "2026年1月波加曼經典社群日",
-    "link": "https://pokemon.wingzero.tw/page/archive/1501/tw"
-  },
-  {
-    "date": "2026-01-02 ~ 2026-02-01",
-    "raw_time": "2026-01-02 10:00:00 ~ 2026-02-01 10:00:00",
-    "pokemonId": [
-      "cresselia"
-    ],
-    "eventName": "克雷色利亞暗影傳說團體戰",
     "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
   }
 ]
