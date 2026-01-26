@@ -549,16 +549,15 @@ function getTranslatedName(id, nameStr) {
 
   return name;
 }
-// ★★★ 最終修正版：Manifest 導向本地檔案模式 ★★★
+// ★★★ 修正版：顯示本地檔案來源路徑 ★★★
 async function handleCurrentLeagues(chatId, env, ctx) {
-  // 1. 發送 Loading 訊息
   const loadingMsg = await sendMessage(chatId, "🔄 正在同步賽季資訊並整合搜尋字串...", { parse_mode: "HTML" }, env);
   
   try {
-    // 2. 抓取你的 Manifest (加上 User-Agent 是一個好習慣)
+    // 1. 抓取 Manifest
     const manifestRes = await fetch(MANIFEST_URL, {
         headers: { "User-Agent": "PokeMaster-Pro/1.0" },
-        cf: { cacheTtl: 300 } // 快取 5 分鐘
+        cf: { cacheTtl: 300 }
     });
     
     if (!manifestRes.ok) throw new Error(`Manifest 讀取失敗 (${manifestRes.status})`);
@@ -568,7 +567,7 @@ async function handleCurrentLeagues(chatId, env, ctx) {
       return sendMessage(chatId, "⚠️ 目前沒有偵測到當下聯盟數據。", null, env);
     }
 
-    // 3. 準備翻譯資料 (共用快取)
+    // 2. 準備翻譯資料
     const transRes = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     const transData = await transRes.json();
     const transMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
@@ -576,96 +575,68 @@ async function handleCurrentLeagues(chatId, env, ctx) {
     const allTopPokemons = new Set();
     const matchedLeaguesInfo = [];
 
-    // 4. 【核心邏輯】遍歷 Manifest，尋找本地對應的 League Config
-    // 我們不抓 manifest 裡的 json_url，而是去抓 local 裡的 path
+    // 3. 遍歷與匹配
     const promises = manifest.active_leagues.map(async (activeLeague) => {
-        
-        // --- 智慧配對邏輯 ---
-        // 在本地 leagues 陣列中，找到 CP 和 ID 特徵相符的檔案
+        // 智慧配對邏輯
         const localLeague = leagues.find(l => {
-            // A. CP 必須相符
             if (String(l.cp) !== String(activeLeague.cp)) return false;
-
             const targetId = activeLeague.pvpoke_id;
             const localName = l.name; 
-            const localCmd = l.command; // 例如 ultra_league_top_permier
+            const localCmd = l.command;
 
-            // B. 根據 PvPoke ID 判斷特徵
-            if (targetId === "all") {
-                // 標準聯盟：名字裡通常不含 "紀念"、"Remix"、"盃"
-                // 或者是特定的 command (great_league_top, ultra_league_top, master_league_top)
-                return (localCmd === "great_league_top" || localCmd === "ultra_league_top" || localCmd === "master_league_top");
-            }
-            
-            if (targetId === "premier") {
-                // 紀念賽：名字含 "紀念" 或 command 含 "premier" (注意你的 typo: permier)
-                return localName.includes("紀念") || localCmd.includes("premier") || localCmd.includes("permier");
-            }
-
-            if (targetId === "remix") {
-                return localName.includes("Remix") || localCmd.includes("remix");
-            }
-
-            // 其他特殊盃賽 (Little Cup, Holiday, etc...)
-            // 嘗試用 ID 去對比 command
+            if (targetId === "all") return (localCmd === "great_league_top" || localCmd === "ultra_league_top" || localCmd === "master_league_top");
+            if (targetId === "premier") return localName.includes("紀念") || localCmd.includes("premier") || localCmd.includes("permier");
+            if (targetId === "remix") return localName.includes("Remix") || localCmd.includes("remix");
             return localCmd.includes(targetId);
         });
 
         if (!localLeague) {
-            console.log(`⚠️ 找不到本地對應設定: ${activeLeague.name_zh} (${activeLeague.pvpoke_id})`);
-            return null; // 你的 Repo 裡可能還沒上傳這個盃賽的 JSON
+            console.log(`⚠️ 找不到本地對應設定: ${activeLeague.name_zh}`);
+            return null;
         }
 
-        // --- 找到對應檔案了，開始抓取你自己的資料 ---
         try {
-            // 使用 getDataUrl 抓取你 Repo 裡的 path (例如 data/rankings_2500_premierultra.json)
             const res = await fetchWithCache(getDataUrl(localLeague.path), env, ctx);
             if (!res.ok) return null;
             
             const data = await res.json();
             return { 
-                name: localLeague.name, // 使用你設定的中文名
+                name: localLeague.name, 
+                path: localLeague.path, // ★ 這裡回傳路徑
                 data: data 
             };
         } catch (err) {
-            console.error(`Local Fetch Error for ${localLeague.name}:`, err);
             return null;
         }
     });
 
     const results = await Promise.all(promises);
 
-    // 5. 整合資料 (取 Top 50)
+    // 4. 整合資料
     results.forEach(result => {
       if (!result || !result.data) return;
-      matchedLeaguesInfo.push(result.name);
+      
+      // ★ 修改顯示格式：加入檔案路徑
+      matchedLeaguesInfo.push(`${result.name}\n   └ 📂 <code>${result.path}</code>`);
 
-      // 取前 50 名
       result.data.slice(0, 50).forEach(p => {
-        // 翻譯名稱
         const rawName = transMap.get(p.speciesId.toLowerCase()) || p.speciesName;
         const name = getTranslatedName(p.speciesId, rawName);
-        
-        // 清理名稱
         const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
-        
-        // 排除無效名稱或 Shadow 殘留
         if (clean && !clean.toUpperCase().includes("SHADOW")) {
             allTopPokemons.add(clean);
         }
       });
     });
 
-    if (allTopPokemons.size === 0) {
-        throw new Error("無法從本地檔案提取任何寶可夢資料，請確認您的 JSON 檔案是否已更新。");
-    }
+    if (allTopPokemons.size === 0) throw new Error("無有效資料");
 
-    // 6. 產生搜尋字串
+    // 5. 產生結果
     const sortedList = Array.from(allTopPokemons).join(",");
     const searchString1 = `${sortedList}&!我的最愛&距離10`;
     const searchString2 = `${sortedList}&!我的最愛&距離10-`;
 
-    // 7. 刪除 Loading 訊息
+    // 刪除 Loading
     try {
         if (loadingMsg && loadingMsg.result) {
             await fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/deleteMessage`, {
@@ -675,10 +646,9 @@ async function handleCurrentLeagues(chatId, env, ctx) {
         }
     } catch(e) {}
 
-    // 8. 發送最終結果
     let msg = `🔥 <b>當下聯盟整合 (資料來源: 本地資料庫)</b>\n`;
-    msg += `更新時間: ${manifest.last_updated_human || "未知"}\n`;
-    msg += `已載入: ${matchedLeaguesInfo.join(", ")}\n\n`;
+    msg += `更新時間: ${manifest.last_updated_human || "未知"}\n\n`;
+    msg += `<b>已載入來源檔：</b>\n${matchedLeaguesInfo.join("\n")}\n\n`; // ★ 這裡會列出每一份檔案
     
     msg += `📋 <b>Top 50 整合搜尋 (距離10)</b>\n`;
     msg += `<code>${searchString1}</code>\n\n`;
