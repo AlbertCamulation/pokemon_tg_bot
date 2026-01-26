@@ -13,7 +13,8 @@ const LIMIT_LEAGUES_SHOW = 50;
 const CACHE_TTL = 86400;
 const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/g;
 const QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
-
+// ★ 新增：當下聯盟 Manifest 網址
+const MANIFEST_URL = "https://raw.githubusercontent.com/AlbertCamulation/catchemall_pokepvp/refs/heads/main/data/manifest.json";
 const leagues = [
   { command: "little_league_top", name: "小小盃 (500)", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "超級聯盟 (1500)", cp: "1500", path: "data/rankings_1500.json" },
@@ -548,6 +549,75 @@ function getTranslatedName(id, nameStr) {
 
   return name;
 }
+// ★★★ 新增：處理當下聯盟邏輯 ★★★
+async function handleCurrentLeagues(chatId, env, ctx) {
+  await sendMessage(chatId, "🔄 正在讀取當下聯盟數據...", { parse_mode: "HTML" }, env);
+
+  try {
+    // 1. 抓取 Manifest (不使用快取，確保拿到最新資訊)
+    const manifestRes = await fetch(MANIFEST_URL);
+    if (!manifestRes.ok) throw new Error("無法讀取聯盟清單");
+    const manifest = await manifestRes.json();
+
+    if (!manifest.active_leagues || manifest.active_leagues.length === 0) {
+      return sendMessage(chatId, "⚠️ 目前沒有偵測到當下聯盟數據。", null, env);
+    }
+
+    // 2. 準備翻譯資料
+    const transRes = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    const transData = await transRes.json();
+    const transMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+
+    const allTopPokemons = new Set();
+    const activeLeagueNames = [];
+
+    // 3. 平行抓取所有活躍聯盟的排名資料
+    const promises = manifest.active_leagues.map(async (league) => {
+      // 使用 fetchWithCache 抓取排名 JSON
+      // 注意：這裡假設 manifest 裡的 json_url 是完整的 URL，如果不是請自行調整
+      const res = await fetchWithCache(league.json_url, env, ctx);
+      if (!res.ok) return null;
+      return { name: league.name_zh, cp: league.cp, data: await res.json() };
+    });
+
+    const results = await Promise.all(promises);
+
+    // 4. 整合資料
+    results.forEach(result => {
+      if (!result || !result.data) return;
+      activeLeagueNames.push(`${result.name} (${result.cp})`);
+
+      // 取前 50 名
+      result.data.slice(0, 50).forEach(p => {
+        const rawName = transMap.get(p.speciesId.toLowerCase()) || p.speciesName;
+        const name = getTranslatedName(p.speciesId, rawName);
+        // 清理名稱 (移除 "暗影"、"阿羅拉" 等後綴，以便搜尋)
+        const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
+        if (clean) allTopPokemons.add(clean);
+      });
+    });
+
+    // 5. 產生搜尋字串
+    const sortedList = Array.from(allTopPokemons).join(",");
+    const searchString1 = `${sortedList}&!我的最愛&距離10`;
+    const searchString2 = `${sortedList}&!我的最愛&距離10-`;
+
+    // 6. 發送訊息
+    let msg = `🔥 <b>當下聯盟 (更新: ${manifest.last_updated_human || "未知"})</b>\n`;
+    msg += `包含: ${activeLeagueNames.join(", ")}\n\n`;
+    
+    msg += `📋 <b>Top 50 整合搜尋 (距離10)</b>\n`;
+    msg += `<code>${searchString1}</code>\n\n`;
+    
+    msg += `📋 <b>Top 50 整合搜尋 (距離10-)</b>\n`;
+    msg += `<code>${searchString2}</code>`;
+
+    await sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
+
+  } catch (e) {
+    await sendMessage(chatId, `❌ 讀取失敗: ${e.message}`, null, env);
+  }
+}
 async function handleLeagueCommand(chatId, command, limit = 50, env, ctx) {
   const leagueInfo = leagues.find((l) => l.command === command);
   if (!leagueInfo) return sendMessage(chatId, "未知的命令。", null, env);
@@ -763,6 +833,8 @@ function generateMainMenu() {
   for (const [title, items] of Object.entries(groups)) { keyboard.push([{ text: `--- ${title} ---`, callback_data: "dummy" }]); add(items); }
   keyboard.push([{ text: "攻擊屬性查詢", callback_data: "menu_atk_types" }, { text: "🛡️ 防禦屬性查詢", callback_data: "menu_def_types" }]);
   keyboard.push([{ text: "📝 垃圾清單", callback_data: "trash_list" }, { text: "ℹ️ 說明", callback_data: "help_menu" }]);
+ // ★ 新增這行：當下聯盟按鈕
+  keyboard.push([{ text: "🔥 當下聯盟 (整合搜尋)", callback_data: "current_leagues" }]);
   return keyboard;
 }
 
@@ -925,6 +997,8 @@ async function onCallbackQuery(callbackQuery, env, ctx) {
     case "trash_list": return handleTrashCommand(chatId, userId, callbackQuery.from, env);
     case "help_menu": return sendHelpMessage(chatId, env);
     case "main_menu": return sendMainMenu(chatId, env);
+    // ★ 新增這行
+    case "current_leagues": return handleCurrentLeagues(chatId, env, ctx);
     default: return;
   }
 }
