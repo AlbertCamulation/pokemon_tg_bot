@@ -25,15 +25,15 @@ const leagues = [
   { command: "great_league_top_halloween", name: "萬聖節盃 (1500)", cp: "1500", path: "data/rankings_1500_halloween.json" },
   { command: "great_league_top_retro", name: "復古盃 (1500)", cp: "1500", path: "data/rankings_1500_retro.json" },
   { command: "great_league_top_summer", name: "夏日盃 (1500)", cp: "1500", path: "data/rankings_1500_summer.json" },
-  { command: "great_league_top_willpower", name: "意志盃 (1500)", cp: "1500", path: "data/rankings_willpower_1500.json" },
+  { command: "great_league_top_willpower", name: "意志盃 (1500)", cp: "1500", path: "data/rankingsr_1500_willpowe.json" },
   { command: "great_league_top_jungle", name: "叢林盃 (1500)", cp: "1500", path: "data/rankings_1500_jungle.json" },
   { command: "ultra_league_top", name: "高級聯盟 (2500)", cp: "2500", path: "data/rankings_2500.json" },
-  { command: "ultra_league_top_permier", name: "究極紀念盃 (2500)", cp: "2500", path: "data/rankings_premierultra_2500.json" },
+  { command: "ultra_league_top_permier", name: "究極紀念盃 (2500)", cp: "2500", path: "data/rankings_2500_premierultra.json" },
   { command: "ultra_league_top_holiday", name: "假日盃 (2500)", cp: "2500", path: "data/rankings_2500_holiday.json" },
   { command: "ultra_league_top_summer", name: "夏日盃 (2500)", cp: "2500", path: "data/rankings_2500_summer.json" },
   { command: "master_league_top", name: "大師聯盟 (無上限)", cp: "10000", path: "data/rankings_10000.json" },
   { command: "master_league_top_permier", name: "大師紀念賽 (無上限)", cp: "10000", path: "data/rankings_10000_premier.json" },
-  { command: "master_league_top_meta", name: "大師 Meta (無上限)", cp: "10000", path: "data/rankings_meta_master_10000.json" },
+  { command: "master_league_top_meta", name: "大師 Meta (無上限)", cp: "10000", path: "data/rankings_10000_meta_master.json" },
   { command: "attackers_top", name: "最佳攻擊手", cp: "Any", path: "data/rankings_attackers_tier.json" },
   { command: "defenders_top", name: "最佳防守者", cp: "Any", path: "data/rankings_defenders_tier.json" }
 ];
