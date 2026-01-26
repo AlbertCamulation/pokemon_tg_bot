@@ -191,7 +191,7 @@ async function fetchWithCache(url, env, ctx) {
 }
 
 function getDataUrl(filename) {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=1006`;
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=1007`;
 }
 
 function getPokemonRating(rank) {
