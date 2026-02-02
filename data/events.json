@@ -1,5 +1,105 @@
 [
   {
+    "date": "2026-02-24",
+    "raw_time": "2026-02-24 18:00:00 ~ 2026-02-24 19:00:00",
+    "pokemonId": [
+      "totodile"
+    ],
+    "eventName": "小鋸鱷聚焦時刻",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-21 ~ 2026-03-04",
+    "raw_time": "2026-02-21 10:00:00 ~ 2026-03-04 10:00:00",
+    "pokemonId": [
+      "lunala"
+    ],
+    "eventName": "露奈雅拉傳說團體戰",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-21 ~ 2026-03-04",
+    "raw_time": "2026-02-21 10:00:00 ~ 2026-03-04 10:00:00",
+    "pokemonId": [
+      "absol"
+    ],
+    "eventName": "超級阿勃梭魯超級團體戰",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-17",
+    "raw_time": "2026-02-17 18:00:00 ~ 2026-02-17 19:00:00",
+    "pokemonId": [
+      "horsea"
+    ],
+    "eventName": "墨海馬聚焦時刻",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-16 ~ 2026-02-21",
+    "raw_time": "2026-02-16 10:00:00 ~ 2026-02-21 10:00:00",
+    "pokemonId": [
+      "solgaleo"
+    ],
+    "eventName": "索爾迦雷歐傳說團體戰",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-16 ~ 2026-02-21",
+    "raw_time": "2026-02-16 10:00:00 ~ 2026-02-21 10:00:00",
+    "pokemonId": [
+      "sableye"
+    ],
+    "eventName": "超級勾魂眼超級團體戰",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-10",
+    "raw_time": "2026-02-10 18:00:00 ~ 2026-02-10 19:00:00",
+    "pokemonId": [
+      "munna"
+    ],
+    "eventName": "食夢夢聚焦時刻",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-04 ~ 2026-02-16",
+    "raw_time": "2026-02-04 10:00:00 ~ 2026-02-16 10:00:00",
+    "pokemonId": [
+      "dialga",
+      "palkia"
+    ],
+    "eventName": "帝牙盧卡、帕路奇亞傳說團體戰",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-04 ~ 2026-02-16",
+    "raw_time": "2026-02-04 10:00:00 ~ 2026-02-16 10:00:00",
+    "pokemonId": [
+      "pidgeot"
+    ],
+    "eventName": "超級大比鳥超級團體戰",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-03",
+    "raw_time": "2026-02-03 18:00:00 ~ 2026-02-03 19:00:00",
+    "pokemonId": [
+      "whismur"
+    ],
+    "eventName": "咕妞妞聚焦時刻",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-02-03 ~ 2026-02-08",
+    "raw_time": "2026-02-03 10:00:00 ~ 2026-02-08 20:00:00",
+    "pokemonId": [
+      "flamigo"
+    ],
+    "eventName": "纏紅鶴嘉年華",
+    "link": "https://pokemon.wingzero.tw/page/archive/1515/tw"
+  },
+  {
     "date": "2026-02-01",
     "raw_time": "2026-02-01 14:00:00 ~ 2026-02-01 17:00:00",
     "pokemonId": [
@@ -9,6 +109,15 @@
     "link": "https://pokemon.wingzero.tw/page/archive/1514/tw"
   },
   {
+    "date": "2026-02-01 ~ 2026-03-04",
+    "raw_time": "2026-02-01 10:00:00 ~ 2026-03-04 10:00:00",
+    "pokemonId": [
+      "regigigas"
+    ],
+    "eventName": "雷吉奇卡斯暗影傳說團體戰",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
     "date": "2026-01-31 ~ 2026-02-01",
     "raw_time": "2026-01-31 06:00:00 ~ 2026-02-01 21:00:00",
     "pokemonId": [
@@ -16,86 +125,5 @@
     ],
     "eventName": "極巨化鳳王極巨對戰週末",
     "link": ""
-  },
-  {
-    "date": "2026-01-27",
-    "raw_time": "2026-01-27 18:00:00 ~ 2026-01-27 19:00:00",
-    "pokemonId": [
-      "foongus"
-    ],
-    "eventName": "哎呀球菇聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
-  },
-  {
-    "date": "2026-01-25 ~ 2026-02-04",
-    "raw_time": "2026-01-25 10:00:00 ~ 2026-02-04 10:00:00",
-    "pokemonId": [
-      "ampharos"
-    ],
-    "eventName": "超級電龍超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
-  },
-  {
-    "date": "2026-01-24",
-    "raw_time": "2026-01-24 14:00:00 ~ 2026-01-24 17:00:00",
-    "pokemonId": [
-      "raikou"
-    ],
-    "eventName": "雷公暗影團體戰日",
-    "link": "https://pokemon.wingzero.tw/page/archive/1510/tw"
-  },
-  {
-    "date": "2026-01-20",
-    "raw_time": "2026-01-20 18:00:00 ~ 2026-01-20 19:00:00",
-    "pokemonId": [
-      "hatenna"
-    ],
-    "eventName": "迷布莉姆聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
-  },
-  {
-    "date": "2026-01-18",
-    "raw_time": "2026-01-18 14:00:00 ~ 2026-01-18 17:00:00",
-    "pokemonId": [
-      "grookey"
-    ],
-    "eventName": "敲音猴社群日",
-    "link": "https://pokemon.wingzero.tw/page/archive/1499/tw"
-  },
-  {
-    "date": "2026-01-16 ~ 2026-01-25",
-    "raw_time": "2026-01-16 10:00:00 ~ 2026-01-25 10:00:00",
-    "pokemonId": [
-      "sceptile"
-    ],
-    "eventName": "超級蜥蜴王超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
-  },
-  {
-    "date": "2026-01-13",
-    "raw_time": "2026-01-13 18:00:00 ~ 2026-01-13 19:00:00",
-    "pokemonId": [
-      "mareep"
-    ],
-    "eventName": "咩利羊聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
-  },
-  {
-    "date": "2026-01-10",
-    "raw_time": "2026-01-10 15:00:00 ~ 2026-01-10 17:00:00",
-    "pokemonId": [
-      "kyurem"
-    ],
-    "eventName": "酋雷姆合體團體戰日",
-    "link": "https://pokemon.wingzero.tw/page/archive/1503/tw"
-  },
-  {
-    "date": "2026-01-06",
-    "raw_time": "2026-01-06 18:00:00 ~ 2026-01-06 19:00:00",
-    "pokemonId": [
-      "barboach"
-    ],
-    "eventName": "泥泥鰍聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1506/tw"
   }
 ]
