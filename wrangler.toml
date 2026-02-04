@@ -3,9 +3,8 @@
 # 您的 Worker 名稱
 name = "cool-bread-8c9a"
 
-# 【新增這一行】: 指向您的主要 JS 檔案
-# 因為您的 worker.js 是放在根目錄，所以直接寫檔名即可
-main = "worker.js"
+# 主程式入口點 (TypeScript)
+main = "src/worker.ts"
 
 # 相容性日期
 compatibility_date = "2025-08-05"
