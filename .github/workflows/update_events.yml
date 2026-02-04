@@ -9,7 +9,6 @@ jobs:
   update-events:
     runs-on: ubuntu-latest
     
-    # 基本權限設定 (寫入權限會由 PAT_TOKEN 提供)
     permissions:
       contents: read
       pull-requests: write
@@ -30,19 +29,18 @@ jobs:
     - name: Run scraper script
       run: |
         python scripts/update_events.py
-    # 加入這個測試步驟
+
     - name: Test Secret
       if: env.PAT_TOKEN == ''
       run: echo "Secret is EMPTY!!!"
       env:
         PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
-    # ★★★ 步驟 1: 自動開 PR ★★★
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v6
       with:
-        token: ${{ secrets.PAT_TOKEN }}   # <--- 改用你剛剛設定的 Secret
+        token: ${{ secrets.PAT_TOKEN }}
         commit-message: "auto: update event schedule from wingzero"
         committer: GitHub <noreply@github.com>
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
@@ -56,9 +54,11 @@ jobs:
         add-paths: |
           data/events.json
 
-    # ★★★ 步驟 2: 自動合併 ★★★
+    # ★★★ 修改重點 ★★★
     - name: Auto Merge
-      if: steps.cpr.outputs.pull-request-operation == 'created'
-      run: gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}"
+      # 只要有 PR 號碼就執行 (不管是新建立的 created 還是更新的 updated)
+      if: steps.cpr.outputs.pull-request-number != ''
+      # 移除 --auto，改為直接執行合併 (因為你有 Bypass 權限，這樣會強制通過)
+      run: gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
       env:
-        GH_TOKEN: ${{ secrets.PAT_TOKEN }} # <--- 這裡也要改用 PAT_TOKEN
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
