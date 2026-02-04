@@ -9,9 +9,10 @@ jobs:
   update-events:
     runs-on: ubuntu-latest
     
-    # ★★★ 關鍵：賦予寫入權限 ★★★
+    # 這裡只需要讀取權限，寫入權限會由 MY_PAT 提供
     permissions:
-      contents: write
+      contents: read
+      pull-requests: write
 
     steps:
     - name: Checkout repository
@@ -30,19 +31,28 @@ jobs:
       run: |
         python scripts/update_events.py
 
-    - name: Commit and Push if changed
-      run: |
-        # ★★★ 使用官方機器人身分 (比較好看) ★★★
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        
-        git add data/events.json
-        
-        # 檢查是否有變動，有才 Commit
-        if [[ -n $(git status --porcelain) ]]; then
-          echo "Changes detected. Committing and pushing..."
-          git commit -m "auto: update event schedule from wingzero"
-          git push
-        else
-          echo "No changes detected. Skipping commit."
-        fi
+    # ★★★ 修改點：移除原本的手動 git push，改用這個 action 自動開 PR ★★★
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.MY_PAT }}      # 使用你的萬能鑰匙 (代表是你本人操作)
+        commit-message: "auto: update event schedule from wingzero"
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        branch: bot-update-events       # 機器人專用的分支
+        base: main                      # 目標合併回 main
+        delete-branch: true             # 合併後刪除暫存分支
+        title: "🤖 自動更新: 活動行程表"
+        body: |
+          更新 data/events.json 資料
+          - 執行者: GitHub Actions
+        add-paths: |                    # 指定只提交這個檔案
+          data/events.json
+
+    # ★★★ 新增：PR 建立成功後，立刻執行自動合併 ★★★
+    - name: Auto Merge
+      if: steps.cpr.outputs.pull-request-operation == 'created'
+      run: gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}"
+      env:
+        GH_TOKEN: ${{ secrets.MY_PAT }} # 使用你的鑰匙來按「合併」按鈕 (無視規則)
