@@ -30,6 +30,12 @@ jobs:
     - name: Run scraper script
       run: |
         python scripts/update_events.py
+    # 加入這個測試步驟
+    - name: Test Secret
+      if: env.PAT_TOKEN == ''
+      run: echo "Secret is EMPTY!!!"
+      env:
+        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
     # ★★★ 步驟 1: 自動開 PR ★★★
     - name: Create Pull Request
