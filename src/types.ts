@@ -122,11 +122,24 @@ export interface LeagueResult {
   pokemons: LeaguePokemonResult[];
 }
 
+export interface PvPValue {
+  pokemon: string;
+  pokemonId: string;
+  league: string;
+  leagueCp: number;
+  rank: number;
+  score: number;
+  isShadow: boolean;
+  isEvolution: boolean;
+}
+
 export interface EventInfo {
   eventName: string;
   date: string;
+  raw_time?: string;
   link: string;
   pokemonId?: string[];
+  pvpValue?: PvPValue[];
 }
 
 export interface SearchResult {
