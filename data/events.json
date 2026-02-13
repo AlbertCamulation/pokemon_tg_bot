@@ -184,6 +184,16 @@
     "pvpValue": []
   },
   {
+    "date": "2026-02-15",
+    "raw_time": "2026-02-15 14:00:00 ~ 2026-02-15 17:00:00",
+    "pokemonId": [
+      "meowth"
+    ],
+    "eventName": "超極巨化喵喵極巨對戰日",
+    "link": "https://pokemon.wingzero.tw/page/archive/1525/tw",
+    "pvpValue": []
+  },
+  {
     "date": "2026-02-10",
     "raw_time": "2026-02-10 18:00:00 ~ 2026-02-10 19:00:00",
     "pokemonId": [
@@ -197,8 +207,8 @@
     "date": "2026-02-04 ~ 2026-02-16",
     "raw_time": "2026-02-04 10:00:00 ~ 2026-02-16 10:00:00",
     "pokemonId": [
-      "dialga",
-      "palkia"
+      "palkia",
+      "dialga"
     ],
     "eventName": "帝牙盧卡、帕路奇亞傳說團體戰",
     "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
@@ -232,127 +242,6 @@
     ],
     "eventName": "纏紅鶴嘉年華",
     "link": "https://pokemon.wingzero.tw/page/archive/1515/tw",
-    "pvpValue": []
-  },
-  {
-    "date": "2026-02-01",
-    "raw_time": "2026-02-01 14:00:00 ~ 2026-02-01 17:00:00",
-    "pokemonId": [
-      "vulpix"
-    ],
-    "eventName": "2026年2月社群日：六尾＆六尾（阿羅拉的樣子）",
-    "link": "https://pokemon.wingzero.tw/page/archive/1514/tw",
-    "pvpValue": [
-      {
-        "pokemon": "六尾",
-        "pokemonId": "vulpix",
-        "league": "小小聯盟",
-        "leagueCp": 500,
-        "rank": 41,
-        "score": 76.4,
-        "isShadow": false,
-        "isEvolution": false
-      },
-      {
-        "pokemon": "六尾",
-        "pokemonId": "vulpix",
-        "league": "小小聯盟",
-        "leagueCp": 500,
-        "rank": 58,
-        "score": 74.6,
-        "isShadow": true,
-        "isEvolution": false
-      },
-      {
-        "pokemon": "九尾 阿羅拉",
-        "pokemonId": "ninetales_alolan",
-        "league": "超級聯盟",
-        "leagueCp": 1500,
-        "rank": 42,
-        "score": 89.7,
-        "isShadow": false,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "九尾 阿羅拉",
-        "pokemonId": "ninetales_alolan",
-        "league": "超級聯盟",
-        "leagueCp": 1500,
-        "rank": 56,
-        "score": 89.5,
-        "isShadow": true,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "九尾",
-        "pokemonId": "ninetales",
-        "league": "超級聯盟",
-        "leagueCp": 1500,
-        "rank": 81,
-        "score": 88.5,
-        "isShadow": false,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "九尾 阿羅拉",
-        "pokemonId": "ninetales_alolan",
-        "league": "高級聯盟",
-        "leagueCp": 2500,
-        "rank": 28,
-        "score": 91.7,
-        "isShadow": false,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "九尾 阿羅拉",
-        "pokemonId": "ninetales_alolan",
-        "league": "高級聯盟",
-        "leagueCp": 2500,
-        "rank": 30,
-        "score": 91.5,
-        "isShadow": true,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "九尾",
-        "pokemonId": "ninetales",
-        "league": "高級聯盟",
-        "leagueCp": 2500,
-        "rank": 77,
-        "score": 89.5,
-        "isShadow": true,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "九尾",
-        "pokemonId": "ninetales",
-        "league": "高級聯盟",
-        "leagueCp": 2500,
-        "rank": 88,
-        "score": 88.9,
-        "isShadow": false,
-        "isEvolution": true
-      }
-    ]
-  },
-  {
-    "date": "2026-02-01 ~ 2026-03-04",
-    "raw_time": "2026-02-01 10:00:00 ~ 2026-03-04 10:00:00",
-    "pokemonId": [
-      "regigigas"
-    ],
-    "eventName": "雷吉奇卡斯暗影傳說團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": []
-  },
-  {
-    "date": "2026-01-31 ~ 2026-02-01",
-    "raw_time": "2026-01-31 06:00:00 ~ 2026-02-01 21:00:00",
-    "pokemonId": [
-      "ho_oh"
-    ],
-    "eventName": "極巨化鳳王極巨對戰週末",
-    "link": "",
     "pvpValue": []
   }
 ]
