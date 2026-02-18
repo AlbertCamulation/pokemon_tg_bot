@@ -32,6 +32,7 @@ export const MANIFEST_URL = "https://raw.githubusercontent.com/AlbertCamulation/
 export const leagues: League[] = [
   { command: "little_league_top", name: "小小盃 (500)", cp: "500", path: "data/rankings_500.json" },
   { command: "great_league_top", name: "超級聯盟 (1500)", cp: "1500", path: "data/rankings_1500.json" },
+  { command: "great_league_top_love", name: "愛情盃 (1500)", cp: "1500", path: "data/rankings_1500_love.json" },
   { command: "great_league_top_scroll", name: "假日盃 (1500)", cp: "1500", path: "data/rankings_1500_holiday.json" },
   { command: "great_league_top_sunshine", name: "陽光盃 (1500)", cp: "1500", path: "data/rankings_1500_sunshine.json" },
   { command: "great_league_top_holiday", name: "掛軸盃 (1500)", cp: "1500", path: "data/rankings_1500_scroll.json" },
