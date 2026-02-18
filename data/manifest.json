@@ -1,4 +1,12 @@
 {
-  "last_updated_human": "Wed Feb 18 02:24:22 2026",
-  "active_leagues": []
+  "last_updated_human": "Wed Feb 18 02:31:44 2026",
+  "active_leagues": [
+    {
+      "name_zh": "超級聯盟",
+      "name_en": "Great League",
+      "pvpoke_id": "all",
+      "cp": "1500",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings_1500.json"
+    }
+  ]
 }
