@@ -1,12 +1,19 @@
 {
-  "last_updated_human": "Wed Feb 18 02:39:22 2026",
+  "last_updated_human": "Wed Feb 18 02:42:19 2026",
   "active_leagues": [
     {
       "name_zh": "超級聯盟",
       "name_en": "Great League",
-      "pvpoke_id": "all",
+      "pvpoke_id": "great",
       "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings_1500.json"
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/great/overall/rankings_1500.json"
+    },
+    {
+      "name_zh": "愛情盃 (1500)",
+      "name_en": "Love Cup",
+      "pvpoke_id": "love",
+      "cp": "1500",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/love/overall/rankings_1500.json"
     }
   ]
 }
