@@ -15,9 +15,10 @@ const GLOBAL_RANKINGS_CACHE = new Map<string, RankingPokemon[]>();
  * 取得 GitHub Raw 資料 URL
  */
 export function getDataUrl(filename: string): string {
-  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?ver=1007`;
+  // 使用時間戳作為版本號，確保每次抓取都是最新的
+  const v = Math.floor(Date.now() / 3600000); // 每小時更新一次快取標籤
+  return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?v=${v}`;
 }
-
 /**
  * 帶快取的 Fetch 請求
  */
