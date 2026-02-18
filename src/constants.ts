@@ -25,8 +25,8 @@ export const LIMIT_LEAGUES_SHOW = 50;
 export const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/g;
 export const QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
 
-// --- 當下聯盟 Manifest 網址 ---
-export const MANIFEST_URL = "https://raw.githubusercontent.com/AlbertCamulation/catchemall_pokepvp/refs/heads/main/data/manifest.json";
+// 改成指向 pokemon_tg_bot 自己的 main 分支
+export const MANIFEST_URL = "https://raw.githubusercontent.com/AlbertCamulation/pokemon_tg_bot/main/data/manifest.json";
 
 // --- 聯盟設定 ---
 export const leagues: League[] = [
