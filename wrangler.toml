@@ -1,7 +1,6 @@
-# wrangler.toml
 
-# 您的 Worker 名稱
-name = "cool-bread-8c9a"
+# wrangler.toml
+name = 'pokemon'
 
 # 主程式入口點 (TypeScript)
 main = "src/worker.ts"
