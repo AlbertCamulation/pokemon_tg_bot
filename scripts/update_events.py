@@ -9,144 +9,28 @@ from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TRANS_FILE = os.path.join(BASE_DIR, 'data', 'chinese_translation.json')
 EVENTS_FILE = os.path.join(BASE_DIR, 'data', 'events.json')
-DATA_DIR = os.path.join(BASE_DIR, 'data')
-
-# --- 聯盟設定 ---
-LEAGUES = {
-    500: "小小聯盟",
-    1500: "超級聯盟",
-    2500: "高級聯盟",
-    10000: "大師聯盟"
-}
 
 # --- 網站設定 ---
 BASE_URL = "https://pokemon.wingzero.tw"
 LIST_URL = "https://pokemon.wingzero.tw/page/event-history/tw/1"
 
 def load_pokemon_data():
-    """建立 中文名稱 -> ID 的對照表，以及完整的寶可夢資料"""
+    """建立 中文名稱 -> ID 的對照表"""
     if not os.path.exists(TRANS_FILE):
-        return {}, []
-
+        return {}
+    
     with open(TRANS_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
-
+    
     name_to_id = {}
     for p in data:
         name = p.get('speciesName')
         pid = p.get('speciesId')
         if name and pid:
             name_to_id[name] = pid.lower()
-    return name_to_id, data
-
-
-def load_rankings_data():
-    """載入所有聯盟的排名資料"""
-    rankings = {}
-    for cp in LEAGUES.keys():
-        file_path = os.path.join(DATA_DIR, f'rankings_{cp}.json')
-        if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                # 建立 speciesId -> 排名 的對照表
-                rankings[cp] = {}
-                for idx, pokemon in enumerate(data):
-                    species_id = pokemon.get('speciesId', '').lower()
-                    if species_id:
-                        rankings[cp][species_id] = {
-                            'rank': idx + 1,
-                            'score': pokemon.get('score', 0),
-                            'speciesName': pokemon.get('speciesName', '')
-                        }
-    return rankings
-
-
-def build_family_map(pokemon_data):
-    """建立進化鏈對照表：speciesId -> 同家族所有成員"""
-    family_map = {}  # family_id -> [member_ids]
-    id_to_family = {}  # species_id -> family_id
-
-    for p in pokemon_data:
-        species_id = p.get('speciesId', '').lower()
-        family = p.get('family', {})
-        family_id = family.get('id', '')
-
-        if species_id and family_id:
-            # 排除暗影版本，只保留一般版本
-            if '_shadow' in species_id:
-                continue
-
-            id_to_family[species_id] = family_id
-
-            if family_id not in family_map:
-                family_map[family_id] = []
-            if species_id not in family_map[family_id]:
-                family_map[family_id].append(species_id)
-
-    return family_map, id_to_family
-
-
-def get_pvp_value(pokemon_ids, rankings, family_map, id_to_family, pokemon_data):
-    """
-    取得活動寶可夢的 PvP 價值
-    會檢查該寶可夢及其所有進化型在各聯盟的排名
-    """
-    pvp_value = []
-    checked_families = set()
-
-    # 建立 id -> 中文名 對照表
-    id_to_name = {}
-    for p in pokemon_data:
-        pid = p.get('speciesId', '').lower()
-        name = p.get('speciesName', '')
-        if pid and name:
-            id_to_name[pid] = name
-
-    for pokemon_id in pokemon_ids:
-        pokemon_id = pokemon_id.lower()
-
-        # 取得這隻寶可夢的家族
-        family_id = id_to_family.get(pokemon_id, '')
-        if not family_id or family_id in checked_families:
-            continue
-        checked_families.add(family_id)
-
-        # 取得家族所有成員
-        family_members = family_map.get(family_id, [pokemon_id])
-
-        # 檢查每個聯盟
-        for cp, league_name in LEAGUES.items():
-            league_rankings = rankings.get(cp, {})
-
-            for member_id in family_members:
-                # 檢查一般版和暗影版
-                variants = [member_id, f"{member_id}_shadow"]
-
-                for variant in variants:
-                    if variant in league_rankings:
-                        info = league_rankings[variant]
-                        rank = info['rank']
-
-                        # 只顯示排名前 100 的
-                        if rank <= 100:
-                            chinese_name = id_to_name.get(member_id, member_id)
-                            is_shadow = '_shadow' in variant
-
-                            pvp_value.append({
-                                'pokemon': chinese_name,
-                                'pokemonId': member_id,
-                                'league': league_name,
-                                'leagueCp': cp,
-                                'rank': rank,
-                                'score': info['score'],
-                                'isShadow': is_shadow,
-                                'isEvolution': member_id != pokemon_id
-                            })
-
-    # 按排名排序
-    pvp_value.sort(key=lambda x: (x['leagueCp'], x['rank']))
-
-    return pvp_value
+            # 處理特殊形態 (例如 "火紅不倒翁" 可能對應到 "darumaka_galarian" 或原版)
+            # 這裡簡單處理，如果是 "極巨化 海豹球"，我們只要對到 "海豹球" 即可
+    return name_to_id
 
 def parse_monthly_article(url, name_to_id, current_year):
     """專門解析「月度活動總覽」文章的內文"""
@@ -280,18 +164,13 @@ def parse_monthly_article(url, name_to_id, current_year):
         return []
 
 def fetch_events():
-    name_to_id, pokemon_data = load_pokemon_data()
-    rankings = load_rankings_data()
-    family_map, id_to_family = build_family_map(pokemon_data)
-
-    print(f"📊 已載入排名資料: {', '.join([f'{LEAGUES[cp]}({len(r)}隻)' for cp, r in rankings.items()])}")
-
+    name_to_id = load_pokemon_data()
     headers = {'User-Agent': 'Mozilla/5.0'}
-
+    
     print(f"🔍 開始爬取列表: {LIST_URL}")
     resp = requests.get(LIST_URL, headers=headers)
     if resp.status_code != 200: return []
-
+    
     soup = BeautifulSoup(resp.content, 'html.parser')
     event_list = soup.select('div.col-lg-9 ul.list-unstyled li.py-3')
     
@@ -357,23 +236,6 @@ def fetch_events():
                 "eventName": raw_title,
                 "link": detail_url
             })
-
-    # 為每個活動計算 PvP 價值
-    print(f"🎯 正在計算 {len(events_data)} 個活動的 PvP 價值...")
-    for event in events_data:
-        if event.get('pokemonId'):
-            pvp_value = get_pvp_value(
-                event['pokemonId'],
-                rankings,
-                family_map,
-                id_to_family,
-                pokemon_data
-            )
-            event['pvpValue'] = pvp_value
-
-            if pvp_value:
-                top_picks = [f"{v['pokemon']}({v['league']}#{v['rank']})" for v in pvp_value[:3]]
-                print(f"   ✨ {event['eventName']}: {', '.join(top_picks)}")
 
     return events_data
 

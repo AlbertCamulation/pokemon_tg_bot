@@ -9,9 +9,9 @@ jobs:
   update-events:
     runs-on: ubuntu-latest
     
+    # ★★★ 關鍵：賦予寫入權限 ★★★
     permissions:
-      contents: read
-      pull-requests: write
+      contents: write
 
     steps:
     - name: Checkout repository
@@ -30,35 +30,19 @@ jobs:
       run: |
         python scripts/update_events.py
 
-    - name: Test Secret
-      if: env.PAT_TOKEN == ''
-      run: echo "Secret is EMPTY!!!"
-      env:
-        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-    - name: Create Pull Request
-      id: cpr
-      uses: peter-evans/create-pull-request@v6
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
-        commit-message: "auto: update event schedule from wingzero"
-        committer: GitHub <noreply@github.com>
-        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-        branch: bot-update-events
-        base: main
-        delete-branch: true
-        title: "🤖 自動更新: 活動行程表"
-        body: |
-          更新 data/events.json 資料
-          - 執行者: GitHub Actions
-        add-paths: |
-          data/events.json
-
-    # ★★★ 修改重點 ★★★
-    - name: Auto Merge
-      # 只要有 PR 號碼就執行 (不管是新建立的 created 還是更新的 updated)
-      if: steps.cpr.outputs.pull-request-number != ''
-      # 移除 --auto，改為直接執行合併 (因為你有 Bypass 權限，這樣會強制通過)
-      run: gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
-      env:
-        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+    - name: Commit and Push if changed
+      run: |
+        # ★★★ 使用官方機器人身分 (比較好看) ★★★
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        
+        git add data/events.json
+        
+        # 檢查是否有變動，有才 Commit
+        if [[ -n $(git status --porcelain) ]]; then
+          echo "Changes detected. Committing and pushing..."
+          git commit -m "auto: update event schedule from wingzero"
+          git push
+        else
+          echo "No changes detected. Skipping commit."
+        fi

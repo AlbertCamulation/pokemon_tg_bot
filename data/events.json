@@ -6,49 +6,7 @@
       "totodile"
     ],
     "eventName": "小鋸鱷聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": [
-      {
-        "pokemon": "大力鱷",
-        "pokemonId": "feraligatr",
-        "league": "超級聯盟",
-        "leagueCp": 1500,
-        "rank": 69,
-        "score": 88.9,
-        "isShadow": false,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "大力鱷",
-        "pokemonId": "feraligatr",
-        "league": "超級聯盟",
-        "leagueCp": 1500,
-        "rank": 89,
-        "score": 88.3,
-        "isShadow": true,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "大力鱷",
-        "pokemonId": "feraligatr",
-        "league": "高級聯盟",
-        "leagueCp": 2500,
-        "rank": 9,
-        "score": 94.4,
-        "isShadow": true,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "大力鱷",
-        "pokemonId": "feraligatr",
-        "league": "高級聯盟",
-        "leagueCp": 2500,
-        "rank": 18,
-        "score": 93,
-        "isShadow": false,
-        "isEvolution": true
-      }
-    ]
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-21 ~ 2026-03-04",
@@ -57,29 +15,7 @@
       "lunala"
     ],
     "eventName": "露奈雅拉傳說團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": [
-      {
-        "pokemon": "露奈雅拉",
-        "pokemonId": "lunala",
-        "league": "大師聯盟",
-        "leagueCp": 10000,
-        "rank": 9,
-        "score": 94,
-        "isShadow": false,
-        "isEvolution": false
-      },
-      {
-        "pokemon": "索爾迦雷歐",
-        "pokemonId": "solgaleo",
-        "league": "大師聯盟",
-        "leagueCp": 10000,
-        "rank": 30,
-        "score": 86.9,
-        "isShadow": false,
-        "isEvolution": true
-      }
-    ]
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-21 ~ 2026-03-04",
@@ -88,8 +24,7 @@
       "absol"
     ],
     "eventName": "超級阿勃梭魯超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": []
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-17",
@@ -98,49 +33,7 @@
       "horsea"
     ],
     "eventName": "墨海馬聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": [
-      {
-        "pokemon": "刺龍王",
-        "pokemonId": "kingdra",
-        "league": "超級聯盟",
-        "leagueCp": 1500,
-        "rank": 49,
-        "score": 89.6,
-        "isShadow": false,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "刺龍王",
-        "pokemonId": "kingdra",
-        "league": "超級聯盟",
-        "leagueCp": 1500,
-        "rank": 99,
-        "score": 87.6,
-        "isShadow": true,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "刺龍王",
-        "pokemonId": "kingdra",
-        "league": "高級聯盟",
-        "leagueCp": 2500,
-        "rank": 32,
-        "score": 91.4,
-        "isShadow": false,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "刺龍王",
-        "pokemonId": "kingdra",
-        "league": "高級聯盟",
-        "leagueCp": 2500,
-        "rank": 33,
-        "score": 91.3,
-        "isShadow": true,
-        "isEvolution": true
-      }
-    ]
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-16 ~ 2026-02-21",
@@ -149,29 +42,7 @@
       "solgaleo"
     ],
     "eventName": "索爾迦雷歐傳說團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": [
-      {
-        "pokemon": "露奈雅拉",
-        "pokemonId": "lunala",
-        "league": "大師聯盟",
-        "leagueCp": 10000,
-        "rank": 9,
-        "score": 94,
-        "isShadow": false,
-        "isEvolution": true
-      },
-      {
-        "pokemon": "索爾迦雷歐",
-        "pokemonId": "solgaleo",
-        "league": "大師聯盟",
-        "leagueCp": 10000,
-        "rank": 30,
-        "score": 86.9,
-        "isShadow": false,
-        "isEvolution": false
-      }
-    ]
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-16 ~ 2026-02-21",
@@ -180,18 +51,7 @@
       "sableye"
     ],
     "eventName": "超級勾魂眼超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": []
-  },
-  {
-    "date": "2026-02-15",
-    "raw_time": "2026-02-15 14:00:00 ~ 2026-02-15 17:00:00",
-    "pokemonId": [
-      "meowth"
-    ],
-    "eventName": "超極巨化喵喵極巨對戰日",
-    "link": "https://pokemon.wingzero.tw/page/archive/1525/tw",
-    "pvpValue": []
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-10",
@@ -200,8 +60,7 @@
       "munna"
     ],
     "eventName": "食夢夢聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": []
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-04 ~ 2026-02-16",
@@ -211,8 +70,7 @@
       "dialga"
     ],
     "eventName": "帝牙盧卡、帕路奇亞傳說團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": []
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-04 ~ 2026-02-16",
@@ -221,8 +79,7 @@
       "pidgeot"
     ],
     "eventName": "超級大比鳥超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": []
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-03",
@@ -231,8 +88,7 @@
       "whismur"
     ],
     "eventName": "咕妞妞聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw",
-    "pvpValue": []
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   },
   {
     "date": "2026-02-03 ~ 2026-02-08",
@@ -241,7 +97,33 @@
       "flamigo"
     ],
     "eventName": "纏紅鶴嘉年華",
-    "link": "https://pokemon.wingzero.tw/page/archive/1515/tw",
-    "pvpValue": []
+    "link": "https://pokemon.wingzero.tw/page/archive/1515/tw"
+  },
+  {
+    "date": "2026-02-01",
+    "raw_time": "2026-02-01 14:00:00 ~ 2026-02-01 17:00:00",
+    "pokemonId": [
+      "vulpix"
+    ],
+    "eventName": "2026年2月社群日：六尾＆六尾（阿羅拉的樣子）",
+    "link": "https://pokemon.wingzero.tw/page/archive/1514/tw"
+  },
+  {
+    "date": "2026-02-01 ~ 2026-03-04",
+    "raw_time": "2026-02-01 10:00:00 ~ 2026-03-04 10:00:00",
+    "pokemonId": [
+      "regigigas"
+    ],
+    "eventName": "雷吉奇卡斯暗影傳說團體戰",
+    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
+  },
+  {
+    "date": "2026-01-31 ~ 2026-02-01",
+    "raw_time": "2026-01-31 06:00:00 ~ 2026-02-01 21:00:00",
+    "pokemonId": [
+      "ho_oh"
+    ],
+    "eventName": "極巨化鳳王極巨對戰週末",
+    "link": ""
   }
 ]

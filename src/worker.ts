@@ -56,9 +56,7 @@ import {
   handleApproveUser,
   handleBanUser,
   handleUnbanUser,
-  sendAuthorizationRequest,
-  handleEventCommand,
-  handlePvPEventCommand
+  sendAuthorizationRequest
 } from './handlers';
 
 import { generateHTML } from './web/html';
@@ -289,15 +287,6 @@ async function onMessage(
         if (isSuperAdmin) {
           await handleBanlistCommand(chatId, env);
         }
-        return;
-
-      case "event":
-      case "events":
-        await handleEventCommand(chatId, env, ctx);
-        return;
-
-      case "pvp":
-        await handlePvPEventCommand(chatId, env, ctx);
         return;
 
       default:
