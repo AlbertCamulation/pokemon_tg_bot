@@ -9,9 +9,11 @@ on:
 jobs:
   fetch-and-commit:
     runs-on: ubuntu-latest
-    
+
+    # 基本權限設定
     permissions:
-      contents: write
+      contents: read
+      pull-requests: write
 
     steps:
       # 步驟 1: 先 Checkout 你的專案程式碼
@@ -22,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x' # 使用最新的 Python 3 版本
+          python-version: '3.x'
 
       # 步驟 3: 安裝 Python 依賴套件
       - name: Install dependencies
@@ -33,23 +35,29 @@ jobs:
       # 步驟 4: 執行 Python 腳本來獲取資料
       - name: Fetch PvPoke rankings data
         run: python scripts/fetch_data.py
-      
-      # 步驟 5: 設定 Git 並 Commit/Push 檔案
-      - name: Commit and push if there are changes
-        run: |
-          # 設定 Git 的機器人使用者
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # 將 data 資料夾中的所有變更加入追蹤列表
-          git add data/
-          
-          # 檢查是否有檔案變更，若有才執行 commit 和 push
-          # 'git status --porcelain' 會在有變更時輸出內容，否則為空
-          if [[ -n $(git status --porcelain) ]]; then
-            echo "Changes detected. Committing and pushing..."
-            git commit -m "Update PvPoke rankings data ($(date +'%Y-%m-%d'))"
-            git push
-          else
-            echo "No changes detected. Skipping commit."
-          fi
+
+      # ★★★ 步驟 5: 拔除原本的 git push，改為自動建立 PR ★★★
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PAT_TOKEN }} # 使用你之前設定的萬能鑰匙
+          commit-message: 'auto: Update PvPoke rankings data'
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          branch: bot-update-rankings # 機器人專用分支
+          base: main
+          delete-branch: true
+          title: '🤖 自動更新: PvPoke 排名數據'
+          body: |
+            更新 data/ 資料夾下的排名資料
+            - 執行者: GitHub Actions
+          add-paths: |
+            data/
+
+      # ★★★ 步驟 6: 利用 Admin 特權直接自動合併 ★★★
+      - name: Auto Merge
+        if: steps.cpr.outputs.pull-request-number != ''
+        run: gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
