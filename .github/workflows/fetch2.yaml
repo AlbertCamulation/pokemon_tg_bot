@@ -58,6 +58,6 @@ jobs:
       # ★★★ 步驟 6: 利用 Admin 特權直接自動合併 ★★★
       - name: Auto Merge
         if: steps.cpr.outputs.pull-request-number != ''
-        run: gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
+        run: gh pr merge --squash --delete-branch --admin "${{ steps.cpr.outputs.pull-request-number }}"
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
