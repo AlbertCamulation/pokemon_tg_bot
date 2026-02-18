@@ -112,7 +112,8 @@ def map_to_pvpoke_id_and_cp(en_name):
 def run_automation():
     # ★★★ 賽季公告網址 (如果未來換季，記得來這裡改網址) ★★★
     # 目前使用 2026 年初的網址範例，請確認這是當前賽季的網址：
-    zh_article_url = "https://pokemongolive.com/zh_hant/post/go-battle-league-max-out/" 
+    # zh_article_url = "https://pokemongolive.com/zh_hant/post/go-battle-league-max-out/" 
+    zh_article_url = "https://pokemongo.com/zh_Hant/news/go-battle-league-precious-paths" 
     
     if not zh_article_url:
         print("❌ 未設定對戰聯盟文章網址")
