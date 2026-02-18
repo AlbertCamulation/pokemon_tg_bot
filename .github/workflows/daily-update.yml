@@ -1,50 +1,54 @@
-name: Daily Data Update
+name: Daily Pokémon Update (3-in-1)
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+    # 每天台灣時間早上 10 點 (UTC 02:00) 執行一次
+    - cron: '0 2 * * *'
+  workflow_dispatch: 
 
 jobs:
-  update-all-data:
+  update-all:
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.9'
 
-      # 一次安裝所有需要的套件
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 cloudscraper
+      - name: Install Dependencies
+        run: pip install requests beautifulsoup4 cloudscraper
 
-      # 依序執行兩個腳本
-      - name: Fetch PvPoke rankings data
-        run: python scripts/fetch_data.py
+      # 1. 抓取當下聯盟 (產生 manifest.json)
+      # ⚠️ 注意路徑：現在腳本已經搬到 scripts/ 底下了
+      - name: Run League Scraper
+        run: python scripts/pk_grab_from_official.py
 
-      - name: Run events scraper script
+      # 2. 抓取活動表 (產生 events.json)
+      - name: Run Event Scraper
         run: python scripts/update_events.py
 
-      # 一次性 Commit 所有變更
-      - name: Commit and push changes
+      # 3. 抓取排名資料 (產生 rankings_xxx.json)
+      - name: Run Ranking Scraper
+        run: python scripts/fetch_data.py
+
+      # 一次性把三個腳本產生的資料打包推上 GitHub
+      - name: Commit and Push
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add data/
-
-          if [[ -n $(git status --porcelain) ]]; then
-            echo "發現變更，準備 Push..."
-            git commit -m "🤖 自動更新: 排名與活動數據 ($(date +'%Y-%m-%d'))"
+          
+          if [ -n "$(git status --porcelain data/)" ]; then
+            git commit -m "🤖 自動更新: 排名/活動/聯盟資料 ($(TZ='Asia/Taipei' date +'%Y-%m-%d %H:%M'))"
             git push origin main
+            echo "✅ 所有資料已更新並推送"
           else
-            echo "沒有資料變更，跳過 Commit。"
+            echo "ℹ️ 資料無變動，跳過提交"
           fi
