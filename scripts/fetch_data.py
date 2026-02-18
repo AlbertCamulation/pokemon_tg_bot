@@ -1,69 +1,62 @@
-# fetch_data.py
-import requests
-import cloudscraper
+import json
 import os
-import re
+import requests
+import time
 
-def get_site_version(scraper):
-    """從 PvPoke 主頁獲取網站版本號"""
-    try:
-        url = "https://pvpoke.com/rankings/all/1500/overall/"
-        print(f"Fetching site version from {url}...")
-        response = scraper.get(url)
-        response.raise_for_status() # 如果請求失敗則拋出異常
-        
-        # 使用正則表達式尋找 var siteVersion = "vX.Y.Z";
-        match = re.search(r'var\s+siteVersion\s*=\s*"([^"]+)"', response.text)
-        if match:
-            version = match.group(1)
-            print(f"Found site version: {version}")
-            return version
+# 設定路徑
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MANIFEST_FILE = os.path.join(BASE_DIR, 'data', 'manifest.json')
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
+
+def fetch_all_active_rankings():
+    # 1. 讀取 manifest.json 看看現在有哪些聯盟
+    if not os.path.exists(MANIFEST_FILE):
+        print("❌ 找不到 manifest.json，請先執行聯盟偵測腳本。")
+        return
+
+    with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
+        manifest = json.load(f)
+
+    active_leagues = manifest.get('active_leagues', [])
+    if not active_leagues:
+        print("ℹ️ 目前沒有活動中的聯盟需要下載。")
+        return
+
+    print(f"🚀 開始同步 {len(active_leagues)} 個當前聯盟的排名資料...")
+
+    # 2. 依照清單下載對應的 JSON
+    for league in active_leagues:
+        url = league['json_url']
+        cp = league['cp']
+        pid = league['pvpoke_id']
+        name = league['name_zh']
+
+        # 決定檔名邏輯：
+        # 標準聯盟 (all/great/ultra/master) -> rankings_1500.json
+        # 特殊盃賽 (love/remix...) -> rankings_1500_love.json
+        if pid in ['all', 'great', 'ultra', 'master']:
+            filename = f"rankings_{cp}.json"
         else:
-            print("Error: Could not find site version in the page content.")
-            return None
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching site version: {e}")
-        return None
+            filename = f"rankings_{cp}_{pid}.json"
 
-def fetch_rankings(scraper, version):
-    """下載所有聯盟的排名 JSON 檔案"""
-    leagues = {
-        "500": "Little League",
-        "1500": "Great League",
-        "2500": "Ultra League",
-        "10000": "Master League"
-    }
-    
-    # 確保 data 資料夾存在
-    if not os.path.exists('data'):
-        os.makedirs('data')
+        target_path = os.path.join(DATA_DIR, filename)
 
-    for cp, name in leagues.items():
-        url = f"https://pvpoke.com/data/rankings/all/overall/rankings-{cp}.json?v={version}"
-        print(f"Fetching rankings for {name} ({cp})...")
+        print(f"  📥 正在下載 {name} -> {filename}...")
         try:
-            response = scraper.get(url)
-            response.raise_for_status()
+            # 加上版本號避免快取
+            res = requests.get(f"{url}?v={int(time.time())}", headers=HEADERS, timeout=15)
+            res.raise_for_status()
             
-            # 寫入檔案
-            with open(f"data/rankings_{cp}.json", 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            print(f"Successfully downloaded rankings_{cp}.json")
-
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching rankings for {cp}: {e}")
+            with open(target_path, 'w', encoding='utf-8') as f:
+                f.write(res.text)
+            print(f"  ✅ 下載成功！")
         except Exception as e:
-            print(f"An unexpected error occurred for {cp}: {e}")
-
+            print(f"  ❌ 下載失敗 ({name}): {e}")
 
 if __name__ == "__main__":
-    # 建立一個 cloudscraper 實例，它會像瀏覽器一樣處理挑戰
-    scraper = cloudscraper.create_scraper()
-    
-    version_number = get_site_version(scraper)
-    
-    if version_number:
-        fetch_rankings(scraper, version_number)
-    else:
-        print("Could not retrieve site version. Aborting download.")
-        exit(1) # 以錯誤碼退出，讓 GitHub Action 失敗
+    os.makedirs(DATA_DIR, exist_ok=True)
+    fetch_all_active_rankings()
