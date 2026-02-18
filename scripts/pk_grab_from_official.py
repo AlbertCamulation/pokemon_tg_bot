@@ -18,22 +18,14 @@ def map_to_pvpoke_id_and_cp(en_name):
     cp = "1500"
     if "master" in name: cp = "10000"
     elif "ultra" in name: cp = "2500"
-    
-    # 移除干擾字
     clean = name.replace(" cup", "").replace(" league", "").replace(" edition", "").replace(" version", "").replace(": great league edition", "").strip()
-    
-    # 核心映射
-    if "great league" in name and "remix" not in name: return "all", "1500"
-    if "ultra league" in name and "premier" not in name: return "all", "2500"
-    if "master league" in name and "premier" not in name: return "all", "10000"
-    
-    # 特殊盃賽提取最後一個單字 (例如 Love Cup -> love)
     pvp_id = clean.split(" ")[-1]
     manual = {"love": "love", "remix": "remix", "fantasy": "fantasy", "retro": "retro"}
     return manual.get(pvp_id, pvp_id), cp
 
 def get_leagues(url, lang="en"):
     soup = get_soup(url, lang)
+    if not soup: return []
     items = soup.find_all('div', attrs={"data-slot": "GblScheduleBlockItem"})
     data = []
     for item in items:
@@ -50,24 +42,22 @@ def run_automation():
     zh_data = get_leagues(zh_url, "zh")
     en_data = get_leagues(en_url, "en")
     
-    # 修改：判定時間加寬 (現在 + 未來 24 小時)，確保時差不會搞死爬蟲
     now_ms = int(time.time() * 1000)
+    # 擴大偵測範圍：現在 or 24小時內會開始的都算
     buffer_ms = 24 * 60 * 60 * 1000 
     
     manifest = {"last_updated_human": time.ctime(), "active_leagues": []}
     seen = set()
 
     for i in range(len(zh_data)):
-        # 只要「現在」或「即將開始」的區間都抓
-        if (zh_data[i]['start'] <= now_ms + buffer_ms <= zh_data[i]['end']) or (zh_data[i]['start'] <= now_ms <= zh_data[i]['end']):
+        # 判定條件：現在正在進行，或是 24 小時內即將開始
+        is_active = zh_data[i]['start'] <= now_ms <= zh_data[i]['end']
+        is_upcoming = zh_data[i]['start'] <= now_ms + buffer_ms <= zh_data[i]['end']
+
+        if is_active or is_upcoming:
             en_leagues = en_data[i]['leagues'] if i < len(en_data) else []
             zh_leagues = zh_data[i]['leagues']
             
-            # 如果這格是空的 (像官方 2/11-2/18 那樣)，我們嘗試抓下一格
-            if not en_leagues and i + 1 < len(en_data):
-                en_leagues = en_data[i+1]['leagues']
-                zh_leagues = zh_data[i+1]['leagues']
-
             for idx, en in enumerate(en_leagues):
                 pvp_id, cp = map_to_pvpoke_id_and_cp(en)
                 if f"{pvp_id}_{cp}" in seen: continue
@@ -79,12 +69,17 @@ def run_automation():
                     "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings_{cp}.json"
                 })
 
-    # 強制保底：如果真的還是空的，手動塞入愛情盃 (針對 2/18 的特殊補丁)
-    if not manifest["active_leagues"]:
-        manifest["active_leagues"] = [
-            {"name_zh": "超級聯盟", "name_en": "Great League", "pvpoke_id": "all", "cp": "1500", "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings_1500.json"},
-            {"name_zh": "愛情盃", "name_en": "Love Cup", "pvpoke_id": "love", "cp": "1500", "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/love/overall/rankings_1500.json"}
-        ]
+    # 🔥 強制邏輯：如果清單內沒有「love」，且現在接近 2/18，就強制補入
+    has_love = any("love" in league["pvpoke_id"] for league in manifest["active_leagues"])
+    if not has_love:
+        print("⚠️ 偵測到愛情盃缺失，執行強制補丁...")
+        manifest["active_leagues"].append({
+            "name_zh": "愛情盃 (1500)",
+            "name_en": "Love Cup",
+            "pvpoke_id": "love",
+            "cp": "1500",
+            "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/love/overall/rankings_1500.json"
+        })
 
     os.makedirs('data', exist_ok=True)
     with open('data/manifest.json', 'w', encoding='utf-8') as f:
