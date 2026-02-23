@@ -4,4 +4,5 @@ dist/
 
 # TypeScript build 產生的檔案
 *.tsbuildinfo
+package.json
 package-lock.json
