@@ -1,0 +1,25 @@
+{
+  "name": "pokemon-tg-bot",
+  "version": "1.0.0",
+  "description": "Pokemon GO PvP Telegram Bot on Cloudflare Workers",
+  "main": "src/worker.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240620.0",
+    "typescript": "^5.4.5",
+    "wrangler": "^3.60.0"
+  },
+  "keywords": [
+    "pokemon",
+    "telegram",
+    "cloudflare-workers",
+    "pvp"
+  ],
+  "author": "",
+  "license": "MIT"
+}
