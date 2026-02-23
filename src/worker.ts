@@ -32,12 +32,8 @@ import {
 
 import {
   getAllowedUserIds,
-  getBannedUsers,
-  isUserBanned,
-  isUserAllowed
+  getBannedUsers
 } from './utils/kv';
-
-import { escapeHtml } from './utils/helpers';
 
 import {
   handlePokemonSearch,
@@ -213,12 +209,13 @@ async function onMessage(
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
 
   if (!isSuperAdmin && !isInAdminGroup) {
-    // 檢查黑名單
-    const bannedMap = await getBannedUsers(env);
+    // 並行讀取黑名單與白名單
+    const [bannedMap, allowedIds] = await Promise.all([
+      getBannedUsers(env),
+      getAllowedUserIds(env)
+    ]);
     if (bannedMap[userId]) return;
 
-    // 檢查白名單
-    const allowedIds = await getAllowedUserIds(env);
     if (!allowedIds.includes(userId)) {
       if (adminGroupId) {
         await sendAuthorizationRequest(

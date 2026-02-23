@@ -24,7 +24,7 @@ export function getDataUrl(filename: string): string {
  */
 export async function fetchWithCache(
   url: string,
-  env: Env,
+  _env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
   const cache = caches.default;

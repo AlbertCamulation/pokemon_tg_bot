@@ -149,7 +149,7 @@ export async function handlePokemonSearch(
           const fast = formatMove(fastMoveId, movesData, eliteList, p.speciesId.toLowerCase());
           const chargedArray = Array.isArray(chargedMoveIds) ? chargedMoveIds : [chargedMoveIds];
           const chargedMoves = chargedArray
-            .filter((m: string) => m)
+            .filter((m): m is string => !!m)
             .map((m: string) => {
               const result = formatMove(m, movesData, eliteList, p.speciesId.toLowerCase());
               if (result.isElite) hasEliteRequirement = true;

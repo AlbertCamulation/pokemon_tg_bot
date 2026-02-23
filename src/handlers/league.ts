@@ -5,7 +5,7 @@
 import type { Env, PokemonData, RankingPokemon } from '../types';
 import { leagues, MANIFEST_URL, NAME_CLEANER_REGEX, typeNames } from '../constants';
 import { fetchWithCache, getDataUrl } from '../utils/cache';
-import { sendMessage, editMessage, deleteMessage } from '../utils/telegram';
+import { sendMessage, deleteMessage } from '../utils/telegram';
 import { getPokemonRating, getTranslatedName, getDefenseProfile, getWeaknesses } from '../utils/helpers';
 
 /**

@@ -5,8 +5,6 @@
 import type { Env, TelegramInlineKeyboardButton } from '../types';
 import { sendMessage, editMessage, answerCallbackQuery } from '../utils/telegram';
 import {
-  getAllowedUserIds,
-  setAllowedUserIds,
   getBannedUsers,
   setBannedUsers,
   addToAllowedList,
