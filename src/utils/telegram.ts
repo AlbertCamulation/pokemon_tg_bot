@@ -57,8 +57,8 @@ export async function editMessage(
   text: string,
   options: SendMessageOptions | null = null,
   env: Env
-): Promise<void> {
-  if (!text) return;
+): Promise<TelegramSendMessageResponse> {
+  if (!text) return { ok: false, description: 'Empty text' };
 
   const payload: Record<string, unknown> = {
     chat_id: chatId,
@@ -76,7 +76,7 @@ export async function editMessage(
     payload.parse_mode = "HTML";
   }
 
-  await fetch(
+  const response = await fetch(
     `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/editMessageText`,
     {
       method: "POST",
@@ -84,6 +84,8 @@ export async function editMessage(
       body: JSON.stringify(payload)
     }
   );
+
+  return await response.json() as TelegramSendMessageResponse;
 }
 
 /**

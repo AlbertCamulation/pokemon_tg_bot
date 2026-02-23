@@ -39,13 +39,17 @@ export async function fetchWithCache(
   let response: Response | null = null;
 
   for (let i = 0; i <= maxRetries; i++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
-      response = await fetch(url);
+      response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (response.ok) break;
     } catch (e) {
+      clearTimeout(timeoutId);
       console.error(`Fetch attempt ${i + 1} failed: ${(e as Error).message}`);
     }
-    if (i < maxRetries) await new Promise(r => setTimeout(r, 50));
+    if (i < maxRetries) await new Promise(r => setTimeout(r, 200));
   }
 
   // 3. 如果重試後還是失敗，回傳空陣列

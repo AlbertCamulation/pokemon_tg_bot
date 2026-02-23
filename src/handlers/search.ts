@@ -254,9 +254,20 @@ export async function handlePokemonSearch(
       ]];
     }
 
+    // Telegram 訊息長度上限為 4096 字元，超過則截斷
+    const MAX_TG_LENGTH = 4000;
+    if (msg.length > MAX_TG_LENGTH) {
+      const cutPoint = msg.lastIndexOf('\n', MAX_TG_LENGTH - 60);
+      msg = msg.substring(0, cutPoint > 0 ? cutPoint : MAX_TG_LENGTH - 60) + '\n\n⚠️ <i>內容過多，已截斷顯示</i>';
+    }
+
     // 編輯或發送訊息
     if (loadingMsgId) {
-      await editMessage(chatId, loadingMsgId, msg, options, env);
+      const editResult = await editMessage(chatId, loadingMsgId, msg, options, env);
+      if (!editResult.ok) {
+        // 編輯失敗時改用新訊息發送
+        await sendMessage(chatId, msg, options, env);
+      }
     } else {
       await sendMessage(chatId, msg, options, env);
     }
