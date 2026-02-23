@@ -10,12 +10,11 @@ import type {
   SearchResult,
   EvolutionChainItem,
   LeagueResult,
-  LeaguePokemonResult
+  LeaguePokemonResult,
+  RankingPokemon
 } from '../types';
 import { leagues, typeChart, QUERY_CLEANER_REGEX, NAME_CLEANER_REGEX } from '../constants';
 import {
-  fetchWithCache,
-  getDataUrl,
   getJsonData,
   getLeagueRanking
 } from '../utils/cache';
@@ -75,16 +74,12 @@ export async function handlePokemonSearch(
   const loadingMsgId = loadingMsg.result?.message_id || null;
 
   try {
-    // 並行取得資料
-    const [resTrans, resMoves, resEvents] = await Promise.all([
-      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
-      fetchWithCache(getDataUrl("data/move.json"), env, ctx),
-      fetchWithCache(getDataUrl("data/events.json"), env, ctx)
+    // 並行取得資料 (使用記憶體快取)
+    const [data, movesData, eventsData] = await Promise.all([
+      getJsonData<PokemonData[]>('trans', "data/chinese_translation.json", env, ctx),
+      getJsonData<MovesMap>('moves', "data/move.json", env, ctx),
+      getJsonData<EventInfo[]>('events', "data/events.json", env, ctx)
     ]);
-
-    const data = await resTrans.json() as PokemonData[];
-    const movesData = resMoves.ok ? await resMoves.json() as MovesMap : {};
-    const eventsData = resEvents.ok ? await resEvents.json() as EventInfo[] : [];
 
     // 搜尋匹配
     const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
@@ -112,9 +107,9 @@ export async function handlePokemonSearch(
     const pokemonMap = new Map(finalMatches.map(p => [p.speciesId.toLowerCase(), p]));
     const ids = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
 
-    // 取得所有聯盟排名
+    // 取得所有聯盟排名 (使用記憶體快取)
     const rankResults = await Promise.all(
-      leagues.map(l => fetchWithCache(getDataUrl(l.path), env, ctx).then(r => r.ok ? r.json() : null))
+      leagues.map(l => getLeagueRanking(l, env, ctx))
     );
 
     let msg = `🏆 <b>"${finalQuery}" 家族相關排名</b>\n`;
@@ -122,10 +117,10 @@ export async function handlePokemonSearch(
     let hasEliteRequirement = false;
 
     // 處理排名結果
-    rankResults.forEach((list, i) => {
-      if (!list || !Array.isArray(list)) return;
+    rankResults.forEach((list: RankingPokemon[], i: number) => {
+      if (!list || list.length === 0) return;
 
-      list.forEach((p: any, rankIndex: number) => {
+      list.forEach((p: RankingPokemon, rankIndex: number) => {
         if (!ids.has(p.speciesId.toLowerCase())) return;
 
         const rank = p.rank || p.tier || rankIndex + 1;
