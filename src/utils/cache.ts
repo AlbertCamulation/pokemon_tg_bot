@@ -35,12 +35,13 @@ export async function fetchWithCache(
   if (cachedRes) return cachedRes;
 
   // 2. 重試邏輯：timeout 涵蓋 headers + body 全程
-  const maxRetries = 2;
+  // maxRetries=1 → 最多 2 次嘗試，最差 5s×2+100ms = 10.1s，兩個階段共 ~20s < 30s 上限
+  const maxRetries = 1;
   let bodyText: string | null = null;
 
   for (let i = 0; i <= maxRetries; i++) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     try {
       const response = await fetch(url, { signal: controller.signal });
       if (response.ok) {
@@ -53,7 +54,7 @@ export async function fetchWithCache(
       clearTimeout(timeoutId);
       console.error(`Fetch attempt ${i + 1} failed: ${(e as Error).message}`);
     }
-    if (i < maxRetries) await new Promise(r => setTimeout(r, 200));
+    if (i < maxRetries) await new Promise(r => setTimeout(r, 100));
   }
 
   // 3. 全部嘗試失敗，回傳空陣列

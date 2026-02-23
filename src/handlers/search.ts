@@ -275,7 +275,10 @@ export async function handlePokemonSearch(
   } catch (e) {
     const errorMsg = `⚠️ 發生錯誤: ${(e as Error).message}`;
     if (loadingMsgId) {
-      await editMessage(chatId, loadingMsgId, errorMsg, null, env);
+      const editResult = await editMessage(chatId, loadingMsgId, errorMsg, null, env);
+      if (!editResult.ok) {
+        await sendMessage(chatId, errorMsg, null, env);
+      }
     } else {
       await sendMessage(chatId, errorMsg, null, env);
     }
