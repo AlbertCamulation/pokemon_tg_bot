@@ -91,7 +91,11 @@ export async function handlePokemonSearch(
     );
 
     if (!initialMatches.length) {
-      await sendMessage(chatId, "找不到寶可夢", null, env);
+      if (loadingMsgId) {
+        await editMessage(chatId, loadingMsgId, "找不到寶可夢", null, env);
+      } else {
+        await sendMessage(chatId, "找不到寶可夢", null, env);
+      }
       return;
     }
 

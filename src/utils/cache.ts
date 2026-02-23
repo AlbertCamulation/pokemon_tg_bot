@@ -118,12 +118,13 @@ export async function getJsonData<T>(
     return [] as T;
   }
 
-  // C. 寫入全域變數
-  if (data) {
-    if (key === 'trans') GLOBAL_TRANS_CACHE = data as PokemonData[];
-    if (key === 'moves') GLOBAL_MOVES_CACHE = data as MovesMap;
-    if (key === 'events') GLOBAL_EVENTS_CACHE = data as EventInfo[];
-  }
+  // C. 寫入全域變數 (只快取非空資料，避免錯誤結果被永久快取)
+  if (key === 'trans' && Array.isArray(data) && (data as unknown[]).length > 0)
+    GLOBAL_TRANS_CACHE = data as PokemonData[];
+  if (key === 'moves' && data && typeof data === 'object' && Object.keys(data as object).length > 0)
+    GLOBAL_MOVES_CACHE = data as MovesMap;
+  if (key === 'events' && Array.isArray(data) && (data as unknown[]).length > 0)
+    GLOBAL_EVENTS_CACHE = data as EventInfo[];
 
   return data;
 }
@@ -147,8 +148,8 @@ export async function getLeagueRanking(
     if (!res.ok) return [];
     const data = await res.json() as RankingPokemon[];
 
-    // C. 存入 Map
-    if (data && Array.isArray(data)) {
+    // C. 存入 Map (只快取非空資料)
+    if (data && Array.isArray(data) && data.length > 0) {
       GLOBAL_RANKINGS_CACHE.set(league.command, data);
     }
     return data;
