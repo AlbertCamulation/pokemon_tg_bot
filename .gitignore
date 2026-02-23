@@ -4,9 +4,5 @@ dist/
 
 # TypeScript build 產生的檔案
 *.tsbuildinfo
+package.json
 package-lock.json
-
-# 本地環境變數 (含密鑰，不可上傳)
-.dev.vars
-.env
-.env.local
