@@ -34,28 +34,24 @@ export async function fetchWithCache(
   const cachedRes = await cache.match(cacheKey);
   if (cachedRes) return cachedRes;
 
-  // 2. 重試邏輯：timeout 涵蓋 headers + body 全程
-  // maxRetries=1 → 最多 2 次嘗試，最差 5s×2+100ms = 10.1s，兩個階段共 ~20s < 30s 上限
-  const maxRetries = 1;
+  // 2. 使用 Promise.race 確保 fetch + body 全程都有 timeout (8s)
+  // 所有聯盟並行抓取，兩個階段共 ~16s < 30s 上限
   let bodyText: string | null = null;
 
-  for (let i = 0; i <= maxRetries; i++) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const controller = new AbortController();
+  const timeoutPromise = new Promise<null>(resolve => {
+    setTimeout(() => { controller.abort(); resolve(null); }, 8000);
+  });
+  const fetchPromise = (async (): Promise<string | null> => {
     try {
       const response = await fetch(url, { signal: controller.signal });
-      if (response.ok) {
-        bodyText = await response.text(); // timeout 仍有效，涵蓋 body 下載
-        clearTimeout(timeoutId);
-        break;
-      }
-      clearTimeout(timeoutId);
-    } catch (e) {
-      clearTimeout(timeoutId);
-      console.error(`Fetch attempt ${i + 1} failed: ${(e as Error).message}`);
+      if (!response.ok) return null;
+      return await response.text();
+    } catch {
+      return null;
     }
-    if (i < maxRetries) await new Promise(r => setTimeout(r, 100));
-  }
+  })();
+  bodyText = await Promise.race([fetchPromise, timeoutPromise]);
 
   // 3. 全部嘗試失敗，回傳空陣列
   if (!bodyText) {
