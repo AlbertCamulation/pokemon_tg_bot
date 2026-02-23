@@ -34,17 +34,21 @@ export async function fetchWithCache(
   const cachedRes = await cache.match(cacheKey);
   if (cachedRes) return cachedRes;
 
-  // 2. 定義重試邏輯 (最多重試 2 次，共 3 次機會)
+  // 2. 重試邏輯：timeout 涵蓋 headers + body 全程
   const maxRetries = 2;
-  let response: Response | null = null;
+  let bodyText: string | null = null;
 
   for (let i = 0; i <= maxRetries; i++) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
-      response = await fetch(url, { signal: controller.signal });
+      const response = await fetch(url, { signal: controller.signal });
+      if (response.ok) {
+        bodyText = await response.text(); // timeout 仍有效，涵蓋 body 下載
+        clearTimeout(timeoutId);
+        break;
+      }
       clearTimeout(timeoutId);
-      if (response.ok) break;
     } catch (e) {
       clearTimeout(timeoutId);
       console.error(`Fetch attempt ${i + 1} failed: ${(e as Error).message}`);
@@ -52,8 +56,8 @@ export async function fetchWithCache(
     if (i < maxRetries) await new Promise(r => setTimeout(r, 200));
   }
 
-  // 3. 如果重試後還是失敗，回傳空陣列
-  if (!response || !response.ok) {
+  // 3. 全部嘗試失敗，回傳空陣列
+  if (!bodyText) {
     console.error(`Failed to fetch ${url} after retries.`);
     return new Response("[]", {
       status: 200,
@@ -61,33 +65,19 @@ export async function fetchWithCache(
     });
   }
 
-  // 4. 讀取並複製資料
-  let bodyText: string;
-  try {
-    bodyText = await response.text();
-  } catch {
+  if (bodyText.trim().length === 0) {
     return new Response("[]", {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
   }
 
-  if (!bodyText || bodyText.trim().length === 0) {
-    return new Response("[]", {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-
-  // 5. 設定快取 Header 並存入快取
-  const headers = new Headers(response.headers);
+  // 4. 設定快取 Header 並存入快取
+  const headers = new Headers();
   headers.set("Cache-Control", `public, max-age=${CACHE_TTL}`);
   headers.set("Content-Type", "application/json");
 
-  const responseToCache = new Response(bodyText, {
-    status: response.status,
-    headers
-  });
+  const responseToCache = new Response(bodyText, { status: 200, headers });
 
   if (ctx?.waitUntil) {
     ctx.waitUntil(cache.put(cacheKey, responseToCache.clone()));
@@ -95,7 +85,7 @@ export async function fetchWithCache(
     cache.put(cacheKey, responseToCache.clone()).catch(console.error);
   }
 
-  return new Response(bodyText, { status: response.status, headers });
+  return new Response(bodyText, { status: 200, headers });
 }
 
 /**
