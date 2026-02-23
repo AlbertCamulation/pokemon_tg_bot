@@ -112,7 +112,7 @@ export async function answerCallbackQuery(
   text: string,
   env: Env
 ): Promise<void> {
-  fetch(
+  await fetch(
     `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/answerCallbackQuery`,
     {
       method: "POST",
