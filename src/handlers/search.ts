@@ -13,6 +13,7 @@ import type {
   LeaguePokemonResult,
   RankingPokemon
 } from '../types';
+import { getAllRankingsBundle } from '../utils/cache';
 import { leagues, typeChart, QUERY_CLEANER_REGEX, NAME_CLEANER_REGEX } from '../constants';
 import {
   getJsonData,
@@ -112,9 +113,8 @@ export async function handlePokemonSearch(
     const ids = new Set(finalMatches.map(p => p.speciesId.toLowerCase()));
 
     // 取得所有聯盟排名 (使用記憶體快取)
-    const rankResults = await Promise.all(
-      leagues.map(l => getLeagueRanking(l, env, ctx))
-    );
+    const bundledData = await getAllRankingsBundle(env, ctx);
+    const rankResults = leagues.map((l) => bundledData[l.path] || []);
 
     let msg = `🏆 <b>"${finalQuery}" 家族相關排名</b>\n`;
     const resultsByLeague: Record<string, string[]> = {};
@@ -344,10 +344,8 @@ export async function getPokemonDataOnly(
   const ids = new Set(familyMembers.map(p => p.speciesId.toLowerCase()));
   const pokemonMap = new Map(familyMembers.map(p => [p.speciesId.toLowerCase(), p]));
 
-  // 取得所有聯盟排名
-  const rankResults = await Promise.all(
-    leagues.map(l => getLeagueRanking(l, env, ctx))
-  );
+  const bundledData = await getAllRankingsBundle(env, ctx);
+  const rankResults = leagues.map((l) => bundledData[l.path] || []);
 
   const finalResults: LeagueResult[] = [];
   let hasElite = false;
