@@ -1,5 +1,5 @@
 {
-  "last_updated_human": "Mon Feb 23 04:21:06 2026",
+  "last_updated_human": "Tue Feb 24 04:14:31 2026",
   "active_leagues": [
     {
       "name_zh": "超級聯盟",
@@ -7,6 +7,20 @@
       "pvpoke_id": "great",
       "cp": "1500",
       "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/great/overall/rankings_1500.json"
+    },
+    {
+      "name_zh": "高級聯盟",
+      "name_en": "Ultra League",
+      "pvpoke_id": "ultra",
+      "cp": "2500",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/ultra/overall/rankings_2500.json"
+    },
+    {
+      "name_zh": "大師聯盟：超級版",
+      "name_en": "Master League: Mega Edition",
+      "pvpoke_id": "mega",
+      "cp": "10000",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/mega/overall/rankings_10000.json"
     },
     {
       "name_zh": "愛情盃 (1500)",
