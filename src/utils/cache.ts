@@ -11,6 +11,9 @@ let GLOBAL_MOVES_CACHE: MovesMap | null = null;
 let GLOBAL_EVENTS_CACHE: EventInfo[] | null = null;
 const GLOBAL_RANKINGS_CACHE = new Map<string, RankingPokemon[]>();
 
+// 🔥 新增：大禮包全域快取
+let GLOBAL_BUNDLE_CACHE: Record<string, RankingPokemon[]> | null = null;
+
 /**
  * 取得 GitHub Raw 資料 URL
  */
@@ -19,6 +22,7 @@ export function getDataUrl(filename: string): string {
   const v = Math.floor(Date.now() / 3600000); // 每小時更新一次快取標籤
   return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?v=${v}`;
 }
+
 /**
  * 帶快取的 Fetch 請求
  */
@@ -35,7 +39,6 @@ export async function fetchWithCache(
   if (cachedRes) return cachedRes;
 
   // 2. 使用 Promise.race 確保 fetch + body 全程都有 timeout (8s)
-  // 所有聯盟並行抓取，兩個階段共 ~16s < 30s 上限
   let bodyText: string | null = null;
 
   const controller = new AbortController();
@@ -94,12 +97,10 @@ export async function getJsonData<T>(
   env: Env,
   ctx: ExecutionContext
 ): Promise<T> {
-  // A. 檢查全域變數快取
   if (key === 'trans' && GLOBAL_TRANS_CACHE) return GLOBAL_TRANS_CACHE as T;
   if (key === 'moves' && GLOBAL_MOVES_CACHE) return GLOBAL_MOVES_CACHE as T;
   if (key === 'events' && GLOBAL_EVENTS_CACHE) return GLOBAL_EVENTS_CACHE as T;
 
-  // B. 沒有快取，才去 Fetch
   const res = await fetchWithCache(getDataUrl(filename), env, ctx);
   let data: T;
   try {
@@ -109,7 +110,6 @@ export async function getJsonData<T>(
     return [] as T;
   }
 
-  // C. 寫入全域變數 (只快取非空資料，避免錯誤結果被永久快取)
   if (key === 'trans' && Array.isArray(data) && (data as unknown[]).length > 0)
     GLOBAL_TRANS_CACHE = data as PokemonData[];
   if (key === 'moves' && data && typeof data === 'object' && Object.keys(data as object).length > 0)
@@ -121,25 +121,50 @@ export async function getJsonData<T>(
 }
 
 /**
- * 取得聯盟排名資料 (帶快取)
+ * 🔥 新增：取得大禮包排名資料 (解決 50 subrequests 限制)
+ */
+export async function getAllRankingsBundle(
+  env: Env,
+  ctx: ExecutionContext
+): Promise<Record<string, RankingPokemon[]>> {
+  // A. 優先檢查記憶體快取
+  if (GLOBAL_BUNDLE_CACHE) return GLOBAL_BUNDLE_CACHE;
+
+  try {
+    // B. 下載大禮包
+    const res = await fetchWithCache(getDataUrl("data/all_rankings_bundle.json"), env, ctx);
+    if (!res.ok) return {};
+
+    const data = await res.json() as Record<string, RankingPokemon[]>;
+
+    // C. 存入記憶體快取
+    if (data && typeof data === 'object') {
+      GLOBAL_BUNDLE_CACHE = data;
+    }
+    return GLOBAL_BUNDLE_CACHE || {};
+  } catch (e) {
+    console.error("讀取大禮包失敗:", e);
+    return {};
+  }
+}
+
+/**
+ * 取得單一聯盟排名資料 (若大禮包失敗的保底方案)
  */
 export async function getLeagueRanking(
   league: League,
   env: Env,
   ctx: ExecutionContext
 ): Promise<RankingPokemon[]> {
-  // A. 檢查 Map 快取
   if (GLOBAL_RANKINGS_CACHE.has(league.command)) {
     return GLOBAL_RANKINGS_CACHE.get(league.command)!;
   }
 
-  // B. Fetch 下載
   try {
     const res = await fetchWithCache(getDataUrl(league.path), env, ctx);
     if (!res.ok) return [];
     const data = await res.json() as RankingPokemon[];
 
-    // C. 存入 Map (只快取非空資料)
     if (data && Array.isArray(data) && data.length > 0) {
       GLOBAL_RANKINGS_CACHE.set(league.command, data);
     }
@@ -157,4 +182,5 @@ export function clearAllCaches(): void {
   GLOBAL_MOVES_CACHE = null;
   GLOBAL_EVENTS_CACHE = null;
   GLOBAL_RANKINGS_CACHE.clear();
+  GLOBAL_BUNDLE_CACHE = null; // 同步清理大禮包快取
 }
