@@ -4,7 +4,7 @@
 
 import type { Env, PokemonData, RankingPokemon } from '../types';
 import { leagues, MANIFEST_URL, NAME_CLEANER_REGEX, typeNames } from '../constants';
-import { fetchWithCache, getDataUrl } from '../utils/cache';
+import { fetchWithCache, getDataUrl, getAllRankingsBundle } from '../utils/cache';
 import { sendMessage, deleteMessage } from '../utils/telegram';
 import { getPokemonRating, getTranslatedName, getDefenseProfile, getWeaknesses } from '../utils/helpers';
 
@@ -27,12 +27,16 @@ export async function handleLeagueCommand(
   await sendMessage(chatId, `查詢 <b>${leagueInfo.name}</b>...`, { parse_mode: "HTML" }, env);
 
   try {
-    const [resRank, resTrans] = await Promise.all([
-      fetchWithCache(getDataUrl(leagueInfo.path), env, ctx),
+    const [bundledData, resTrans] = await Promise.all([
+      getAllRankingsBundle(env, ctx),
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
     ]);
 
-    const rankings = await resRank.json() as RankingPokemon[];
+    const rankings = bundledData[leagueInfo.path] || [];
+    if (rankings.length === 0) {
+        throw new Error("無法從資料庫讀取該聯盟資料");
+    }
+
     const trans = await resTrans.json() as PokemonData[];
     const map = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
@@ -97,8 +101,11 @@ export async function handleCurrentLeagues(
       return;
     }
 
-    // 準備翻譯資料
-    const transRes = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    // 準備大禮包和翻譯資料
+    const [bundledData, transRes] = await Promise.all([
+      getAllRankingsBundle(env, ctx),
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
+    ]);
     const transData = await transRes.json() as PokemonData[];
     const transMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
@@ -106,7 +113,7 @@ export async function handleCurrentLeagues(
     const matchedLeaguesInfo: string[] = [];
 
     // 遍歷與匹配
-    const promises = manifest.active_leagues.map(async (activeLeague) => {
+    manifest.active_leagues.forEach((activeLeague) => {
       const localLeague = leagues.find(l => {
         if (String(l.cp) !== String(activeLeague.cp)) return false;
         const targetId = activeLeague.pvpoke_id;
@@ -131,35 +138,22 @@ export async function handleCurrentLeagues(
 
       if (!localLeague) {
         console.log(`⚠️ 找不到本地對應設定: ${activeLeague.name_zh}`);
-        return null;
+        return;
       }
 
-      try {
-        const res = await fetchWithCache(getDataUrl(localLeague.path), env, ctx);
-        if (!res.ok) return null;
-        const data = await res.json() as RankingPokemon[];
-        return { name: localLeague.name, path: localLeague.path, data };
-      } catch {
-        return null;
+      const data = bundledData[localLeague.path];
+      if (data && data.length > 0) {
+        matchedLeaguesInfo.push(`${localLeague.name}\n   └ 📂 <code>${localLeague.path}</code>`);
+        
+        data.slice(0, 50).forEach(p => {
+          const rawName = transMap.get(p.speciesId.toLowerCase()) || p.speciesName || p.speciesId;
+          const name = getTranslatedName(p.speciesId, rawName);
+          const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
+          if (clean && !clean.toUpperCase().includes("SHADOW")) {
+            allTopPokemons.add(clean);
+          }
+        });
       }
-    });
-
-    const results = await Promise.all(promises);
-
-    // 整合資料
-    results.forEach(result => {
-      if (!result || !result.data) return;
-
-      matchedLeaguesInfo.push(`${result.name}\n   └ 📂 <code>${result.path}</code>`);
-
-      result.data.slice(0, 50).forEach(p => {
-        const rawName = transMap.get(p.speciesId.toLowerCase()) || p.speciesName || p.speciesId;
-        const name = getTranslatedName(p.speciesId, rawName);
-        const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
-        if (clean && !clean.toUpperCase().includes("SHADOW")) {
-          allTopPokemons.add(clean);
-        }
-      });
     });
 
     if (allTopPokemons.size === 0) throw new Error("無有效資料");
@@ -300,7 +294,11 @@ export async function handleMetaAnalysis(
     env
   );
 
-  const transResponse = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+  const [bundledData, transResponse] = await Promise.all([
+    getAllRankingsBundle(env, ctx),
+    fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
+  ]);
+
   if (!transResponse.ok) {
     await sendMessage(chatId, "❌ 無法讀取資料庫", null, env);
     return;
@@ -326,13 +324,15 @@ export async function handleMetaAnalysis(
     return `(${chiTypes.join("/")})`;
   };
 
+  // 定義圓圈數字
+  const circleNums = ['①', '②', '③'];
+
   for (const league of targetLeagues) {
     if (!league) continue;
 
     try {
-      const response = await fetchWithCache(getDataUrl(league.path), env, ctx);
-      const rankings = await response.json() as RankingPokemon[];
-      if (!rankings || rankings.length === 0) continue;
+      const rankings = bundledData[league.path] || [];
+      if (rankings.length === 0) continue;
 
       const topOne = rankings[0];
       const topOneScore = topOne.score ? topOne.score.toFixed(1) : "N/A";
@@ -354,18 +354,22 @@ export async function handleMetaAnalysis(
 
       let msg = `📊 <b>${league.name} 戰略分析</b>\n\n`;
       msg += `👑 <b>META 核心</b>\n👉 <b>${getName(topOne)}</b> (分: ${topOneScore})\n\n`;
+      
       msg += `<b>暴力 T0 隊</b> (純強度)\n`;
       teamViolence.forEach((p, i) => {
-        msg += `${i + 1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`;
+        msg += `${circleNums[i]} ${getName(p)} ${getTypesStr(p)}\n`;
       });
+      
       msg += `\n🛡️ <b>智慧聯防隊</b> (以王者為核)\n`;
       teamBalanced.forEach((p, i) => {
-        msg += `${i + 1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`;
+        msg += `${circleNums[i]} ${getName(p)} ${getTypesStr(p)}\n`;
       });
+      
       msg += `\n🔄 <b>二當家聯防隊</b> (替代方案)\n`;
       teamAlternative.forEach((p, i) => {
-        msg += `${i + 1}️⃣ ${getName(p)} ${getTypesStr(p)}\n`;
+        msg += `${circleNums[i]} ${getName(p)} ${getTypesStr(p)}\n`;
       });
+      
       msg += `\n📋 <b>一鍵複製搜尋字串</b>\n`;
       msg += `<code>${copyString}</code>`;
 
