@@ -1,5 +1,14 @@
 [
   {
+    "date": "2026-03-14",
+    "raw_time": "2026-03-14 14:00:00 ~ 2026-03-14 17:00:00",
+    "pokemonId": [
+      "scorbunny"
+    ],
+    "eventName": "2026 年 3 月：炎兔兒社群日",
+    "link": "https://pokemon.wingzero.tw/page/archive/1531/tw"
+  },
+  {
     "date": "2026-02-24",
     "raw_time": "2026-02-24 18:00:00 ~ 2026-02-24 19:00:00",
     "pokemonId": [
@@ -70,42 +79,5 @@
     ],
     "eventName": "食夢夢聚焦時刻",
     "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
-  },
-  {
-    "date": "2026-02-04 ~ 2026-02-16",
-    "raw_time": "2026-02-04 10:00:00 ~ 2026-02-16 10:00:00",
-    "pokemonId": [
-      "palkia",
-      "dialga"
-    ],
-    "eventName": "帝牙盧卡、帕路奇亞傳說團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
-  },
-  {
-    "date": "2026-02-04 ~ 2026-02-16",
-    "raw_time": "2026-02-04 10:00:00 ~ 2026-02-16 10:00:00",
-    "pokemonId": [
-      "pidgeot"
-    ],
-    "eventName": "超級大比鳥超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
-  },
-  {
-    "date": "2026-02-03",
-    "raw_time": "2026-02-03 18:00:00 ~ 2026-02-03 19:00:00",
-    "pokemonId": [
-      "whismur"
-    ],
-    "eventName": "咕妞妞聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
-  },
-  {
-    "date": "2026-02-03 ~ 2026-02-08",
-    "raw_time": "2026-02-03 10:00:00 ~ 2026-02-08 20:00:00",
-    "pokemonId": [
-      "flamigo"
-    ],
-    "eventName": "纏紅鶴嘉年華",
-    "link": "https://pokemon.wingzero.tw/page/archive/1515/tw"
   }
 ]
