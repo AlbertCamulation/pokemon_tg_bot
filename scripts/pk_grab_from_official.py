@@ -54,20 +54,27 @@ def map_to_pvpoke_id_and_cp(en_name):
     if "master" in name: cp = "10000"
     elif "ultra" in name: cp = "2500"
     
-    if "master" in name and "mega" in name:
+    # 1. 攔截大師超級版
+    if "mega" in name and "master" in name:
         return "mega", "10000"
+        
+    # 2. 🔥 精準攔截三大常駐聯盟 (必須完全相等)
+    if name in ["great league", "ultra league", "master league"]:
+        return "all", cp
+        
+    # 3. 攔截紀念盃 / Remix
+    if "premier" in name: return "premier", cp
+    if "remix" in name: return "remix", cp
     
-    clean = name.replace(" cup", "").replace(" league", "").replace(" edition", "").replace(" version", "").replace(": great league edition", "").replace(": mega edition", "").replace("mega", "").strip()
-    
-    if "great league" in name and "remix" not in name: return "all", "1500"
-    if "ultra league" in name and "premier" not in name: return "all", "2500"
-    if "master league" in name and "premier" not in name: return "all", "10000"
-    
+    # 4. 其他特殊盃賽萃取
+    # 先把後面的 : great league edition 清掉，再清掉 cup
+    clean = name.replace(": great league edition", "").replace(": ultra league edition", "").replace(" cup", "").replace(" league", "").strip()
     pvp_id = clean.split(" ")[-1]
-    # 🔥 加入新賽季的盃賽對應 (關都、春日、叢林、電氣、速成)
+    
     manual = {
-        "love": "love", "remix": "remix", "fantasy": "fantasy", "retro": "retro",
-        "kanto": "kanto", "spring": "spring", "jungle": "jungle", "electric": "electric", "catch": "catch"
+        "love": "love", "fantasy": "fantasy", "retro": "retro",
+        "kanto": "kanto", "spring": "spring", "jungle": "jungle", 
+        "electric": "electric", "catch": "catch"
     }
     return manual.get(pvp_id, pvp_id), cp
 
