@@ -64,7 +64,11 @@ def map_to_pvpoke_id_and_cp(en_name):
     if "master league" in name and "premier" not in name: return "all", "10000"
     
     pvp_id = clean.split(" ")[-1]
-    manual = {"love": "love", "remix": "remix", "fantasy": "fantasy", "retro": "retro"}
+    # 🔥 加入新賽季的盃賽對應 (關都、春日、叢林、電氣、速成)
+    manual = {
+        "love": "love", "remix": "remix", "fantasy": "fantasy", "retro": "retro",
+        "kanto": "kanto", "spring": "spring", "jungle": "jungle", "electric": "electric", "catch": "catch"
+    }
     return manual.get(pvp_id, pvp_id), cp
 
 def get_leagues(url, lang="en"):
