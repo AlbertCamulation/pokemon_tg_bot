@@ -38,10 +38,10 @@ export async function handleLeagueCommand(
     }
 
     const trans = await resTrans.json() as PokemonData[];
-    // 🔥 手動補足最新寶可夢翻譯
+    // 把下面這三行完整蓋過去：
+    const map = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
     map.set("victreebel_mega", "大食花 Mega");
     map.set("malamar_mega", "烏賊王 Mega");
-    const map = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
     const list = rankings.slice(0, limit);
     let msg = `🏆 <b>${leagueInfo.name}</b> (Top ${limit})\n\n`;
@@ -115,10 +115,10 @@ export async function handleCurrentLeagues(
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
     ]);
     const transData = await transRes.json() as PokemonData[];
-    // 🔥 手動補足最新寶可夢翻譯
+    // 把下面這三行完整蓋過去：
+    const transMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
     transMap.set("victreebel_mega", "大食花 Mega");
     transMap.set("malamar_mega", "烏賊王 Mega");
-    const transMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
     const allTopPokemons = new Set<string>();
     const matchedLeaguesInfo: string[] = [];
