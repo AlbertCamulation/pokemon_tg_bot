@@ -48,6 +48,7 @@ export const leagues: League[] = [
   { command: "ultra_league_top_holiday", name: "假日盃 (2500)", cp: "2500", path: "data/rankings_2500_holiday.json" },
   { command: "ultra_league_top_summer", name: "夏日盃 (2500)", cp: "2500", path: "data/rankings_2500_summer.json" },
   { command: "master_league_top", name: "大師聯盟 (無上限)", cp: "10000", path: "data/rankings_10000.json" },
+  { command: "master_league_top_mega", name: "大師聯盟：超級版 (無上限)", cp: "10000", path: "data/rankings_10000_mega.json" }, // 🔥 加入這行
   { command: "master_league_top_permier", name: "大師紀念賽 (無上限)", cp: "10000", path: "data/rankings_10000_premier.json" },
   { command: "master_league_top_meta", name: "大師 Meta (無上限)", cp: "10000", path: "data/rankings_10000_meta_master.json" },
   { command: "attackers_top", name: "最佳攻擊手", cp: "Any", path: "data/rankings_attackers_tier.json" },
