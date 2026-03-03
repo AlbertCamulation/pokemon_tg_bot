@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import time
 import json
 import os
-import re
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
@@ -18,7 +17,14 @@ def map_to_pvpoke_id_and_cp(en_name):
     cp = "1500"
     if "master" in name: cp = "10000"
     elif "ultra" in name: cp = "2500"
-    clean = name.replace(" cup", "").replace(" league", "").replace(" edition", "").replace(" version", "").replace(": great league edition", "").strip()
+    
+    # 清除多餘字眼，加入對 Mega (超級版) 的過濾
+    clean = name.replace(" cup", "").replace(" league", "").replace(" edition", "").replace(" version", "").replace(": great league edition", "").replace(": mega edition", "").replace("mega", "").strip()
+    
+    if "great league" in name and "remix" not in name: return "all", "1500"
+    if "ultra league" in name and "premier" not in name: return "all", "2500"
+    if "master league" in name and "premier" not in name: return "all", "10000"
+    
     pvp_id = clean.split(" ")[-1]
     manual = {"love": "love", "remix": "remix", "fantasy": "fantasy", "retro": "retro"}
     return manual.get(pvp_id, pvp_id), cp
@@ -36,6 +42,7 @@ def get_leagues(url, lang="en"):
     return data
 
 def run_automation():
+    # ⚠️ 尋寶之旅賽季快結束了，下次換季記得把這裡的網址改成新賽季！
     zh_url = "https://pokemongo.com/zh_Hant/news/go-battle-league-precious-paths"
     en_url = "https://pokemongo.com/en/news/go-battle-league-precious-paths"
     
@@ -43,14 +50,12 @@ def run_automation():
     en_data = get_leagues(en_url, "en")
     
     now_ms = int(time.time() * 1000)
-    # 擴大偵測範圍：現在 or 24小時內會開始的都算
     buffer_ms = 24 * 60 * 60 * 1000 
     
     manifest = {"last_updated_human": time.ctime(), "active_leagues": []}
     seen = set()
 
     for i in range(len(zh_data)):
-        # 判定條件：現在正在進行，或是 24 小時內即將開始
         is_active = zh_data[i]['start'] <= now_ms <= zh_data[i]['end']
         is_upcoming = zh_data[i]['start'] <= now_ms + buffer_ms <= zh_data[i]['end']
 
@@ -69,17 +74,7 @@ def run_automation():
                     "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings_{cp}.json"
                 })
 
-    # 🔥 強制邏輯：如果清單內沒有「love」，且現在接近 2/18，就強制補入
-    has_love = any("love" in league["pvpoke_id"] for league in manifest["active_leagues"])
-    if not has_love:
-        print("⚠️ 偵測到愛情盃缺失，執行強制補丁...")
-        manifest["active_leagues"].append({
-            "name_zh": "愛情盃 (1500)",
-            "name_en": "Love Cup",
-            "pvpoke_id": "love",
-            "cp": "1500",
-            "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/love/overall/rankings_1500.json"
-        })
+    # 🔥 已經把「愛情盃強制保底」刪除了！
 
     os.makedirs('data', exist_ok=True)
     with open('data/manifest.json', 'w', encoding='utf-8') as f:
