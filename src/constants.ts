@@ -52,7 +52,11 @@ export const leagues: League[] = [
   { command: "master_league_top_permier", name: "大師紀念賽 (無上限)", cp: "10000", path: "data/rankings_10000_premier.json" },
   { command: "master_league_top_meta", name: "大師 Meta (無上限)", cp: "10000", path: "data/rankings_10000_meta_master.json" },
   { command: "attackers_top", name: "最佳攻擊手", cp: "Any", path: "data/rankings_attackers_tier.json" },
-  { command: "defenders_top", name: "最佳防守者", cp: "Any", path: "data/rankings_defenders_tier.json" }
+  { command: "defenders_top", name: "最佳防守者", cp: "Any", path: "data/rankings_defenders_tier.json" },
+  { command: "great_league_top_kanto", name: "關都盃 (1500)", cp: "1500", path: "data/rankings_1500_kanto.json" },
+  { command: "great_league_top_spring", name: "春日盃 (1500)", cp: "1500", path: "data/rankings_1500_spring.json" },
+  { command: "great_league_top_electric", name: "電氣盃 (1500)", cp: "1500", path: "data/rankings_1500_electric.json" },
+  { command: "great_league_top_catch", name: "速成盃 (1500)", cp: "1500", path: "data/rankings_1500_catch.json" }
 ];
 
 // --- 屬性相剋表 ---
