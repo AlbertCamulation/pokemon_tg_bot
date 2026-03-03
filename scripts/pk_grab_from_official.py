@@ -18,9 +18,14 @@ def map_to_pvpoke_id_and_cp(en_name):
     if "master" in name: cp = "10000"
     elif "ultra" in name: cp = "2500"
     
-    # 清除多餘字眼，加入對 Mega (超級版) 的過濾
+    # 🔥 新增：優先攔截大師聯盟超級版 (Mega)
+    if "master" in name and "mega" in name:
+        return "mega", "10000"
+    
+    # 清除多餘字眼
     clean = name.replace(" cup", "").replace(" league", "").replace(" edition", "").replace(" version", "").replace(": great league edition", "").replace(": mega edition", "").replace("mega", "").strip()
     
+    # 核心映射
     if "great league" in name and "remix" not in name: return "all", "1500"
     if "ultra league" in name and "premier" not in name: return "all", "2500"
     if "master league" in name and "premier" not in name: return "all", "10000"
