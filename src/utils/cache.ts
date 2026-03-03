@@ -18,8 +18,8 @@ let GLOBAL_BUNDLE_CACHE: Record<string, RankingPokemon[]> | null = null;
  * 取得 GitHub Raw 資料 URL
  */
 export function getDataUrl(filename: string): string {
-  // 使用時間戳作為版本號，確保每次抓取都是最新的
-  const v = Math.floor(Date.now() / 3600000); // 每小時更新一次快取標籤
+  // 🔥 改成每 5 分鐘更新一次快取標籤，確保 Action 跑完很快就能抓到新資料
+  const v = Math.floor(Date.now() / 300000); 
   return `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/${filename}?v=${v}`;
 }
 
