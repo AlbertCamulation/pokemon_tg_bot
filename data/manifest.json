@@ -1,19 +1,19 @@
 {
-  "last_updated_human": "2026-03-04 05:20:14 (台灣時間)",
+  "last_updated_human": "2026-03-04 05:37:18 (台灣時間)",
   "active_leagues": [
     {
       "name_zh": "超級聯盟",
       "name_en": "Great League",
       "pvpoke_id": "all",
       "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings_1500.json"
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"
     },
     {
       "name_zh": "關都盃：超級聯盟版",
       "name_en": "Kanto Cup: Great League Edition",
       "pvpoke_id": "all",
       "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings_1500.json"
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"
     }
   ]
 }
