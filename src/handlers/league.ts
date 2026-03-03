@@ -4,17 +4,10 @@
 
 import type { Env, PokemonData, RankingPokemon } from '../types';
 import { leagues, MANIFEST_URL, NAME_CLEANER_REGEX, typeNames } from '../constants';
-import { fetchWithCache, getDataUrl, getAllRankingsBundle } from '../utils/cache';
+import { fetchWithCache, getDataUrl, getAllRankingsBundle, clearAllCaches } from '../utils/cache';
 import { sendMessage, deleteMessage } from '../utils/telegram';
 import { getPokemonRating, getTranslatedName, getDefenseProfile, getWeaknesses } from '../utils/helpers';
-import { clearAllCaches } from '../utils/cache'; // 記得在最上面引入
 
-// 在抓大禮包前，強制清一下記憶體
-clearAllCaches(); 
-const [bundledData, transRes] = await Promise.all([
-  getAllRankingsBundle(env, ctx),
-  fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
-]);
 /**
  * 處理聯盟排名查詢
  */
@@ -91,7 +84,7 @@ export async function handleCurrentLeagues(
   );
 
   try {
-    // 抓取 Manifest (加上時間戳，強制打破 Cloudflare 與 GitHub 的快取)
+    // 🔥 強制打破 Manifest 快取
     const manifestRes = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, {
       headers: { 
         "User-Agent": "PokeMaster-Pro/1.0",
@@ -110,6 +103,9 @@ export async function handleCurrentLeagues(
       return;
     }
 
+    // 🔥 強制清空全域快取，確保讀到剛打包好的最新大禮包
+    clearAllCaches();
+    
     // 準備大禮包和翻譯資料
     const [bundledData, transRes] = await Promise.all([
       getAllRankingsBundle(env, ctx),
@@ -152,7 +148,7 @@ export async function handleCurrentLeagues(
 
       const data = bundledData[localLeague.path];
       if (data && data.length > 0) {
-        matchedLeaguesInfo.push(`${localLeague.name}\n   └ 📂 <code>${localLeague.path}</code>`);
+        matchedLeaguesInfo.push(`${activeLeague.name_zh}\n   └ 📂 <code>${localLeague.path}</code>`);
         
         data.slice(0, 50).forEach(p => {
           const rawName = transMap.get(p.speciesId.toLowerCase()) || p.speciesName || p.speciesId;
