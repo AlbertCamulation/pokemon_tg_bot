@@ -84,10 +84,12 @@ export async function handleCurrentLeagues(
   );
 
   try {
-    // 抓取 Manifest
-    const manifestRes = await fetch(MANIFEST_URL, {
-      headers: { "User-Agent": "PokeMaster-Pro/1.0" },
-      cf: { cacheTtl: 300 }
+    // 抓取 Manifest (加上時間戳，強制打破 Cloudflare 與 GitHub 的快取)
+    const manifestRes = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, {
+      headers: { 
+        "User-Agent": "PokeMaster-Pro/1.0",
+        "Cache-Control": "no-cache"
+      }
     });
 
     if (!manifestRes.ok) throw new Error(`Manifest 讀取失敗 (${manifestRes.status})`);
