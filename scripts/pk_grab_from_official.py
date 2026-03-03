@@ -125,7 +125,7 @@ def run_automation():
                 
                 manifest["active_leagues"].append({
                     "name_zh": zh_name, "name_en": en, "pvpoke_id": pvp_id, "cp": cp,
-                    "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings_{cp}.json"
+                    "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings-{cp}.json"
                 })
 
     os.makedirs('data', exist_ok=True)
