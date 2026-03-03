@@ -7,7 +7,11 @@ import { leagues, MANIFEST_URL, NAME_CLEANER_REGEX, typeNames } from '../constan
 import { fetchWithCache, getDataUrl, getAllRankingsBundle } from '../utils/cache';
 import { sendMessage, deleteMessage } from '../utils/telegram';
 import { getPokemonRating, getTranslatedName, getDefenseProfile, getWeaknesses } from '../utils/helpers';
+import { clearAllCaches } from '../utils/cache'; // 記得在最上面引入
 
+// 在抓大禮包前，強制清一下記憶體
+clearAllCaches(); 
+const [bundledData, transRes] = await Promise.all([ ... ]);
 /**
  * 處理聯盟排名查詢
  */
