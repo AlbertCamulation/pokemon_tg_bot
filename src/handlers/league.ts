@@ -11,7 +11,10 @@ import { clearAllCaches } from '../utils/cache'; // 記得在最上面引入
 
 // 在抓大禮包前，強制清一下記憶體
 clearAllCaches(); 
-const [bundledData, transRes] = await Promise.all([ ... ]);
+const [bundledData, transRes] = await Promise.all([
+  getAllRankingsBundle(env, ctx),
+  fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
+]);
 /**
  * 處理聯盟排名查詢
  */
