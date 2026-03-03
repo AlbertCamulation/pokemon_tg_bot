@@ -1,5 +1,5 @@
 {
-  "last_updated_human": "Tue Mar  3 20:48:49 2026",
+  "last_updated_human": "2026-03-04 05:20:14 (台灣時間)",
   "active_leagues": [
     {
       "name_zh": "超級聯盟",
@@ -9,18 +9,11 @@
       "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings_1500.json"
     },
     {
-      "name_zh": "高級聯盟",
-      "name_en": "Ultra League",
+      "name_zh": "關都盃：超級聯盟版",
+      "name_en": "Kanto Cup: Great League Edition",
       "pvpoke_id": "all",
-      "cp": "2500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings_2500.json"
-    },
-    {
-      "name_zh": "大師聯盟：超級版",
-      "name_en": "Master League: Mega Edition",
-      "pvpoke_id": "mega",
-      "cp": "10000",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/mega/overall/rankings_10000.json"
+      "cp": "1500",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings_1500.json"
     }
   ]
 }
