@@ -2,7 +2,7 @@
 //  Pokemon Telegram Bot - Main Entry Point
 //  Cloudflare Workers TypeScript 版本
 // =========================================================
-
+import { analyzeUserBoxTeam } from './handlers/box'; 
 import type {
   Env,
   TelegramUpdate,
@@ -487,31 +487,25 @@ export default {
         });
       }
 
-      // 🔥 [新增] Web App 儲存盒子資料 API
+      // 🔥 Web App 儲存盒子資料 API + 自動啟動演算法
       if (path === "/api/box" && request.method === "POST") {
         const payload = await request.json() as any;
         const { userId, league, team } = payload;
         
-        // 寫入 Cloudflare KV
+        // 1. 寫入 Cloudflare KV
         await env.POKEMON_KV.put(`box_${league}_${userId}`, JSON.stringify(team));
         
-        // 儲存成功後，機器人自動推播訊息到聊天室
-        await sendMessage(
-          userId,
-          `✅ 成功更新對戰盒子！\n你在 <b>${league} 聯盟</b> 共登錄了 ${team.length} 隻寶可夢。\n\n<code>${team.join(", ")}</code>\n\n(配隊分析演算法即將上線...)`,
-          { parse_mode: "HTML" },
-          env
-        );
+        // 2. 跑演算法分析最佳隊伍
+        const analysisResult = await analyzeUserBoxTeam(league, team, env, ctx);
+        
+        // 3. 組合最後的訊息推播給使用者
+        const finalMsg = `✅ <b>成功更新對戰盒子！</b>\n共登錄了 ${team.length} 隻寶可夢。\n\n${analysisResult}`;
+        
+        await sendMessage(userId, finalMsg, { parse_mode: "HTML" }, env);
+        
         return new Response(JSON.stringify({ success: true }), {
           headers: { "Content-Type": "application/json; charset=utf-8" }
         });
       }
-      return new Response("Not Found", { status: 404 });
-    } catch (e) {
-      return new Response(
-        JSON.stringify({ error: (e as Error).message }),
-        { status: 500 }
-      );
-    }
   }
 };
