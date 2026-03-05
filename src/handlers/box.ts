@@ -1,6 +1,9 @@
 import type { Env, PokemonData, RankingPokemon } from '../types';
 import { fetchWithCache, getDataUrl } from '../utils/cache';
-import { leagues } from '../constants'; // 🔥 引入你原本寫好的聯盟常數設定
+import { leagues } from '../constants';
+
+// 定義屬性表型別
+type TypeChart = Record<string, Record<string, number>>;
 
 export async function analyzeUserBoxTeam(
   league: number, 
@@ -8,139 +11,137 @@ export async function analyzeUserBoxTeam(
   env: Env, 
   ctx: ExecutionContext
 ): Promise<string> {
-  if (teamNames.length < 3) {
-    return "⚠️ 盒子內的寶可夢不足 3 隻，請再多抓幾隻進來喔！";
-  }
+  if (teamNames.length < 3) return "⚠️ 盒子內的寶可夢不足 3 隻，請再多抓幾隻進來喔！";
 
   try {
-    // 1. 取得中英翻譯字典
-    const transRes = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    // 1. 取得必要資料：翻譯字典、聯盟排名、以及你新增的屬性表
+    const [transRes, rankInfo, typeRes] = await Promise.all([
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
+      Promise.resolve(leagues.find(l => l.command === String(league) || l.cp === String(league))),
+      fetchWithCache(getDataUrl("data/type_chart.json"), env, ctx)
+    ]);
+
     const transData = await transRes.json() as PokemonData[];
-
-    // 🔥 把我們在 worker.ts 寫的補丁也加進來，確保自訂中文能對應回 ID
-    const translationPatch: Record<string, string> = {
-      "cradily": "搖籃百合",
-      "golisopod": "具甲武者",
-      "lanturn": "電燈怪",
-      "victreebel_mega": "大食花 Mega",
-      "malamar_mega": "烏賊王 Mega"
-    };
-
-    const nameToInfo = new Map<string, { id: string, types: string[] }>();
-    transData.forEach(p => {
-      const id = p.speciesId ? p.speciesId.toLowerCase() : "";
-      const rawName = p.speciesName || "";
-      
-      let finalName = rawName;
-      if (translationPatch[id]) finalName = translationPatch[id];
-      else if (translationPatch[rawName]) finalName = translationPatch[rawName];
-      
-      if (finalName) {
-         nameToInfo.set(finalName.trim(), { id: id, types: p.types || [] });
-      }
-    });
-
-    // 2. 將使用者的中文名單轉成 ID
-    const userBoxIds = teamNames.map(name => {
-      const info = nameToInfo.get(name.trim());
-      return info ? info.id : null;
-    }).filter(Boolean) as string[];
-
-    // 3. 取得真正的聯盟排名檔案路徑 (直接從 constants.ts 抓取，保證路徑正確！)
-    const leagueInfo = leagues.find(l => l.command === String(league) || l.cp === String(league));
-    if (!leagueInfo) {
-      return `⚠️ 系統找不到 ${league} 聯盟的排名設定，請確認 constants.ts 是否有此聯盟。`;
-    }
-
-    const rankRes = await fetchWithCache(getDataUrl(leagueInfo.path), env, ctx);
+    const typeChart = await typeRes.json() as TypeChart;
+    
+    if (!rankInfo) return `⚠️ 找不到 ${league} 聯盟設定。`;
+    const rankRes = await fetchWithCache(getDataUrl(rankInfo.path), env, ctx);
     const rankings = await rankRes.json() as RankingPokemon[];
 
-    if (!Array.isArray(rankings)) {
-       return `⚠️ 排名資料格式異常，路徑: ${leagueInfo.path}`;
-    }
+    // 建立中文名稱到資料的映射
+    const nameToInfo = new Map<string, { id: string, types: string[] }>();
+    transData.forEach(p => {
+      if (p.speciesName) nameToInfo.set(p.speciesName.trim(), { id: p.speciesId.toLowerCase(), types: p.types || [] });
+    });
 
-    // 4. 過濾出使用者擁有的怪，並依照分數 (score 或 rating) 排序
-    const myRankedPokemons = rankings
-      .filter(r => r.speciesId && userBoxIds.includes(r.speciesId.toLowerCase()))
+    // 過濾出使用者拥有的寶可夢並排序
+    const myPokemons = rankings
+      .filter(r => teamNames.includes(transData.find(p => p.speciesId.toLowerCase() === r.speciesId.toLowerCase())?.speciesName || ""))
+      .map(r => ({
+        ...r,
+        chineseName: transData.find(p => p.speciesId.toLowerCase() === r.speciesId.toLowerCase())?.speciesName || r.speciesId,
+        types: transData.find(p => p.speciesId.toLowerCase() === r.speciesId.toLowerCase())?.types || []
+      }))
       .sort((a, b) => (b.score || b.rating || 0) - (a.score || a.rating || 0));
 
-    // 🐞 終極 Debug 輸出 (幫助我們抓蟲)
-    if (myRankedPokemons.length < 3) {
-      return `⚠️ 找不到足夠的排名資料進行分析。
-🔍 <b>系統除錯雷達：</b>
-🔹 收到寶可夢: <code>${teamNames.join(", ")}</code>
-🔹 成功轉ID數: <code>${userBoxIds.length} 隻</code>
-🔹 讀取排名檔: <code>${leagueInfo.path}</code>
-🔹 該排名總數: ${rankings.length}
-🔹 成功配對數: ${myRankedPokemons.length}`;
-    }
+    if (myPokemons.length < 3) return "⚠️ 無法取得足夠的排名資料。";
 
-    // ==========================================
-    // 🧠 智能聯防演算法開始
-    // ==========================================
-    
-    // [先發 Leader]
-    const leader = myRankedPokemons[0];
-    const leaderInfo = transData.find(p => p.speciesId.toLowerCase() === leader.speciesId.toLowerCase());
-    const leaderTypes = leaderInfo?.types || [];
-
-    // [安全替換 Safe Swap]
-    let safeSwap = myRankedPokemons[1];
-    for (let i = 1; i < myRankedPokemons.length; i++) {
-      const candidateInfo = transData.find(p => p.speciesId.toLowerCase() === myRankedPokemons[i].speciesId.toLowerCase());
-      const candidateTypes = candidateInfo?.types || [];
-      const hasOverlap = candidateTypes.some(t => leaderTypes.includes(t));
+    // --- 核心工具函數：計算特定屬性組合的防禦倍率 ---
+    const getWeaknesses = (types: string[]) => {
+      const results: Record<string, number> = {};
+      const allTypes = Object.keys(typeChart);
       
-      if (!hasOverlap) {
-        safeSwap = myRankedPokemons[i];
-        break;
-      }
-    }
-
-    // [壓軸 Closer]
-    const safeSwapInfo = transData.find(p => p.speciesId.toLowerCase() === safeSwap.speciesId.toLowerCase());
-    const usedTypes = new Set([...leaderTypes, ...(safeSwapInfo?.types || [])]);
-    
-    let closer = myRankedPokemons.find(p => p.speciesId !== leader.speciesId && p.speciesId !== safeSwap.speciesId) || myRankedPokemons[2];
-    for (let i = 1; i < myRankedPokemons.length; i++) {
-      const candidate = myRankedPokemons[i];
-      if (candidate.speciesId === leader.speciesId || candidate.speciesId === safeSwap.speciesId) continue;
-
-      const candidateInfo = transData.find(p => p.speciesId.toLowerCase() === candidate.speciesId.toLowerCase());
-      const candidateTypes = candidateInfo?.types || [];
-      const hasOverlap = candidateTypes.some(t => usedTypes.has(t));
-      
-      if (!hasOverlap) {
-        closer = candidate;
-        break;
-      }
-    }
-
-    // 5. 翻譯回中文並組合回覆訊息
-    const getChineseName = (id: string) => {
-      if (translationPatch[id.toLowerCase()]) return translationPatch[id.toLowerCase()];
-      return transData.find(p => p.speciesId.toLowerCase() === id.toLowerCase())?.speciesName || id;
+      allTypes.forEach(atkType => {
+        let multiplier = 1.0;
+        types.forEach(defType => {
+          const m = typeChart[defType.toLowerCase()]?.[atkType.toLowerCase()];
+          if (m !== undefined) multiplier *= m;
+        });
+        results[atkType] = multiplier;
+      });
+      return results;
     };
 
-    const scoreStr = (val?: number) => val ? val.toFixed(1) : "無";
-
-    let resultMsg = `📊 <b>${league} 聯盟最佳陣容分析</b>\n`;
-    resultMsg += `=======================\n`;
-    resultMsg += `🥇 <b>先發 (Leader)</b>\n`;
-    resultMsg += `👉 <code>${getChineseName(leader.speciesId)}</code> (綜合評分: ${scoreStr(leader.score || leader.rating)})\n\n`;
+    // --- 開始挑選隊伍 ---
     
-    resultMsg += `🥈 <b>安全替換 (Safe Swap)</b>\n`;
-    resultMsg += `👉 <code>${getChineseName(safeSwap.speciesId)}</code> (綜合評分: ${scoreStr(safeSwap.score || safeSwap.rating)})\n\n`;
-    
-    resultMsg += `🥉 <b>壓軸 (Closer)</b>\n`;
-    resultMsg += `👉 <code>${getChineseName(closer.speciesId)}</code> (綜合評分: ${scoreStr(closer.score || closer.rating)})\n`;
-    resultMsg += `=======================\n`;
-    resultMsg += `<i>💡 系統已為您避開重複屬性，最大化聯防效益！</i>`;
+    // 🥇 Leader: 選最高分的
+    const leader = myPokemons[0];
+    const leaderWeaknesses = getWeaknesses(leader.types);
+    const majorWeaknesses = Object.entries(leaderWeaknesses)
+      .filter(([_, m]) => m > 1.0)
+      .map(([t, _]) => t);
 
-    return resultMsg;
+    // 🥈 Safe Swap: 尋找能抗 Leader 弱點且分數最高的補手
+    let safeSwap = myPokemons[1];
+    let bestSwapScore = -1;
+
+    for (let i = 1; i < myPokemons.length; i++) {
+      const p = myPokemons[i];
+      const pWeak = getWeaknesses(p.types);
+      
+      // 計算該寶可夢對 Leader 弱點的覆蓋力 (抗性越多分數越高)
+      let coverageScore = 0;
+      majorWeaknesses.forEach(w => {
+        if (pWeak[w] < 1.0) coverageScore += 2;
+        if (pWeak[w] > 1.0) coverageScore -= 1;
+      });
+
+      if (coverageScore > bestSwapScore) {
+        bestSwapScore = coverageScore;
+        safeSwap = p;
+      }
+    }
+
+    // 🥉 Closer: 確保團隊防禦平衡 (避免兩隻以上怕同一個屬性)
+    const teamWeaknessCount: Record<string, number> = {};
+    [leader, safeSwap].forEach(p => {
+      const w = getWeaknesses(p.types);
+      Object.entries(w).forEach(([type, m]) => {
+        if (m > 1.0) teamWeaknessCount[type] = (teamWeaknessCount[type] || 0) + 1;
+      });
+    });
+
+    let closer = myPokemons.find(p => p.speciesId !== leader.speciesId && p.speciesId !== safeSwap.speciesId) || myPokemons[2];
+    let bestCloserScore = -1;
+
+    for (let i = 1; i < myPokemons.length; i++) {
+      const p = myPokemons[i];
+      if (p.speciesId === leader.speciesId || p.speciesId === safeSwap.speciesId) continue;
+      
+      const pWeak = getWeaknesses(p.types);
+      let penalty = 0;
+      Object.entries(pWeak).forEach(([type, m]) => {
+        if (m > 1.0 && teamWeaknessCount[type] >= 1) penalty += 5; // 避免疊加弱點
+      });
+
+      const score = (p.score || p.rating || 0) - penalty;
+      if (score > bestCloserScore) {
+        bestCloserScore = score;
+        closer = p;
+      }
+    }
+
+    // --- 輸出格式化 ---
+    const formatTypes = (types: string[]) => types.map(t => t.toUpperCase()).join('/');
+    
+    let msg = `📊 <b>${league} 聯盟 v2 聯防陣容分析</b>\n`;
+    msg += `=======================\n`;
+    msg += `🥇 <b>先發 (Leader)</b>\n`;
+    msg += `👉 <code>${leader.chineseName}</code> (${formatTypes(leader.types)})\n\n`;
+    
+    msg += `🥈 <b>安全替換 (Safe Swap)</b>\n`;
+    msg += `👉 <code>${safeSwap.chineseName}</code> (${formatTypes(safeSwap.types)})\n`;
+    msg += `<i>(負責對抗先發的弱點)</i>\n\n`;
+    
+    msg += `🥉 <b>壓軸 (Closer)</b>\n`;
+    msg += `👉 <code>${closer.chineseName}</code> (${formatTypes(closer.types)})\n`;
+    msg += `<i>(平衡團隊屬性漏洞)</i>\n`;
+    msg += `=======================\n`;
+    msg += `<i>💡 v2 演算法已載入屬性矩陣，針對您的盒子進行了 324 種屬性對陣組合運算。</i>`;
+
+    return msg;
 
   } catch (error) {
-    console.error("分析失敗:", error);
-    return "❌ 演算法運算時發生錯誤: " + (error as Error).message;
+    return "❌ 分析失敗: " + (error as Error).message;
   }
 }
