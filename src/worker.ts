@@ -330,7 +330,7 @@ async function handleApiNames(
         return name;
       }).filter(name => {
         if (!name || !/[\u4E00-\u9FA5]/.test(name)) return false;
-        return !new RegExp(NAME_CLEANER_REGEX.source).test(name);
+        return true;  // 不再用 NAME_CLEANER_REGEX 過濾，保留所有地區形態
       })
     )).sort();
 
