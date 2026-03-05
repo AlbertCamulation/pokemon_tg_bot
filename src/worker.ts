@@ -55,7 +55,8 @@ import {
   sendAuthorizationRequest
 } from './handlers';
 
-import { generateHTML } from './web/html';
+// 🔥 引入我們剛剛寫好的 myBoxHtml
+import { generateHTML, myBoxHtml } from './web/html';
 
 // =========================================================
 //  Callback Query 處理
@@ -73,18 +74,15 @@ async function onCallbackQuery(
   const userName = callbackQuery.from.first_name || "Unknown";
   const messageId = callbackQuery.message!.message_id;
 
-  // 身分變數
   const isSuperAdmin = String(userId) === String(env.ADMIN_UID);
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
 
-  // --- 特權功能：解封黑名單 ---
   if (data.startsWith("unban_btn_")) {
     if (!isSuperAdmin) {
       await answerCallbackQuery(callbackQueryId, "⛔ 您無權執行此操作", env);
       return;
     }
-
     const targetUid = data.replace("unban_btn_", "");
     await handleUnbanUser(chatId, messageId, targetUid, callbackQueryId, env);
     return;
@@ -95,16 +93,12 @@ async function onCallbackQuery(
     return;
   }
 
-  // --- 審核通知按鈕 (approve/ban) ---
   if (data.startsWith("approve_uid_") || data.startsWith("ban_uid_")) {
     if (!isSuperAdmin && !isInAdminGroup) {
       await answerCallbackQuery(callbackQueryId, "⛔ 權限不足", env);
       return;
     }
-
     const targetUid = parseInt(data.split("_")[2]);
-
-    // 從訊息文字中抓取名字
     const msgText = callbackQuery.message?.text || "";
     const nameMatch = msgText.match(/使用者:\s*(.*?)(\n|\(|$)/);
     const targetName = nameMatch ? nameMatch[1].trim() : "Unknown User";
@@ -119,14 +113,12 @@ async function onCallbackQuery(
     return;
   }
 
-  // --- 權限檢查 ---
   const allowedIds = await getAllowedUserIds(env);
   if (!isSuperAdmin && !isInAdminGroup && !allowedIds.includes(userId)) {
     await answerCallbackQuery(callbackQueryId, `⛔ 權限不足`, env);
     return;
   }
 
-  // --- 垃圾清單移除 ---
   if (data.startsWith("untrash_btn_")) {
     const name = data.replace("untrash_btn_", "");
     await answerCallbackQuery(callbackQueryId, "正在移除...", env);
@@ -134,7 +126,6 @@ async function onCallbackQuery(
     return;
   }
 
-  // --- 屬性選單 ---
   if (data === "menu_atk_types") {
     await sendTypeSelectionMenu(chatId, "atk", env);
     return;
@@ -154,14 +145,12 @@ async function onCallbackQuery(
 
   await answerCallbackQuery(callbackQueryId, "", env);
 
-  // --- 聯盟指令 ---
   const leagueInfo = leagues.find((l) => l.command === data);
   if (leagueInfo) {
     await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env, ctx);
     return;
   }
 
-  // --- 其他功能 ---
   switch (data) {
     case "meta_analysis":
       await handleMetaAnalysis(chatId, env, ctx);
@@ -190,8 +179,36 @@ async function onCallbackQuery(
 async function onMessage(
   message: TelegramMessage,
   env: Env,
-  ctx: ExecutionContext
+  ctx: ExecutionContext,
+  requestOrigin: string // 🔥 接收動態網址
 ): Promise<void> {
+
+  // 🔥 優先攔截前端 Web App 傳送回來的 JSON 資料
+  if (message.web_app_data) {
+    try {
+      const payload = JSON.parse(message.web_app_data.data);
+      
+      if (payload.action === "save_box") {
+        const { league, team } = payload;
+        const kvKey = `box_${league}_${message.chat.id}`;
+        
+        // 寫入 Cloudflare KV
+        await env.POKEMON_KV.put(kvKey, JSON.stringify(team));
+        
+        await sendMessage(
+          message.chat.id,
+          `✅ 成功儲存！你在 <b>${league} 聯盟</b> 共登錄了 ${team.length} 隻寶可夢。\n\n<code>${team.join(", ")}</code>\n\n(配隊分析功能即將解鎖...)`,
+          { parse_mode: "HTML" },
+          env
+        );
+      }
+    } catch (e) {
+      await sendMessage(message.chat.id, "❌ 解析寶可夢盒子資料失敗。", null, env);
+    }
+    return;
+  }
+
+  // 確保是一般文字訊息才往下走
   if (!message.text) return;
 
   const text = message.text.trim();
@@ -203,13 +220,11 @@ async function onMessage(
   // =======================================================
   // 權限控管邏輯
   // =======================================================
-
   const isSuperAdmin = String(userId) === String(env.ADMIN_UID);
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
 
   if (!isSuperAdmin && !isInAdminGroup) {
-    // 並行讀取黑名單與白名單
     const [bannedMap, allowedIds] = await Promise.all([
       getBannedUsers(env),
       getAllowedUserIds(env)
@@ -218,22 +233,9 @@ async function onMessage(
 
     if (!allowedIds.includes(userId)) {
       if (adminGroupId) {
-        await sendAuthorizationRequest(
-          chatId,
-          userId,
-          firstName,
-          username,
-          text,
-          adminGroupId,
-          env
-        );
+        await sendAuthorizationRequest(chatId, userId, firstName, username, text, adminGroupId, env);
       } else {
-        await sendMessage(
-          chatId,
-          `⛔ <b>權限不足</b>\n您的 UID (<code>${userId}</code>) 未授權。`,
-          { parse_mode: "HTML" },
-          env
-        );
+        await sendMessage(chatId, `⛔ <b>權限不足</b>\n您的 UID (<code>${userId}</code>) 未授權。`, { parse_mode: "HTML" }, env);
       }
       return;
     }
@@ -242,21 +244,18 @@ async function onMessage(
   // =======================================================
   // 指令解析
   // =======================================================
-
   const parts = text.split(" ");
   const command = parts[0].startsWith("/")
     ? parts[0].split("@")[0].substring(1)
     : null;
   const args = parts.slice(1);
 
-  // 聯盟指令
   const leagueInfo = leagues.find((l) => l.command === command);
   if (leagueInfo) {
     await handleLeagueCommand(chatId, command!, LIMIT_LEAGUES_SHOW, env, ctx);
     return;
   }
 
-  // 其他指令
   if (command) {
     switch (command) {
       case "start":
@@ -266,6 +265,21 @@ async function onMessage(
 
       case "help":
         await sendHelpMessage(chatId, env);
+        return;
+
+      // 🔥 新增：叫出寶可夢盒子的按鈕
+      case "box":
+        const replyMarkup = {
+          inline_keyboard: [
+            [
+              {
+                text: "🎒 點我開啟寶可夢盒子",
+                web_app: { url: `${requestOrigin}/mybox` } // 動態帶入你的 Worker 網址
+              }
+            ]
+          ]
+        };
+        await sendMessage(chatId, "準備好編輯你的陣容了嗎？", replyMarkup, env);
         return;
 
       case "trash":
@@ -291,7 +305,6 @@ async function onMessage(
     }
   }
 
-  // 寶可夢搜尋
   if (text.length >= 2 && !text.startsWith("/")) {
     await handlePokemonSearch(chatId, userId, text, env, ctx);
   }
@@ -317,9 +330,10 @@ async function handleWebhook(
 
   try {
     const update = await request.json() as TelegramUpdate;
+    const requestOrigin = new URL(request.url).origin; // 🔥 抓取當前網域
 
     if (update.message) {
-      ctx.waitUntil(onMessage(update.message, env, ctx));
+      ctx.waitUntil(onMessage(update.message, env, ctx, requestOrigin)); // 傳入網域給 onMessage
     } else if (update.callback_query) {
       ctx.waitUntil(onCallbackQuery(update.callback_query, env, ctx));
     }
@@ -344,7 +358,6 @@ async function handleApiSearch(
   if (!query) {
     return new Response(JSON.stringify({ error: "No query" }), { status: 400 });
   }
-
   const result = await getPokemonDataOnly(query, env, ctx);
   return new Response(JSON.stringify(result), {
     headers: { "Content-Type": "application/json; charset=utf-8" }
@@ -409,10 +422,20 @@ export default {
         return registerWebhook(url, env);
       }
 
-      // Web 介面
+      // Web 介面 (主頁)
       if (path === "/") {
         return new Response(generateHTML(), {
           headers: { "Content-Type": "text/html; charset=utf-8" }
+        });
+      }
+
+      // 🔥 Web App 盒子介面路由
+      if (path === "/mybox") {
+        return new Response(myBoxHtml, {
+          headers: { 
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "no-store, max-age=0" 
+          }
         });
       }
 
