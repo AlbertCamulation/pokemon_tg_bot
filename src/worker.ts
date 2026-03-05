@@ -310,7 +310,7 @@ async function handleApiNames(
     const baseNameMap = new Map<string, string>();
     transData.forEach(p => baseNameMap.set(p.speciesId.toLowerCase(), p.speciesName));
 
-    const sourceData = rankings.length > 0 ? rankings : transData;
+    const sourceData = transData;
 
     const cleanNames = Array.from(new Set(
       sourceData.map(item => {
