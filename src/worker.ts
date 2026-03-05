@@ -285,38 +285,50 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 //  API 端點處理
 // =========================================================
 
-async function handleApiNames(env: Env, ctx: ExecutionContext): Promise<Response> {
+async function handleApiNames(
+  env: Env,
+  ctx: ExecutionContext
+): Promise<Response> {
   try {
-    const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    // 💡 這裡也加一個隨機參數給 fetchWithCache，確保不會抓到 Cloudflare 暫存的舊檔案
+    const res = await fetchWithCache(getDataUrl(`data/chinese_translation.json?v=${Date.now()}`), env, ctx);
     const data = await res.json() as PokemonData[];
 
     const cleanNames = Array.from(new Set(
       data.map(p => {
-        const id = p.speciesId.toLowerCase();
+        const id = p.speciesId?.toLowerCase() || "";
         let name = p.speciesName || "";
 
-        // 自動動態標註型態 (暗影、地區、Mega)
-        if (!name.includes("(")) {
+        // 🔥 關鍵邏輯：如果 ID 含有特殊後綴 (如 _alolan)，但名稱還沒標註，就自動加上去
+        if (name && !name.includes("(")) {
           Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
             if (id.includes(key)) name += zh;
           });
         }
         
-        // 強制修補欄位
+        // 額外修補
         if (id === "cradily") return "搖籃百合";
         if (id === "golisopod") return "具甲武者";
 
         return name;
       }).filter(name => {
         if (!name || !/[\u4E00-\u9FA5]/.test(name)) return false;
-        return !new RegExp(NAME_CLEANER_REGEX.source).test(name);
+        // 確保地區型態不會被 NAME_CLEANER_REGEX 給誤殺
+        const regex = new RegExp(NAME_CLEANER_REGEX.source);
+        return !regex.test(name);
       })
     )).sort();
 
     return new Response(JSON.stringify(cleanNames), {
-      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store, no-cache" }
+      headers: { 
+        "Content-Type": "application/json; charset=utf-8",
+        // 🔥 強制關閉瀏覽器快取
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
     });
-  } catch {
+  } catch (e) {
     return new Response(JSON.stringify([]), { status: 500 });
   }
 }
