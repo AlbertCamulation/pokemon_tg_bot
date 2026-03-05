@@ -372,14 +372,13 @@ async function handleApiNames(
     const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     const data = await res.json() as PokemonData[];
 
-    // 🔥 建立強制翻譯補丁字典
-    // 以後如果還有發現漏網的英文寶可夢，直接加在這個清單裡就好！
+    // 🔥 終極補丁：直接比對「名字」(大小寫需完全一致)
     const translationPatch: Record<string, string> = {
-      "cradily": "搖籃百合",
-      "golisopod": "具甲武者",
-      "lanturn": "電燈怪",
-      "victreebel_mega": "大食花 Mega", 
-      "malamar_mega": "烏賊王 Mega"
+      "Cradily": "搖籃百合",
+      "Golisopod": "具甲武者",
+      "Lanturn": "電燈怪",
+      "Victreebel (Mega)": "大食花 Mega",
+      "Malamar (Mega)": "烏賊王 Mega"
     };
 
     const cleanNames = Array.from(new Set(
