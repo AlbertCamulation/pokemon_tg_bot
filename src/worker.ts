@@ -285,47 +285,50 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 //  API 端點處理
 // =========================================================
 // 🔥 請將這段貼到 src/worker.ts 的 handleApiNames 函數中
-
 async function handleApiNames(
   env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
   try {
-    // 1. 加上 v 參數，防止 Cloudflare 快取住舊的翻譯檔
-    const res = await fetchWithCache(getDataUrl(`data/chinese_translation.json?v=${Date.now()}`), env, ctx);
-    const data = await res.json() as PokemonData[];
+    // 1. 同時抓取「翻譯檔」與「1500 排名檔」
+    // 加上時間戳記確保抓到的是伺服器最新版
+    const [transRes, rankRes] = await Promise.all([
+      fetchWithCache(getDataUrl(`data/chinese_translation.json?t=${Date.now()}`), env, ctx),
+      fetchWithCache(getDataUrl(`data/rankings_1500_overall.json?t=${Date.now()}`), env, ctx)
+    ]);
 
-    // 2. 定義型態後綴 (確保與分析演算法一致)
-    const SUFFIX_MAP: Record<string, string> = {
-      "_shadow": " (暗影)",
-      "_alolan": " (阿羅拉)",
-      "_galarian": " (伽勒爾)",
-      "_hisuian": " (洗翠)",
-      "_paldean": " (帕底亞)",
-      "_mega": " (Mega)"
-    };
+    const transData = await transRes.json() as PokemonData[];
+    const rankings = await rankRes.json() as any[];
 
+    // 建立 ID -> 中文名稱的對照表
+    const idToNameMap = new Map<string, string>();
+    transData.forEach(p => idToNameMap.set(p.speciesId.toLowerCase(), p.speciesName));
+
+    // 2. 從「排名檔」出發，這才是搜尋功能能找到地區型態的原因
     const cleanNames = Array.from(new Set(
-      data.map(p => {
-        const id = p.speciesId?.toLowerCase() || "";
-        let name = p.speciesName || "";
+      rankings.map(r => {
+        const id = r.speciesId.toLowerCase();
+        const baseId = id.split('_')[0]; // 取得基礎 ID，如 raticate
+        
+        // 優先找完美匹配，找不到就找基礎名稱 (如阿羅拉型態通常共用基礎名稱)
+        let name = idToNameMap.get(id) || idToNameMap.get(baseId) || id;
 
-        // 🔥 核心修正：如果 ID 含有特殊後綴，但名稱還沒標註，就自動加上去
-        // 這樣「拉達」與「拉達 (阿羅拉)」名稱就會不同，不會被 Set 合併
+        // 🔥 自動動態標註 (只要搜尋到的 ID 包含後綴，就加上括號)
+        // 這就是為什麼搜尋能顯示「拉達 阿羅拉」而選單之前不行的解藥
         if (name && !name.includes("(")) {
           Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
             if (id.includes(key)) name += zh;
           });
         }
         
-        // 針對特定欄位修正
-        if (id === "cradily") return "搖籃百合";
-        if (id === "golisopod") return "具甲武者";
+        // 針對特定寶可夢名稱修正
+        if (id.startsWith("cradily")) name = "搖籃百合" + (id.includes("_shadow") ? " (暗影)" : "");
+        if (id.startsWith("golisopod")) name = "具甲武者" + (id.includes("_shadow") ? " (暗影)" : "");
 
         return name;
       }).filter(name => {
+        // 確保是中文且不符合垃圾字元過濾
         if (!name || !/[\u4E00-\u9FA5]/.test(name)) return false;
-        // 確保 NAME_CLEANER_REGEX 不會誤刪掉帶有括號的地區型態
         return !new RegExp(NAME_CLEANER_REGEX.source).test(name);
       })
     )).sort();
@@ -333,8 +336,7 @@ async function handleApiNames(
     return new Response(JSON.stringify(cleanNames), {
       headers: { 
         "Content-Type": "application/json; charset=utf-8",
-        // 🔥 強制瀏覽器與 Telegram Webview 關閉快取
-        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "Cache-Control": "no-store, no-cache, must-revalidate", // 絕對不准快取
         "Pragma": "no-cache",
         "Expires": "0"
       }
