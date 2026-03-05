@@ -507,5 +507,14 @@ export default {
           headers: { "Content-Type": "application/json; charset=utf-8" }
         });
       }
+
+      // 👇 就是這裡！你不小心刪掉了 404 和 catch 區塊 👇
+      return new Response("Not Found", { status: 404 });
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: (e as Error).message }),
+        { status: 500 }
+      );
+    }
   }
 };
