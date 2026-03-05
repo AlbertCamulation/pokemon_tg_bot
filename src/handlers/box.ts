@@ -1,5 +1,5 @@
 import type { Env, PokemonData, RankingPokemon } from '../types';
-import { fetchWithCache, getDataUrl } from '../utils/cache';
+import { fetchWithCache, getDataUrl, getAllRankingsBundle } from '../utils/cache';
 import { leagues } from '../constants';
 
 const TYPE_MAP: Record<string, string> = {
@@ -49,7 +49,7 @@ function scoreTeam(trio: any[], typeChart: any): number {
   trio.forEach(p => {
     if (p.rank <= 50) score += 30;
     else if (p.rank <= 100) score += 10;
-    else score -= 20; // 100以外才用，扣分但不硬排除
+    else score -= 20;
   });
 
   // 3. 弱點互補加分
@@ -94,16 +94,17 @@ function scoreTeam(trio: any[], typeChart: any): number {
 }
 
 export async function analyzeUserBoxTeam(
-  league: number,
+  leaguePath: string,   // 直接傳入路徑，例如 "data/rankings_1500_kanto.json"
   teamNames: string[],
   env: Env,
   ctx: ExecutionContext
 ): Promise<string> {
   try {
-    const [transRes, typeRes, moveTransRes] = await Promise.all([
+    const [transRes, typeRes, moveTransRes, bundledData] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
       fetchWithCache(getDataUrl("data/type_chart.json"), env, ctx),
       fetchWithCache(getDataUrl("data/move.json"), env, ctx),
+      getAllRankingsBundle(env, ctx),
     ]);
 
     const transData = await transRes.json() as PokemonData[];
@@ -131,12 +132,17 @@ export async function analyzeUserBoxTeam(
       return isElite ? `${name}*` : name;
     };
 
-    const leagueInfo = leagues.find(l => l.command === String(league) || l.cp === String(league));
-    const rankRes = await fetchWithCache(getDataUrl(leagueInfo!.path), env, ctx);
-    const rankings = await rankRes.json() as RankingPokemon[];
+    // 直接用 leaguePath 取排名
+    const rankings = (bundledData[leaguePath] || []) as (RankingPokemon & { realRank: number })[];
+    if (rankings.length === 0) {
+      return `⚠️ 找不到該聯盟排名資料（${leaguePath}）`;
+    }
 
-    const myPokemons = rankings
-      .map((r, idx) => ({ ...r, realRank: idx + 1 }))
+    // 為每筆加上 realRank
+    const rankedList = rankings.map((r, idx) => ({ ...r, realRank: idx + 1 }));
+
+    // 過濾出盒子內有的寶可夢
+    const myPokemons = rankedList
       .filter(r => teamNames.includes(getFullName(r.speciesId)))
       .map(r => {
         const id = r.speciesId.toLowerCase();
@@ -168,7 +174,7 @@ export async function analyzeUserBoxTeam(
       });
 
     if (myPokemons.length < 3) {
-      return "⚠️ 符合排名的寶可夢不足 3 隻，請至少加入 3 隻有排名的寶可夢。";
+      return "⚠️ 在此聯盟中，符合排名的寶可夢不足 3 隻，請加入更多有排名的寶可夢。";
     }
 
     // 暴力枚舉所有組合
@@ -207,7 +213,11 @@ export async function analyzeUserBoxTeam(
       return `${icon} #${p.rank} ${p.chineseName} (${p.score.toFixed(1)}) - ${getRankIcon(p.score)}${rankWarning}\n(${toZh(p.types)})\n└ ${moveLine}`;
     };
 
-    let msg = `📊 ${league} 聯盟最佳三人組分析\n`;
+    // 聯盟名稱
+    const leagueInfo = leagues.find(l => l.path === leaguePath);
+    const leagueName = leagueInfo ? leagueInfo.name : leaguePath;
+
+    let msg = `📊 ${leagueName} 最佳三人組分析\n`;
     msg += `=======================\n`;
     msg += `🥇 先發 (Leader)\n${formatPoke(leader, "👑")}\n\n`;
     msg += `🥈 安全替換 (Safe Swap)\n${formatPoke(safeSwap, "🛡️")}\n\n`;
@@ -218,7 +228,8 @@ export async function analyzeUserBoxTeam(
     } else {
       msg += `✅ 弱點覆蓋良好，無共同致命弱點。\n`;
     }
-    msg += `💡 系統已自動識別 暗影/地區/Mega 型態。`;
+    msg += `💡 系統已自動識別 暗影/地區/Mega 型態。\n\n`;
+    msg += `📋 快速複製：\n${bestTrio.map(p => p.chineseName).join(',')}`;
 
     return msg;
 
