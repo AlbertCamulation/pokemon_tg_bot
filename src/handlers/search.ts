@@ -311,27 +311,31 @@ export async function getPokemonDataOnly(
   // 搜尋匹配
   const isChi = /[\u4e00-\u9fa5]/.test(finalQuery);
   const lower = finalQuery.toLowerCase();
-  const target = data.find(p =>
-    isChi
-      ? p.speciesName.includes(finalQuery)
-      : p.speciesId.toLowerCase().includes(lower)
-  );
+  const initialMatches = data.filter(p =>
+  isChi
+    ? p.speciesName.includes(finalQuery)
+    : p.speciesId.toLowerCase().includes(lower)
+);
 
-  if (!target) {
-    return {
-      evolutionChain: [],
-      results: [],
-      events: [],
-      allLeagues: leagues.map(l => ({ id: l.command, name: l.name })),
-      hasEliteWarning: false,
-      typeChart
-    };
-  }
+if (!initialMatches.length) {
+  return {
+    evolutionChain: [],
+    results: [],
+    events: [],
+    allLeagues: leagues.map(l => ({ id: l.command, name: l.name })),
+    hasEliteWarning: false,
+    typeChart
+  };
+}
 
-  // 進化鏈處理
-  const familyMembers = target.family?.id
-    ? data.filter(p => p.family && p.family.id === target.family!.id)
-    : [target];
+const familyIds = new Set<string>();
+initialMatches.forEach(p => {
+  if (p.family?.id) familyIds.add(p.family.id);
+});
+
+const familyMembers = data.filter(p =>
+  (p.family && familyIds.has(p.family.id)) || initialMatches.includes(p)
+);
 
   const evolutionChain: EvolutionChainItem[] = familyMembers
     .filter(m => !m.speciesId.toLowerCase().includes("_shadow") && !m.speciesName.includes("暗影"))
