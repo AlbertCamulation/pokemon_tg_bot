@@ -229,7 +229,7 @@ export async function analyzeUserBoxTeam(
       msg += `✅ 弱點覆蓋良好，無共同致命弱點。\n`;
     }
     msg += `💡 系統已自動識別 暗影/地區/Mega 型態。\n\n`;
-    msg += `📋 快速複製：\n${bestTrio.map(p => p.chineseName).join(',')}`;
+    msg += `📋 快速複製：\n<code>${bestTrio.map(p => p.chineseName).join(',')}</code>`;
 
     return msg;
 
