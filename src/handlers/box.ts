@@ -45,7 +45,14 @@ function scoreTeam(trio: any[], typeChart: any): number {
   // 1. 基礎分數
   trio.forEach(p => { score += p.score; });
 
-  // 2. 弱點互補加分：A 的弱點被 B 或 C 抵抗
+  // 2. 排名加權：前50強加分，51-100微加，100以外扣分
+  trio.forEach(p => {
+    if (p.rank <= 50) score += 30;
+    else if (p.rank <= 100) score += 10;
+    else score -= 20; // 100以外才用，扣分但不硬排除
+  });
+
+  // 3. 弱點互補加分
   for (let i = 0; i < trio.length; i++) {
     const myWeaks = Object.entries(getWeaknesses(trio[i].types, typeChart))
       .filter(([_, m]) => m > 1.0).map(([t]) => t);
@@ -58,12 +65,12 @@ function scoreTeam(trio: any[], typeChart: any): number {
     }
   }
 
-  // 3. 招式屬性多樣化加分
+  // 4. 招式屬性多樣化加分
   const allMoveTypes: string[] = [];
   trio.forEach(p => allMoveTypes.push(...p.moveTypes));
   score += new Set(allMoveTypes).size * 5;
 
-  // 4. 主屬性重疊扣分
+  // 5. 主屬性重疊扣分
   const typeCounts: Record<string, number> = {};
   trio.forEach(p => {
     p.types.forEach((t: string) => {
@@ -75,7 +82,7 @@ function scoreTeam(trio: any[], typeChart: any): number {
     else if (count === 2) score -= 10;
   });
 
-  // 5. 共同弱點重扣
+  // 6. 共同弱點重扣
   const allWeakSets = trio.map(p => {
     const w = getWeaknesses(p.types, typeChart);
     return new Set(Object.entries(w).filter(([_, m]) => m > 1.0).map(([t]) => t));
@@ -146,7 +153,6 @@ export async function analyzeUserBoxTeam(
           chargedMoves = r.moveset.slice(1, 3);
         }
 
-        // 招式屬性：用自身屬性近似（無法從 move.json 取得屬性時的備案）
         const moveTypes: string[] = (pInfo?.types || []).filter((t: string) => t !== 'none');
 
         return {
@@ -165,7 +171,7 @@ export async function analyzeUserBoxTeam(
       return "⚠️ 符合排名的寶可夢不足 3 隻，請至少加入 3 隻有排名的寶可夢。";
     }
 
-    // 暴力枚舉所有組合，找最高分
+    // 暴力枚舉所有組合
     let bestScore = -Infinity;
     let bestTrio = myPokemons.slice(0, 3);
 
@@ -197,7 +203,8 @@ export async function analyzeUserBoxTeam(
       const fast = translateMove(p.fastMove);
       const charged = p.chargedMoves.map((m: string) => translateMove(m)).filter(Boolean).join(', ');
       const moveLine = [fast, charged].filter(Boolean).join(' / ');
-      return `${icon} #${p.rank} ${p.chineseName} (${p.score.toFixed(1)}) - ${getRankIcon(p.score)}\n(${toZh(p.types)})\n└ ${moveLine}`;
+      const rankWarning = p.rank > 100 ? ' ⚠️排名較低' : '';
+      return `${icon} #${p.rank} ${p.chineseName} (${p.score.toFixed(1)}) - ${getRankIcon(p.score)}${rankWarning}\n(${toZh(p.types)})\n└ ${moveLine}`;
     };
 
     let msg = `📊 ${league} 聯盟最佳三人組分析\n`;
