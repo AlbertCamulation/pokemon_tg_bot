@@ -284,46 +284,57 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 // =========================================================
 //  API 端點處理
 // =========================================================
+// 🔥 請將這段貼到 src/worker.ts 的 handleApiNames 函數中
 
 async function handleApiNames(
   env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
   try {
-    // 💡 這裡也加一個隨機參數給 fetchWithCache，確保不會抓到 Cloudflare 暫存的舊檔案
+    // 1. 加上 v 參數，防止 Cloudflare 快取住舊的翻譯檔
     const res = await fetchWithCache(getDataUrl(`data/chinese_translation.json?v=${Date.now()}`), env, ctx);
     const data = await res.json() as PokemonData[];
+
+    // 2. 定義型態後綴 (確保與分析演算法一致)
+    const SUFFIX_MAP: Record<string, string> = {
+      "_shadow": " (暗影)",
+      "_alolan": " (阿羅拉)",
+      "_galarian": " (伽勒爾)",
+      "_hisuian": " (洗翠)",
+      "_paldean": " (帕底亞)",
+      "_mega": " (Mega)"
+    };
 
     const cleanNames = Array.from(new Set(
       data.map(p => {
         const id = p.speciesId?.toLowerCase() || "";
         let name = p.speciesName || "";
 
-        // 🔥 關鍵邏輯：如果 ID 含有特殊後綴 (如 _alolan)，但名稱還沒標註，就自動加上去
+        // 🔥 核心修正：如果 ID 含有特殊後綴，但名稱還沒標註，就自動加上去
+        // 這樣「拉達」與「拉達 (阿羅拉)」名稱就會不同，不會被 Set 合併
         if (name && !name.includes("(")) {
           Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
             if (id.includes(key)) name += zh;
           });
         }
         
-        // 額外修補
+        // 針對特定欄位修正
         if (id === "cradily") return "搖籃百合";
         if (id === "golisopod") return "具甲武者";
 
         return name;
       }).filter(name => {
         if (!name || !/[\u4E00-\u9FA5]/.test(name)) return false;
-        // 確保地區型態不會被 NAME_CLEANER_REGEX 給誤殺
-        const regex = new RegExp(NAME_CLEANER_REGEX.source);
-        return !regex.test(name);
+        // 確保 NAME_CLEANER_REGEX 不會誤刪掉帶有括號的地區型態
+        return !new RegExp(NAME_CLEANER_REGEX.source).test(name);
       })
     )).sort();
 
     return new Response(JSON.stringify(cleanNames), {
       headers: { 
         "Content-Type": "application/json; charset=utf-8",
-        // 🔥 強制關閉瀏覽器快取
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        // 🔥 強制瀏覽器與 Telegram Webview 關閉快取
+        "Cache-Control": "no-store, no-cache, must-revalidate",
         "Pragma": "no-cache",
         "Expires": "0"
       }
@@ -332,7 +343,6 @@ async function handleApiNames(
     return new Response(JSON.stringify([]), { status: 500 });
   }
 }
-
 // =========================================================
 //  Worker Entry Point
 // =========================================================
