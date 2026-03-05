@@ -42,15 +42,21 @@ export async function analyzeUserBoxTeam(
     const rankRes = await fetchWithCache(getDataUrl(leagueInfo!.path), env, ctx);
     const rankings = await rankRes.json() as RankingPokemon[];
 
-    // 2. 格式化使用者盒子內的寶可夢
+    // 2. 格式化使用者盒子內的寶可夢 (加入真正的排名序號與修正招式路徑)
     const myPokemons = rankings
-      .filter(r => teamNames.includes(transData.find(p => p.speciesId.toLowerCase() === r.speciesId.toLowerCase())?.speciesName || ""))
+      // 先標註每一隻在原始檔案中的排名 (index + 1)
+      .map((r, idx) => ({ ...r, realRank: idx + 1 }))
+      .filter(r => {
+        const pInfo = transData.find(p => p.speciesId.toLowerCase() === r.speciesId.toLowerCase());
+        return pInfo && teamNames.includes(pInfo.speciesName);
+      })
       .map(r => {
         const pInfo = transData.find(p => p.speciesId.toLowerCase() === r.speciesId.toLowerCase());
-        const fastMove = r.moveFast || "";
-        const chargedMoves = Array.isArray(r.moveCharged) ? r.moveCharged : [r.moveCharged].filter(Boolean) as string[];
         
-        // 抓取該寶可夢擁有的攻擊屬性
+        // 🔥 修正點：PvPoke 的招式通常在 r.moves 之下
+        const fastMove = r.moves?.fast || "";
+        const chargedMoves = Array.isArray(r.moves?.charged) ? r.moves.charged : [];
+        
         const attackTypes = new Set<string>();
         [fastMove, ...chargedMoves].forEach(mId => {
           const attr = moveAttrMap.get(mId.replace('*', '').toUpperCase());
@@ -63,10 +69,17 @@ export async function analyzeUserBoxTeam(
           types: pInfo?.types || [],
           attackTypes: Array.from(attackTypes),
           fastMove,
-          chargedMoves
+          chargedMoves,
+          rank: r.realRank // 🔥 這裡現在有正確的排名數字了
         };
       })
       .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    // --- 輸出格式化優化 (處理 none 屬性) ---
+    const toZh = (ts: string[]) => {
+      const filtered = ts.filter(t => t.toLowerCase() !== 'none');
+      return filtered.map(t => TYPE_MAP[t.toLowerCase()] || t).join('/');
+    };
 
     if (myPokemons.length < 3) return "⚠️ 排名資料配對不足 3 隻。";
 
