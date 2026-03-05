@@ -290,45 +290,45 @@ async function handleApiNames(
   ctx: ExecutionContext
 ): Promise<Response> {
   try {
-    // 1. 同時抓取「翻譯檔」與「1500 排名檔」
-    // 加上時間戳記確保抓到的是伺服器最新版
+    // 1. 同時抓取「翻譯檔」與「1500 聯盟排名檔」 (這是選單能出現阿羅拉型態的關鍵)
     const [transRes, rankRes] = await Promise.all([
-      fetchWithCache(getDataUrl(`data/chinese_translation.json?t=${Date.now()}`), env, ctx),
-      fetchWithCache(getDataUrl(`data/rankings_1500_overall.json?t=${Date.now()}`), env, ctx)
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
+      fetchWithCache(getDataUrl("data/rankings_1500_overall.json"), env, ctx)
     ]);
 
     const transData = await transRes.json() as PokemonData[];
     const rankings = await rankRes.json() as any[];
 
-    // 建立 ID -> 中文名稱的對照表
-    const idToNameMap = new Map<string, string>();
-    transData.forEach(p => idToNameMap.set(p.speciesId.toLowerCase(), p.speciesName));
+    // 建立基礎名稱映射 (ID -> 中文名)
+    const baseNameMap = new Map<string, string>();
+    transData.forEach(p => baseNameMap.set(p.speciesId.toLowerCase(), p.speciesName));
 
-    // 2. 從「排名檔」出發，這才是搜尋功能能找到地區型態的原因
+    // 2. 從排名資料 (Rankings) 出發，這樣才能抓到所有變體 ID
     const cleanNames = Array.from(new Set(
       rankings.map(r => {
         const id = r.speciesId.toLowerCase();
         const baseId = id.split('_')[0]; // 取得基礎 ID，如 raticate
         
-        // 優先找完美匹配，找不到就找基礎名稱 (如阿羅拉型態通常共用基礎名稱)
-        let name = idToNameMap.get(id) || idToNameMap.get(baseId) || id;
+        // 優先找完美匹配，找不到就找基礎名稱 (如拉達)，最後才用原始 ID
+        let name = baseNameMap.get(id) || baseNameMap.get(baseId) || id;
 
-        // 🔥 自動動態標註 (只要搜尋到的 ID 包含後綴，就加上括號)
-        // 這就是為什麼搜尋能顯示「拉達 阿羅拉」而選單之前不行的解藥
+        // 🔥 自動動態標註 (只要 ID 包含後綴，就自動加上括號)
+        // 這樣「拉達 (阿羅拉)」就會出現在選單裡了
         if (name && !name.includes("(")) {
           Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
             if (id.includes(key)) name += zh;
           });
         }
         
-        // 針對特定寶可夢名稱修正
+        // 特殊修正
         if (id.startsWith("cradily")) name = "搖籃百合" + (id.includes("_shadow") ? " (暗影)" : "");
         if (id.startsWith("golisopod")) name = "具甲武者" + (id.includes("_shadow") ? " (暗影)" : "");
 
         return name;
       }).filter(name => {
-        // 確保是中文且不符合垃圾字元過濾
+        // 確保是中文且不符合過濾規則
         if (!name || !/[\u4E00-\u9FA5]/.test(name)) return false;
+        // 確保 NAME_CLEANER_REGEX 不會誤刪
         return !new RegExp(NAME_CLEANER_REGEX.source).test(name);
       })
     )).sort();
@@ -336,12 +336,14 @@ async function handleApiNames(
     return new Response(JSON.stringify(cleanNames), {
       headers: { 
         "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "no-store, no-cache, must-revalidate", // 絕對不准快取
+        // 強制關閉快取，確保每次打開 Web App 都能更新名單
+        "Cache-Control": "no-store, no-cache, must-revalidate",
         "Pragma": "no-cache",
         "Expires": "0"
       }
     });
   } catch (e) {
+    console.error("選單載入失敗:", e);
     return new Response(JSON.stringify([]), { status: 500 });
   }
 }
