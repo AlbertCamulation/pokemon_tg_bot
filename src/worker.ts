@@ -372,13 +372,34 @@ async function handleApiNames(
     const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     const data = await res.json() as PokemonData[];
 
+    // 🔥 建立強制翻譯補丁字典
+    // 以後如果還有發現漏網的英文寶可夢，直接加在這個清單裡就好！
+    const translationPatch: Record<string, string> = {
+      "cradily": "搖籃百合",
+      "golisopod": "具甲武者",
+      "lanturn": "電燈怪",
+      "victreebel_mega": "大食花 Mega", 
+      "malamar_mega": "烏賊王 Mega"
+    };
+
     const cleanNames = Array.from(new Set(
-      data.map(p => p.speciesName)
-        .filter(name => {
-          if (!name) return false;
-          const regex = new RegExp(NAME_CLEANER_REGEX.source);
-          return !regex.test(name);
-        })
+      data.map(p => {
+        const safeId = p.speciesId.toLowerCase();
+        // 1. 如果在我們的補丁名單內，強制使用我們寫的中文
+        if (translationPatch[safeId]) {
+          return translationPatch[safeId];
+        }
+        // 2. 否則使用原始翻譯
+        return p.speciesName;
+      })
+      .filter(name => {
+        if (!name) return false;
+        
+        // 把我上次給你的「沒有中文就丟棄」的爛濾網拿掉，
+        // 這樣以後如果有沒翻譯到的，它會以英文顯示，你才會知道要來補丁字典加字！
+        const regex = new RegExp(NAME_CLEANER_REGEX.source);
+        return !regex.test(name);
+      })
     )).sort();
 
     return new Response(JSON.stringify(cleanNames), {
@@ -388,7 +409,6 @@ async function handleApiNames(
     return new Response(JSON.stringify([]), { status: 500 });
   }
 }
-
 // =========================================================
 //  Worker Entry Point
 // =========================================================
