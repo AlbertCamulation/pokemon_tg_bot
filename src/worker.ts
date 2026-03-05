@@ -372,33 +372,30 @@ async function handleApiNames(
     const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     const data = await res.json() as PokemonData[];
 
-    // 🔥 強制補丁字典 (你可以隨時在這裡加字)
+    // 擴展翻譯補丁，加入地區型態的特殊處理
     const translationPatch: Record<string, string> = {
       "cradily": "搖籃百合",
       "golisopod": "具甲武者",
       "lanturn": "電燈怪",
-      "victreebel_mega": "大食花 Mega",
-      "malamar_mega": "烏賊王 Mega"
+      "rattata_alolan": "拉達 (阿羅拉)",
+      "corsola_galarian": "太陽珊瑚 (伽勒爾)",
+      "stunfisk_galarian": "泥巴魚 (伽勒爾)",
+      "ninetales_alolan": "九尾 (阿羅拉)",
+      "marowak_alolan": "嘎啦嘎啦 (阿羅拉)"
     };
 
     const cleanNames = Array.from(new Set(
       data.map(p => {
-        const id = p.speciesId ? p.speciesId.toLowerCase() : "";
-        const name = p.speciesName || "";
-        
-        // 1. 優先比對 ID (最準)
+        const id = p.speciesId.toLowerCase();
+        // 1. 如果 ID 在補丁裡，優先使用補丁的名稱 (這樣才有地區標註)
         if (translationPatch[id]) return translationPatch[id];
-        // 2. 其次比對原本的名字
-        if (translationPatch[name]) return translationPatch[name];
         
-        return name;
+        // 2. 如果原始名稱本身就有括號 (例如 "拉達 (阿羅拉)")，直接保留
+        return p.speciesName || "";
       }).filter(name => {
         if (!name) return false;
-        
-        // ⚔️ 絕對殺手鐧：只要名字裡沒有中文字 (\u4E00-\u9FA5)，直接斬立決！
-        // 只要這行有成功部署，網址裡絕對不可能出現 Cradily！
+        // 確保至少有一個中文字，且不是我們要過濾的垃圾字串
         if (!/[\u4E00-\u9FA5]/.test(name)) return false;
-
         const regex = new RegExp(NAME_CLEANER_REGEX.source);
         return !regex.test(name);
       })
@@ -407,9 +404,7 @@ async function handleApiNames(
     return new Response(JSON.stringify(cleanNames), {
       headers: { 
         "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0"
+        "Cache-Control": "no-store, no-cache, must-revalidate"
       }
     });
   } catch {
