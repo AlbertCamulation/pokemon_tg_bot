@@ -15,7 +15,8 @@ import {
   WEBHOOK_PATH,
   leagues,
   LIMIT_LEAGUES_SHOW,
-  NAME_CLEANER_REGEX
+  NAME_CLEANER_REGEX,
+  MANIFEST_URL
 } from './constants';
 
 import {
