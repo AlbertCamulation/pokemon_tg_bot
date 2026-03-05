@@ -56,10 +56,9 @@ import {
   sendAuthorizationRequest
 } from './handlers';
 
-// 引入 Web 介面
 import { generateHTML, myBoxHtml } from './web/html';
 
-// 全域後綴映射 (自動標記型態)
+// 全域後綴映射
 const SUFFIX_MAP: Record<string, string> = {
   "_shadow": " (暗影)",
   "_alolan": " (阿羅拉)",
@@ -68,6 +67,39 @@ const SUFFIX_MAP: Record<string, string> = {
   "_paldean": " (帕底亞)",
   "_mega": " (Mega)"
 };
+
+// KV key 安全化：把斜線、點換成底線
+function sanitizePathKey(path: string): string {
+  return path.replace(/[\/\.]/g, '_');
+}
+
+// 從 manifest 取得當下聯盟清單
+async function getActiveLeagues(): Promise<Array<{ name: string; path: string; command: string }>> {
+  try {
+    const manifestRes = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, {
+      headers: { "Cache-Control": "no-cache" }
+    });
+    if (!manifestRes.ok) return [];
+    const manifest = await manifestRes.json() as {
+      active_leagues: Array<{ cp: string; pvpoke_id: string; name_zh: string }>;
+    };
+
+    const result: Array<{ name: string; path: string; command: string }> = [];
+    manifest.active_leagues.forEach(a => {
+      const local = leagues.find(l => {
+        if (String(l.cp) !== String(a.cp)) return false;
+        if (a.pvpoke_id === "all") return l.command === "great_league_top" || l.command === "ultra_league_top" || l.command === "master_league_top";
+        if (a.pvpoke_id === "premier") return l.name.includes("紀念") || l.command.includes("premier") || l.command.includes("permier");
+        if (a.pvpoke_id === "remix") return l.name.includes("Remix") || l.command.includes("remix");
+        return l.command.includes(a.pvpoke_id);
+      });
+      if (local) result.push({ name: local.name, path: local.path, command: local.command });
+    });
+    return result;
+  } catch {
+    return [];
+  }
+}
 
 // =========================================================
 //  Callback Query 處理
@@ -89,7 +121,6 @@ async function onCallbackQuery(
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
 
-  // 處理解除封禁
   if (data.startsWith("unban_btn_")) {
     if (!isSuperAdmin) {
       await answerCallbackQuery(callbackQueryId, "⛔ 您無權執行此操作", env);
@@ -100,13 +131,11 @@ async function onCallbackQuery(
     return;
   }
 
-  // 關閉選單
   if (data === "close_menu") {
     await deleteMessage(chatId, messageId, env);
     return;
   }
 
-  // 管理員審核與封鎖
   if (data.startsWith("approve_uid_") || data.startsWith("ban_uid_")) {
     if (!isSuperAdmin && !isInAdminGroup) {
       await answerCallbackQuery(callbackQueryId, "⛔ 權限不足", env);
@@ -127,14 +156,12 @@ async function onCallbackQuery(
     return;
   }
 
-  // 權限檢查
   const allowedIds = await getAllowedUserIds(env);
   if (!isSuperAdmin && !isInAdminGroup && !allowedIds.includes(userId)) {
     await answerCallbackQuery(callbackQueryId, `⛔ 權限不足`, env);
     return;
   }
 
-  // 處理垃圾名單
   if (data.startsWith("untrash_btn_")) {
     const name = data.replace("untrash_btn_", "");
     await answerCallbackQuery(callbackQueryId, "正在移除...", env);
@@ -142,7 +169,6 @@ async function onCallbackQuery(
     return;
   }
 
-  // 屬性選單處理
   if (data === "menu_atk_types") { await sendTypeSelectionMenu(chatId, "atk", env); return; }
   if (data === "menu_def_types") { await sendTypeSelectionMenu(chatId, "def", env); return; }
   if (data.startsWith("type_atk_")) { await handleTypeDetail(chatId, data.replace("type_atk_", ""), "atk", env); return; }
@@ -150,14 +176,12 @@ async function onCallbackQuery(
 
   await answerCallbackQuery(callbackQueryId, "", env);
 
-  // 聯盟指令處理
   const leagueInfo = leagues.find((l) => l.command === data);
   if (leagueInfo) {
     await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env, ctx);
     return;
   }
 
-  // 其他主選單按鈕
   switch (data) {
     case "meta_analysis": await handleMetaAnalysis(chatId, env, ctx); break;
     case "trash_list": await handleTrashCommand(chatId, userId, callbackQuery.from, env); break;
@@ -179,15 +203,12 @@ async function onMessage(
   requestOrigin: string
 ): Promise<void> {
 
-  // 優先攔截 Web App 儲存事件
   if (message.web_app_data) {
     try {
       const payload = JSON.parse(message.web_app_data.data);
       if (payload.action === "save_box") {
         const { league, team } = payload;
         await env.POKEMON_KV.put(`box_${league}_${message.chat.id}`, JSON.stringify(team));
-        
-        // 即時執行分析演算法
         const analysisResult = await analyzeUserBoxTeam(league, team, env, ctx);
         await sendMessage(
           message.chat.id,
@@ -209,7 +230,6 @@ async function onMessage(
   const firstName = message.from!.first_name || "Unknown";
   const username = message.from!.username;
 
-  // 權限控管
   const isSuperAdmin = String(userId) === String(env.ADMIN_UID);
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
@@ -224,7 +244,6 @@ async function onMessage(
     }
   }
 
-  // 指令解析
   const parts = text.split(" ");
   const command = parts[0].startsWith("/") ? parts[0].split("@")[0].substring(1) : null;
   const args = parts.slice(1);
@@ -248,14 +267,12 @@ async function onMessage(
       case "banlist": if (isSuperAdmin) await handleBanlistCommand(chatId, env); return;
       default: break;
     }
-    // 檢查是否為聯盟指令
     if (leagues.find(l => l.command === command)) {
       await handleLeagueCommand(chatId, command, LIMIT_LEAGUES_SHOW, env, ctx);
       return;
     }
   }
 
-  // 一般搜尋
   if (text.length >= 2 && !text.startsWith("/")) {
     await handlePokemonSearch(chatId, userId, text, env, ctx);
   }
@@ -283,38 +300,23 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 }
 
 // =========================================================
-//  API 端點處理
+//  handleApiNames
 // =========================================================
-// 🔥 請將這段貼到 src/worker.ts 的 handleApiNames 函數中
 async function handleApiNames(
   env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
   let transData: PokemonData[] = [];
-  let rankings: any[] = [];
 
   try {
-    // 1. 抓取翻譯大禮包
     const transRes = await fetchWithCache(getDataUrl(`data/chinese_translation.json`), env, ctx);
     transData = await transRes.json() as PokemonData[];
-
-    try {
-      // 🔥 修正：路徑改為正確的 rankings_1500.json
-      const rankRes = await fetch(getDataUrl(`data/rankings_1500.json`)); 
-      if (rankRes.ok) {
-        rankings = await rankRes.json() as any[];
-      }
-    } catch (rankError) {
-      console.error("排名檔抓取失敗:", rankError);
-    }
 
     const baseNameMap = new Map<string, string>();
     transData.forEach(p => baseNameMap.set(p.speciesId.toLowerCase(), p.speciesName));
 
-    const sourceData = transData;
-
     const cleanNames = Array.from(new Set(
-      sourceData.map(item => {
+      transData.map(item => {
         const id = (item.speciesId || "").toLowerCase();
         const baseId = id.split('_')[0];
         let name = baseNameMap.get(id) || baseNameMap.get(baseId) || id;
@@ -323,19 +325,19 @@ async function handleApiNames(
           const zhClean = zh.replace(/[()]/g, '').trim();
           if (id.includes(key) && !name.includes(zhClean)) name += zh;
         });
-        
+
         if (id.startsWith("cradily")) name = "搖籃百合" + (id.includes("_shadow") ? " (暗影)" : "");
         if (id.startsWith("golisopod")) name = "具甲武者" + (id.includes("_shadow") ? " (暗影)" : "");
 
         return name;
       }).filter(name => {
         if (!name || !/[\u4E00-\u9FA5]/.test(name)) return false;
-        return true;  // 不再用 NAME_CLEANER_REGEX 過濾，保留所有地區形態
+        return true;
       })
     )).sort();
 
     return new Response(JSON.stringify(cleanNames), {
-      headers: { 
+      headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "public, max-age=3600"
       }
@@ -346,6 +348,7 @@ async function handleApiNames(
     return new Response(JSON.stringify(fallback), { status: 200, headers: { "Content-Type": "application/json" } });
   }
 }
+
 // =========================================================
 //  Worker Entry Point
 // =========================================================
@@ -358,40 +361,22 @@ export default {
     try {
       if (path === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
       if (path === "/api/names") return handleApiNames(env, ctx);
+
+      // 當下聯盟清單
       if (path === "/api/active-leagues") {
-        try {
-          const manifestRes = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, {
-            headers: { "Cache-Control": "no-cache" }
-          });
-          const manifest = await manifestRes.json() as {
-            active_leagues: Array<{ cp: string; pvpoke_id: string; name_zh: string }>;
-          };
-      
-          const result: Array<{ name: string; path: string; command: string }> = [];
-          manifest.active_leagues.forEach(a => {
-            const local = leagues.find(l => {
-              if (String(l.cp) !== String(a.cp)) return false;
-              if (a.pvpoke_id === "all") return l.command === "great_league_top" || l.command === "ultra_league_top" || l.command === "master_league_top";
-              if (a.pvpoke_id === "premier") return l.name.includes("紀念") || l.command.includes("premier") || l.command.includes("permier");
-              if (a.pvpoke_id === "remix") return l.name.includes("Remix") || l.command.includes("remix");
-              return l.command.includes(a.pvpoke_id);
-            });
-            if (local) result.push({ name: local.name, path: local.path, command: local.command });
-          });
-      
-          return new Response(JSON.stringify(result), {
-            headers: { "Content-Type": "application/json; charset=utf-8" }
-          });
-        } catch {
-          return new Response("[]", { headers: { "Content-Type": "application/json" } });
-        }
+        const result = await getActiveLeagues();
+        return new Response(JSON.stringify(result), {
+          headers: { "Content-Type": "application/json; charset=utf-8" }
+        });
       }
+
       if (path === "/api/search") {
         const query = url.searchParams.get("q");
         if (!query) return new Response("{}", { status: 400 });
         const result = await getPokemonDataOnly(query, env, ctx);
         return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
+
       if (path === "/registerWebhook") return registerWebhook(url, env);
       if (path === "/") return new Response(generateHTML(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
       if (path === "/mybox") return new Response(myBoxHtml, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
@@ -400,28 +385,32 @@ export default {
       if (path === "/api/box" && request.method === "GET") {
         const uid = url.searchParams.get("userId");
         if (!uid) return new Response("{}", { status: 400 });
-        
-        // 列出該 user 所有 box_ 開頭的 key
-        const keys = await env.POKEMON_KV.list({ prefix: `box_path_` });
+
+        // 取得當下所有聯盟，逐一讀取該 user 的盒子
+        const activeLeagues = await getActiveLeagues();
         const result: Record<string, string[]> = {};
-        await Promise.all(
-          keys.keys
-            .filter(k => k.name.endsWith(`_${uid}`))
-            .map(async k => {
-              const leaguePath = k.name.replace(`box_path_`, "").replace(`_${uid}`, "");
-              const val = await env.POKEMON_KV.get(k.name);
-              result[leaguePath] = JSON.parse(val || "[]");
-            })
-        );
-        return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
+
+        await Promise.all(activeLeagues.map(async league => {
+          const kvKey = `box_${sanitizePathKey(league.path)}_${uid}`;
+          const val = await env.POKEMON_KV.get(kvKey);
+          result[league.path] = JSON.parse(val || "[]");
+        }));
+
+        return new Response(JSON.stringify(result), {
+          headers: { "Content-Type": "application/json; charset=utf-8" }
+        });
       }
 
       // 儲存盒子與分析 API
       if (path === "/api/box" && request.method === "POST") {
         const payload = await request.json() as any;
-        const { userId, leaguePath, team } = payload;  // ← 改這行
-        await env.POKEMON_KV.put(`box_path_${leaguePath}_${userId}`, JSON.stringify(team));
-        const analysisResult = await analyzeUserBoxTeam(leaguePath, team, env, ctx);  // ← 改這行
+        const { userId, leaguePath, team } = payload;
+        if (!userId || !leaguePath) return new Response(JSON.stringify({ error: "missing fields" }), { status: 400 });
+
+        const kvKey = `box_${sanitizePathKey(leaguePath)}_${userId}`;
+        await env.POKEMON_KV.put(kvKey, JSON.stringify(team));
+
+        const analysisResult = await analyzeUserBoxTeam(leaguePath, team, env, ctx);
         await sendMessage(userId, `✅ <b>盒子已更新</b>\n${analysisResult}`, { parse_mode: "HTML" }, env);
         return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
       }
