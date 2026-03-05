@@ -30,31 +30,22 @@ function getRankIcon(score: number): string {
 }
 
 export async function analyzeUserBoxTeam(
-  league: number, 
-  teamNames: string[], 
-  env: Env, 
+  league: number,
+  teamNames: string[],
+  env: Env,
   ctx: ExecutionContext
 ): Promise<string> {
   try {
-    // A. 資料同步抓取
+    // A. 資料同步抓取 (修正：改用 move.json，移除外部 API)
     const [transRes, typeRes, moveTransRes] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
       fetchWithCache(getDataUrl("data/type_chart.json"), env, ctx),
-      fetchWithCache(getDataUrl("data/move.json"), env, ctx),  // ✅
+      fetchWithCache(getDataUrl("data/move.json"), env, ctx),
     ]);
-    const moveTrans = await moveTransRes.json() as Record<string, string>;
 
     const transData = await transRes.json() as PokemonData[];
     const typeChart = await typeRes.json() as any;
     const moveTrans = await moveTransRes.json() as Record<string, string>;
-    const fastMovesRaw = await fastRes.json() as any[];
-    const chargedMovesRaw = await chargedRes.json() as any[];
-    
-    // B. 建立招式屬性映射
-    const moveAttrMap = new Map<string, string>();
-    [...fastMovesRaw, ...chargedMovesRaw].forEach(m => {
-      moveAttrMap.set(m.name.toUpperCase().replace(/\s+/g, '_'), m.type.toLowerCase());
-    });
 
     // C. 核心動態翻譯函數 (處理暗影與地區型態)
     const getFullName = (speciesId: string): string => {
@@ -83,31 +74,26 @@ export async function analyzeUserBoxTeam(
       .map(r => {
         const id = r.speciesId.toLowerCase();
         const baseId = id.split('_')[0];
-        const pInfo = transData.find(p => p.speciesId.toLowerCase() === id) || 
+        const pInfo = transData.find(p => p.speciesId.toLowerCase() === id) ||
                       transData.find(p => p.speciesId.toLowerCase() === baseId);
-        
-        let fastMove = r.moveFast || "";
-        let chargedMoves: string[] = Array.isArray(r.moveCharged) ? r.moveCharged.slice(0, 2) : (r.moveCharged ? [r.moveCharged] : []);
-        
+
+        // 修正：使用 moveFast / moveCharged，與 search.ts 一致
+        let fastMove: string = r.moveFast || "";
+        let chargedMoves: string[] = Array.isArray(r.moveCharged)
+          ? r.moveCharged.slice(0, 2)
+          : (r.moveCharged ? [r.moveCharged] : []);
+
         // moveset fallback
         if (!fastMove && r.moveset && Array.isArray(r.moveset)) {
           fastMove = r.moveset[0] || "";
           chargedMoves = r.moveset.slice(1, 3);
         }
-        
-        const attackTypes = new Set<string>();
-        [fastMove, ...chargedMoves].forEach(mId => {
-          if (mId) {
-            const attr = moveAttrMap.get(mId.replace('*', '').toUpperCase());
-            if (attr) attackTypes.add(attr);
-          }
-        });
 
         return {
           ...r,
           chineseName: getFullName(r.speciesId),
           types: pInfo?.types || [],
-          attackTypes: Array.from(attackTypes),
+          attackTypes: [] as string[],
           fastMove,
           chargedMoves,
           rank: r.realRank,
@@ -123,17 +109,21 @@ export async function analyzeUserBoxTeam(
       const mults: Record<string, number> = {};
       Object.keys(typeChart).forEach(atk => {
         let m = 1.0;
-        types.forEach(def => { if (def.toLowerCase() !== 'none') m *= (typeChart[def.toLowerCase()]?.[atk.toLowerCase()] ?? 1.0); });
+        types.forEach(def => {
+          if (def.toLowerCase() !== 'none') m *= (typeChart[def.toLowerCase()]?.[atk.toLowerCase()] ?? 1.0);
+        });
         mults[atk] = m;
       });
       return mults;
     };
 
-    const toZh = (ts: string[]) => ts.filter(t => t.toLowerCase() !== 'none').map(t => TYPE_MAP[t.toLowerCase()] || t).join('/');
+    const toZh = (ts: string[]) =>
+      ts.filter(t => t.toLowerCase() !== 'none').map(t => TYPE_MAP[t.toLowerCase()] || t).join('/');
 
     const leader = myPokemons[0];
     const leaderWeakDetail = getWeaknesses(leader.types);
-    const leaderMajorWeaknesses = Object.entries(leaderWeakDetail).filter(([_, m]) => m > 1.0).map(([t, _]) => t);
+    const leaderMajorWeaknesses = Object.entries(leaderWeakDetail)
+      .filter(([_, m]) => m > 1.0).map(([t]) => t);
 
     let safeSwap = myPokemons[1];
     let bestSwapScore = -100;
@@ -143,15 +133,16 @@ export async function analyzeUserBoxTeam(
       let score = p.score / 10;
       leaderMajorWeaknesses.forEach(w => {
         if (pWeak[w] < 1.0) score += 20;
-        p.attackTypes.forEach(atkType => { if (typeChart[w]?.[atkType] > 1.0) score += 15; });
       });
       if (score > bestSwapScore) { bestSwapScore = score; safeSwap = p; }
     }
 
-    let closer = myPokemons.find(p => p.speciesId !== leader.speciesId && p.speciesId !== safeSwap.speciesId) || myPokemons[2];
+    const closer = myPokemons.find(
+      p => p.speciesId !== leader.speciesId && p.speciesId !== safeSwap.speciesId
+    ) || myPokemons[2];
 
-    // 🔥 F. 智慧型招式翻譯邏輯 (修復英文顯示問題)
-    const translateMove = (mId: string) => {
+    // F. 招式翻譯 (move.json 格式：{ "MOVE_ID": "中文名" })
+    const translateMove = (mId: string): string => {
       if (!mId) return "未知";
       const isElite = mId.includes('*');
       const cleanId = mId.replace('*', '').toUpperCase();
@@ -161,25 +152,27 @@ export async function analyzeUserBoxTeam(
 
     const formatPoke = (p: any, icon: string) => {
       const fast = translateMove(p.fastMove);
-      const charged = p.chargedMoves.map((m: string) => translateMove(m, 'charged')).filter(Boolean).join(', ');
-      
-      // header: #排名 名字 (分數) - 勳章
-      const header = `${icon} #<b>${p.rank}</b> <b>${p.chineseName}</b> (${p.score.toFixed(1)}) - ${getRankIcon(p.score)}`;
+      const charged = p.chargedMoves
+        .map((m: string) => translateMove(m))
+        .filter(Boolean)
+        .join(', ');
+
+      const header = `${icon} #${p.rank} ${p.chineseName} (${p.score.toFixed(1)}) - ${getRankIcon(p.score)}`;
       const typeLine = `(${toZh(p.types)})`;
       const movesLine = `└ ${fast} / ${charged}`;
-      
+
       return `${header}\n${typeLine}\n${movesLine}`;
     };
 
     // G. 組合訊息回覆
-    let msg = `📊 <b>${league} 聯盟 v3 全能型態分析</b>\n`;
+    let msg = `📊 ${league} 聯盟 v3 全能型態分析\n`;
     msg += `=======================\n`;
-    msg += `🥇 <b>先發 (Leader)</b>\n${formatPoke(leader, "👑")}\n\n`;
-    msg += `🥈 <b>安全替換 (Safe Swap)</b>\n${formatPoke(safeSwap, "🛡️")}\n`;
-    msg += `<i>(針對反制 ${leaderMajorWeaknesses.map(w => TYPE_MAP[w]).join('、')} 系強化)</i>\n\n`;
-    msg += `🥉 <b>壓軸 (Closer)</b>\n${formatPoke(closer, "⚔️")}\n`;
+    msg += `🥇 先發 (Leader)\n${formatPoke(leader, "👑")}\n\n`;
+    msg += `🥈 安全替換 (Safe Swap)\n${formatPoke(safeSwap, "🛡️")}\n`;
+    msg += `(針對反制 ${leaderMajorWeaknesses.map(w => TYPE_MAP[w] || w).join('、')} 系強化)\n\n`;
+    msg += `🥉 壓軸 (Closer)\n${formatPoke(closer, "⚔️")}\n`;
     msg += `=======================\n`;
-    msg += `<i>💡 系統已自動識別 暗影/地區/Mega 型態。</i>`;
+    msg += `💡 系統已自動識別 暗影/地區/Mega 型態。`;
 
     return msg;
 
