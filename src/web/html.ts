@@ -1,5 +1,17 @@
 // src/web/html.ts
 
+// 1. 這是你原本就有的主機首頁 (如果你原本有寫其他的，請保留你原本的)
+export function generateHTML() {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head><title>Pokemon TG Bot</title></head>
+      <body><h1>機器人運作中 🤖</h1></body>
+    </html>
+  `;
+}
+
+// 2. 這是我們剛剛做好的 Web App 寶可夢盒子介面
 export const myBoxHtml = `
 <!DOCTYPE html>
 <html lang="zh-TW">
@@ -29,7 +41,7 @@ export const myBoxHtml = `
       color: var(--text-color);
       margin: 0;
       padding: 0;
-      padding-bottom: 90px; /* 預留底部按鈕的空間 */
+      padding-bottom: 90px;
     }
     
     .container { padding: 20px; }
@@ -38,7 +50,6 @@ export const myBoxHtml = `
     .header h2 { margin: 0 0 8px 0; }
     .header p { color: var(--hint-color); margin: 0; font-size: 14px; }
     
-    /* 聯盟切換標籤 */
     .tabs { 
       display: flex; 
       background: var(--secondary-bg); 
@@ -62,7 +73,6 @@ export const myBoxHtml = `
       box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
     }
     
-    /* 寶可夢列表 */
     .pokemon-list { display: flex; flex-direction: column; gap: 10px; }
     .pokemon-item {
       display: flex; justify-content: space-between; align-items: center;
@@ -74,7 +84,6 @@ export const myBoxHtml = `
       width: 22px; height: 22px; accent-color: var(--btn-color);
     }
     
-    /* 底部固定按鈕 */
     .footer {
       position: fixed; bottom: 0; left: 0; right: 0;
       padding: 15px 20px; background: var(--bg-color);
@@ -110,27 +119,15 @@ export const myBoxHtml = `
         <input type="checkbox" value="azumarill" class="poke-check">
       </label>
       <label class="pokemon-item">
-        <span>🪤 泥巴魚 伽勒爾 (Stunfisk Galarian)</span>
+        <span>🪤 泥巴魚 伽勒爾</span>
         <input type="checkbox" value="stunfisk_galarian" class="poke-check">
-      </label>
-      <label class="pokemon-item">
-        <span>🐉 哈克龍 (Dragonair)</span>
-        <input type="checkbox" value="dragonair" class="poke-check">
-      </label>
-      <label class="pokemon-item">
-        <span>🥊 火爆猴 (Primeape)</span>
-        <input type="checkbox" value="primeape" class="poke-check">
       </label>
     </div>
     
     <div class="pokemon-list" id="list-2500" style="display: none;">
       <label class="pokemon-item">
-        <span>🐉 騎拉帝納 另類 (Giratina Altered)</span>
+        <span>🐉 騎拉帝納 另類</span>
         <input type="checkbox" value="giratina_altered" class="poke-check">
-      </label>
-      <label class="pokemon-item">
-        <span>🐧 帝王拿波 (Empoleon)</span>
-        <input type="checkbox" value="empoleon" class="poke-check">
       </label>
       <label class="pokemon-item">
         <span>🦅 烈箭鷹 (Talonflame)</span>
@@ -144,12 +141,10 @@ export const myBoxHtml = `
   </div>
 
   <script>
-    // 初始化 Telegram Web App
     const tg = window.Telegram.WebApp;
-    tg.expand(); // 強制展開為全螢幕
-    tg.ready();  // 通知 Telegram 已經準備好
+    tg.expand();
+    tg.ready();
 
-    // 動態設定使用者名稱
     if (tg.initDataUnsafe?.user) {
       document.getElementById('user-info').innerText = 
         '訓練家：' + tg.initDataUnsafe.user.first_name + '，請勾選可上場的寶可夢。';
@@ -157,22 +152,15 @@ export const myBoxHtml = `
 
     let currentLeague = 1500;
 
-    // 切換聯盟顯示邏輯
     function switchLeague(league) {
       currentLeague = league;
-      
-      // 更新 Tab 樣式
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       event.target.classList.add('active');
-      
-      // 切換列表顯示
       document.getElementById('list-1500').style.display = league === 1500 ? 'flex' : 'none';
       document.getElementById('list-2500').style.display = league === 2500 ? 'flex' : 'none';
     }
 
-    // 儲存並發送回 Worker
     function saveTeam() {
-      // 只抓取當前聯盟有被勾選的寶可夢
       const checkboxes = document.querySelectorAll('#list-' + currentLeague + ' .poke-check:checked');
       const selected = Array.from(checkboxes).map(cb => cb.value);
       
@@ -181,14 +169,7 @@ export const myBoxHtml = `
         return;
       }
 
-      // 打包成 JSON 格式，方便 Worker 判斷動作
-      const payload = {
-        action: "save_box",
-        league: currentLeague,
-        team: selected
-      };
-      
-      // 透過 Telegram 隧道直接傳送字串回 Worker
+      const payload = { action: "save_box", league: currentLeague, team: selected };
       tg.sendData(JSON.stringify(payload));
     }
   </script>
