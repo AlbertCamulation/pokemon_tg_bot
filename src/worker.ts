@@ -357,6 +357,34 @@ export default {
     try {
       if (path === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
       if (path === "/api/names") return handleApiNames(env, ctx);
+      if (path === "/api/active-leagues") {
+        try {
+          const manifestRes = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, {
+            headers: { "Cache-Control": "no-cache" }
+          });
+          const manifest = await manifestRes.json() as {
+            active_leagues: Array<{ cp: string; pvpoke_id: string; name_zh: string }>;
+          };
+      
+          const result: Array<{ name: string; path: string; command: string }> = [];
+          manifest.active_leagues.forEach(a => {
+            const local = leagues.find(l => {
+              if (String(l.cp) !== String(a.cp)) return false;
+              if (a.pvpoke_id === "all") return l.command === "great_league_top" || l.command === "ultra_league_top" || l.command === "master_league_top";
+              if (a.pvpoke_id === "premier") return l.name.includes("紀念") || l.command.includes("premier") || l.command.includes("permier");
+              if (a.pvpoke_id === "remix") return l.name.includes("Remix") || l.command.includes("remix");
+              return l.command.includes(a.pvpoke_id);
+            });
+            if (local) result.push({ name: local.name, path: local.path, command: local.command });
+          });
+      
+          return new Response(JSON.stringify(result), {
+            headers: { "Content-Type": "application/json; charset=utf-8" }
+          });
+        } catch {
+          return new Response("[]", { headers: { "Content-Type": "application/json" } });
+        }
+      }
       if (path === "/api/search") {
         const query = url.searchParams.get("q");
         if (!query) return new Response("{}", { status: 400 });
@@ -371,28 +399,30 @@ export default {
       if (path === "/api/box" && request.method === "GET") {
         const uid = url.searchParams.get("userId");
         if (!uid) return new Response("{}", { status: 400 });
-        const results = await Promise.all([
-          env.POKEMON_KV.get(`box_500_${uid}`),
-          env.POKEMON_KV.get(`box_1500_${uid}`),
-          env.POKEMON_KV.get(`box_2500_${uid}`),
-          env.POKEMON_KV.get(`box_10000_${uid}`)
-        ]);
-        return new Response(JSON.stringify({
-          "500": JSON.parse(results[0] || "[]"),
-          "1500": JSON.parse(results[1] || "[]"),
-          "2500": JSON.parse(results[2] || "[]"),
-          "10000": JSON.parse(results[3] || "[]")
-        }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
+        
+        // 列出該 user 所有 box_ 開頭的 key
+        const keys = await env.POKEMON_KV.list({ prefix: `box_path_` });
+        const result: Record<string, string[]> = {};
+        await Promise.all(
+          keys.keys
+            .filter(k => k.name.endsWith(`_${uid}`))
+            .map(async k => {
+              const leaguePath = k.name.replace(`box_path_`, "").replace(`_${uid}`, "");
+              const val = await env.POKEMON_KV.get(k.name);
+              result[leaguePath] = JSON.parse(val || "[]");
+            })
+        );
+        return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
 
       // 儲存盒子與分析 API
       if (path === "/api/box" && request.method === "POST") {
         const payload = await request.json() as any;
-        const { userId, league, team } = payload;
-        await env.POKEMON_KV.put(`box_${league}_${userId}`, JSON.stringify(team));
-        const analysisResult = await analyzeUserBoxTeam(league, team, env, ctx);
+        const { userId, leaguePath, team } = payload;  // ← 改這行
+        await env.POKEMON_KV.put(`box_path_${leaguePath}_${userId}`, JSON.stringify(team));
+        const analysisResult = await analyzeUserBoxTeam(leaguePath, team, env, ctx);  // ← 改這行
         await sendMessage(userId, `✅ <b>盒子已更新</b>\n${analysisResult}`, { parse_mode: "HTML" }, env);
-        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
+        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
       }
 
       return new Response("Not Found", { status: 404 });
