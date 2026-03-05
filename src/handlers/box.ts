@@ -45,7 +45,7 @@ function scoreTeam(trio: any[], typeChart: any): number {
   // 1. 基礎分數
   trio.forEach(p => { score += p.score; });
 
-  // 2. 排名加權：前50強加分，51-100微加，100以外扣分
+  // 2. 排名加權
   trio.forEach(p => {
     if (p.rank <= 50) score += 30;
     else if (p.rank <= 100) score += 10;
@@ -94,7 +94,7 @@ function scoreTeam(trio: any[], typeChart: any): number {
 }
 
 export async function analyzeUserBoxTeam(
-  leaguePath: string,   // 直接傳入路徑，例如 "data/rankings_1500_kanto.json"
+  leaguePath: string,
   teamNames: string[],
   env: Env,
   ctx: ExecutionContext
@@ -132,16 +132,13 @@ export async function analyzeUserBoxTeam(
       return isElite ? `${name}*` : name;
     };
 
-    // 直接用 leaguePath 取排名
     const rankings = (bundledData[leaguePath] || []) as (RankingPokemon & { realRank: number })[];
     if (rankings.length === 0) {
       return `⚠️ 找不到該聯盟排名資料（${leaguePath}）`;
     }
 
-    // 為每筆加上 realRank
     const rankedList = rankings.map((r, idx) => ({ ...r, realRank: idx + 1 }));
 
-    // 過濾出盒子內有的寶可夢
     const myPokemons = rankedList
       .filter(r => teamNames.includes(getFullName(r.speciesId)))
       .map(r => {
@@ -193,7 +190,7 @@ export async function analyzeUserBoxTeam(
 
     const [leader, safeSwap, closer] = bestTrio;
 
-    // 共同弱點提示
+    // 共同弱點
     const allWeakSets = bestTrio.map(p => {
       const w = getWeaknesses(p.types, typeChart);
       return new Set(Object.entries(w).filter(([_, m]) => m > 1.0).map(([t]) => t));
@@ -205,31 +202,32 @@ export async function analyzeUserBoxTeam(
     const toZh = (ts: string[]) =>
       ts.filter(t => t.toLowerCase() !== 'none').map(t => TYPE_MAP[t.toLowerCase()] || t).join('/');
 
-    const formatPoke = (p: any, icon: string) => {
+    const formatPoke = (p: any, icon: string, role: string) => {
       const fast = translateMove(p.fastMove);
       const charged = p.chargedMoves.map((m: string) => translateMove(m)).filter(Boolean).join(', ');
       const moveLine = [fast, charged].filter(Boolean).join(' / ');
-      const rankWarning = p.rank > 100 ? ' ⚠️排名較低' : '';
-      return `${icon} #${p.rank} ${p.chineseName} (${p.score.toFixed(1)}) - ${getRankIcon(p.score)}${rankWarning}\n(${toZh(p.types)})\n└ ${moveLine}`;
+      const rankWarning = p.rank > 100 ? ' ⚠️' : '';
+      return (
+        `${icon} ${role}　<b>#${p.rank} ${p.chineseName}</b>${rankWarning}\n` +
+        `${getRankIcon(p.score)} ${p.score.toFixed(1)} ｜ ${toZh(p.types)}\n` +
+        `└ ${moveLine}`
+      );
     };
 
-    // 聯盟名稱
     const leagueInfo = leagues.find(l => l.path === leaguePath);
     const leagueName = leagueInfo ? leagueInfo.name : leaguePath;
 
-    let msg = `📊 ${leagueName} 最佳三人組分析\n`;
-    msg += `=======================\n`;
-    msg += `🥇 先發 (Leader)\n${formatPoke(leader, "👑")}\n\n`;
-    msg += `🥈 安全替換 (Safe Swap)\n${formatPoke(safeSwap, "🛡️")}\n\n`;
-    msg += `🥉 壓軸 (Closer)\n${formatPoke(closer, "⚔️")}\n`;
-    msg += `=======================\n`;
+    let msg = `📊 <b>${leagueName} 最佳三人組</b>\n\n`;
+    msg += `${formatPoke(leader, "👑", "先發")}\n\n`;
+    msg += `${formatPoke(safeSwap, "🛡", "替換")}\n\n`;
+    msg += `${formatPoke(closer, "⚔️", "壓軸")}\n\n`;
+
     if (sharedWeaks.length > 0) {
-      msg += `⚠️ 共同弱點：${sharedWeaks.join('、')} 系，小心被針對！\n`;
+      msg += `⚠️ 共同弱點：${sharedWeaks.join('、')} 系\n`;
     } else {
-      msg += `✅ 弱點覆蓋良好，無共同致命弱點。\n`;
+      msg += `✅ 弱點覆蓋良好，無共同致命弱點\n`;
     }
-    msg += `💡 系統已自動識別 暗影/地區/Mega 型態。\n\n`;
-    msg += `📋 快速複製：\n<code>${bestTrio.map(p => p.chineseName).join(',')}</code>`;
+    msg += `\n📋 <code>${bestTrio.map(p => p.chineseName).join(',')}</code>`;
 
     return msg;
 
