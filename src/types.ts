@@ -34,6 +34,11 @@ export interface TelegramMessage {
   date: number;
   text?: string;
   reply_to_message?: TelegramMessage;
+  // 👇 就是要加這三行！讓機器人看得懂 Web App 傳回來的東西
+  web_app_data?: {
+    data: string;
+    button_text: string;
+  };
 }
 
 export interface TelegramCallbackQuery {
