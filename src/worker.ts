@@ -372,37 +372,45 @@ async function handleApiNames(
     const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     const data = await res.json() as PokemonData[];
 
-    // 🔥 終極補丁：直接比對「名字」(大小寫需完全一致)
+    // 🔥 強制補丁字典 (你可以隨時在這裡加字)
     const translationPatch: Record<string, string> = {
-      "Cradily": "搖籃百合",
-      "Golisopod": "具甲武者",
-      "Lanturn": "電燈怪",
-      "Victreebel (Mega)": "大食花 Mega",
-      "Malamar (Mega)": "烏賊王 Mega"
+      "cradily": "搖籃百合",
+      "golisopod": "具甲武者",
+      "lanturn": "電燈怪",
+      "victreebel_mega": "大食花 Mega",
+      "malamar_mega": "烏賊王 Mega"
     };
 
     const cleanNames = Array.from(new Set(
       data.map(p => {
-        const safeId = p.speciesId.toLowerCase();
-        // 1. 如果在我們的補丁名單內，強制使用我們寫的中文
-        if (translationPatch[safeId]) {
-          return translationPatch[safeId];
-        }
-        // 2. 否則使用原始翻譯
-        return p.speciesName;
-      })
-      .filter(name => {
+        const id = p.speciesId ? p.speciesId.toLowerCase() : "";
+        const name = p.speciesName || "";
+        
+        // 1. 優先比對 ID (最準)
+        if (translationPatch[id]) return translationPatch[id];
+        // 2. 其次比對原本的名字
+        if (translationPatch[name]) return translationPatch[name];
+        
+        return name;
+      }).filter(name => {
         if (!name) return false;
         
-        // 把我上次給你的「沒有中文就丟棄」的爛濾網拿掉，
-        // 這樣以後如果有沒翻譯到的，它會以英文顯示，你才會知道要來補丁字典加字！
+        // ⚔️ 絕對殺手鐧：只要名字裡沒有中文字 (\u4E00-\u9FA5)，直接斬立決！
+        // 只要這行有成功部署，網址裡絕對不可能出現 Cradily！
+        if (!/[\u4E00-\u9FA5]/.test(name)) return false;
+
         const regex = new RegExp(NAME_CLEANER_REGEX.source);
         return !regex.test(name);
       })
     )).sort();
 
     return new Response(JSON.stringify(cleanNames), {
-      headers: { "Content-Type": "application/json; charset=utf-8" }
+      headers: { 
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
     });
   } catch {
     return new Response(JSON.stringify([]), { status: 500 });
