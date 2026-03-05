@@ -438,7 +438,47 @@ export default {
           }
         });
       }
+      // 🔥 [新增] Web App 讀取盒子資料 API
+      if (path === "/api/box" && request.method === "GET") {
+        const uid = url.searchParams.get("userId");
+        if (!uid) return new Response("{}", { status: 400 });
+        
+        // 讀取四個聯盟的資料
+        const box500 = await env.POKEMON_KV.get(`box_500_${uid}`) || "[]";
+        const box1500 = await env.POKEMON_KV.get(`box_1500_${uid}`) || "[]";
+        const box2500 = await env.POKEMON_KV.get(`box_2500_${uid}`) || "[]";
+        const box10000 = await env.POKEMON_KV.get(`box_10000_${uid}`) || "[]";
+        
+        const data = {
+          "500": JSON.parse(box500),
+          "1500": JSON.parse(box1500),
+          "2500": JSON.parse(box2500),
+          "10000": JSON.parse(box10000)
+        };
+        return new Response(JSON.stringify(data), {
+          headers: { "Content-Type": "application/json; charset=utf-8" }
+        });
+      }
 
+      // 🔥 [新增] Web App 儲存盒子資料 API
+      if (path === "/api/box" && request.method === "POST") {
+        const payload = await request.json() as any;
+        const { userId, league, team } = payload;
+        
+        // 寫入 Cloudflare KV
+        await env.POKEMON_KV.put(`box_${league}_${userId}`, JSON.stringify(team));
+        
+        // 儲存成功後，機器人自動推播訊息到聊天室
+        await sendMessage(
+          userId,
+          `✅ 成功更新對戰盒子！\n你在 <b>${league} 聯盟</b> 共登錄了 ${team.length} 隻寶可夢。\n\n<code>${team.join(", ")}</code>\n\n(配隊分析演算法即將上線...)`,
+          { parse_mode: "HTML" },
+          env
+        );
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { "Content-Type": "application/json; charset=utf-8" }
+        });
+      }
       return new Response("Not Found", { status: 404 });
     } catch (e) {
       return new Response(
