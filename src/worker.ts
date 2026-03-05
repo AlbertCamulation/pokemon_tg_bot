@@ -55,8 +55,18 @@ import {
   sendAuthorizationRequest
 } from './handlers';
 
-// 🔥 引入我們剛剛寫好的 myBoxHtml
+// 引入 Web 介面
 import { generateHTML, myBoxHtml } from './web/html';
+
+// 全域後綴映射 (自動標記型態)
+const SUFFIX_MAP: Record<string, string> = {
+  "_shadow": " (暗影)",
+  "_alolan": " (阿羅拉)",
+  "_galarian": " (伽勒爾)",
+  "_hisuian": " (洗翠)",
+  "_paldean": " (帕底亞)",
+  "_mega": " (Mega)"
+};
 
 // =========================================================
 //  Callback Query 處理
@@ -78,6 +88,7 @@ async function onCallbackQuery(
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
 
+  // 處理解除封禁
   if (data.startsWith("unban_btn_")) {
     if (!isSuperAdmin) {
       await answerCallbackQuery(callbackQueryId, "⛔ 您無權執行此操作", env);
@@ -88,11 +99,13 @@ async function onCallbackQuery(
     return;
   }
 
+  // 關閉選單
   if (data === "close_menu") {
     await deleteMessage(chatId, messageId, env);
     return;
   }
 
+  // 管理員審核與封鎖
   if (data.startsWith("approve_uid_") || data.startsWith("ban_uid_")) {
     if (!isSuperAdmin && !isInAdminGroup) {
       await answerCallbackQuery(callbackQueryId, "⛔ 權限不足", env);
@@ -113,12 +126,14 @@ async function onCallbackQuery(
     return;
   }
 
+  // 權限檢查
   const allowedIds = await getAllowedUserIds(env);
   if (!isSuperAdmin && !isInAdminGroup && !allowedIds.includes(userId)) {
     await answerCallbackQuery(callbackQueryId, `⛔ 權限不足`, env);
     return;
   }
 
+  // 處理垃圾名單
   if (data.startsWith("untrash_btn_")) {
     const name = data.replace("untrash_btn_", "");
     await answerCallbackQuery(callbackQueryId, "正在移除...", env);
@@ -126,49 +141,29 @@ async function onCallbackQuery(
     return;
   }
 
-  if (data === "menu_atk_types") {
-    await sendTypeSelectionMenu(chatId, "atk", env);
-    return;
-  }
-  if (data === "menu_def_types") {
-    await sendTypeSelectionMenu(chatId, "def", env);
-    return;
-  }
-  if (data.startsWith("type_atk_")) {
-    await handleTypeDetail(chatId, data.replace("type_atk_", ""), "atk", env);
-    return;
-  }
-  if (data.startsWith("type_def_")) {
-    await handleTypeDetail(chatId, data.replace("type_def_", ""), "def", env);
-    return;
-  }
+  // 屬性選單處理
+  if (data === "menu_atk_types") { await sendTypeSelectionMenu(chatId, "atk", env); return; }
+  if (data === "menu_def_types") { await sendTypeSelectionMenu(chatId, "def", env); return; }
+  if (data.startsWith("type_atk_")) { await handleTypeDetail(chatId, data.replace("type_atk_", ""), "atk", env); return; }
+  if (data.startsWith("type_def_")) { await handleTypeDetail(chatId, data.replace("type_def_", ""), "def", env); return; }
 
   await answerCallbackQuery(callbackQueryId, "", env);
 
+  // 聯盟指令處理
   const leagueInfo = leagues.find((l) => l.command === data);
   if (leagueInfo) {
     await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env, ctx);
     return;
   }
 
+  // 其他主選單按鈕
   switch (data) {
-    case "meta_analysis":
-      await handleMetaAnalysis(chatId, env, ctx);
-      break;
-    case "trash_list":
-      await handleTrashCommand(chatId, userId, callbackQuery.from, env);
-      break;
-    case "help_menu":
-      await sendHelpMessage(chatId, env);
-      break;
-    case "main_menu":
-      await sendMainMenu(chatId, env);
-      break;
-    case "current_leagues":
-      await handleCurrentLeagues(chatId, env, ctx);
-      break;
-    default:
-      break;
+    case "meta_analysis": await handleMetaAnalysis(chatId, env, ctx); break;
+    case "trash_list": await handleTrashCommand(chatId, userId, callbackQuery.from, env); break;
+    case "help_menu": await sendHelpMessage(chatId, env); break;
+    case "main_menu": await sendMainMenu(chatId, env); break;
+    case "current_leagues": await handleCurrentLeagues(chatId, env, ctx); break;
+    default: break;
   }
 }
 
@@ -180,131 +175,86 @@ async function onMessage(
   message: TelegramMessage,
   env: Env,
   ctx: ExecutionContext,
-  requestOrigin: string // 🔥 接收動態網址
+  requestOrigin: string
 ): Promise<void> {
 
-  // 🔥 優先攔截前端 Web App 傳送回來的 JSON 資料
+  // 優先攔截 Web App 儲存事件
   if (message.web_app_data) {
     try {
       const payload = JSON.parse(message.web_app_data.data);
-      
       if (payload.action === "save_box") {
         const { league, team } = payload;
-        const kvKey = `box_${league}_${message.chat.id}`;
+        await env.POKEMON_KV.put(`box_${league}_${message.chat.id}`, JSON.stringify(team));
         
-        // 寫入 Cloudflare KV
-        await env.POKEMON_KV.put(kvKey, JSON.stringify(team));
-        
+        // 即時執行分析演算法
+        const analysisResult = await analyzeUserBoxTeam(league, team, env, ctx);
         await sendMessage(
           message.chat.id,
-          `✅ 成功儲存！你在 <b>${league} 聯盟</b> 共登錄了 ${team.length} 隻寶可夢。\n\n<code>${team.join(", ")}</code>\n\n(配隊分析功能即將解鎖...)`,
+          `✅ <b>對戰盒子同步成功！</b>\n共登錄了 ${team.length} 隻寶可夢。\n\n${analysisResult}`,
           { parse_mode: "HTML" },
           env
         );
       }
     } catch (e) {
-      await sendMessage(message.chat.id, "❌ 解析寶可夢盒子資料失敗。", null, env);
+      await sendMessage(message.chat.id, "❌ 盒子資料處理或分析失敗。", null, env);
     }
     return;
   }
 
-  // 確保是一般文字訊息才往下走
   if (!message.text) return;
-
   const text = message.text.trim();
   const chatId = message.chat.id;
   const userId = message.from!.id;
   const firstName = message.from!.first_name || "Unknown";
   const username = message.from!.username;
 
-  // =======================================================
-  // 權限控管邏輯
-  // =======================================================
+  // 權限控管
   const isSuperAdmin = String(userId) === String(env.ADMIN_UID);
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
 
   if (!isSuperAdmin && !isInAdminGroup) {
-    const [bannedMap, allowedIds] = await Promise.all([
-      getBannedUsers(env),
-      getAllowedUserIds(env)
-    ]);
+    const [bannedMap, allowedIds] = await Promise.all([getBannedUsers(env), getAllowedUserIds(env)]);
     if (bannedMap[userId]) return;
-
     if (!allowedIds.includes(userId)) {
-      if (adminGroupId) {
-        await sendAuthorizationRequest(chatId, userId, firstName, username, text, adminGroupId, env);
-      } else {
-        await sendMessage(chatId, `⛔ <b>權限不足</b>\n您的 UID (<code>${userId}</code>) 未授權。`, { parse_mode: "HTML" }, env);
-      }
+      if (adminGroupId) await sendAuthorizationRequest(chatId, userId, firstName, username, text, adminGroupId, env);
+      else await sendMessage(chatId, `⛔ <b>權限不足</b>\n您的 UID (<code>${userId}</code>) 未授權。`, { parse_mode: "HTML" }, env);
       return;
     }
   }
 
-  // =======================================================
   // 指令解析
-  // =======================================================
   const parts = text.split(" ");
-  const command = parts[0].startsWith("/")
-    ? parts[0].split("@")[0].substring(1)
-    : null;
+  const command = parts[0].startsWith("/") ? parts[0].split("@")[0].substring(1) : null;
   const args = parts.slice(1);
-
-  const leagueInfo = leagues.find((l) => l.command === command);
-  if (leagueInfo) {
-    await handleLeagueCommand(chatId, command!, LIMIT_LEAGUES_SHOW, env, ctx);
-    return;
-  }
 
   if (command) {
     switch (command) {
       case "start":
-      case "menu":
-        await sendMainMenu(chatId, env);
-        return;
-
-      case "help":
-        await sendHelpMessage(chatId, env);
-        return;
-
-      // 🔥 新增：叫出寶可夢盒子的按鈕
+      case "menu": await sendMainMenu(chatId, env); return;
+      case "help": await sendHelpMessage(chatId, env); return;
       case "box":
         const replyMarkup = {
-          inline_keyboard: [
-            [
-              {
-                text: "🎒 點我開啟寶可夢盒子",
-                web_app: { url: `${requestOrigin}/mybox` } // 動態帶入你的 Worker 網址
-              }
-            ]
-          ]
+          inline_keyboard: [[{ text: "🎒 開啟我的對戰盒子", web_app: { url: `${requestOrigin}/mybox` } }]]
         };
         await sendMessage(chatId, "準備好編輯你的陣容了嗎？", replyMarkup, env);
         return;
-
       case "trash":
-        if (args.length > 0) {
-          await handleAddTrashCommand(chatId, userId, args, env);
-        } else {
-          await handleTrashCommand(chatId, userId, message.from!, env);
-        }
+        if (args.length > 0) await handleAddTrashCommand(chatId, userId, args, env);
+        else await handleTrashCommand(chatId, userId, message.from!, env);
         return;
-
-      case "untrash":
-        await handleUntrashCommand(chatId, userId, args, env);
-        return;
-
-      case "banlist":
-        if (isSuperAdmin) {
-          await handleBanlistCommand(chatId, env);
-        }
-        return;
-
-      default:
-        return;
+      case "untrash": await handleUntrashCommand(chatId, userId, args, env); return;
+      case "banlist": if (isSuperAdmin) await handleBanlistCommand(chatId, env); return;
+      default: break;
+    }
+    // 檢查是否為聯盟指令
+    if (leagues.find(l => l.command === command)) {
+      await handleLeagueCommand(chatId, command, LIMIT_LEAGUES_SHOW, env, ctx);
+      return;
     }
   }
 
+  // 一般搜尋
   if (text.length >= 2 && !text.startsWith("/")) {
     await handlePokemonSearch(chatId, userId, text, env, ctx);
   }
@@ -314,30 +264,16 @@ async function onMessage(
 //  Webhook 處理
 // =========================================================
 
-async function handleWebhook(
-  request: Request,
-  env: Env,
-  ctx: ExecutionContext
-): Promise<Response> {
-  if (request.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
+async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
   const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
-  if (secret !== env.ENV_BOT_SECRET) {
-    return new Response("Unauthorized", { status: 403 });
-  }
+  if (secret !== env.ENV_BOT_SECRET) return new Response("Unauthorized", { status: 403 });
 
   try {
     const update = await request.json() as TelegramUpdate;
-    const requestOrigin = new URL(request.url).origin; // 🔥 抓取當前網域
-
-    if (update.message) {
-      ctx.waitUntil(onMessage(update.message, env, ctx, requestOrigin)); // 傳入網域給 onMessage
-    } else if (update.callback_query) {
-      ctx.waitUntil(onCallbackQuery(update.callback_query, env, ctx));
-    }
-
+    const requestOrigin = new URL(request.url).origin;
+    if (update.message) ctx.waitUntil(onMessage(update.message, env, ctx, requestOrigin));
+    else if (update.callback_query) ctx.waitUntil(onCallbackQuery(update.callback_query, env, ctx));
     return new Response("Ok");
   } catch (e) {
     console.error(e);
@@ -349,167 +285,95 @@ async function handleWebhook(
 //  API 端點處理
 // =========================================================
 
-async function handleApiSearch(
-  url: URL,
-  env: Env,
-  ctx: ExecutionContext
-): Promise<Response> {
-  const query = url.searchParams.get("q");
-  if (!query) {
-    return new Response(JSON.stringify({ error: "No query" }), { status: 400 });
-  }
-  const result = await getPokemonDataOnly(query, env, ctx);
-  return new Response(JSON.stringify(result), {
-    headers: { "Content-Type": "application/json; charset=utf-8" }
-  });
-}
-
-async function handleApiNames(
-  env: Env,
-  ctx: ExecutionContext
-): Promise<Response> {
+async function handleApiNames(env: Env, ctx: ExecutionContext): Promise<Response> {
   try {
     const res = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
     const data = await res.json() as PokemonData[];
 
-    // 擴展翻譯補丁，加入地區型態的特殊處理
-    const translationPatch: Record<string, string> = {
-      "cradily": "搖籃百合",
-      "golisopod": "具甲武者",
-      "lanturn": "電燈怪",
-      "rattata_alolan": "拉達 (阿羅拉)",
-      "corsola_galarian": "太陽珊瑚 (伽勒爾)",
-      "stunfisk_galarian": "泥巴魚 (伽勒爾)",
-      "ninetales_alolan": "九尾 (阿羅拉)",
-      "marowak_alolan": "嘎啦嘎啦 (阿羅拉)"
-    };
-
     const cleanNames = Array.from(new Set(
       data.map(p => {
         const id = p.speciesId.toLowerCase();
-        // 1. 如果 ID 在補丁裡，優先使用補丁的名稱 (這樣才有地區標註)
-        if (translationPatch[id]) return translationPatch[id];
+        let name = p.speciesName || "";
+
+        // 自動動態標註型態 (暗影、地區、Mega)
+        if (!name.includes("(")) {
+          Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
+            if (id.includes(key)) name += zh;
+          });
+        }
         
-        // 2. 如果原始名稱本身就有括號 (例如 "拉達 (阿羅拉)")，直接保留
-        return p.speciesName || "";
+        // 強制修補欄位
+        if (id === "cradily") return "搖籃百合";
+        if (id === "golisopod") return "具甲武者";
+
+        return name;
       }).filter(name => {
-        if (!name) return false;
-        // 確保至少有一個中文字，且不是我們要過濾的垃圾字串
-        if (!/[\u4E00-\u9FA5]/.test(name)) return false;
-        const regex = new RegExp(NAME_CLEANER_REGEX.source);
-        return !regex.test(name);
+        if (!name || !/[\u4E00-\u9FA5]/.test(name)) return false;
+        return !new RegExp(NAME_CLEANER_REGEX.source).test(name);
       })
     )).sort();
 
     return new Response(JSON.stringify(cleanNames), {
-      headers: { 
-        "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "no-store, no-cache, must-revalidate"
-      }
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store, no-cache" }
     });
   } catch {
     return new Response(JSON.stringify([]), { status: 500 });
   }
 }
+
 // =========================================================
 //  Worker Entry Point
 // =========================================================
 
 export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    ctx: ExecutionContext
-  ): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
 
     try {
-      // Webhook 端點
-      if (path === WEBHOOK_PATH) {
-        return handleWebhook(request, env, ctx);
-      }
-
-      // API 端點
-      if (path === "/api/names") {
-        return handleApiNames(env, ctx);
-      }
-
+      if (path === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
+      if (path === "/api/names") return handleApiNames(env, ctx);
       if (path === "/api/search") {
-        return handleApiSearch(url, env, ctx);
+        const query = url.searchParams.get("q");
+        if (!query) return new Response("{}", { status: 400 });
+        const result = await getPokemonDataOnly(query, env, ctx);
+        return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
+      if (path === "/registerWebhook") return registerWebhook(url, env);
+      if (path === "/") return new Response(generateHTML(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      if (path === "/mybox") return new Response(myBoxHtml, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 
-      // 註冊 Webhook
-      if (path === "/registerWebhook") {
-        return registerWebhook(url, env);
-      }
-
-      // Web 介面 (主頁)
-      if (path === "/") {
-        return new Response(generateHTML(), {
-          headers: { "Content-Type": "text/html; charset=utf-8" }
-        });
-      }
-
-      // 🔥 Web App 盒子介面路由
-      if (path === "/mybox") {
-        return new Response(myBoxHtml, {
-          headers: { 
-            "Content-Type": "text/html; charset=utf-8",
-            "Cache-Control": "no-store, max-age=0" 
-          }
-        });
-      }
-      // 🔥 [新增] Web App 讀取盒子資料 API
+      // 讀取盒子 API
       if (path === "/api/box" && request.method === "GET") {
         const uid = url.searchParams.get("userId");
         if (!uid) return new Response("{}", { status: 400 });
-        
-        // 讀取四個聯盟的資料
-        const box500 = await env.POKEMON_KV.get(`box_500_${uid}`) || "[]";
-        const box1500 = await env.POKEMON_KV.get(`box_1500_${uid}`) || "[]";
-        const box2500 = await env.POKEMON_KV.get(`box_2500_${uid}`) || "[]";
-        const box10000 = await env.POKEMON_KV.get(`box_10000_${uid}`) || "[]";
-        
-        const data = {
-          "500": JSON.parse(box500),
-          "1500": JSON.parse(box1500),
-          "2500": JSON.parse(box2500),
-          "10000": JSON.parse(box10000)
-        };
-        return new Response(JSON.stringify(data), {
-          headers: { "Content-Type": "application/json; charset=utf-8" }
-        });
+        const results = await Promise.all([
+          env.POKEMON_KV.get(`box_500_${uid}`),
+          env.POKEMON_KV.get(`box_1500_${uid}`),
+          env.POKEMON_KV.get(`box_2500_${uid}`),
+          env.POKEMON_KV.get(`box_10000_${uid}`)
+        ]);
+        return new Response(JSON.stringify({
+          "500": JSON.parse(results[0] || "[]"),
+          "1500": JSON.parse(results[1] || "[]"),
+          "2500": JSON.parse(results[2] || "[]"),
+          "10000": JSON.parse(results[3] || "[]")
+        }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
 
-      // 🔥 Web App 儲存盒子資料 API + 自動啟動演算法
+      // 儲存盒子與分析 API
       if (path === "/api/box" && request.method === "POST") {
         const payload = await request.json() as any;
         const { userId, league, team } = payload;
-        
-        // 1. 寫入 Cloudflare KV
         await env.POKEMON_KV.put(`box_${league}_${userId}`, JSON.stringify(team));
-        
-        // 2. 跑演算法分析最佳隊伍
         const analysisResult = await analyzeUserBoxTeam(league, team, env, ctx);
-        
-        // 3. 組合最後的訊息推播給使用者
-        const finalMsg = `✅ <b>成功更新對戰盒子！</b>\n共登錄了 ${team.length} 隻寶可夢。\n\n${analysisResult}`;
-        
-        await sendMessage(userId, finalMsg, { parse_mode: "HTML" }, env);
-        
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { "Content-Type": "application/json; charset=utf-8" }
-        });
+        await sendMessage(userId, `✅ <b>盒子已更新</b>\n${analysisResult}`, { parse_mode: "HTML" }, env);
+        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
 
-      // 👇 就是這裡！你不小心刪掉了 404 和 catch 區塊 👇
       return new Response("Not Found", { status: 404 });
     } catch (e) {
-      return new Response(
-        JSON.stringify({ error: (e as Error).message }),
-        { status: 500 }
-      );
+      return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500 });
     }
   }
 };
