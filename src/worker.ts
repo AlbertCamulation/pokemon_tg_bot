@@ -318,11 +318,10 @@ async function handleApiNames(
         const baseId = id.split('_')[0];
         let name = baseNameMap.get(id) || baseNameMap.get(baseId) || id;
 
-        if (name && !name.includes("(")) {
-          Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
-            if (id.includes(key)) name += zh;
-          });
-        }
+        Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
+          const zhClean = zh.replace(/[()]/g, '').trim();
+          if (id.includes(key) && !name.includes(zhClean)) name += zh;
+        });
         
         if (id.startsWith("cradily")) name = "搖籃百合" + (id.includes("_shadow") ? " (暗影)" : "");
         if (id.startsWith("golisopod")) name = "具甲武者" + (id.includes("_shadow") ? " (暗影)" : "");
