@@ -2,7 +2,7 @@ import type { Env, PokemonData, RankingPokemon } from '../types';
 import { fetchWithCache, getDataUrl } from '../utils/cache';
 import { leagues } from '../constants';
 
-// 屬性與後綴對應表
+// 1. 屬性中文化對照表
 const TYPE_MAP: Record<string, string> = {
   "normal": "一般", "fire": "火", "water": "水", "grass": "草", "electric": "電",
   "ice": "冰", "fighting": "格鬥", "poison": "毒", "ground": "地面", "flying": "飛行",
@@ -10,6 +10,7 @@ const TYPE_MAP: Record<string, string> = {
   "dark": "惡", "steel": "鋼", "fairy": "妖精", "none": ""
 };
 
+// 2. 自動標註後綴對照表
 const SUFFIX_MAP: Record<string, string> = {
   "_shadow": " (暗影)",
   "_alolan": " (阿羅拉)",
@@ -20,6 +21,7 @@ const SUFFIX_MAP: Record<string, string> = {
   "_mega": " (Mega)"
 };
 
+// 3. 分數勳章邏輯
 function getRankIcon(score: number): string {
   if (score >= 90) return "🥇白金";
   if (score >= 80) return "🥇金";
@@ -34,6 +36,7 @@ export async function analyzeUserBoxTeam(
   ctx: ExecutionContext
 ): Promise<string> {
   try {
+    // A. 資料同步抓取
     const [transRes, typeRes, moveTransRes, fastRes, chargedRes] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
       fetchWithCache(getDataUrl("data/type_chart.json"), env, ctx),
@@ -48,48 +51,38 @@ export async function analyzeUserBoxTeam(
     const fastMovesRaw = await fastRes.json() as any[];
     const chargedMovesRaw = await chargedRes.json() as any[];
     
-    // 招式與屬性映射
+    // B. 建立招式屬性映射
     const moveAttrMap = new Map<string, string>();
     [...fastMovesRaw, ...chargedMovesRaw].forEach(m => {
       moveAttrMap.set(m.name.toUpperCase().replace(/\s+/g, '_'), m.type.toLowerCase());
     });
 
-    // --- 🧠 核心動態翻譯函數 ---
+    // C. 核心動態翻譯函數 (處理暗影與地區型態)
     const getFullName = (speciesId: string): string => {
       const id = speciesId.toLowerCase();
-      
-      // 1. 先找有沒有完美匹配 (例如某些特殊型態已經寫在翻譯檔)
       const directMatch = transData.find(p => p.speciesId.toLowerCase() === id);
       if (directMatch?.speciesName) return directMatch.speciesName;
 
-      // 2. 拆解 ID 找出基礎名稱 (例如 rattata_alolan_shadow -> rattata)
-      // 我們取底線分割後的第一個單字作為 Base
       const baseId = id.split('_')[0];
       const baseMatch = transData.find(p => p.speciesId.toLowerCase() === baseId);
       let name = baseMatch?.speciesName || speciesId;
 
-      // 3. 遍歷後綴映射表，符合就加上去
       Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
         if (id.includes(key)) name += zh;
       });
-
       return name;
     };
 
+    // D. 取得排名與過濾盒子
     const leagueInfo = leagues.find(l => l.command === String(league) || l.cp === String(league));
     const rankRes = await fetchWithCache(getDataUrl(leagueInfo!.path), env, ctx);
     const rankings = await rankRes.json() as RankingPokemon[];
 
-    // 2. 格式化盒子寶可夢 (全自動識別)
     const myPokemons = rankings
       .map((r, idx) => ({ ...r, realRank: idx + 1 }))
-      .filter(r => {
-        const fullName = getFullName(r.speciesId);
-        return teamNames.includes(fullName);
-      })
+      .filter(r => teamNames.includes(getFullName(r.speciesId)))
       .map(r => {
         const id = r.speciesId.toLowerCase();
-        // 抓取屬性 (需處理 Shadow/Mega 的屬性與 Base 一致)
         const baseId = id.split('_')[0];
         const pInfo = transData.find(p => p.speciesId.toLowerCase() === id) || 
                       transData.find(p => p.speciesId.toLowerCase() === baseId);
@@ -118,9 +111,9 @@ export async function analyzeUserBoxTeam(
       })
       .sort((a, b) => b.score - a.score);
 
-    if (myPokemons.length < 3) return "⚠️ 符合排名的寶可夢不足 3 隻。請確認 Web App 中的名稱是否包含括號標註。";
+    if (myPokemons.length < 3) return "⚠️ 符合排名的寶可夢不足 3 隻。";
 
-    // --- 運算邏輯 (同 v3) ---
+    // E. 運算邏輯 (v3 攻防聯防)
     const getWeaknesses = (types: string[]) => {
       const mults: Record<string, number> = {};
       Object.keys(typeChart).forEach(atk => {
@@ -152,20 +145,32 @@ export async function analyzeUserBoxTeam(
 
     let closer = myPokemons.find(p => p.speciesId !== leader.speciesId && p.speciesId !== safeSwap.speciesId) || myPokemons[2];
 
-    const translateMove = (mId: string) => {
-      if (!mId) return "";
+    // 🔥 F. 智慧型招式翻譯邏輯 (修復英文顯示問題)
+    const translateMove = (mId: string, moveType: 'fast' | 'charged') => {
+      if (!mId) return "未知";
       const isElite = mId.includes('*');
       const cleanId = mId.replace('*', '').toUpperCase();
-      const name = moveTrans[cleanId] || cleanId;
+      
+      // 嘗試匹配：1. 帶後綴 (SUCKER_PUNCH_FAST) 2. 原始 ID (SUCKER_PUNCH)
+      const suffix = moveType === 'fast' ? '_FAST' : '_CHARGED';
+      const name = moveTrans[cleanId + suffix] || moveTrans[cleanId] || cleanId;
+      
       return isElite ? `${name}*` : name;
     };
 
     const formatPoke = (p: any, icon: string) => {
-      const fast = translateMove(p.fastMove);
-      const charged = p.chargedMoves.map(translateMove).filter(Boolean).join(', ');
-      return `${icon} #<b>${p.rank}</b> <b>${p.chineseName}</b> (${p.score.toFixed(1)}) - ${getRankIcon(p.score)}\n(${toZh(p.types)})\n└ ${fast} / ${charged}`;
+      const fast = translateMove(p.fastMove, 'fast');
+      const charged = p.chargedMoves.map((m: string) => translateMove(m, 'charged')).filter(Boolean).join(', ');
+      
+      // header: #排名 名字 (分數) - 勳章
+      const header = `${icon} #<b>${p.rank}</b> <b>${p.chineseName}</b> (${p.score.toFixed(1)}) - ${getRankIcon(p.score)}`;
+      const typeLine = `(${toZh(p.types)})`;
+      const movesLine = `└ ${fast} / ${charged}`;
+      
+      return `${header}\n${typeLine}\n${movesLine}`;
     };
 
+    // G. 組合訊息回覆
     let msg = `📊 <b>${league} 聯盟 v3 全能型態分析</b>\n`;
     msg += `=======================\n`;
     msg += `🥇 <b>先發 (Leader)</b>\n${formatPoke(leader, "👑")}\n\n`;
