@@ -37,13 +37,12 @@ export async function analyzeUserBoxTeam(
 ): Promise<string> {
   try {
     // A. 資料同步抓取
-    const [transRes, typeRes, moveTransRes, fastRes, chargedRes] = await Promise.all([
+    const [transRes, typeRes, moveTransRes] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
       fetchWithCache(getDataUrl("data/type_chart.json"), env, ctx),
-      fetchWithCache(getDataUrl("data/moves_translation.json"), env, ctx),
-      fetch("https://pogoapi.net/api/v1/fast_moves.json"),
-      fetch("https://pogoapi.net/api/v1/charged_moves.json")
+      fetchWithCache(getDataUrl("data/move.json"), env, ctx),  // ✅
     ]);
+    const moveTrans = await moveTransRes.json() as Record<string, string>;
 
     const transData = await transRes.json() as PokemonData[];
     const typeChart = await typeRes.json() as any;
@@ -87,8 +86,14 @@ export async function analyzeUserBoxTeam(
         const pInfo = transData.find(p => p.speciesId.toLowerCase() === id) || 
                       transData.find(p => p.speciesId.toLowerCase() === baseId);
         
-        const fastMove = r.moves?.fastMoves?.[0]?.moveId || "";
-        const chargedMoves = r.moves?.chargedMoves ? r.moves.chargedMoves.slice(0, 2).map((m: any) => m.moveId) : [];
+        let fastMove = r.moveFast || "";
+        let chargedMoves: string[] = Array.isArray(r.moveCharged) ? r.moveCharged.slice(0, 2) : (r.moveCharged ? [r.moveCharged] : []);
+        
+        // moveset fallback
+        if (!fastMove && r.moveset && Array.isArray(r.moveset)) {
+          fastMove = r.moveset[0] || "";
+          chargedMoves = r.moveset.slice(1, 3);
+        }
         
         const attackTypes = new Set<string>();
         [fastMove, ...chargedMoves].forEach(mId => {
@@ -146,20 +151,16 @@ export async function analyzeUserBoxTeam(
     let closer = myPokemons.find(p => p.speciesId !== leader.speciesId && p.speciesId !== safeSwap.speciesId) || myPokemons[2];
 
     // 🔥 F. 智慧型招式翻譯邏輯 (修復英文顯示問題)
-    const translateMove = (mId: string, moveType: 'fast' | 'charged') => {
+    const translateMove = (mId: string) => {
       if (!mId) return "未知";
       const isElite = mId.includes('*');
       const cleanId = mId.replace('*', '').toUpperCase();
-      
-      // 嘗試匹配：1. 帶後綴 (SUCKER_PUNCH_FAST) 2. 原始 ID (SUCKER_PUNCH)
-      const suffix = moveType === 'fast' ? '_FAST' : '_CHARGED';
-      const name = moveTrans[cleanId + suffix] || moveTrans[cleanId] || cleanId;
-      
+      const name = moveTrans[cleanId] || cleanId;
       return isElite ? `${name}*` : name;
     };
 
     const formatPoke = (p: any, icon: string) => {
-      const fast = translateMove(p.fastMove, 'fast');
+      const fast = translateMove(p.fastMove);
       const charged = p.chargedMoves.map((m: string) => translateMove(m, 'charged')).filter(Boolean).join(', ');
       
       // header: #排名 名字 (分數) - 勳章
