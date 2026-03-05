@@ -1,6 +1,3 @@
-// src/web/html.ts
-
-// 1. 這是你原本就有的主機首頁 (如果你原本有寫其他的，請保留你原本的)
 export function generateHTML() {
   return `
     <!DOCTYPE html>
@@ -131,18 +128,15 @@ export const myBoxHtml = `
     const userId = tg.initDataUnsafe?.user?.id || "";
     if (tg.initDataUnsafe?.user) {
       document.getElementById('user-info').innerText = '訓練家：' + tg.initDataUnsafe.user.first_name;
-    } else {
-      document.getElementById('user-info').innerText = '請在 Telegram 內部開啟';
     }
 
     let currentLeague = 1500;
     let userBox = { 500: [], 1500: [], 2500: [], 10000: [] };
 
-    // 1. 初始化資料 (要字典清單 + 使用者上次儲存的陣容)
     async function initData() {
       try {
-        // 抓取寶可夢名稱字典
-        const namesRes = await fetch('/api/names');
+        // 🔥 加上時間戳記強制刷新快取！
+        const namesRes = await fetch('/api/names?t=' + new Date().getTime());
         const names = await namesRes.json();
         const datalist = document.getElementById('poke-options');
         names.forEach(name => {
@@ -151,19 +145,16 @@ export const myBoxHtml = `
           datalist.appendChild(opt);
         });
 
-        // 抓取使用者的雲端資料
         if (userId) {
-          const boxRes = await fetch('/api/box?userId=' + userId);
+          const boxRes = await fetch('/api/box?userId=' + userId + '&t=' + new Date().getTime());
           userBox = await boxRes.json();
         }
-        
         renderList();
       } catch (e) {
-        document.getElementById('current-list').innerHTML = '<div style="color:red;text-align:center;">資料載入失敗，請重試</div>';
+        document.getElementById('current-list').innerHTML = '<div style="color:red;text-align:center;">載入失敗</div>';
       }
     }
 
-    // 2. 切換聯盟
     function switchLeague(league) {
       currentLeague = league;
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -171,85 +162,55 @@ export const myBoxHtml = `
       renderList();
     }
 
-    // 3. 渲染目前的列表
     function renderList() {
       const listEl = document.getElementById('current-list');
       listEl.innerHTML = '';
-      
       const currentTeam = userBox[currentLeague] || [];
       if (currentTeam.length === 0) {
-        listEl.innerHTML = '<div style="text-align:center; color:var(--hint-color); padding: 20px;">目前盒子是空的，趕快搜尋加入吧！</div>';
+        listEl.innerHTML = '<div style="text-align:center; color:gray; padding: 20px;">盒子空空的，搜一隻來加吧！</div>';
         return;
       }
-
       currentTeam.forEach(name => {
         const div = document.createElement('div');
         div.className = 'pokemon-item';
-        div.innerHTML = \`
-          <span>\${name}</span>
-          <button class="delete-btn" onclick="removePokemon('\${name}')">移除</button>
-        \`;
+        div.innerHTML = \`<span>\${name}</span><button class="delete-btn" onclick="removePokemon('\${name}')">移除</button>\`;
         listEl.appendChild(div);
       });
     }
 
-    // 4. 新增寶可夢
     function addPokemon() {
       const input = document.getElementById('poke-search');
       const name = input.value.trim();
-      
       if (!name) return;
       if (!userBox[currentLeague].includes(name)) {
         userBox[currentLeague].push(name);
         tg.HapticFeedback.impactOccurred('light');
         renderList();
-      } else {
-        tg.showAlert('⚠️ 這隻寶可夢已經在盒子裡囉！');
       }
-      input.value = ''; // 清空搜尋框
+      input.value = '';
     }
 
-    // 5. 移除寶可夢
     function removePokemon(name) {
       userBox[currentLeague] = userBox[currentLeague].filter(p => p !== name);
-      tg.HapticFeedback.impactOccurred('light');
       renderList();
     }
 
-    // 6. 儲存回後端
     async function saveTeam() {
-      if (!userId) {
-        tg.showAlert('發生錯誤：找不到使用者 ID');
-        return;
-      }
-      
-      const btn = document.getElementById('save-btn');
-      btn.innerText = "儲存中...";
-      tg.HapticFeedback.impactOccurred('medium');
-
-      const payload = {
-        userId: userId,
-        league: currentLeague,
-        team: userBox[currentLeague]
-      };
-      
+      if (!userId) { tg.showAlert('找不到使用者ID'); return; }
+      document.getElementById('save-btn').innerText = "儲存中...";
       try {
         await fetch('/api/box', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ userId, league: currentLeague, team: userBox[currentLeague] })
         });
-        
-        tg.showAlert('✅ 已同步至雲端，請回聊天室查看結果！', () => {
-          tg.close(); // 關閉 Web App 回到聊天室
-        });
+        tg.showAlert('✅ 已同步！請回聊天室查看結果！', () => { tg.close(); });
       } catch (e) {
-        tg.showAlert('儲存失敗，請檢查網路狀態');
-        btn.innerText = "💾 儲存並分析最佳隊伍";
+        tg.showAlert('儲存失敗');
+        document.getElementById('save-btn').innerText = "💾 儲存並分析最佳隊伍";
       }
     }
 
-    // 啟動！
     initData();
   </script>
 </body>
