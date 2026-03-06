@@ -25,12 +25,10 @@ const SUFFIX_MAP: Record<string, string> = {
   "_hisuian": " (洗翠)", "_paldean": " (帕底亞)", "_mega": " (Mega)"
 };
 
-// KV key 安全化
 function sanitizeKey(s: string): string {
   return s.replace(/[\/\.\s]/g, '_');
 }
 
-// 取得當下聯盟清單
 async function getActiveLeagues(): Promise<Array<{ name: string; path: string; command: string; cp: string }>> {
   try {
     const res = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, { headers: { "Cache-Control": "no-cache" } });
@@ -277,40 +275,46 @@ export default {
       }
 
       // 讀取盒子 GET
-      // 回傳格式: { acct: { leaguePath: { box:[], favs:[] } } }
+      // KV key: box4_{uid}_{acct}_{cp}
+      // 回傳: { acct: { cp: { box:[], favs:[] } } }
       if (path === "/api/box" && request.method === "GET") {
         const uid = url.searchParams.get("userId");
         if (!uid) return new Response("{}", { status: 400 });
+
+        // 取得所有當下聯盟的 CP（去重）
         const activeLeagues = await getActiveLeagues();
+        const uniqueCps = [...new Set(activeLeagues.map(l => l.cp))];
+
         const result: Record<number, Record<string, { box: string[]; favs: string[] }>> = {};
         for (let a = 0; a < 4; a++) {
           result[a] = {};
-          for (const l of activeLeagues) {
-            const key = `box3_${uid}_${a}_${sanitizeKey(l.path)}`;
+          for (const cp of uniqueCps) {
+            const key = `box4_${uid}_${a}_${cp}`;
             const val = await env.POKEMON_KV.get(key);
-            result[a][l.path] = val ? JSON.parse(val) : { box: [], favs: [] };
+            result[a][cp] = val ? JSON.parse(val) : { box: [], favs: [] };
           }
         }
         return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
 
       // 儲存盒子 POST
+      // payload: { userId, acct, leaguePath, cp, allData: { cp: { box:[], favs:[] } } }
       if (path === "/api/box" && request.method === "POST") {
         const payload = await request.json() as any;
-        const { userId, acct, leaguePath, allData } = payload;
-        if (!userId || acct === undefined || !leaguePath || !allData)
+        const { userId, acct, leaguePath, cp, allData } = payload;
+        if (!userId || acct === undefined || !leaguePath || !cp || !allData)
           return new Response(JSON.stringify({ error: "missing fields" }), { status: 400 });
 
-        // 儲存當前帳號所有聯盟資料（key by leaguePath）
+        // 儲存所有 CP 的資料（key by CP）
         await Promise.all(
-          Object.entries(allData).map(async ([lp, lpData]: [string, any]) => {
-            const key = `box3_${userId}_${acct}_${sanitizeKey(lp)}`;
-            await env.POKEMON_KV.put(key, JSON.stringify(lpData));
+          Object.entries(allData).map(async ([cpKey, cpData]: [string, any]) => {
+            const key = `box4_${userId}_${acct}_${cpKey}`;
+            await env.POKEMON_KV.put(key, JSON.stringify(cpData));
           })
         );
 
-        // 只分析當前選擇的聯盟
-        const cpData = allData[leaguePath] || { box: [], favs: [] };
+        // 用選擇的 leaguePath 分析，資料來自對應 CP
+        const cpData = allData[cp] || { box: [], favs: [] };
         const teamNames: string[] = cpData.box || [];
         const favNames: string[] = cpData.favs || [];
 
