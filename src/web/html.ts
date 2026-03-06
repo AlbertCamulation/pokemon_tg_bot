@@ -104,6 +104,7 @@ export const myBoxHtml = `
       background: none; border: none; font-size: 20px;
       cursor: pointer; padding: 0 4px; line-height: 1;
       transition: transform 0.15s; flex-shrink: 0;
+      color: rgba(255, 255, 255, 0.6);  
     }
     .star-btn:active { transform: scale(1.35); }
     .delete-btn {
