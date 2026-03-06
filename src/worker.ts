@@ -1,90 +1,44 @@
 // =========================================================
 //  Pokemon Telegram Bot - Main Entry Point
-//  Cloudflare Workers TypeScript 版本
 // =========================================================
-import { analyzeUserBoxTeam } from './handlers/box'; 
+import { analyzeUserBoxTeam } from './handlers/box';
 import type {
-  Env,
-  TelegramUpdate,
-  TelegramMessage,
-  TelegramCallbackQuery,
-  PokemonData
+  Env, TelegramUpdate, TelegramMessage, TelegramCallbackQuery, PokemonData
 } from './types';
-
 import {
-  WEBHOOK_PATH,
-  leagues,
-  LIMIT_LEAGUES_SHOW,
-  NAME_CLEANER_REGEX,
-  MANIFEST_URL
+  WEBHOOK_PATH, leagues, LIMIT_LEAGUES_SHOW, NAME_CLEANER_REGEX, MANIFEST_URL
 } from './constants';
-
+import { fetchWithCache, getDataUrl } from './utils/cache';
+import { sendMessage, answerCallbackQuery, deleteMessage, registerWebhook } from './utils/telegram';
+import { getAllowedUserIds, getBannedUsers } from './utils/kv';
 import {
-  fetchWithCache,
-  getDataUrl
-} from './utils/cache';
-
-import {
-  sendMessage,
-  answerCallbackQuery,
-  deleteMessage,
-  registerWebhook
-} from './utils/telegram';
-
-import {
-  getAllowedUserIds,
-  getBannedUsers
-} from './utils/kv';
-
-import {
-  handlePokemonSearch,
-  getPokemonDataOnly,
-  sendMainMenu,
-  sendHelpMessage,
-  sendTypeSelectionMenu,
-  handleTypeDetail,
-  handleLeagueCommand,
-  handleCurrentLeagues,
-  handleMetaAnalysis,
-  handleTrashCommand,
-  handleAddTrashCommand,
-  handleUntrashCommand,
-  handleBanlistCommand,
-  handleApproveUser,
-  handleBanUser,
-  handleUnbanUser,
+  handlePokemonSearch, getPokemonDataOnly, sendMainMenu, sendHelpMessage,
+  sendTypeSelectionMenu, handleTypeDetail, handleLeagueCommand, handleCurrentLeagues,
+  handleMetaAnalysis, handleTrashCommand, handleAddTrashCommand, handleUntrashCommand,
+  handleBanlistCommand, handleApproveUser, handleBanUser, handleUnbanUser,
   sendAuthorizationRequest
 } from './handlers';
-
 import { generateHTML, myBoxHtml } from './web/html';
 
-// 全域後綴映射
 const SUFFIX_MAP: Record<string, string> = {
-  "_shadow": " (暗影)",
-  "_alolan": " (阿羅拉)",
-  "_galarian": " (伽勒爾)",
-  "_hisuian": " (洗翠)",
-  "_paldean": " (帕底亞)",
-  "_mega": " (Mega)"
+  "_shadow": " (暗影)", "_alolan": " (阿羅拉)", "_galarian": " (伽勒爾)",
+  "_hisuian": " (洗翠)", "_paldean": " (帕底亞)", "_mega": " (Mega)"
 };
 
-// KV key 安全化：把斜線、點換成底線
-function sanitizePathKey(path: string): string {
-  return path.replace(/[\/\.]/g, '_');
+// KV key 安全化
+function sanitizeKey(s: string): string {
+  return s.replace(/[\/\.\s]/g, '_');
 }
 
-// 從 manifest 取得當下聯盟清單
-async function getActiveLeagues(): Promise<Array<{ name: string; path: string; command: string }>> {
+// 取得當下聯盟清單
+async function getActiveLeagues(): Promise<Array<{ name: string; path: string; command: string; cp: string }>> {
   try {
-    const manifestRes = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, {
-      headers: { "Cache-Control": "no-cache" }
-    });
-    if (!manifestRes.ok) return [];
-    const manifest = await manifestRes.json() as {
+    const res = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, { headers: { "Cache-Control": "no-cache" } });
+    if (!res.ok) return [];
+    const manifest = await res.json() as {
       active_leagues: Array<{ cp: string; pvpoke_id: string; name_zh: string }>;
     };
-
-    const result: Array<{ name: string; path: string; command: string }> = [];
+    const result: Array<{ name: string; path: string; command: string; cp: string }> = [];
     manifest.active_leagues.forEach(a => {
       const local = leagues.find(l => {
         if (String(l.cp) !== String(a.cp)) return false;
@@ -93,143 +47,98 @@ async function getActiveLeagues(): Promise<Array<{ name: string; path: string; c
         if (a.pvpoke_id === "remix") return l.name.includes("Remix") || l.command.includes("remix");
         return l.command.includes(a.pvpoke_id);
       });
-      if (local) result.push({ name: local.name, path: local.path, command: local.command });
+      if (local) result.push({ name: local.name, path: local.path, command: local.command, cp: String(local.cp) });
     });
     return result;
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
 // =========================================================
-//  Callback Query 處理
+//  Callback Query
 // =========================================================
-
-async function onCallbackQuery(
-  callbackQuery: TelegramCallbackQuery,
-  env: Env,
-  ctx: ExecutionContext
-): Promise<void> {
-  const chatId = callbackQuery.message!.chat.id;
-  const data = callbackQuery.data || '';
-  const callbackQueryId = callbackQuery.id;
-  const userId = callbackQuery.from.id;
-  const userName = callbackQuery.from.first_name || "Unknown";
-  const messageId = callbackQuery.message!.message_id;
-
+async function onCallbackQuery(cq: TelegramCallbackQuery, env: Env, ctx: ExecutionContext): Promise<void> {
+  const chatId = cq.message!.chat.id;
+  const data = cq.data || '';
+  const cqId = cq.id;
+  const userId = cq.from.id;
+  const userName = cq.from.first_name || "Unknown";
+  const messageId = cq.message!.message_id;
   const isSuperAdmin = String(userId) === String(env.ADMIN_UID);
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
 
   if (data.startsWith("unban_btn_")) {
-    if (!isSuperAdmin) {
-      await answerCallbackQuery(callbackQueryId, "⛔ 您無權執行此操作", env);
-      return;
-    }
-    const targetUid = data.replace("unban_btn_", "");
-    await handleUnbanUser(chatId, messageId, targetUid, callbackQueryId, env);
-    return;
+    if (!isSuperAdmin) { await answerCallbackQuery(cqId, "⛔ 您無權執行此操作", env); return; }
+    await handleUnbanUser(chatId, messageId, data.replace("unban_btn_", ""), cqId, env); return;
   }
-
-  if (data === "close_menu") {
-    await deleteMessage(chatId, messageId, env);
-    return;
-  }
+  if (data === "close_menu") { await deleteMessage(chatId, messageId, env); return; }
 
   if (data.startsWith("approve_uid_") || data.startsWith("ban_uid_")) {
-    if (!isSuperAdmin && !isInAdminGroup) {
-      await answerCallbackQuery(callbackQueryId, "⛔ 權限不足", env);
-      return;
-    }
+    if (!isSuperAdmin && !isInAdminGroup) { await answerCallbackQuery(cqId, "⛔ 權限不足", env); return; }
     const targetUid = parseInt(data.split("_")[2]);
-    const msgText = callbackQuery.message?.text || "";
-    const nameMatch = msgText.match(/使用者:\s*(.*?)(\n|\(|$)/);
+    const nameMatch = (cq.message?.text || "").match(/使用者:\s*(.*?)(\n|\(|$)/);
     const targetName = nameMatch ? nameMatch[1].trim() : "Unknown User";
-
     if (data.startsWith("approve_uid_")) {
       await handleApproveUser(chatId, messageId, targetUid, targetName, userName, env);
-      await answerCallbackQuery(callbackQueryId, "已核准", env);
-    } else if (data.startsWith("ban_uid_")) {
+      await answerCallbackQuery(cqId, "已核准", env);
+    } else {
       await handleBanUser(chatId, messageId, targetUid, targetName, userName, env);
-      await answerCallbackQuery(callbackQueryId, "已封禁", env);
+      await answerCallbackQuery(cqId, "已封禁", env);
     }
     return;
   }
 
   const allowedIds = await getAllowedUserIds(env);
   if (!isSuperAdmin && !isInAdminGroup && !allowedIds.includes(userId)) {
-    await answerCallbackQuery(callbackQueryId, `⛔ 權限不足`, env);
-    return;
+    await answerCallbackQuery(cqId, `⛔ 權限不足`, env); return;
   }
 
   if (data.startsWith("untrash_btn_")) {
-    const name = data.replace("untrash_btn_", "");
-    await answerCallbackQuery(callbackQueryId, "正在移除...", env);
-    await handleUntrashCommand(chatId, userId, [name], env);
-    return;
+    await answerCallbackQuery(cqId, "正在移除...", env);
+    await handleUntrashCommand(chatId, userId, [data.replace("untrash_btn_", "")], env); return;
   }
-
   if (data === "menu_atk_types") { await sendTypeSelectionMenu(chatId, "atk", env); return; }
   if (data === "menu_def_types") { await sendTypeSelectionMenu(chatId, "def", env); return; }
   if (data.startsWith("type_atk_")) { await handleTypeDetail(chatId, data.replace("type_atk_", ""), "atk", env); return; }
   if (data.startsWith("type_def_")) { await handleTypeDetail(chatId, data.replace("type_def_", ""), "def", env); return; }
 
-  await answerCallbackQuery(callbackQueryId, "", env);
+  await answerCallbackQuery(cqId, "", env);
 
-  const leagueInfo = leagues.find((l) => l.command === data);
-  if (leagueInfo) {
-    await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env, ctx);
-    return;
+  if (leagues.find(l => l.command === data)) {
+    await handleLeagueCommand(chatId, data, LIMIT_LEAGUES_SHOW, env, ctx); return;
   }
-
   switch (data) {
     case "meta_analysis": await handleMetaAnalysis(chatId, env, ctx); break;
-    case "trash_list": await handleTrashCommand(chatId, userId, callbackQuery.from, env); break;
+    case "trash_list": await handleTrashCommand(chatId, userId, cq.from, env); break;
     case "help_menu": await sendHelpMessage(chatId, env); break;
     case "main_menu": await sendMainMenu(chatId, env); break;
     case "current_leagues": await handleCurrentLeagues(chatId, env, ctx); break;
-    default: break;
   }
 }
 
 // =========================================================
-//  Message 處理
+//  Message
 // =========================================================
-
-async function onMessage(
-  message: TelegramMessage,
-  env: Env,
-  ctx: ExecutionContext,
-  requestOrigin: string
-): Promise<void> {
-
-  if (message.web_app_data) {
+async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, origin: string): Promise<void> {
+  if (msg.web_app_data) {
     try {
-      const payload = JSON.parse(message.web_app_data.data);
+      const payload = JSON.parse(msg.web_app_data.data);
       if (payload.action === "save_box") {
         const { league, team } = payload;
-        await env.POKEMON_KV.put(`box_${league}_${message.chat.id}`, JSON.stringify(team));
-        const analysisResult = await analyzeUserBoxTeam(league, team, env, ctx);
-        await sendMessage(
-          message.chat.id,
-          `✅ <b>對戰盒子同步成功！</b>\n共登錄了 ${team.length} 隻寶可夢。\n\n${analysisResult}`,
-          { parse_mode: "HTML" },
-          env
-        );
+        await env.POKEMON_KV.put(`box_${league}_${msg.chat.id}`, JSON.stringify(team));
+        const result = await analyzeUserBoxTeam(league, team, [], env, ctx);
+        await sendMessage(msg.chat.id, `✅ <b>盒子同步成功</b>\n\n${result}`, { parse_mode: "HTML" }, env);
       }
-    } catch (e) {
-      await sendMessage(message.chat.id, "❌ 盒子資料處理或分析失敗。", null, env);
-    }
+    } catch { await sendMessage(msg.chat.id, "❌ 盒子處理失敗", null, env); }
     return;
   }
 
-  if (!message.text) return;
-  const text = message.text.trim();
-  const chatId = message.chat.id;
-  const userId = message.from!.id;
-  const firstName = message.from!.first_name || "Unknown";
-  const username = message.from!.username;
-
+  if (!msg.text) return;
+  const text = msg.text.trim();
+  const chatId = msg.chat.id;
+  const userId = msg.from!.id;
+  const firstName = msg.from!.first_name || "Unknown";
+  const username = msg.from!.username;
   const isSuperAdmin = String(userId) === String(env.ADMIN_UID);
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
@@ -239,7 +148,7 @@ async function onMessage(
     if (bannedMap[userId]) return;
     if (!allowedIds.includes(userId)) {
       if (adminGroupId) await sendAuthorizationRequest(chatId, userId, firstName, username, text, adminGroupId, env);
-      else await sendMessage(chatId, `⛔ <b>權限不足</b>\n您的 UID (<code>${userId}</code>) 未授權。`, { parse_mode: "HTML" }, env);
+      else await sendMessage(chatId, `⛔ <b>權限不足</b>\nUID: <code>${userId}</code>`, { parse_mode: "HTML" }, env);
       return;
     }
   }
@@ -250,26 +159,21 @@ async function onMessage(
 
   if (command) {
     switch (command) {
-      case "start":
-      case "menu": await sendMainMenu(chatId, env); return;
+      case "start": case "menu": await sendMainMenu(chatId, env); return;
       case "help": await sendHelpMessage(chatId, env); return;
       case "box":
-        const replyMarkup = {
-          inline_keyboard: [[{ text: "🎒 開啟我的對戰盒子", web_app: { url: `${requestOrigin}/mybox` } }]]
-        };
-        await sendMessage(chatId, "準備好編輯你的陣容了嗎？", replyMarkup, env);
-        return;
+        await sendMessage(chatId, "準備好編輯你的陣容了嗎？", {
+          inline_keyboard: [[{ text: "🎒 開啟我的對戰盒子", web_app: { url: `${origin}/mybox` } }]]
+        }, env); return;
       case "trash":
         if (args.length > 0) await handleAddTrashCommand(chatId, userId, args, env);
-        else await handleTrashCommand(chatId, userId, message.from!, env);
+        else await handleTrashCommand(chatId, userId, msg.from!, env);
         return;
       case "untrash": await handleUntrashCommand(chatId, userId, args, env); return;
       case "banlist": if (isSuperAdmin) await handleBanlistCommand(chatId, env); return;
-      default: break;
     }
     if (leagues.find(l => l.command === command)) {
-      await handleLeagueCommand(chatId, command, LIMIT_LEAGUES_SHOW, env, ctx);
-      return;
+      await handleLeagueCommand(chatId, command, LIMIT_LEAGUES_SHOW, env, ctx); return;
     }
   }
 
@@ -279,80 +183,58 @@ async function onMessage(
 }
 
 // =========================================================
-//  Webhook 處理
+//  Webhook
 // =========================================================
-
 async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
-  const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
-  if (secret !== env.ENV_BOT_SECRET) return new Response("Unauthorized", { status: 403 });
-
+  if (request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== env.ENV_BOT_SECRET)
+    return new Response("Unauthorized", { status: 403 });
   try {
     const update = await request.json() as TelegramUpdate;
-    const requestOrigin = new URL(request.url).origin;
-    if (update.message) ctx.waitUntil(onMessage(update.message, env, ctx, requestOrigin));
+    const origin = new URL(request.url).origin;
+    if (update.message) ctx.waitUntil(onMessage(update.message, env, ctx, origin));
     else if (update.callback_query) ctx.waitUntil(onCallbackQuery(update.callback_query, env, ctx));
     return new Response("Ok");
-  } catch (e) {
-    console.error(e);
-    return new Response("Error", { status: 500 });
-  }
+  } catch (e) { console.error(e); return new Response("Error", { status: 500 }); }
 }
 
 // =========================================================
 //  handleApiNames
 // =========================================================
-async function handleApiNames(
-  env: Env,
-  ctx: ExecutionContext
-): Promise<Response> {
-  let transData: PokemonData[] = [];
-
+async function handleApiNames(env: Env, ctx: ExecutionContext): Promise<Response> {
   try {
-    const transRes = await fetchWithCache(getDataUrl(`data/chinese_translation.json`), env, ctx);
-    transData = await transRes.json() as PokemonData[];
-
-    const baseNameMap = new Map<string, string>();
-    transData.forEach(p => baseNameMap.set(p.speciesId.toLowerCase(), p.speciesName));
+    const transRes = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    const transData = await transRes.json() as PokemonData[];
+    const baseNameMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
     const cleanNames = Array.from(new Set(
       transData.map(item => {
         const id = (item.speciesId || "").toLowerCase();
         const baseId = id.split('_')[0];
         let name = baseNameMap.get(id) || baseNameMap.get(baseId) || id;
-
         Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
           const zhClean = zh.replace(/[()]/g, '').trim();
           if (id.includes(key) && !name.includes(zhClean)) name += zh;
         });
-
         if (id.startsWith("cradily")) name = "搖籃百合" + (id.includes("_shadow") ? " (暗影)" : "");
         if (id.startsWith("golisopod")) name = "具甲武者" + (id.includes("_shadow") ? " (暗影)" : "");
-
         return name;
-      }).filter(name => {
-        if (!name || !/[\u4E00-\u9FA5]/.test(name)) return false;
-        return true;
-      })
+      }).filter(n => n && /[\u4E00-\u9FA5]/.test(n))
     )).sort();
 
     return new Response(JSON.stringify(cleanNames), {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "public, max-age=3600"
-      }
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=3600" }
     });
-
-  } catch (e) {
-    const fallback = ["拉達", "小拉達", "胖可丁", "大尾立", "土王"];
-    return new Response(JSON.stringify(fallback), { status: 200, headers: { "Content-Type": "application/json" } });
+  } catch {
+    return new Response(JSON.stringify(["拉達","胖可丁","大尾立","土王"]), {
+      headers: { "Content-Type": "application/json" }
+    });
   }
 }
 
 // =========================================================
 //  Worker Entry Point
 // =========================================================
-
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -361,58 +243,101 @@ export default {
     try {
       if (path === WEBHOOK_PATH) return handleWebhook(request, env, ctx);
       if (path === "/api/names") return handleApiNames(env, ctx);
-
-      // 當下聯盟清單
-      if (path === "/api/active-leagues") {
-        const result = await getActiveLeagues();
-        return new Response(JSON.stringify(result), {
-          headers: { "Content-Type": "application/json; charset=utf-8" }
-        });
-      }
-
       if (path === "/api/search") {
-        const query = url.searchParams.get("q");
-        if (!query) return new Response("{}", { status: 400 });
-        const result = await getPokemonDataOnly(query, env, ctx);
+        const q = url.searchParams.get("q");
+        if (!q) return new Response("{}", { status: 400 });
+        const result = await getPokemonDataOnly(q, env, ctx);
         return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
-
       if (path === "/registerWebhook") return registerWebhook(url, env);
       if (path === "/") return new Response(generateHTML(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
       if (path === "/mybox") return new Response(myBoxHtml, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 
-      // 讀取盒子 API
+      // 當下聯盟清單
+      if (path === "/api/active-leagues") {
+        const result = await getActiveLeagues();
+        return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
+      }
+
+      // 帳號名稱 GET
+      if (path === "/api/account-names" && request.method === "GET") {
+        const uid = url.searchParams.get("userId");
+        if (!uid) return new Response("[]", { status: 400 });
+        const val = await env.POKEMON_KV.get(`acct_names_${uid}`);
+        const names = val ? JSON.parse(val) : ['帳號 A', '帳號 B', '帳號 C', '帳號 D'];
+        return new Response(JSON.stringify(names), { headers: { "Content-Type": "application/json; charset=utf-8" } });
+      }
+
+      // 帳號名稱 POST
+      if (path === "/api/account-names" && request.method === "POST") {
+        const { userId, names } = await request.json() as any;
+        if (!userId || !Array.isArray(names)) return new Response("{}", { status: 400 });
+        await env.POKEMON_KV.put(`acct_names_${userId}`, JSON.stringify(names));
+        return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
+      }
+
+      // 讀取盒子 GET
+      // 回傳格式: { 0: { 500: {box:[], favs:[]}, 1500: {...}, ... }, 1: {...}, ... }
       if (path === "/api/box" && request.method === "GET") {
         const uid = url.searchParams.get("userId");
         if (!uid) return new Response("{}", { status: 400 });
+        const cps = [500, 1500, 2500, 10000];
+        const result: Record<number, Record<number, { box: string[]; favs: string[] }>> = {};
 
-        // 取得當下所有聯盟，逐一讀取該 user 的盒子
-        const activeLeagues = await getActiveLeagues();
-        const result: Record<string, string[]> = {};
-
-        await Promise.all(activeLeagues.map(async league => {
-          const kvKey = `box_${sanitizePathKey(league.path)}_${uid}`;
-          const val = await env.POKEMON_KV.get(kvKey);
-          result[league.path] = JSON.parse(val || "[]");
-        }));
-
-        return new Response(JSON.stringify(result), {
-          headers: { "Content-Type": "application/json; charset=utf-8" }
-        });
+        for (let a = 0; a < 4; a++) {
+          result[a] = {};
+          for (const cp of cps) {
+            const key = `box2_${uid}_${a}_${cp}`;
+            const val = await env.POKEMON_KV.get(key);
+            result[a][cp] = val ? JSON.parse(val) : { box: [], favs: [] };
+          }
+        }
+        return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
       }
 
-      // 儲存盒子與分析 API
+      // 儲存盒子 POST
       if (path === "/api/box" && request.method === "POST") {
         const payload = await request.json() as any;
-        const { userId, leaguePath, team } = payload;
-        if (!userId || !leaguePath) return new Response(JSON.stringify({ error: "missing fields" }), { status: 400 });
+        const { userId, acct, cp, allData } = payload;
+        if (!userId || acct === undefined || !cp || !allData)
+          return new Response(JSON.stringify({ error: "missing fields" }), { status: 400 });
 
-        const kvKey = `box_${sanitizePathKey(leaguePath)}_${userId}`;
-        await env.POKEMON_KV.put(kvKey, JSON.stringify(team));
+        // 儲存當前帳號所有 CP 的資料
+        const cps = [500, 1500, 2500, 10000];
+        await Promise.all(cps.map(async (c) => {
+          const key = `box2_${userId}_${acct}_${c}`;
+          const cpData = allData[c] || { box: [], favs: [] };
+          await env.POKEMON_KV.put(key, JSON.stringify(cpData));
+        }));
 
-        const analysisResult = await analyzeUserBoxTeam(leaguePath, team, env, ctx);
-        await sendMessage(userId, `✅ <b>盒子已更新</b>\n${analysisResult}`, { parse_mode: "HTML" }, env);
-        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+        // 找當下聯盟中對應 cp 的所有聯盟，逐一分析
+        const activeLeagues = await getActiveLeagues();
+        const matchedLeagues = activeLeagues.filter(l => String(l.cp) === String(cp));
+
+        if (matchedLeagues.length === 0) {
+          // 沒有當下聯盟，用預設
+          const fallback = leagues.find(l => String(l.cp) === String(cp) &&
+            (l.command.endsWith("_top") || l.command === "great_league_top" || l.command === "ultra_league_top" || l.command === "master_league_top")
+          );
+          if (fallback) matchedLeagues.push({ name: fallback.name, path: fallback.path, command: fallback.command, cp: String(fallback.cp) });
+        }
+
+        const cpData = allData[cp] || { box: [], favs: [] };
+        const teamNames: string[] = cpData.box || [];
+        const favNames: string[] = cpData.favs || [];
+
+        if (teamNames.length === 0) {
+          await sendMessage(Number(userId), "⚠️ 盒子是空的，請先加入寶可夢再儲存。", null, env);
+          return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
+        }
+
+        // 每個當下聯盟各自分析
+        for (const league of matchedLeagues) {
+          const result = await analyzeUserBoxTeam(league.path, teamNames, favNames, env, ctx);
+          await sendMessage(Number(userId), `✅ <b>盒子已更新</b>\n${result}`, { parse_mode: "HTML" }, env);
+        }
+
+        return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
       }
 
       return new Response("Not Found", { status: 404 });
