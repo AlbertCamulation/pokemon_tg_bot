@@ -26,53 +26,45 @@ export const myBoxHtml = `
       --secondary-bg: var(--tg-theme-secondary-bg-color, #2c2c2e);
       --danger: #ff453a;
       --star: #ffd60a;
-      --card-bg: #2c2c2e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--text);
-      padding-bottom: 100px;
+      background: var(--bg); color: var(--text); padding-bottom: 100px;
     }
 
-    /* ── Header ── */
     .header { text-align: center; padding: 20px 20px 10px; }
     .header h2 { font-size: 20px; margin-bottom: 4px; }
     .header p { color: var(--hint); font-size: 13px; }
 
-    /* ── 帳號切換器 ── */
+    /* 帳號切換 */
     .accounts {
-      display: flex; gap: 8px; padding: 0 16px 16px;
+      display: flex; gap: 8px; padding: 0 16px 14px;
       overflow-x: auto; scrollbar-width: none;
     }
     .accounts::-webkit-scrollbar { display: none; }
     .account-btn {
-      flex-shrink: 0; padding: 6px 14px;
-      border-radius: 20px; font-size: 13px; font-weight: 600;
+      flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+      font-size: 13px; font-weight: 600;
       background: var(--secondary-bg); color: var(--hint);
-      border: 2px solid transparent; cursor: pointer;
-      transition: 0.2s; user-select: none;
+      border: 2px solid transparent; cursor: pointer; transition: 0.2s;
     }
-    .account-btn.active {
-      background: var(--btn); color: var(--btn-text);
-      border-color: var(--btn);
-    }
+    .account-btn.active { background: var(--btn); color: var(--btn-text); }
 
-    /* ── CP Tabs ── */
+    /* 動態聯盟 Tabs */
     .tabs {
-      display: flex; gap: 6px; padding: 0 16px 14px;
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 14px;
     }
     .tab {
-      flex: 1; text-align: center; padding: 9px 0;
-      border-radius: 10px; font-weight: 700; font-size: 14px;
+      flex: 1; min-width: 100px; text-align: center; padding: 10px 8px;
+      border-radius: 10px; font-weight: 700; font-size: 13px;
       background: var(--secondary-bg); color: var(--hint);
-      cursor: pointer; transition: 0.2s;
+      cursor: pointer; transition: 0.2s; white-space: nowrap;
     }
-    .tab.active {
-      background: var(--btn); color: var(--btn-text);
-    }
+    .tab.active { background: var(--btn); color: var(--btn-text); }
+    .tabs-loading { color: var(--hint); font-size: 13px; padding: 0 16px 14px; }
 
-    /* ── 搜尋列 ── */
+    /* 搜尋列 */
     .search-bar { display: flex; gap: 10px; padding: 0 16px 14px; }
     .search-bar input {
       flex: 1; padding: 12px 14px; border-radius: 12px;
@@ -87,14 +79,19 @@ export const myBoxHtml = `
       font-weight: bold; font-size: 15px; cursor: pointer;
     }
 
-    /* ── 寶可夢列表 ── */
+    /* 列表 */
     .pokemon-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
     .pokemon-item {
       display: flex; align-items: center; gap: 10px;
-      background: var(--card-bg); padding: 12px 14px;
+      background: var(--secondary-bg); padding: 12px 14px;
       border-radius: 14px; font-size: 15px; font-weight: 500;
     }
     .pokemon-name { flex: 1; }
+    .fav-badge {
+      font-size: 11px; color: var(--star);
+      background: rgba(255,214,10,0.15);
+      padding: 2px 6px; border-radius: 6px; margin-left: 4px;
+    }
     .star-btn {
       background: none; border: none; font-size: 22px;
       cursor: pointer; padding: 0 2px; line-height: 1;
@@ -106,18 +103,9 @@ export const myBoxHtml = `
       padding: 5px 11px; border-radius: 8px;
       font-weight: bold; font-size: 13px; cursor: pointer;
     }
-    .fav-badge {
-      font-size: 11px; color: var(--star);
-      background: rgba(255,214,10,0.15);
-      padding: 2px 6px; border-radius: 6px;
-    }
+    .empty-hint { text-align: center; color: var(--hint); padding: 30px 0; font-size: 14px; }
 
-    .empty-hint {
-      text-align: center; color: var(--hint);
-      padding: 30px 0; font-size: 14px;
-    }
-
-    /* ── Footer ── */
+    /* Footer */
     .footer {
       position: fixed; bottom: 0; left: 0; right: 0;
       padding: 12px 16px 16px; background: var(--bg);
@@ -130,17 +118,14 @@ export const myBoxHtml = `
     }
     .save-btn:disabled { opacity: 0.5; }
 
-    /* ── 改名 modal ── */
+    /* 改名 Modal */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.6); z-index: 100;
       align-items: center; justify-content: center;
     }
     .modal-overlay.show { display: flex; }
-    .modal {
-      background: var(--secondary-bg); border-radius: 16px;
-      padding: 20px; width: 280px;
-    }
+    .modal { background: var(--secondary-bg); border-radius: 16px; padding: 20px; width: 280px; }
     .modal h3 { margin-bottom: 12px; font-size: 16px; }
     .modal input {
       width: 100%; padding: 10px 12px; border-radius: 10px;
@@ -163,18 +148,12 @@ export const myBoxHtml = `
   <p id="user-info">連線中...</p>
 </div>
 
-<!-- 帳號切換（長按改名） -->
 <div class="accounts" id="accounts-container"></div>
 
-<!-- CP Tabs（靜態，儲存用） -->
-<div class="tabs">
-  <div class="tab active" id="tab-1500" onclick="switchCp(1500)">1500</div>
-  <div class="tab" id="tab-500" onclick="switchCp(500)">500</div>
-  <div class="tab" id="tab-2500" onclick="switchCp(2500)">2500</div>
-  <div class="tab" id="tab-10000" onclick="switchCp(10000)">大師</div>
+<div id="tabs-wrapper">
+  <div class="tabs-loading">載入當下聯盟...</div>
 </div>
 
-<!-- 搜尋列 -->
 <div class="search-bar">
   <input type="text" id="poke-search" list="poke-options"
     placeholder="🔍 搜尋寶可夢..." autocomplete="off">
@@ -182,17 +161,12 @@ export const myBoxHtml = `
   <button onclick="addPokemon()">加入</button>
 </div>
 
-<!-- 列表 -->
 <div class="pokemon-list" id="current-list"></div>
 
-<!-- Footer -->
 <div class="footer">
-  <button class="save-btn" id="save-btn" onclick="saveTeam()">
-    💾 儲存並分析最佳隊伍
-  </button>
+  <button class="save-btn" id="save-btn" onclick="saveTeam()">💾 儲存並分析最佳隊伍</button>
 </div>
 
-<!-- 改名 Modal -->
 <div class="modal-overlay" id="rename-modal">
   <div class="modal">
     <h3>帳號改名</h3>
@@ -210,32 +184,29 @@ export const myBoxHtml = `
 
   const userId = tg.initDataUnsafe?.user?.id || "";
   if (tg.initDataUnsafe?.user) {
-    document.getElementById('user-info').innerText =
-      '訓練家：' + tg.initDataUnsafe.user.first_name;
+    document.getElementById('user-info').innerText = '訓練家：' + tg.initDataUnsafe.user.first_name;
   }
 
   // ── State ──
-  let currentAcct = 0;   // 0~3
-  let currentCp   = 1500;
+  let currentAcct = 0;
+  let currentLeaguePath = "";
+  let currentLeagueCommand = "";
   let renamingAcct = -1;
 
-  // accountNames[i] = 帳號名稱
   let accountNames = ['帳號 A', '帳號 B', '帳號 C', '帳號 D'];
+  let activeLeagues = []; // [{ name, path, command, cp }]
 
-  // box[acct][cp] = [pokemonName, ...]
-  // favs[acct][cp] = Set of favourited names
-  let box  = [ {500:[],1500:[],2500:[],10000:[]}, {500:[],1500:[],2500:[],10000:[]},
-               {500:[],1500:[],2500:[],10000:[]}, {500:[],1500:[],2500:[],10000:[]} ];
-  let favs = [ {500:new Set(),1500:new Set(),2500:new Set(),10000:new Set()},
-               {500:new Set(),1500:new Set(),2500:new Set(),10000:new Set()},
-               {500:new Set(),1500:new Set(),2500:new Set(),10000:new Set()},
-               {500:new Set(),1500:new Set(),2500:new Set(),10000:new Set()} ];
+  // box[acct][leaguePath] = []
+  // favs[acct][leaguePath] = Set
+  let box  = [{},{},{},{}];
+  let favs = [{},{},{},{}];
 
   // ── Init ──
   async function initData() {
     try {
-      const [namesRes, boxRes, acctNamesRes] = await Promise.all([
+      const [namesRes, leaguesRes, boxRes, acctNamesRes] = await Promise.all([
         fetch('/api/names?t=' + Date.now()),
+        fetch('/api/active-leagues?t=' + Date.now()),
         userId ? fetch('/api/box?userId=' + userId + '&t=' + Date.now()) : Promise.resolve(null),
         userId ? fetch('/api/account-names?userId=' + userId) : Promise.resolve(null)
       ]);
@@ -243,35 +214,42 @@ export const myBoxHtml = `
       // autocomplete
       const names = await namesRes.json();
       const dl = document.getElementById('poke-options');
-      names.forEach(n => {
-        const o = document.createElement('option'); o.value = n; dl.appendChild(o);
-      });
+      names.forEach(n => { const o = document.createElement('option'); o.value = n; dl.appendChild(o); });
 
-      // account names
+      // 帳號名稱
       if (acctNamesRes && acctNamesRes.ok) {
         const an = await acctNamesRes.json();
         if (Array.isArray(an) && an.length === 4) accountNames = an;
       }
 
-      // box data
+      // 當下聯盟
+      activeLeagues = await leaguesRes.json();
+
+      // 盒子資料（keyed by leaguePath）
       if (boxRes && boxRes.ok) {
         const data = await boxRes.json();
-        // data = { acct: { cp: { box:[], favs:[] } } }
+        // data = { acct: { leaguePath: { box:[], favs:[] } } }
         for (let a = 0; a < 4; a++) {
           const acctData = data[a] || {};
-          [500,1500,2500,10000].forEach(cp => {
-            const cpData = acctData[cp] || {};
-            box[a][cp]  = cpData.box  || [];
-            favs[a][cp] = new Set(cpData.favs || []);
+          Object.keys(acctData).forEach(lp => {
+            box[a][lp]  = acctData[lp].box  || [];
+            favs[a][lp] = new Set(acctData[lp].favs || []);
           });
         }
       }
 
       renderAccounts();
-      renderList();
+      renderTabs();
+
+      if (activeLeagues.length > 0) {
+        switchLeague(activeLeagues[0].path, activeLeagues[0].command);
+      } else {
+        document.getElementById('current-list').innerHTML =
+          '<div class="empty-hint">目前無進行中的聯盟</div>';
+      }
     } catch (e) {
-      document.getElementById('current-list').innerHTML =
-        '<div class="empty-hint" style="color:red">載入失敗</div>';
+      document.getElementById('tabs-wrapper').innerHTML =
+        '<div class="tabs-loading" style="color:red">載入失敗</div>';
     }
   }
 
@@ -284,18 +262,11 @@ export const myBoxHtml = `
       btn.className = 'account-btn' + (i === currentAcct ? ' active' : '');
       btn.textContent = name;
       btn.onclick = () => switchAcct(i);
-
-      // 長按改名
       let pressTimer;
-      btn.addEventListener('touchstart', () => {
-        pressTimer = setTimeout(() => openRename(i), 600);
-      });
+      btn.addEventListener('touchstart', () => { pressTimer = setTimeout(() => openRename(i), 600); });
       btn.addEventListener('touchend', () => clearTimeout(pressTimer));
-      btn.addEventListener('mousedown', () => {
-        pressTimer = setTimeout(() => openRename(i), 600);
-      });
+      btn.addEventListener('mousedown', () => { pressTimer = setTimeout(() => openRename(i), 600); });
       btn.addEventListener('mouseup', () => clearTimeout(pressTimer));
-
       c.appendChild(btn);
     });
   }
@@ -313,16 +284,13 @@ export const myBoxHtml = `
     document.getElementById('rename-modal').classList.add('show');
     tg.HapticFeedback.impactOccurred('medium');
   }
-  function closeRename() {
-    document.getElementById('rename-modal').classList.remove('show');
-  }
+  function closeRename() { document.getElementById('rename-modal').classList.remove('show'); }
   async function confirmRename() {
     const val = document.getElementById('rename-input').value.trim();
     if (!val) return;
     accountNames[renamingAcct] = val;
     closeRename();
     renderAccounts();
-    // 儲存帳號名稱
     if (userId) {
       await fetch('/api/account-names', {
         method: 'POST',
@@ -332,11 +300,31 @@ export const myBoxHtml = `
     }
   }
 
-  // ── CP Tabs ──
-  function switchCp(cp) {
-    currentCp = cp;
+  // ── League Tabs ──
+  function renderTabs() {
+    const wrapper = document.getElementById('tabs-wrapper');
+    if (activeLeagues.length === 0) {
+      wrapper.innerHTML = '<div class="tabs-loading">目前無進行中的聯盟</div>';
+      return;
+    }
+    wrapper.innerHTML = '<div class="tabs" id="tabs-container"></div>';
+    const container = document.getElementById('tabs-container');
+    activeLeagues.forEach((league, i) => {
+      const div = document.createElement('div');
+      div.className = 'tab' + (i === 0 ? ' active' : '');
+      div.id = 'tab-' + league.command;
+      div.textContent = league.name;
+      div.onclick = () => switchLeague(league.path, league.command);
+      container.appendChild(div);
+    });
+  }
+
+  function switchLeague(path, command) {
+    currentLeaguePath = path;
+    currentLeagueCommand = command;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + cp).classList.add('active');
+    const tab = document.getElementById('tab-' + command);
+    if (tab) tab.classList.add('active');
     renderList();
   }
 
@@ -344,40 +332,35 @@ export const myBoxHtml = `
   function renderList() {
     const el = document.getElementById('current-list');
     el.innerHTML = '';
-    const team = box[currentAcct][currentCp] || [];
-    const starred = favs[currentAcct][currentCp];
+    if (!currentLeaguePath) return;
+    const team = box[currentAcct][currentLeaguePath] || [];
+    const starred = favs[currentAcct][currentLeaguePath] || new Set();
 
     if (team.length === 0) {
       el.innerHTML = '<div class="empty-hint">盒子空空的，搜一隻來加吧！</div>';
       return;
     }
 
-    // 已練完的排前面
-    const sorted = [...team].sort((a, b) => {
-      const aS = starred.has(a) ? 0 : 1;
-      const bS = starred.has(b) ? 0 : 1;
-      return aS - bS;
-    });
-
+    const sorted = [...team].sort((a, b) => (starred.has(a) ? 0 : 1) - (starred.has(b) ? 0 : 1));
     sorted.forEach(name => {
       const isFav = starred.has(name);
       const div = document.createElement('div');
       div.className = 'pokemon-item';
       div.innerHTML =
-        \`<span class="pokemon-name">\${name}\${isFav ? ' <span class="fav-badge">即戰力</span>' : ''}</span>\` +
+        \`<span class="pokemon-name">\${name}\${isFav ? '<span class="fav-badge">即戰力</span>' : ''}</span>\` +
         \`<button class="star-btn" onclick="toggleStar('\${name}')">\${isFav ? '⭐' : '☆'}</button>\` +
         \`<button class="delete-btn" onclick="removePokemon('\${name}')">移除</button>\`;
       el.appendChild(div);
     });
   }
 
-  // ── Add / Remove / Star ──
   function addPokemon() {
     const input = document.getElementById('poke-search');
     const name = input.value.trim();
-    if (!name) return;
-    if (!box[currentAcct][currentCp].includes(name)) {
-      box[currentAcct][currentCp].push(name);
+    if (!name || !currentLeaguePath) return;
+    if (!box[currentAcct][currentLeaguePath]) box[currentAcct][currentLeaguePath] = [];
+    if (!box[currentAcct][currentLeaguePath].includes(name)) {
+      box[currentAcct][currentLeaguePath].push(name);
       tg.HapticFeedback.impactOccurred('light');
       renderList();
     }
@@ -385,15 +368,15 @@ export const myBoxHtml = `
   }
 
   function removePokemon(name) {
-    box[currentAcct][currentCp] = box[currentAcct][currentCp].filter(p => p !== name);
-    favs[currentAcct][currentCp].delete(name);
+    box[currentAcct][currentLeaguePath] = (box[currentAcct][currentLeaguePath] || []).filter(p => p !== name);
+    if (favs[currentAcct][currentLeaguePath]) favs[currentAcct][currentLeaguePath].delete(name);
     renderList();
   }
 
   function toggleStar(name) {
-    const s = favs[currentAcct][currentCp];
-    if (s.has(name)) s.delete(name);
-    else s.add(name);
+    if (!favs[currentAcct][currentLeaguePath]) favs[currentAcct][currentLeaguePath] = new Set();
+    const s = favs[currentAcct][currentLeaguePath];
+    if (s.has(name)) s.delete(name); else s.add(name);
     tg.HapticFeedback.impactOccurred('light');
     renderList();
   }
@@ -401,28 +384,28 @@ export const myBoxHtml = `
   // ── Save ──
   async function saveTeam() {
     if (!userId) { tg.showAlert('找不到使用者ID'); return; }
+    if (!currentLeaguePath) { tg.showAlert('請先選擇聯盟'); return; }
     const btn = document.getElementById('save-btn');
     btn.disabled = true; btn.innerText = '儲存中...';
-
     try {
-      // 整理當前帳號所有 CP 資料
-      const payload = {
-        userId,
-        acct: currentAcct,
-        cp: currentCp,
-        allData: {}
-      };
-      [500,1500,2500,10000].forEach(cp => {
-        payload.allData[cp] = {
-          box:  box[currentAcct][cp] || [],
-          favs: Array.from(favs[currentAcct][cp] || [])
+      // 整理當前帳號所有聯盟資料
+      const allData = {};
+      activeLeagues.forEach(l => {
+        allData[l.path] = {
+          box:  box[currentAcct][l.path]  || [],
+          favs: Array.from(favs[currentAcct][l.path] || [])
         };
       });
 
       await fetch('/api/box', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          userId,
+          acct: currentAcct,
+          leaguePath: currentLeaguePath,
+          allData
+        })
       });
 
       tg.showAlert('✅ 已同步！請回聊天室查看分析結果！', () => { tg.close(); });
