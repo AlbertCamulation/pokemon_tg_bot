@@ -25,7 +25,7 @@ export const myBoxHtml = `
       --btn-text: var(--tg-theme-button-text-color, #ffffff);
       --secondary-bg: var(--tg-theme-secondary-bg-color, #2c2c2e);
       --danger: #ff453a;
-      --star: #ffd60a;
+      --star-on: #ffd60a;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -48,10 +48,11 @@ export const myBoxHtml = `
       font-size: 13px; font-weight: 600;
       background: var(--secondary-bg); color: var(--hint);
       border: 2px solid transparent; cursor: pointer; transition: 0.2s;
+      user-select: none;
     }
     .account-btn.active { background: var(--btn); color: var(--btn-text); }
 
-    /* 動態聯盟 Tabs */
+    /* 動態聯盟 Tabs（顯示用，同CP共用盒子） */
     .tabs {
       display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 14px;
     }
@@ -63,6 +64,14 @@ export const myBoxHtml = `
     }
     .tab.active { background: var(--btn); color: var(--btn-text); }
     .tabs-loading { color: var(--hint); font-size: 13px; padding: 0 16px 14px; }
+
+    /* CP 同步提示 */
+    .cp-hint {
+      margin: 0 16px 12px; padding: 8px 12px;
+      background: rgba(124,107,255,0.12); border-radius: 10px;
+      font-size: 12px; color: var(--hint); display: none;
+    }
+    .cp-hint.show { display: block; }
 
     /* 搜尋列 */
     .search-bar { display: flex; gap: 10px; padding: 0 16px 14px; }
@@ -79,29 +88,28 @@ export const myBoxHtml = `
       font-weight: bold; font-size: 15px; cursor: pointer;
     }
 
-    /* 列表 */
-    .pokemon-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+    /* 列表 section */
+    .section-title {
+      padding: 0 16px 8px; font-size: 12px; font-weight: 700;
+      color: var(--hint); text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .pokemon-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; margin-bottom: 14px; }
     .pokemon-item {
       display: flex; align-items: center; gap: 10px;
       background: var(--secondary-bg); padding: 12px 14px;
       border-radius: 14px; font-size: 15px; font-weight: 500;
     }
     .pokemon-name { flex: 1; }
-    .fav-badge {
-      font-size: 11px; color: var(--star);
-      background: rgba(255,214,10,0.15);
-      padding: 2px 6px; border-radius: 6px; margin-left: 4px;
-    }
     .star-btn {
-      background: none; border: none; font-size: 22px;
-      cursor: pointer; padding: 0 2px; line-height: 1;
-      transition: transform 0.15s;
+      background: none; border: none; font-size: 20px;
+      cursor: pointer; padding: 0 4px; line-height: 1;
+      transition: transform 0.15s; flex-shrink: 0;
     }
-    .star-btn:active { transform: scale(1.3); }
+    .star-btn:active { transform: scale(1.35); }
     .delete-btn {
       background: var(--danger); color: white; border: none;
       padding: 5px 11px; border-radius: 8px;
-      font-weight: bold; font-size: 13px; cursor: pointer;
+      font-weight: bold; font-size: 13px; cursor: pointer; flex-shrink: 0;
     }
     .empty-hint { text-align: center; color: var(--hint); padding: 30px 0; font-size: 14px; }
 
@@ -154,6 +162,8 @@ export const myBoxHtml = `
   <div class="tabs-loading">載入當下聯盟...</div>
 </div>
 
+<div class="cp-hint" id="cp-hint"></div>
+
 <div class="search-bar">
   <input type="text" id="poke-search" list="poke-options"
     placeholder="🔍 搜尋寶可夢..." autocomplete="off">
@@ -161,7 +171,7 @@ export const myBoxHtml = `
   <button onclick="addPokemon()">加入</button>
 </div>
 
-<div class="pokemon-list" id="current-list"></div>
+<div id="list-wrapper"></div>
 
 <div class="footer">
   <button class="save-btn" id="save-btn" onclick="saveTeam()">💾 儲存並分析最佳隊伍</button>
@@ -189,15 +199,14 @@ export const myBoxHtml = `
 
   // ── State ──
   let currentAcct = 0;
-  let currentLeaguePath = "";
-  let currentLeagueCommand = "";
+  let currentLeague = null;  // { name, path, command, cp }
+  let activeLeagues = [];
   let renamingAcct = -1;
 
   let accountNames = ['帳號 A', '帳號 B', '帳號 C', '帳號 D'];
-  let activeLeagues = []; // [{ name, path, command, cp }]
 
-  // box[acct][leaguePath] = []
-  // favs[acct][leaguePath] = Set
+  // box[acct][cp]  = ['七夕青鳥', '土王', ...]
+  // favs[acct][cp] = Set of names (即戰力)
   let box  = [{},{},{},{}];
   let favs = [{},{},{},{}];
 
@@ -225,15 +234,14 @@ export const myBoxHtml = `
       // 當下聯盟
       activeLeagues = await leaguesRes.json();
 
-      // 盒子資料（keyed by leaguePath）
+      // 盒子資料：{ acct: { cp: { box:[], favs:[] } } }
       if (boxRes && boxRes.ok) {
         const data = await boxRes.json();
-        // data = { acct: { leaguePath: { box:[], favs:[] } } }
         for (let a = 0; a < 4; a++) {
           const acctData = data[a] || {};
-          Object.keys(acctData).forEach(lp => {
-            box[a][lp]  = acctData[lp].box  || [];
-            favs[a][lp] = new Set(acctData[lp].favs || []);
+          Object.keys(acctData).forEach(cp => {
+            box[a][cp]  = acctData[cp].box  || [];
+            favs[a][cp] = new Set(acctData[cp].favs || []);
           });
         }
       }
@@ -242,14 +250,14 @@ export const myBoxHtml = `
       renderTabs();
 
       if (activeLeagues.length > 0) {
-        switchLeague(activeLeagues[0].path, activeLeagues[0].command);
+        switchLeague(activeLeagues[0]);
       } else {
-        document.getElementById('current-list').innerHTML =
+        document.getElementById('list-wrapper').innerHTML =
           '<div class="empty-hint">目前無進行中的聯盟</div>';
       }
     } catch (e) {
       document.getElementById('tabs-wrapper').innerHTML =
-        '<div class="tabs-loading" style="color:red">載入失敗</div>';
+        '<div class="tabs-loading" style="color:red">載入失敗: ' + e.message + '</div>';
     }
   }
 
@@ -263,8 +271,8 @@ export const myBoxHtml = `
       btn.textContent = name;
       btn.onclick = () => switchAcct(i);
       let pressTimer;
-      btn.addEventListener('touchstart', () => { pressTimer = setTimeout(() => openRename(i), 600); });
-      btn.addEventListener('touchend', () => clearTimeout(pressTimer));
+      btn.addEventListener('touchstart', () => { pressTimer = setTimeout(() => openRename(i), 600); }, { passive: true });
+      btn.addEventListener('touchend', () => clearTimeout(pressTimer), { passive: true });
       btn.addEventListener('mousedown', () => { pressTimer = setTimeout(() => openRename(i), 600); });
       btn.addEventListener('mouseup', () => clearTimeout(pressTimer));
       c.appendChild(btn);
@@ -314,53 +322,94 @@ export const myBoxHtml = `
       div.className = 'tab' + (i === 0 ? ' active' : '');
       div.id = 'tab-' + league.command;
       div.textContent = league.name;
-      div.onclick = () => switchLeague(league.path, league.command);
+      div.onclick = () => switchLeague(league);
       container.appendChild(div);
     });
   }
 
-  function switchLeague(path, command) {
-    currentLeaguePath = path;
-    currentLeagueCommand = command;
+  function switchLeague(league) {
+    currentLeague = league;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    const tab = document.getElementById('tab-' + command);
+    const tab = document.getElementById('tab-' + league.command);
     if (tab) tab.classList.add('active');
+
+    // 同 CP 提示
+    const sameCpLeagues = activeLeagues.filter(l => l.cp === league.cp && l.command !== league.command);
+    const hint = document.getElementById('cp-hint');
+    if (sameCpLeagues.length > 0) {
+      hint.textContent = '💡 同為 CP' + league.cp + '，與「' + sameCpLeagues.map(l => l.name).join('、') + '」共用同一個盒子';
+      hint.classList.add('show');
+    } else {
+      hint.classList.remove('show');
+    }
+
     renderList();
   }
 
   // ── List ──
+  function currentCp() { return currentLeague ? String(currentLeague.cp) : null; }
+
   function renderList() {
-    const el = document.getElementById('current-list');
-    el.innerHTML = '';
-    if (!currentLeaguePath) return;
-    const team = box[currentAcct][currentLeaguePath] || [];
-    const starred = favs[currentAcct][currentLeaguePath] || new Set();
+    const wrapper = document.getElementById('list-wrapper');
+    wrapper.innerHTML = '';
+    const cp = currentCp();
+    if (!cp) return;
+
+    const team = box[currentAcct][cp] || [];
+    const starred = favs[currentAcct][cp] || new Set();
 
     if (team.length === 0) {
-      el.innerHTML = '<div class="empty-hint">盒子空空的，搜一隻來加吧！</div>';
+      wrapper.innerHTML = '<div class="empty-hint">盒子空空的，搜一隻來加吧！</div>';
       return;
     }
 
-    const sorted = [...team].sort((a, b) => (starred.has(a) ? 0 : 1) - (starred.has(b) ? 0 : 1));
-    sorted.forEach(name => {
-      const isFav = starred.has(name);
-      const div = document.createElement('div');
-      div.className = 'pokemon-item';
-      div.innerHTML =
-        \`<span class="pokemon-name">\${name}\${isFav ? '<span class="fav-badge">即戰力</span>' : ''}</span>\` +
-        \`<button class="star-btn" onclick="toggleStar('\${name}')">\${isFav ? '⭐' : '☆'}</button>\` +
-        \`<button class="delete-btn" onclick="removePokemon('\${name}')">移除</button>\`;
-      el.appendChild(div);
-    });
+    const favList  = team.filter(n => starred.has(n));
+    const restList = team.filter(n => !starred.has(n));
+
+    // ⭐ 即戰力區
+    if (favList.length > 0) {
+      const titleEl = document.createElement('div');
+      titleEl.className = 'section-title';
+      titleEl.textContent = '⭐ 即戰力';
+      wrapper.appendChild(titleEl);
+      const listEl = document.createElement('div');
+      listEl.className = 'pokemon-list';
+      favList.forEach(name => listEl.appendChild(makeItem(name, true)));
+      wrapper.appendChild(listEl);
+    }
+
+    // 其餘
+    if (restList.length > 0) {
+      const titleEl = document.createElement('div');
+      titleEl.className = 'section-title';
+      titleEl.textContent = favList.length > 0 ? '📋 其他寶可夢' : '📋 寶可夢列表';
+      wrapper.appendChild(titleEl);
+      const listEl = document.createElement('div');
+      listEl.className = 'pokemon-list';
+      restList.forEach(name => listEl.appendChild(makeItem(name, false)));
+      wrapper.appendChild(listEl);
+    }
   }
 
+  function makeItem(name, isFav) {
+    const div = document.createElement('div');
+    div.className = 'pokemon-item';
+    div.innerHTML =
+      \`<span class="pokemon-name">\${name}</span>\` +
+      \`<button class="star-btn" onclick="toggleStar('\${name}')" title="\${isFav ? '取消即戰力' : '標記即戰力'}">\${isFav ? '⭐' : '☆'}</button>\` +
+      \`<button class="delete-btn" onclick="removePokemon('\${name}')">移除</button>\`;
+    return div;
+  }
+
+  // ── Add / Remove / Star ──
   function addPokemon() {
     const input = document.getElementById('poke-search');
     const name = input.value.trim();
-    if (!name || !currentLeaguePath) return;
-    if (!box[currentAcct][currentLeaguePath]) box[currentAcct][currentLeaguePath] = [];
-    if (!box[currentAcct][currentLeaguePath].includes(name)) {
-      box[currentAcct][currentLeaguePath].push(name);
+    const cp = currentCp();
+    if (!name || !cp) return;
+    if (!box[currentAcct][cp]) box[currentAcct][cp] = [];
+    if (!box[currentAcct][cp].includes(name)) {
+      box[currentAcct][cp].push(name);
       tg.HapticFeedback.impactOccurred('light');
       renderList();
     }
@@ -368,14 +417,18 @@ export const myBoxHtml = `
   }
 
   function removePokemon(name) {
-    box[currentAcct][currentLeaguePath] = (box[currentAcct][currentLeaguePath] || []).filter(p => p !== name);
-    if (favs[currentAcct][currentLeaguePath]) favs[currentAcct][currentLeaguePath].delete(name);
+    const cp = currentCp();
+    if (!cp) return;
+    box[currentAcct][cp] = (box[currentAcct][cp] || []).filter(p => p !== name);
+    if (favs[currentAcct][cp]) favs[currentAcct][cp].delete(name);
     renderList();
   }
 
   function toggleStar(name) {
-    if (!favs[currentAcct][currentLeaguePath]) favs[currentAcct][currentLeaguePath] = new Set();
-    const s = favs[currentAcct][currentLeaguePath];
+    const cp = currentCp();
+    if (!cp) return;
+    if (!favs[currentAcct][cp]) favs[currentAcct][cp] = new Set();
+    const s = favs[currentAcct][cp];
     if (s.has(name)) s.delete(name); else s.add(name);
     tg.HapticFeedback.impactOccurred('light');
     renderList();
@@ -384,17 +437,22 @@ export const myBoxHtml = `
   // ── Save ──
   async function saveTeam() {
     if (!userId) { tg.showAlert('找不到使用者ID'); return; }
-    if (!currentLeaguePath) { tg.showAlert('請先選擇聯盟'); return; }
+    if (!currentLeague) { tg.showAlert('請先選擇聯盟'); return; }
     const btn = document.getElementById('save-btn');
     btn.disabled = true; btn.innerText = '儲存中...';
     try {
-      // 整理當前帳號所有聯盟資料
+      // 整理所有 CP 資料（用 CP 為 key）
       const allData = {};
+      const seenCps = new Set();
       activeLeagues.forEach(l => {
-        allData[l.path] = {
-          box:  box[currentAcct][l.path]  || [],
-          favs: Array.from(favs[currentAcct][l.path] || [])
-        };
+        const cp = String(l.cp);
+        if (!seenCps.has(cp)) {
+          seenCps.add(cp);
+          allData[cp] = {
+            box:  box[currentAcct][cp]  || [],
+            favs: Array.from(favs[currentAcct][cp] || [])
+          };
+        }
       });
 
       await fetch('/api/box', {
@@ -403,7 +461,8 @@ export const myBoxHtml = `
         body: JSON.stringify({
           userId,
           acct: currentAcct,
-          leaguePath: currentLeaguePath,
+          leaguePath: currentLeague.path,  // 分析用的聯盟
+          cp: String(currentLeague.cp),    // 儲存用的 CP key
           allData
         })
       });
