@@ -277,19 +277,18 @@ export default {
       }
 
       // 讀取盒子 GET
-      // 回傳格式: { 0: { 500: {box:[], favs:[]}, 1500: {...}, ... }, 1: {...}, ... }
+      // 回傳格式: { acct: { leaguePath: { box:[], favs:[] } } }
       if (path === "/api/box" && request.method === "GET") {
         const uid = url.searchParams.get("userId");
         if (!uid) return new Response("{}", { status: 400 });
-        const cps = [500, 1500, 2500, 10000];
-        const result: Record<number, Record<number, { box: string[]; favs: string[] }>> = {};
-
+        const activeLeagues = await getActiveLeagues();
+        const result: Record<number, Record<string, { box: string[]; favs: string[] }>> = {};
         for (let a = 0; a < 4; a++) {
           result[a] = {};
-          for (const cp of cps) {
-            const key = `box2_${uid}_${a}_${cp}`;
+          for (const l of activeLeagues) {
+            const key = `box3_${uid}_${a}_${sanitizeKey(l.path)}`;
             const val = await env.POKEMON_KV.get(key);
-            result[a][cp] = val ? JSON.parse(val) : { box: [], favs: [] };
+            result[a][l.path] = val ? JSON.parse(val) : { box: [], favs: [] };
           }
         }
         return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
@@ -298,42 +297,27 @@ export default {
       // 儲存盒子 POST
       if (path === "/api/box" && request.method === "POST") {
         const payload = await request.json() as any;
-        const { userId, acct, cp, allData } = payload;
-        if (!userId || acct === undefined || !cp || !allData)
+        const { userId, acct, leaguePath, allData } = payload;
+        if (!userId || acct === undefined || !leaguePath || !allData)
           return new Response(JSON.stringify({ error: "missing fields" }), { status: 400 });
 
-        // 儲存當前帳號所有 CP 的資料
-        const cps = [500, 1500, 2500, 10000];
-        await Promise.all(cps.map(async (c) => {
-          const key = `box2_${userId}_${acct}_${c}`;
-          const cpData = allData[c] || { box: [], favs: [] };
-          await env.POKEMON_KV.put(key, JSON.stringify(cpData));
-        }));
+        // 儲存當前帳號所有聯盟資料（key by leaguePath）
+        await Promise.all(
+          Object.entries(allData).map(async ([lp, lpData]: [string, any]) => {
+            const key = `box3_${userId}_${acct}_${sanitizeKey(lp)}`;
+            await env.POKEMON_KV.put(key, JSON.stringify(lpData));
+          })
+        );
 
-        // 找當下聯盟中對應 cp 的所有聯盟，逐一分析
-        const activeLeagues = await getActiveLeagues();
-        const matchedLeagues = activeLeagues.filter(l => String(l.cp) === String(cp));
-
-        if (matchedLeagues.length === 0) {
-          // 沒有當下聯盟，用預設
-          const fallback = leagues.find(l => String(l.cp) === String(cp) &&
-            (l.command.endsWith("_top") || l.command === "great_league_top" || l.command === "ultra_league_top" || l.command === "master_league_top")
-          );
-          if (fallback) matchedLeagues.push({ name: fallback.name, path: fallback.path, command: fallback.command, cp: String(fallback.cp) });
-        }
-
-        const cpData = allData[cp] || { box: [], favs: [] };
+        // 只分析當前選擇的聯盟
+        const cpData = allData[leaguePath] || { box: [], favs: [] };
         const teamNames: string[] = cpData.box || [];
         const favNames: string[] = cpData.favs || [];
 
         if (teamNames.length === 0) {
-          await sendMessage(Number(userId), "⚠️ 盒子是空的，請先加入寶可夢再儲存。", null, env);
-          return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
-        }
-
-        // 每個當下聯盟各自分析
-        for (const league of matchedLeagues) {
-          const result = await analyzeUserBoxTeam(league.path, teamNames, favNames, env, ctx);
+          await sendMessage(Number(userId), "⚠️ 盒子是空的，請先加入寶可夢。", null, env);
+        } else {
+          const result = await analyzeUserBoxTeam(leaguePath, teamNames, favNames, env, ctx);
           await sendMessage(Number(userId), `✅ <b>盒子已更新</b>\n${result}`, { parse_mode: "HTML" }, env);
         }
 
