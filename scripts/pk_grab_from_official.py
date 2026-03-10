@@ -109,7 +109,6 @@ def run_automation():
     en_data = get_leagues(en_url, "en")
     
     now_ms = int(time.time() * 1000)
-    buffer_ms = 24 * 60 * 60 * 1000 
     
     tw_time = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
     tw_time_str = tw_time.strftime("%Y-%m-%d %H:%M:%S (台灣時間)")
@@ -119,10 +118,10 @@ def run_automation():
 
     # 3. 解析並配對
     for i in range(len(zh_data)):
+        # 改後 - 只保留真正進行中的聯盟
         is_active = zh_data[i]['start'] <= now_ms <= zh_data[i]['end']
-        is_upcoming = zh_data[i]['start'] <= now_ms + buffer_ms <= zh_data[i]['end']
-
-        if is_active or is_upcoming:
+        
+        if is_active:
             en_leagues = en_data[i]['leagues'] if i < len(en_data) else []
             zh_leagues = zh_data[i]['leagues']
             
