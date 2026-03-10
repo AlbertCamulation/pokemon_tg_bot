@@ -240,6 +240,17 @@ export async function analyzeUserBoxTeam(
     } else if (favPool.length > 0) {
       msg += `\n\n⭐ 即戰力寶可夢僅 ${favPool.length} 隻，不足 3 隻無法分析優先組`;
     }
+    
+    // 20260310 垃圾寶可夢判斷：排名 > 500 或完全不在排名內
+    const garbageList = teamNames.filter(name => {
+      const found = myPokemons.find(p => p.chineseName === name);
+      if (!found) return !rankedNameSet.has(name); // 完全不在排名裡
+      return found.rank > GARBAGE_RANK_THRESHOLD;  // 排名太低
+    });
+
+    if (garbageList.length > 0) {
+      msg += `\n\n🗑 <b>建議移除（此聯盟排名過低）：</b>\n<code>${garbageList.join(',')}</code>`;
+    }
 
     return msg;
 
