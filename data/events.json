@@ -1,5 +1,14 @@
 [
   {
+    "date": "2026-03-28",
+    "raw_time": "2026-03-28 14:00:00 ~ 2026-03-28 17:00:00",
+    "pokemonId": [
+      "pikachu"
+    ],
+    "eventName": "超極巨化皮卡丘極巨對戰日",
+    "link": "https://pokemon.wingzero.tw/page/archive/1540/tw"
+  },
+  {
     "date": "2026-03-25 ~ 2026-03-31",
     "raw_time": "2026-03-25 05:00:00 ~ 2026-03-31 21:30:00",
     "pokemonId": [
@@ -49,8 +58,8 @@
     "raw_time": "2026-03-04 05:00:00 ~ 2026-03-10 21:30:00",
     "pokemonId": [
       "zapdos",
-      "moltres",
-      "articuno"
+      "articuno",
+      "moltres"
     ],
     "eventName": "急凍鳥、火焰鳥、閃電鳥傳說團體戰",
     "link": "https://pokemon.wingzero.tw/page/archive/1536/tw"
@@ -63,23 +72,5 @@
     ],
     "eventName": "暗影拉帝亞斯暗影傳說團體戰",
     "link": "https://pokemon.wingzero.tw/page/archive/1536/tw"
-  },
-  {
-    "date": "2026-03-04 ~ 2026-03-10",
-    "raw_time": "2026-03-04 05:00:00 ~ 2026-03-10 21:30:00",
-    "pokemonId": [
-      "pinsir"
-    ],
-    "eventName": "超級凱羅斯超級團體戰",
-    "link": "https://pokemon.wingzero.tw/page/archive/1536/tw"
-  },
-  {
-    "date": "2026-02-24",
-    "raw_time": "2026-02-24 18:00:00 ~ 2026-02-24 19:00:00",
-    "pokemonId": [
-      "totodile"
-    ],
-    "eventName": "小鋸鱷聚焦時刻",
-    "link": "https://pokemon.wingzero.tw/page/archive/1521/tw"
   }
 ]
