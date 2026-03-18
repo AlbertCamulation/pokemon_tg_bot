@@ -1,19 +1,19 @@
 {
-  "last_updated_human": "2026-03-17 12:14:19 (台灣時間)",
+  "last_updated_human": "2026-03-18 12:21:56 (台灣時間)",
   "active_leagues": [
     {
-      "name_zh": "高級聯盟",
-      "name_en": "Ultra League",
+      "name_zh": "大師聯盟",
+      "name_en": "Master League",
       "pvpoke_id": "all",
-      "cp": "2500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"
+      "cp": "10000",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-10000.json"
     },
     {
-      "name_zh": "春日盃：超級聯盟版",
-      "name_en": "Spring Cup: Great League Edition",
-      "pvpoke_id": "spring",
+      "name_zh": "叢林盃：超級聯盟版",
+      "name_en": "Jungle Cup: Great League Edition",
+      "pvpoke_id": "jungle",
       "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/spring/overall/rankings-1500.json"
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/jungle/overall/rankings-1500.json"
     }
   ]
 }
