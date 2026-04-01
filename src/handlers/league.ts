@@ -82,10 +82,11 @@ export async function handleLeagueCommand(
       const rating = getPokemonRating(rank);
       if (rating === "垃圾") return;
 
-      // 🔥 套用全新動態翻譯邏輯
       const name = getFullTranslatedName(p.speciesId, map);
-      const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
-      if (clean) copyList.push(clean);
+      
+      // 🔥 修正複製字串：只取第一個空格或括號前的字（基礎名稱）
+      const copyName = name.split(/[\s(]/)[0].trim();
+      if (copyName) copyList.push(copyName);
 
       const rankDisplay = `#${rank}`;
       msg += `${rankDisplay} ${name} ${p.cp ? `CP:${p.cp}` : ""} ${p.score ? `(${p.score.toFixed(1)})` : ""} - ${rating}\n`;
@@ -136,10 +137,8 @@ export async function handleCurrentLeagues(
       return;
     }
 
-    // 🔥 強制清空全域快取，確保讀到剛打包好的最新大禮包
     clearAllCaches();
     
-    // 準備大禮包和翻譯資料
     const [bundledData, transRes] = await Promise.all([
       getAllRankingsBundle(env, ctx),
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
@@ -150,7 +149,6 @@ export async function handleCurrentLeagues(
     const allTopPokemons = new Set<string>();
     const matchedLeaguesInfo: string[] = [];
 
-    // 遍歷與匹配
     manifest.active_leagues.forEach((activeLeague) => {
       const localLeague = leagues.find(l => {
         if (String(l.cp) !== String(activeLeague.cp)) return false;
@@ -158,19 +156,9 @@ export async function handleCurrentLeagues(
         const localName = l.name;
         const localCmd = l.command;
 
-        if (targetId === "all") {
-          return localCmd === "great_league_top" ||
-            localCmd === "ultra_league_top" ||
-            localCmd === "master_league_top";
-        }
-        if (targetId === "premier") {
-          return localName.includes("紀念") ||
-            localCmd.includes("premier") ||
-            localCmd.includes("permier");
-        }
-        if (targetId === "remix") {
-          return localName.includes("Remix") || localCmd.includes("remix");
-        }
+        if (targetId === "all") return localCmd === "great_league_top" || localCmd === "ultra_league_top" || localCmd === "master_league_top";
+        if (targetId === "premier") return localName.includes("紀念") || localCmd.includes("premier") || localCmd.includes("permier");
+        if (targetId === "remix") return localName.includes("Remix") || localCmd.includes("remix");
         return localCmd.includes(targetId);
       });
 
@@ -184,11 +172,11 @@ export async function handleCurrentLeagues(
         matchedLeaguesInfo.push(`${activeLeague.name_zh}\n   └ 📂 <code>${localLeague.path}</code>`);
         
         data.slice(0, 50).forEach(p => {
-          // 🔥 套用全新動態翻譯邏輯
           const name = getFullTranslatedName(p.speciesId, transMap);
-          const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
-          if (clean && !clean.toUpperCase().includes("SHADOW")) {
-            allTopPokemons.add(clean);
+          // 🔥 修正複製字串：只取第一個空格或括號前的字
+          const copyName = name.split(/[\s(]/)[0].trim();
+          if (copyName && !p.speciesId.toLowerCase().includes("shadow")) {
+            allTopPokemons.add(copyName);
           }
         });
       }
@@ -196,12 +184,10 @@ export async function handleCurrentLeagues(
 
     if (allTopPokemons.size === 0) throw new Error("無有效資料");
 
-    // 產生結果
     const sortedList = Array.from(allTopPokemons).join(",");
     const searchString1 = `${sortedList}&!我的最愛&距離10`;
     const searchString2 = `${sortedList}&!我的最愛&距離10-`;
 
-    // 刪除 Loading
     if (loadingMsg.result?.message_id) {
       await deleteMessage(chatId, loadingMsg.result.message_id, env);
     }
@@ -347,9 +333,9 @@ export async function handleMetaAnalysis(
   const nameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
   const getName = (p: RankingPokemon, forCopy = false): string => {
-    // 🔥 套用全新動態翻譯邏輯
     const name = getFullTranslatedName(p.speciesId, nameMap);
-    if (forCopy) return name.replace(NAME_CLEANER_REGEX, "").trim();
+    // 🔥 修正複製字串：只取第一個空格或括號前的字
+    if (forCopy) return name.split(/[\s(]/)[0].trim();
     return name;
   };
 
@@ -362,7 +348,6 @@ export async function handleMetaAnalysis(
     return `(${chiTypes.join("/")})`;
   };
 
-  // 定義圓圈數字
   const circleNums = ['①', '②', '③'];
 
   for (const league of targetLeagues) {
