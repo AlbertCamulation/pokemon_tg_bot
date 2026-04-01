@@ -122,14 +122,30 @@ export async function analyzeUserBoxTeam(
 
     const getFullName = (speciesId: string): string => {
       const id = speciesId.toLowerCase();
+      
+      // 1. 優先找完美匹配
       const direct = transData.find(p => p.speciesId.toLowerCase() === id);
       if (direct?.speciesName) return direct.speciesName;
-      const baseId = id.split('_')[0];
-      const base = transData.find(p => p.speciesId.toLowerCase() === baseId);
-      let name = base?.speciesName || speciesId;
-      Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
-        if (id.includes(key)) name += zh;
+
+      // 2. 🔥 修正：拔除特殊後綴，精確還原基礎 ID
+      let baseId = id;
+      const suffixesToRemove = ["_shadow", "_mega", "_xl", "_apex"];
+      suffixesToRemove.forEach(s => {
+        baseId = baseId.replace(s, '');
       });
+
+      // 3. 找基礎名稱
+      const base = transData.find(p => p.speciesId.toLowerCase() === baseId);
+      let name = base?.speciesName || speciesId; // 如果還是找不到，就用英文原始 ID 墊底
+
+      // 4. 動態黏貼後綴 (阿羅拉、暗影等)
+      // 確保不會重複標記 (例如名字已經叫「拉達 (阿羅拉)」，就不要再加一次)
+      if (!name.includes("(")) {
+        Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
+          if (id.includes(key)) name += zh;
+        });
+      }
+
       return name;
     };
 
