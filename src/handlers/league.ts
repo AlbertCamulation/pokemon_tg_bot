@@ -6,7 +6,40 @@ import type { Env, PokemonData, RankingPokemon } from '../types';
 import { leagues, MANIFEST_URL, NAME_CLEANER_REGEX, typeNames } from '../constants';
 import { fetchWithCache, getDataUrl, getAllRankingsBundle, clearAllCaches } from '../utils/cache';
 import { sendMessage, deleteMessage } from '../utils/telegram';
-import { getPokemonRating, getTranslatedName, getDefenseProfile, getWeaknesses } from '../utils/helpers';
+import { getPokemonRating, getDefenseProfile, getWeaknesses } from '../utils/helpers';
+
+// 🔥 定義後綴對照表
+const SUFFIX_MAP: Record<string, string> = {
+  "_shadow": " (暗影)", "_alolan": " (阿羅拉)", "_galarian": " (伽勒爾)",
+  "_hisuian": " (洗翠)", "_paldean": " (帕底亞)", "_apex": " (頂點)", "_mega": " (Mega)"
+};
+
+// 🔥 核心翻譯邏輯：精準拔除後綴以還原基礎型態
+function getFullTranslatedName(speciesId: string, nameMap: Map<string, string>): string {
+  const id = speciesId.toLowerCase();
+  
+  let baseId = id;
+  const suffixesToRemove = ["_shadow", "_mega", "_xl", "_apex"];
+  suffixesToRemove.forEach(s => {
+    baseId = baseId.replace(s, '');
+  });
+
+  let name = nameMap.get(id) || nameMap.get(baseId) || id;
+
+  if (name && !name.includes("(")) {
+    Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
+      const zhClean = zh.replace(/[()]/g, '').trim();
+      if (id.includes(key) && !name.includes(zhClean)) name += zh;
+    });
+  }
+
+  if (id.startsWith("cradily")) name = "搖籃百合" + (id.includes("_shadow") ? " (暗影)" : "");
+  if (id.startsWith("golisopod")) name = "具甲武者" + (id.includes("_shadow") ? " (暗影)" : "");
+  if (id === "victreebel_mega") name = "大食花 (Mega)";
+  if (id === "malamar_mega") name = "烏賊王 (Mega)";
+
+  return name;
+}
 
 /**
  * 處理聯盟排名查詢
@@ -38,10 +71,7 @@ export async function handleLeagueCommand(
     }
 
     const trans = await resTrans.json() as PokemonData[];
-    // 把下面這三行完整蓋過去：
     const map = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-    map.set("victreebel_mega", "大食花 Mega");
-    map.set("malamar_mega", "烏賊王 Mega");
 
     const list = rankings.slice(0, limit);
     let msg = `🏆 <b>${leagueInfo.name}</b> (Top ${limit})\n\n`;
@@ -52,8 +82,8 @@ export async function handleLeagueCommand(
       const rating = getPokemonRating(rank);
       if (rating === "垃圾") return;
 
-      const rawName = map.get(p.speciesId.toLowerCase()) || p.speciesName || p.speciesId;
-      const name = getTranslatedName(p.speciesId, rawName);
+      // 🔥 套用全新動態翻譯邏輯
+      const name = getFullTranslatedName(p.speciesId, map);
       const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
       if (clean) copyList.push(clean);
 
@@ -115,10 +145,7 @@ export async function handleCurrentLeagues(
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
     ]);
     const transData = await transRes.json() as PokemonData[];
-    // 把下面這三行完整蓋過去：
     const transMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-    transMap.set("victreebel_mega", "大食花 Mega");
-    transMap.set("malamar_mega", "烏賊王 Mega");
 
     const allTopPokemons = new Set<string>();
     const matchedLeaguesInfo: string[] = [];
@@ -157,8 +184,8 @@ export async function handleCurrentLeagues(
         matchedLeaguesInfo.push(`${activeLeague.name_zh}\n   └ 📂 <code>${localLeague.path}</code>`);
         
         data.slice(0, 50).forEach(p => {
-          const rawName = transMap.get(p.speciesId.toLowerCase()) || p.speciesName || p.speciesId;
-          const name = getTranslatedName(p.speciesId, rawName);
+          // 🔥 套用全新動態翻譯邏輯
+          const name = getFullTranslatedName(p.speciesId, transMap);
           const clean = name.replace(NAME_CLEANER_REGEX, "").trim();
           if (clean && !clean.toUpperCase().includes("SHADOW")) {
             allTopPokemons.add(clean);
@@ -317,11 +344,11 @@ export async function handleMetaAnalysis(
 
   const allPokemonData = await transResponse.json() as PokemonData[];
   const pokemonDetailMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p]));
+  const nameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
   const getName = (p: RankingPokemon, forCopy = false): string => {
-    const detail = pokemonDetailMap.get(p.speciesId.toLowerCase());
-    const originalName = detail ? detail.speciesName : p.speciesName || p.speciesId;
-    const name = getTranslatedName(p.speciesId, originalName);
+    // 🔥 套用全新動態翻譯邏輯
+    const name = getFullTranslatedName(p.speciesId, nameMap);
     if (forCopy) return name.replace(NAME_CLEANER_REGEX, "").trim();
     return name;
   };
