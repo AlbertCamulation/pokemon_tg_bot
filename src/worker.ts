@@ -201,21 +201,45 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
 // =========================================================
 async function handleApiNames(env: Env, ctx: ExecutionContext): Promise<Response> {
   try {
-    const transRes = await fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx);
+    // 1. 同時抓取翻譯檔與排名檔，以確保能拿到所有特殊型態的 ID
+    const [transRes, rankRes] = await Promise.all([
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
+      fetchWithCache(getDataUrl("data/rankings_1500.json"), env, ctx)
+    ]);
+
     const transData = await transRes.json() as PokemonData[];
+    let rankings: any[] = [];
+    if (rankRes.ok) {
+      rankings = await rankRes.json() as any[];
+    }
+
     const baseNameMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+    
+    // 如果 rankings 成功抓取，就用 rankings 當來源；否則退回 transData 墊底
+    const sourceData = rankings.length > 0 ? rankings : transData;
 
     const cleanNames = Array.from(new Set(
-      transData.map(item => {
+      sourceData.map(item => {
         const id = (item.speciesId || "").toLowerCase();
-        const baseId = id.split('_')[0];
+        
+        // 🔥 核心修復：拔除特殊後綴以還原基礎型態，解決 Thundurus Incarnate 斷頭問題
+        let baseId = id;
+        const suffixesToRemove = ["_shadow", "_mega", "_xl", "_apex"];
+        suffixesToRemove.forEach(s => {
+          baseId = baseId.replace(s, '');
+        });
+
+        // 優先找原始 ID，找不到再找拔除後綴的 baseId
         let name = baseNameMap.get(id) || baseNameMap.get(baseId) || id;
+        
         Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
           const zhClean = zh.replace(/[()]/g, '').trim();
           if (id.includes(key) && !name.includes(zhClean)) name += zh;
         });
+        
         if (id.startsWith("cradily")) name = "搖籃百合" + (id.includes("_shadow") ? " (暗影)" : "");
         if (id.startsWith("golisopod")) name = "具甲武者" + (id.includes("_shadow") ? " (暗影)" : "");
+        
         return name;
       }).filter(n => n && /[\u4E00-\u9FA5]/.test(n))
     )).sort();
