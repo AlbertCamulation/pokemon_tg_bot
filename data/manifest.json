@@ -1,19 +1,19 @@
 {
-  "last_updated_human": "2026-04-07 12:30:50 (台灣時間)",
+  "last_updated_human": "2026-04-08 12:34:13 (台灣時間)",
   "active_leagues": [
     {
-      "name_zh": "超級聯盟",
-      "name_en": "Great League",
+      "name_zh": "高級聯盟",
+      "name_en": "Ultra League",
       "pvpoke_id": "all",
-      "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"
+      "cp": "2500",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"
     },
     {
-      "name_zh": "電氣盃：超級聯盟版",
-      "name_en": "Electric Cup: Great League Edition",
-      "pvpoke_id": "electric",
+      "name_zh": "奇幻盃：超級聯盟版",
+      "name_en": "Fantasy Cup: Great League Edition",
+      "pvpoke_id": "fantasy",
       "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/electric/overall/rankings-1500.json"
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/fantasy/overall/rankings-1500.json"
     }
   ]
 }
