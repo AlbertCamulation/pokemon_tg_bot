@@ -56,7 +56,8 @@ export const leagues: League[] = [
   { command: "great_league_top_kanto", name: "關都盃 (1500)", cp: "1500", path: "data/rankings_1500_kanto.json" },
   { command: "great_league_top_spring", name: "春日盃 (1500)", cp: "1500", path: "data/rankings_1500_spring.json" },
   { command: "great_league_top_electric", name: "電氣盃 (1500)", cp: "1500", path: "data/rankings_1500_electric.json" },
-  { command: "great_league_top_catch", name: "速成盃 (1500)", cp: "1500", path: "data/rankings_1500_catch.json" }
+  { command: "great_league_top_catch", name: "速成盃 (1500)", cp: "1500", path: "data/rankings_1500_catch.json" },
+  { command: "great_league_top_fantasy", name: "奇幻盃 (1500)", cp: "1500", path: "data/rankings_1500_fantasy.json" }
 ];
 
 // --- 屬性相剋表 ---
