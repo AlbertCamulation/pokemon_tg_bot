@@ -88,6 +88,43 @@ export const myBoxHtml = `
       font-weight: bold; font-size: 15px; cursor: pointer;
     }
 
+    /* 🔥 批量匯入區塊 UI */
+    .import-container { padding: 0 16px 14px; }
+    .toggle-import-btn {
+      width: 100%; padding: 10px; border-radius: 12px;
+      background: rgba(124,107,255,0.1); color: #a59fff;
+      border: 1px dashed #7c6bff; font-weight: bold; cursor: pointer;
+      font-size: 14px; transition: 0.2s;
+    }
+    .import-area {
+      display: none; margin-top: 10px; padding: 12px;
+      background: var(--secondary-bg); border-radius: 12px;
+    }
+    .import-area label { display: block; font-size: 12px; color: var(--hint); margin-bottom: 8px; }
+    .import-area textarea {
+      width: 100%; padding: 10px; border-radius: 8px;
+      border: 1px solid #444; background: var(--bg);
+      color: var(--text); font-size: 14px; margin-bottom: 10px; resize: vertical;
+    }
+    .import-actions { display: flex; gap: 10px; }
+    .import-actions button {
+      flex: 1; padding: 10px; border-radius: 8px; border: none;
+      font-weight: bold; cursor: pointer; font-size: 14px; color: white;
+    }
+    .btn-preview { background: #4a4a4c; }
+    .btn-confirm { background: var(--btn); }
+    .btn-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+    .import-preview {
+      margin-top: 12px; font-size: 13px; max-height: 200px; overflow-y: auto;
+      background: var(--bg); border-radius: 8px; padding: 8px; display: none;
+    }
+    .preview-item { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #333; line-height: 1.4; }
+    .preview-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .text-success { color: #32d74b; }
+    .text-warning { color: #ffd60a; }
+    .text-danger { color: #ff453a; }
+    .badge { background: #0a84ff; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 6px; }
+
     /* 列表 section */
     .section-title {
       padding: 0 16px 8px; font-size: 12px; font-weight: 700;
@@ -167,9 +204,22 @@ export const myBoxHtml = `
 
 <div class="search-bar">
   <input type="text" id="poke-search" list="poke-options"
-    placeholder="🔍 搜尋寶可夢..." autocomplete="off">
+    placeholder="🔍 搜尋單一寶可夢..." autocomplete="off">
   <datalist id="poke-options"></datalist>
   <button onclick="addPokemon()">加入</button>
+</div>
+
+<div class="import-container">
+  <button class="toggle-import-btn" id="toggleImportBtn" onclick="toggleImportArea()">✨ 智慧批量匯入 (支援貼上與簡稱)</button>
+  <div id="importArea" class="import-area">
+    <label>💡 直接從排行複製貼上，或輸入簡稱 (如「暗影拉達」、「雷雲」)。支援逗號或換行分隔。</label>
+    <textarea id="importTextarea" rows="4" placeholder="例如：\\n胖嘟嘟\\n暗影拉達\\n雷雲\\n大劍鬼&!我的最愛"></textarea>
+    <div class="import-actions">
+      <button class="btn-preview" onclick="previewImport()">🔍 智慧解析</button>
+      <button class="btn-confirm" id="confirmImportBtn" onclick="executeImport()" disabled>✅ 批次加入</button>
+    </div>
+    <div id="importPreview" class="import-preview"></div>
+  </div>
 </div>
 
 <div id="list-wrapper"></div>
@@ -211,6 +261,10 @@ export const myBoxHtml = `
   let box  = [{},{},{},{}];
   let favs = [{},{},{},{}];
 
+  // 🔥 匯入專用狀態
+  let availableNames = [];
+  let pendingImportList = [];
+
   // ── Init ──
   async function initData() {
     try {
@@ -223,6 +277,7 @@ export const myBoxHtml = `
 
       // autocomplete
       const names = await namesRes.json();
+      availableNames = names; // 儲存供模糊比對使用
       const dl = document.getElementById('poke-options');
       names.forEach(n => { const o = document.createElement('option'); o.value = n; dl.appendChild(o); });
 
@@ -347,9 +402,114 @@ export const myBoxHtml = `
     renderList();
   }
 
-  // ── List ──
   function currentCp() { return currentLeague ? String(currentLeague.cp) : null; }
 
+  // ── 🔥 智慧批量匯入邏輯 ──
+  function toggleImportArea() {
+    const area = document.getElementById('importArea');
+    const isHidden = area.style.display === 'none' || area.style.display === '';
+    area.style.display = isHidden ? 'block' : 'none';
+    if (!isHidden) {
+      document.getElementById('importTextarea').value = '';
+      document.getElementById('importPreview').style.display = 'none';
+      document.getElementById('confirmImportBtn').disabled = true;
+      pendingImportList = [];
+    }
+  }
+
+  function isSubsequence(shortStr, longStr) {
+    let i = 0, j = 0;
+    while (i < shortStr.length && j < longStr.length) {
+      if (shortStr[i] === longStr[j]) i++;
+      j++;
+    }
+    return i === shortStr.length;
+  }
+
+  function findBestMatch(input) {
+    if (availableNames.includes(input)) return { status: 'exact', name: input };
+
+    let normalizedInput = input.replace(/暗影/g, '(暗影)')
+                               .replace(/阿羅拉/g, '(阿羅拉)')
+                               .replace(/伽勒爾/g, '(伽勒爾)')
+                               .replace(/洗翠/g, '(洗翠)')
+                               .replace(/mega/gi, '(Mega)');
+    
+    const candidates = availableNames.filter(name => {
+       const cleanName = name.replace(/[()]/g, '');
+       const cleanInput = input.replace(/[()]/g, '');
+       return name.includes(input) || 
+              cleanName.includes(cleanInput) || 
+              name.includes(normalizedInput) ||
+              isSubsequence(cleanInput, cleanName);
+    });
+
+    if (candidates.length === 1) return { status: 'fuzzy', name: candidates[0] };
+    if (candidates.length > 1) {
+      const exactBase = candidates.find(c => c === input || c.replace(/[()]/g, '') === input.replace(/[()]/g, ''));
+      if (exactBase) return { status: 'fuzzy', name: exactBase };
+      return { status: 'multiple', candidates: candidates.slice(0, 3) };
+    }
+    return { status: 'not_found' };
+  }
+
+  function previewImport() {
+    const text = document.getElementById('importTextarea').value;
+    if (!text.trim()) return;
+    const cp = currentCp();
+    if (!cp) { tg.showAlert('請先選擇聯盟'); return; }
+
+    const rawNames = text.split(/,|，|\\n|\\t/).map(n => n.split('&')[0].trim()).filter(n => n);
+    
+    pendingImportList = [];
+    let previewHTML = '';
+    const currentBox = box[currentAcct][cp] || [];
+
+    rawNames.forEach(inputName => {
+      const match = findBestMatch(inputName);
+      if (match.status === 'exact' || match.status === 'fuzzy') {
+         if (currentBox.includes(match.name) || pendingImportList.includes(match.name)) {
+           previewHTML += '<div class="preview-item text-warning"><del>' + inputName + '</del> ➡️ ' + match.name + ' (已存在)</div>';
+         } else {
+           pendingImportList.push(match.name);
+           const badge = match.status === 'fuzzy' ? '<span class="badge">縮寫/型態修正</span>' : '';
+           previewHTML += '<div class="preview-item text-success">✔️ ' + inputName + ' ➡️ <b>' + match.name + '</b> ' + badge + '</div>';
+         }
+      } else if (match.status === 'multiple') {
+         previewHTML += '<div class="preview-item text-danger">❌ ' + inputName + ' ➡️ 找到多個 (' + match.candidates.join(', ') + ')，請補詳細</div>';
+      } else {
+         previewHTML += '<div class="preview-item text-danger">❌ ' + inputName + ' ➡️ 查無此寶可夢</div>';
+      }
+    });
+
+    const previewDiv = document.getElementById('importPreview');
+    previewDiv.innerHTML = previewHTML;
+    previewDiv.style.display = 'block';
+    document.getElementById('confirmImportBtn').disabled = pendingImportList.length === 0;
+  }
+
+  function executeImport() {
+    if (pendingImportList.length === 0) return;
+    const cp = currentCp();
+    if (!cp) return;
+    
+    if (!box[currentAcct][cp]) box[currentAcct][cp] = [];
+    
+    let added = 0;
+    pendingImportList.forEach(name => {
+      if (!box[currentAcct][cp].includes(name)) {
+        box[currentAcct][cp].push(name);
+        added++;
+      }
+    });
+    
+    renderList();
+    tg.HapticFeedback.impactOccurred('medium');
+    toggleImportArea();
+    tg.showAlert('✅ 成功批次加入 ' + added + ' 隻寶可夢！');
+  }
+
+  // ── List ──
   function renderList() {
     const wrapper = document.getElementById('list-wrapper');
     wrapper.innerHTML = '';
@@ -360,7 +520,7 @@ export const myBoxHtml = `
     const starred = favs[currentAcct][cp] || new Set();
 
     if (team.length === 0) {
-      wrapper.innerHTML = '<div class="empty-hint">盒子空空的，搜一隻來加吧！</div>';
+      wrapper.innerHTML = '<div class="empty-hint">盒子空空的，搜一隻或批次匯入來加吧！</div>';
       return;
     }
 
@@ -409,8 +569,13 @@ export const myBoxHtml = `
     const cp = currentCp();
     if (!name || !cp) return;
     if (!box[currentAcct][cp]) box[currentAcct][cp] = [];
-    if (!box[currentAcct][cp].includes(name)) {
-      box[currentAcct][cp].push(name);
+    
+    // 也能讓單一輸入框受惠於模糊匹配
+    const match = findBestMatch(name);
+    const finalName = (match.status === 'exact' || match.status === 'fuzzy') ? match.name : name;
+
+    if (!box[currentAcct][cp].includes(finalName)) {
+      box[currentAcct][cp].push(finalName);
       tg.HapticFeedback.impactOccurred('light');
       renderList();
     }
