@@ -52,7 +52,7 @@ export const myBoxHtml = `
     }
     .account-btn.active { background: var(--btn); color: var(--btn-text); }
 
-    /* 動態聯盟 Tabs（顯示用，同CP共用盒子） */
+    /* 動態聯盟 Tabs */
     .tabs {
       display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 14px;
     }
@@ -88,7 +88,7 @@ export const myBoxHtml = `
       font-weight: bold; font-size: 15px; cursor: pointer;
     }
 
-    /* 🔥 批量匯入區塊 UI */
+    /* 批量匯入區塊 UI */
     .import-container { padding: 0 16px 14px; }
     .toggle-import-btn {
       width: 100%; padding: 10px; border-radius: 12px;
@@ -124,6 +124,16 @@ export const myBoxHtml = `
     .text-warning { color: #ffd60a; }
     .text-danger { color: #ff453a; }
     .badge { background: #0a84ff; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 6px; }
+
+    /* 🔥 一鍵清理垃圾按鈕 */
+    .clean-btn {
+      background: rgba(255, 69, 58, 0.1); color: var(--danger);
+      border: 1px dashed var(--danger); padding: 10px; border-radius: 12px;
+      font-size: 14px; font-weight: bold; width: 100%; cursor: pointer;
+      transition: 0.2s;
+    }
+    .clean-btn:active { background: rgba(255, 69, 58, 0.2); }
+    .clean-btn:disabled { opacity: 0.5; cursor: not-allowed; border: 1px solid var(--danger); }
 
     /* 列表 section */
     .section-title {
@@ -222,6 +232,10 @@ export const myBoxHtml = `
   </div>
 </div>
 
+<div style="padding: 0 16px 14px;">
+  <button class="clean-btn" id="cleanBoxBtn" onclick="cleanBox()">🧹 一鍵清除未上榜 / 低排名垃圾</button>
+</div>
+
 <div id="list-wrapper"></div>
 
 <div class="footer">
@@ -261,7 +275,7 @@ export const myBoxHtml = `
   let box  = [{},{},{},{}];
   let favs = [{},{},{},{}];
 
-  // 🔥 匯入專用狀態
+  // 匯入專用狀態
   let availableNames = [];
   let pendingImportList = [];
 
@@ -404,7 +418,7 @@ export const myBoxHtml = `
 
   function currentCp() { return currentLeague ? String(currentLeague.cp) : null; }
 
-  // ── 🔥 智慧批量匯入邏輯 ──
+  // ── 智慧批量匯入邏輯 ──
   function toggleImportArea() {
     const area = document.getElementById('importArea');
     const isHidden = area.style.display === 'none' || area.style.display === '';
@@ -507,6 +521,53 @@ export const myBoxHtml = `
     tg.HapticFeedback.impactOccurred('medium');
     toggleImportArea();
     tg.showAlert('✅ 成功批次加入 ' + added + ' 隻寶可夢！');
+  }
+
+  // ── 🔥 呼叫後端執行垃圾清理 ──
+  async function cleanBox() {
+    const cp = currentCp();
+    if (!cp || !currentLeague) return;
+    const currentBox = box[currentAcct][cp] || [];
+    
+    if (currentBox.length === 0) {
+      tg.showAlert('盒子空空的，沒有東西可以清理喔！');
+      return;
+    }
+
+    const btn = document.getElementById('cleanBoxBtn');
+    btn.disabled = true;
+    const oldText = btn.innerText;
+    btn.innerText = '🧹 雲端過濾中...';
+
+    try {
+      const res = await fetch('/api/clean-box', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leaguePath: currentLeague.path, team: currentBox })
+      });
+
+      if (res.ok) {
+         const { keep, removed } = await res.json();
+         if (removed.length > 0) {
+           // 更新狀態並刪除移除名單的星星標記
+           box[currentAcct][cp] = keep;
+           removed.forEach(r => {
+             if (favs[currentAcct][cp]) favs[currentAcct][cp].delete(r);
+           });
+           
+           renderList();
+           tg.HapticFeedback.notificationOccurred('success');
+           tg.showAlert('🗑 已為您自動清理 ' + removed.length + ' 隻低排名 / 未上榜寶可夢！\\n\\n清除名單：\\n' + removed.join(', '));
+         } else {
+           tg.showAlert('✨ 您的盒子已經很乾淨，沒有需要清除的垃圾！');
+         }
+      }
+    } catch (e) {
+      tg.showAlert('清理失敗: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerText = oldText;
+    }
   }
 
   // ── List ──
