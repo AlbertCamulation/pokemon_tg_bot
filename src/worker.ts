@@ -1,7 +1,7 @@
 // =========================================================
 //  Pokemon Telegram Bot - Main Entry Point
 // =========================================================
-import { analyzeUserBoxTeam } from './handlers/box';
+import { analyzeUserBoxTeam, filterGarbage } from './handlers/box';
 import type {
   Env, TelegramUpdate, TelegramMessage, TelegramCallbackQuery, PokemonData
 } from './types';
@@ -297,7 +297,14 @@ export default {
         await env.POKEMON_KV.put(`acct_names_${userId}`, JSON.stringify(names));
         return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
       }
-
+      // 🔥 新增：一鍵清理垃圾 API
+      if (path === "/api/clean-box" && request.method === "POST") {
+        const payload = await request.json() as any;
+        const { leaguePath, team } = payload;
+        if (!leaguePath || !team) return new Response("{}", { status: 400 });
+        const result = await filterGarbage(leaguePath, team, env, ctx);
+        return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json; charset=utf-8" } });
+      }
       // 讀取盒子 GET
       // KV key: box4_{uid}_{acct}_{cp}
       // 回傳: { acct: { cp: { box:[], favs:[] } } }
