@@ -299,3 +299,61 @@ export async function analyzeUserBoxTeam(
     return "❌ 運算錯誤: " + (error as Error).message;
   }
 }
+// 🔥 新增：專門用來過濾垃圾清單的 API 邏輯
+export async function filterGarbage(
+  leaguePath: string,
+  teamNames: string[],
+  env: Env,
+  ctx: ExecutionContext
+): Promise<{ keep: string[], removed: string[] }> {
+  try {
+    const [transRes, bundledData] = await Promise.all([
+      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
+      getAllRankingsBundle(env, ctx),
+    ]);
+
+    const transData = await transRes.json() as PokemonData[];
+    const transMap = new Map<string, string>();
+    transData.forEach(p => transMap.set(p.speciesId.toLowerCase(), p.speciesName));
+
+    const getFullName = (speciesId: string): string => {
+      const id = speciesId.toLowerCase();
+      if (transMap.has(id)) return transMap.get(id)!;
+      let baseId = id;
+      const suffixesToRemove = ["_shadow", "_mega", "_xl", "_apex"];
+      suffixesToRemove.forEach(s => { baseId = baseId.replace(s, ''); });
+      let name = transMap.get(baseId) || speciesId;
+      if (!name.includes("(")) {
+        Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
+          if (id.includes(key)) name += zh;
+        });
+      }
+      return name;
+    };
+
+    const rankings = (bundledData[leaguePath] || []) as RankingPokemon[];
+    const rankedNameMap = new Map<string, any>();
+    rankings.forEach((r, idx) => {
+       const zhName = getFullName(r.speciesId);
+       if (!rankedNameMap.has(zhName)) {
+           rankedNameMap.set(zhName, { realRank: idx + 1 });
+       }
+    });
+
+    const keep: string[] = [];
+    const removed: string[] = [];
+    
+    // 比對並分類：沒在排名內或名次 > 500 的就丟進 removed
+    teamNames.forEach(name => {
+       if (!rankedNameMap.has(name) || rankedNameMap.get(name).realRank > GARBAGE_RANK_THRESHOLD) {
+           removed.push(name);
+       } else {
+           keep.push(name);
+       }
+    });
+
+    return { keep, removed };
+  } catch (e) {
+    return { keep: teamNames, removed: [] }; // 發生錯誤時先保留原本陣容
+  }
+}
