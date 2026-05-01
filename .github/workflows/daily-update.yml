@@ -47,6 +47,7 @@ jobs:
           
           if [ -n "$(git status --porcelain data/)" ]; then
             git commit -m "🤖 自動更新: 排名/活動/聯盟資料 ($(TZ='Asia/Taipei' date +'%Y-%m-%d %H:%M'))"
+            git pull --rebase origin main   # 🔥 新增這行：推上去前先同步最新進度
             git push origin main
             echo "✅ 所有資料已更新並推送"
           else
