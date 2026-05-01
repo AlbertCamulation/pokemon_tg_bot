@@ -100,7 +100,7 @@ def get_leagues(url, lang="en"):
         for text in item.stripped_strings:
             clean_text = text.replace('*', '').strip()
             # 放寬字數限制到 45，因為「速成盃：絢爛奪目的記憶超級聯盟版」字數較多
-            if clean_text and len(clean_text) < 45 and any(kw in clean_text.lower() for kw in valid_kws):
+            if clean_text and len(clean_text) < 70 and any(kw in clean_text.lower() for kw in valid_kws):
                 if clean_text not in names:
                     names.append(clean_text)
                     
