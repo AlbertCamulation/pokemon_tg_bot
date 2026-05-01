@@ -27,8 +27,10 @@ def get_latest_gbl_url(base_url, lang="en"):
     if not soup: return None
 
     links = soup.find_all('a', href=True)
-    keywords_zh = ["go對戰聯盟", "賽季更新"]
-    keywords_en = ["go-battle-league", "update"]
+    
+    # 🔥 修正 1：嚴格鎖定 GBL，拔除容易撞名的 "update"
+    keywords_zh = ["go對戰聯盟"]
+    keywords_en = ["go-battle-league"]
     keywords = keywords_zh if lang == "zh" else keywords_en
     
     for link in links:
@@ -43,25 +45,22 @@ def get_latest_gbl_url(base_url, lang="en"):
     print(f"⚠️ 找不到最新的 GO對戰聯盟 公告，將使用預設網址。")
     return None
 
-def map_to_pvpoke_id_and_cp(en_name):
-    # 🔥 1. 無視所有星號與前後空白
+def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
     name = en_name.lower().replace('*', '').strip()
+    zh_name_clean = zh_name.replace('*', '').strip()
     
-    # 🔥 2. 判定 CP 上限
     cp = "1500"
-    if "master" in name: cp = "10000"
-    elif "ultra" in name: cp = "2500"
-    elif "little" in name: cp = "500"
+    if "master" in name or "大師" in zh_name_clean: cp = "10000"
+    elif "ultra" in name or "高級" in zh_name_clean: cp = "2500"
+    elif "little" in name or "小小" in zh_name_clean: cp = "500"
     
-    # 攔截特殊: 大師超級版
-    if "mega" in name and "master" in name:
+    if ("mega" in name or "超級" in zh_name_clean) and cp == "10000":
         return "mega", "10000"
         
-    # 攔截常駐三大聯盟
-    if name in ["great league", "ultra league", "master league"]:
+    if name in ["great league", "ultra league", "master league"] or zh_name_clean in ["超級聯盟", "高級聯盟", "大師聯盟"]:
         return "all", cp
 
-    # 🔥 3. 建立「全盃賽關鍵字雷達字典」(包含未來可能出現的所有盃賽)
+    # 英文雷達
     cup_keywords = {
         "kanto": "kanto", "johto": "johto", "hoenn": "hoenn", "sinnoh": "sinnoh", 
         "paldea": "paldea", "hisui": "hisui", "retro": "retro", "love": "love", 
@@ -73,13 +72,30 @@ def map_to_pvpoke_id_and_cp(en_name):
         "element": "element", "remix": "remix", "premier": "premier"
     }
     
-    # 掃描名稱中是否包含雷達字典裡的關鍵字
-    pvp_id = "all" # 預設值
+    # 🔥 修正 2：新增「中文雷達」，就算英文公告壞了，光看中文也能找出 ID
+    zh_cup_keywords = {
+        "關都": "kanto", "城都": "johto", "豐緣": "hoenn", "神奧": "sinnoh",
+        "帕底亞": "paldea", "洗翠": "hisui", "復古": "retro", "愛情": "love",
+        "奇幻": "fantasy", "春日": "spring", "叢林": "jungle", "電氣": "electric",
+        "速成": "catch", "進化": "evolution", "陽光": "sunshine",
+        "萬聖節": "halloween", "假日": "holiday", "意志": "willpower",
+        "天氣": "weather", "化石": "fossil", "夏日": "summer", "色彩": "color",
+        "山嶺": "mountain", "超能力": "psychic", "飛行": "flying", "格鬥": "fighting",
+        "元素": "element", "remix": "remix", "紀念": "premier"
+    }
+
+    pvp_id = "all"
     for keyword, mapped_id in cup_keywords.items():
         if keyword in name:
             pvp_id = mapped_id
-            break # 抓到主標籤就跳出
+            break
             
+    if pvp_id == "all":
+        for keyword, mapped_id in zh_cup_keywords.items():
+            if keyword in zh_name_clean:
+                pvp_id = mapped_id
+                break
+                
     return pvp_id, cp
 
 def get_leagues(url, lang="en"):
@@ -94,12 +110,11 @@ def get_leagues(url, lang="en"):
         end = int(item.get('data-end-timestamp', 0))
         
         names = []
-        # 加入 "版" 或 "edition"，以防長名字被切斷
         valid_kws = ["league", "cup", "edition", "聯盟", "盃", "版"]
         
         for text in item.stripped_strings:
             clean_text = text.replace('*', '').strip()
-            # 放寬字數限制到 45，因為「速成盃：絢爛奪目的記憶超級聯盟版」字數較多
+            # 放寬字數限制到 70
             if clean_text and len(clean_text) < 70 and any(kw in clean_text.lower() for kw in valid_kws):
                 if clean_text not in names:
                     names.append(clean_text)
@@ -129,6 +144,7 @@ def run_automation():
     
     seen = set()
 
+    # 🔥 修正 3：以「中文資料」為主體進行迴圈，避免英文資料缺失導致全盤皆輸
     for i in range(len(zh_data)):
         is_active = zh_data[i]['start'] <= now_ms <= zh_data[i]['end']
         
@@ -136,16 +152,16 @@ def run_automation():
             en_leagues = en_data[i]['leagues'] if i < len(en_data) else []
             zh_leagues = zh_data[i]['leagues']
             
-            for idx, en in enumerate(en_leagues):
-                pvp_id, cp = map_to_pvpoke_id_and_cp(en)
+            for idx, zh_name in enumerate(zh_leagues):
+                en_name = en_leagues[idx] if idx < len(en_leagues) else zh_name
+                pvp_id, cp = map_to_pvpoke_id_and_cp(en_name, zh_name)
                 
-                zh_name = zh_leagues[idx] if idx < len(zh_leagues) else en
                 unique_key = f"{pvp_id}_{cp}_{zh_name}"
                 if unique_key in seen: continue
                 seen.add(unique_key)
                 
                 manifest["active_leagues"].append({
-                    "name_zh": zh_name, "name_en": en, "pvpoke_id": pvp_id, "cp": cp,
+                    "name_zh": zh_name, "name_en": en_name, "pvpoke_id": pvp_id, "cp": cp,
                     "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings-{cp}.json"
                 })
 
