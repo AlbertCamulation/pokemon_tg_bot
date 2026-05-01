@@ -273,7 +273,32 @@ export default {
       }
       if (path === "/registerWebhook") return registerWebhook(url, env);
       if (path === "/") return new Response(generateHTML(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
-      if (path === "/mybox") return new Response(myBoxHtml, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+
+      // 🔥 處理 mybox：動態插入當下聯盟選項
+      if (path === "/mybox") {
+        const activeLeagues = await getActiveLeagues();
+        let dynamicOptions = '';
+        
+        if (activeLeagues.length > 0) {
+          activeLeagues.forEach(league => {
+            dynamicOptions += `<option value="${league.path}">${league.name} (${league.cp})</option>\n`;
+          });
+        } else {
+           // 備用選項
+           dynamicOptions = `
+              <option value="data/rankings_1500.json">超級聯盟 (1500)</option>
+              <option value="data/rankings_2500.json">高級聯盟 (2500)</option>
+              <option value="data/rankings_10000.json">大師聯盟 (10000)</option>
+           `;
+        }
+
+        const modifiedHtml = myBoxHtml.replace(
+           '<select id="leagueSelect" class="league-select"></select>',
+           `<select id="leagueSelect" class="league-select">${dynamicOptions}</select>`
+        );
+
+        return new Response(modifiedHtml, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+      }
 
       // 當下聯盟清單
       if (path === "/api/active-leagues") {
