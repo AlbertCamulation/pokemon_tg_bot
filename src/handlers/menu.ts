@@ -27,25 +27,26 @@ export async function generateMainMenu(): Promise<TelegramInlineKeyboardButton[]
       if (manifest.active_leagues && manifest.active_leagues.length > 0) {
         manifest.active_leagues.forEach(league => {
           const local = leagues.find(l => {
-            // 確保 CP 相符
             if (String(l.cp) !== String(league.cp)) return false;
             
-            // 常規三大聯盟精準判斷
+            // 🔥 修正 1：放寬三大聯盟的判斷條件，改看 command 而不是死板的中文名稱
             if (league.pvpoke_id === "all") {
-                return (l.cp === "1500" && l.name === "超級聯盟") || 
-                       (l.cp === "2500" && l.name === "高級聯盟") || 
-                       (l.cp === "10000" && l.name === "大師聯盟");
+                return l.command === "1500" || l.command === "2500" || l.command === "10000" || 
+                       l.command === "great_league_top" || l.command === "ultra_league_top" || l.command === "master_league_top";
             }
-            // 紀念盃與 Remix 模糊比對
-            if (league.pvpoke_id === "premier") return l.name.includes("紀念") || l.command.includes("premier");
+            if (league.pvpoke_id === "premier") return l.name.includes("紀念") || l.command.includes("premier") || l.command.includes("permier");
             if (league.pvpoke_id === "remix") return l.name.includes("Remix") || l.command.includes("remix");
             
-            // 其他特殊盃賽 (如 fantasy, electric)
             return l.command.includes(league.pvpoke_id);
           });
 
           if (local) {
-            dynamicButtons.push({ text: `🔥 ${local.name} (${local.cp})`, callback_data: local.command });
+            // 🔥 修正 2：防呆處理，如果你的設定檔名字裡已經有 CP (例如 "奇幻盃 (1500)")，就不再重複加
+            const displayName = local.name.includes(String(local.cp)) 
+                ? local.name 
+                : `${local.name} (${local.cp})`;
+            
+            dynamicButtons.push({ text: `🔥 ${displayName}`, callback_data: local.command });
           }
         });
       }
@@ -54,7 +55,7 @@ export async function generateMainMenu(): Promise<TelegramInlineKeyboardButton[]
     console.error("無法動態抓取當下聯盟選單", e);
   }
 
-  // 將動態按鈕置頂 (如果抓取失敗，則給予預設值防呆)
+  // 將動態按鈕置頂 (如果抓取失敗，則給予預設值)
   keyboard.push([{ text: "--- 🟢 目前開放聯盟 ---", callback_data: "dummy" }]);
   if (dynamicButtons.length > 0) {
     keyboard.push(...chunk(dynamicButtons, 2)); // 兩個一排
@@ -123,7 +124,6 @@ export async function sendMainMenu(
   env: Env
 ): Promise<void> {
   const text = "🤖 <b>PvP 查詢機器人</b>\n請選擇你要查詢的聯盟或功能：";
-  // 🔥 注意這裡加了 await，因為 generateMainMenu 變成非同步了
   const keyboard = await generateMainMenu(); 
   await sendMessage(chatId, text, { inline_keyboard: keyboard, parse_mode: "HTML" }, env);
 }
