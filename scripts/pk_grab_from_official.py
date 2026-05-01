@@ -1,4 +1,4 @@
-import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 import time
 import json
@@ -13,23 +13,20 @@ def get_soup(url, lang="en"):
     headers = HEADERS.copy()
     headers["Accept-Language"] = "en-US,en;q=0.9" if lang == "en" else "zh-TW,zh;q=0.9"
     try:
-        res = requests.get(url, headers=headers, timeout=15)
+        scraper = cloudscraper.create_scraper()
+        res = scraper.get(url, headers=headers, timeout=15)
         res.raise_for_status()
         return BeautifulSoup(res.text, 'html.parser')
     except Exception as e:
         print(f"❌ 無法請求網址 {url}: {e}")
         return None
 
-# 🔥 新增：自動尋找最新賽季的網址
 def get_latest_gbl_url(base_url, lang="en"):
     print(f"🔍 正在自動尋找最新「GO對戰聯盟」公告 ({lang})...")
     soup = get_soup(base_url, lang)
     if not soup: return None
 
-    # 尋找所有新聞連結 (通常在 <a> 標籤內)
     links = soup.find_all('a', href=True)
-    
-    # 設定搜尋關鍵字
     keywords_zh = ["go對戰聯盟", "賽季更新"]
     keywords_en = ["go-battle-league", "update"]
     keywords = keywords_zh if lang == "zh" else keywords_en
@@ -38,9 +35,7 @@ def get_latest_gbl_url(base_url, lang="en"):
         href = link['href'].lower()
         title = link.get_text(strip=True).lower()
         
-        # 檢查網址或標題是否包含關鍵字
         if any(kw in href for kw in keywords) or any(kw in title for kw in keywords):
-            # 確保是完整網址
             full_url = href if href.startswith("http") else f"https://pokemongo.com{href}"
             print(f"🎯 找到最新公告: {full_url}")
             return full_url
@@ -49,34 +44,43 @@ def get_latest_gbl_url(base_url, lang="en"):
     return None
 
 def map_to_pvpoke_id_and_cp(en_name):
-    name = en_name.lower()
+    # 🔥 1. 無視所有星號與前後空白
+    name = en_name.lower().replace('*', '').strip()
+    
+    # 🔥 2. 判定 CP 上限
     cp = "1500"
     if "master" in name: cp = "10000"
     elif "ultra" in name: cp = "2500"
+    elif "little" in name: cp = "500"
     
-    # 1. 攔截大師超級版
+    # 攔截特殊: 大師超級版
     if "mega" in name and "master" in name:
         return "mega", "10000"
         
-    # 2. 🔥 精準攔截三大常駐聯盟 (必須完全相等)
+    # 攔截常駐三大聯盟
     if name in ["great league", "ultra league", "master league"]:
         return "all", cp
-        
-    # 3. 攔截紀念盃 / Remix
-    if "premier" in name: return "premier", cp
-    if "remix" in name: return "remix", cp
-    
-    # 4. 其他特殊盃賽萃取
-    # 先把後面的 : great league edition 清掉，再清掉 cup
-    clean = name.replace(": great league edition", "").replace(": ultra league edition", "").replace(" cup", "").replace(" league", "").strip()
-    pvp_id = clean.split(" ")[-1]
-    
-    manual = {
-        "love": "love", "fantasy": "fantasy", "retro": "retro",
-        "kanto": "kanto", "spring": "spring", "jungle": "jungle", 
-        "electric": "electric", "catch": "catch"
+
+    # 🔥 3. 建立「全盃賽關鍵字雷達字典」(包含未來可能出現的所有盃賽)
+    cup_keywords = {
+        "kanto": "kanto", "johto": "johto", "hoenn": "hoenn", "sinnoh": "sinnoh", 
+        "paldea": "paldea", "hisui": "hisui", "retro": "retro", "love": "love", 
+        "fantasy": "fantasy", "spring": "spring", "jungle": "jungle", "electric": "electric", 
+        "catch": "catch", "evolution": "evolution", "sunshine": "sunshine", 
+        "halloween": "halloween", "holiday": "holiday", "willpower": "willpower", 
+        "weather": "weather", "fossil": "fossil", "summer": "summer", "color": "color", 
+        "mountain": "mountain", "psychic": "psychic", "flying": "flying", "fighting": "fighting",
+        "element": "element", "remix": "remix", "premier": "premier"
     }
-    return manual.get(pvp_id, pvp_id), cp
+    
+    # 掃描名稱中是否包含雷達字典裡的關鍵字
+    pvp_id = "all" # 預設值
+    for keyword, mapped_id in cup_keywords.items():
+        if keyword in name:
+            pvp_id = mapped_id
+            break # 抓到主標籤就跳出
+            
+    return pvp_id, cp
 
 def get_leagues(url, lang="en"):
     if not url: return []
@@ -88,7 +92,18 @@ def get_leagues(url, lang="en"):
     for item in items:
         start = int(item.get('data-start-timestamp', 0))
         end = int(item.get('data-end-timestamp', 0))
-        names = [d.get_text(strip=True).replace('*', '') for d in item.find_all('div', class_=lambda x: x and 'League' in x) if d.get_text(strip=True)]
+        
+        names = []
+        # 加入 "版" 或 "edition"，以防長名字被切斷
+        valid_kws = ["league", "cup", "edition", "聯盟", "盃", "版"]
+        
+        for text in item.stripped_strings:
+            clean_text = text.replace('*', '').strip()
+            # 放寬字數限制到 45，因為「速成盃：絢爛奪目的記憶超級聯盟版」字數較多
+            if clean_text and len(clean_text) < 45 and any(kw in clean_text.lower() for kw in valid_kws):
+                if clean_text not in names:
+                    names.append(clean_text)
+                    
         if names:
             data.append({"start": start, "end": end, "leagues": names})
             
@@ -97,14 +112,12 @@ def get_leagues(url, lang="en"):
     return data
 
 def run_automation():
-    # 1. 自動尋找最新網址 (找不到才用預設的「尋寶之旅」或「絢爛奪目的記憶」當備案)
     zh_url = get_latest_gbl_url(BASE_NEWS_URL_ZH, "zh") or "https://pokemongo.com/zh_Hant/news/go-battle-league-memories-in-motion"
     en_url = get_latest_gbl_url(BASE_NEWS_URL_EN, "en") or "https://pokemongo.com/en/news/go-battle-league-memories-in-motion"
     
     print(f"🌐 使用中文網址: {zh_url}")
     print(f"🌐 使用英文網址: {en_url}")
     
-    # 2. 抓取資料
     zh_data = get_leagues(zh_url, "zh")
     en_data = get_leagues(en_url, "en")
     
@@ -116,9 +129,7 @@ def run_automation():
     
     seen = set()
 
-    # 3. 解析並配對
     for i in range(len(zh_data)):
-        # 改後 - 只保留真正進行中的聯盟
         is_active = zh_data[i]['start'] <= now_ms <= zh_data[i]['end']
         
         if is_active:
