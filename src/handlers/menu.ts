@@ -3,15 +3,76 @@
 // =========================================================
 
 import type { Env, TelegramInlineKeyboardButton } from '../types';
-import { leagues, typeChart, typeNames, allTypes } from '../constants';
+import { leagues, typeChart, typeNames, allTypes, MANIFEST_URL } from '../constants';
 import { sendMessage } from '../utils/telegram';
 import { chunk } from '../utils/helpers';
 
 /**
- * 生成主選單鍵盤
+ * 動態生成主選單鍵盤
  */
-export function generateMainMenu(): TelegramInlineKeyboardButton[][] {
+export async function generateMainMenu(): Promise<TelegramInlineKeyboardButton[][]> {
   const keyboard: TelegramInlineKeyboardButton[][] = [];
+
+  // ========================================
+  // 🔥 1. 動態抓取當下開放聯盟
+  // ========================================
+  const dynamicButtons: TelegramInlineKeyboardButton[] = [];
+  try {
+    const res = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, { headers: { "Cache-Control": "no-cache" } });
+    if (res.ok) {
+      const manifest = await res.json() as {
+        active_leagues: Array<{ cp: string; pvpoke_id: string; name_zh: string }>;
+      };
+      
+      if (manifest.active_leagues && manifest.active_leagues.length > 0) {
+        manifest.active_leagues.forEach(league => {
+          const local = leagues.find(l => {
+            // 確保 CP 相符
+            if (String(l.cp) !== String(league.cp)) return false;
+            
+            // 常規三大聯盟精準判斷
+            if (league.pvpoke_id === "all") {
+                return (l.cp === "1500" && l.name === "超級聯盟") || 
+                       (l.cp === "2500" && l.name === "高級聯盟") || 
+                       (l.cp === "10000" && l.name === "大師聯盟");
+            }
+            // 紀念盃與 Remix 模糊比對
+            if (league.pvpoke_id === "premier") return l.name.includes("紀念") || l.command.includes("premier");
+            if (league.pvpoke_id === "remix") return l.name.includes("Remix") || l.command.includes("remix");
+            
+            // 其他特殊盃賽 (如 fantasy, electric)
+            return l.command.includes(league.pvpoke_id);
+          });
+
+          if (local) {
+            dynamicButtons.push({ text: `🔥 ${local.name} (${local.cp})`, callback_data: local.command });
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.error("無法動態抓取當下聯盟選單", e);
+  }
+
+  // 將動態按鈕置頂 (如果抓取失敗，則給予預設值防呆)
+  keyboard.push([{ text: "--- 🟢 目前開放聯盟 ---", callback_data: "dummy" }]);
+  if (dynamicButtons.length > 0) {
+    keyboard.push(...chunk(dynamicButtons, 2)); // 兩個一排
+  } else {
+    keyboard.push([
+      { text: "🔥 超級聯盟 (1500)", callback_data: "1500" },
+      { text: "🔥 高級聯盟 (2500)", callback_data: "2500" }
+    ]);
+    keyboard.push([{ text: "🔥 大師聯盟 (10000)", callback_data: "10000" }]);
+  }
+
+  // ========================================
+  // 📊 2. Meta 分析與全聯盟靜態列表
+  // ========================================
+  keyboard.push([{
+    text: "📊 三聯盟 Meta 生態分析",
+    callback_data: "meta_analysis"
+  }]);
 
   const add = (items: typeof leagues) => {
     const btns = items.map(l => ({
@@ -21,13 +82,6 @@ export function generateMainMenu(): TelegramInlineKeyboardButton[][] {
     keyboard.push(...chunk(btns, 2));
   };
 
-  // Meta 分析按鈕
-  keyboard.push([{
-    text: "📊 三聯盟 Meta 生態分析",
-    callback_data: "meta_analysis"
-  }]);
-
-  // 各聯盟分組
   const groups: Record<string, typeof leagues> = {
     "🏆 超級 (1500)": leagues.filter(l => l.cp === "1500"),
     "高級 (2500)": leagues.filter(l => l.cp === "2500"),
@@ -40,19 +94,19 @@ export function generateMainMenu(): TelegramInlineKeyboardButton[][] {
     add(items);
   }
 
-  // 屬性查詢按鈕
+  // ========================================
+  // 🛡️ 3. 屬性查詢與其他功能
+  // ========================================
   keyboard.push([
-    { text: "攻擊屬性查詢", callback_data: "menu_atk_types" },
+    { text: "⚔️ 攻擊屬性查詢", callback_data: "menu_atk_types" },
     { text: "🛡️ 防禦屬性查詢", callback_data: "menu_def_types" }
   ]);
 
-  // 其他功能
   keyboard.push([
     { text: "📝 垃圾清單", callback_data: "trash_list" },
     { text: "ℹ️ 說明", callback_data: "help_menu" }
   ]);
 
-  // 當下聯盟按鈕
   keyboard.push([{
     text: "🔥 當下聯盟 (整合搜尋)",
     callback_data: "current_leagues"
@@ -68,8 +122,9 @@ export async function sendMainMenu(
   chatId: number,
   env: Env
 ): Promise<void> {
-  const text = "🤖 <b>PvP 查詢機器人</b>\n請選擇功能或直接輸入名稱查詢。";
-  const keyboard = generateMainMenu();
+  const text = "🤖 <b>PvP 查詢機器人</b>\n請選擇你要查詢的聯盟或功能：";
+  // 🔥 注意這裡加了 await，因為 generateMainMenu 變成非同步了
+  const keyboard = await generateMainMenu(); 
   await sendMessage(chatId, text, { inline_keyboard: keyboard, parse_mode: "HTML" }, env);
 }
 
