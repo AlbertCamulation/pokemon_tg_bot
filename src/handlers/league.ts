@@ -185,8 +185,8 @@ export async function handleCurrentLeagues(
     if (allTopPokemons.size === 0) throw new Error("無有效資料");
 
     const sortedList = Array.from(allTopPokemons).join(",");
-    const searchString1 = `${sortedList}&!我的最愛&距離10`;
-    const searchString2 = `${sortedList}&!我的最愛&距離10-`;
+    //const searchString1 = `${sortedList}&!我的最愛&距離10`;
+    //const searchString2 = `${sortedList}&!我的最愛&距離10-`;
 
     if (loadingMsg.result?.message_id) {
       await deleteMessage(chatId, loadingMsg.result.message_id, env);
@@ -195,10 +195,13 @@ export async function handleCurrentLeagues(
     let msg = `🔥 <b>當下聯盟整合 (資料來源: 本地資料庫)</b>\n`;
     msg += `更新時間: ${manifest.last_updated_human || "未知"}\n\n`;
     msg += `<b>已載入來源檔：</b>\n${matchedLeaguesInfo.join("\n")}\n\n`;
-    msg += `📋 <b>Top 50 整合搜尋 (距離10)</b>\n`;
-    msg += `<code>${searchString1}</code>\n\n`;
-    msg += `📋 <b>Top 50 整合搜尋 (距離10-)</b>\n`;
-    msg += `<code>${searchString2}</code>`;
+    //msg += `📋 <b>Top 50 整合搜尋 (距離10)</b>\n`;
+    //msg += `<code>${searchString1}</code>\n\n`;
+    //msg += `📋 <b>Top 50 整合搜尋 (距離10-)</b>\n`;
+    //msg += `<code>${searchString2}</code>`;
+    msg += `📋 <b>Top 50 整合搜尋</b>\n`;
+    msg += `<code>${sortedList}</code>`;
+
 
     await sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
 
