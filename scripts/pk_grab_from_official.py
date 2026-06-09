@@ -60,6 +60,7 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
        zh_name_clean in ["超級聯盟", "高級聯盟", "大師聯盟"]:
         return "all", cp
 
+    # 英文雷達
     cup_keywords = {
         "kanto": "kanto", "johto": "johto", "hoenn": "hoenn", "sinnoh": "sinnoh", 
         "paldea": "paldea", "hisui": "hisui", "retro": "retro", "love": "love", 
@@ -69,11 +70,12 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
         "weather": "weather", "fossil": "fossil", "summer": "summer", "color": "color", 
         "mountain": "mountain", "psychic": "psychic", "flying": "flying", "fighting": "fighting",
         "element": "element", "remix": "remix", "premier": "premier",
-        # 🔥 新增：將官方錦標賽映射到 PvPoke 專屬的 'championships' 資料夾
-        "north america": "championships", "international": "championships", 
-        "championship": "championships", "naic": "championships", "euic": "championships"
+        # 🔥 換成精準的 naic2026
+        "north america": "naic2026", "international": "naic2026", 
+        "championship": "naic2026", "naic": "naic2026", "euic": "euic"
     }
     
+    # 中文雷達
     zh_cup_keywords = {
         "關都": "kanto", "城都": "johto", "豐緣": "hoenn", "神奧": "sinnoh",
         "帕底亞": "paldea", "洗翠": "hisui", "復古": "retro", "愛情": "love",
@@ -83,8 +85,8 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
         "天氣": "weather", "化石": "fossil", "夏日": "summer", "色彩": "color",
         "山嶺": "mountain", "超能力": "psychic", "飛行": "flying", "格鬥": "fighting",
         "元素": "element", "remix": "remix", "紀念": "premier",
-        # 🔥 中文映射
-        "北美": "championships", "國際": "championships", "錦標賽": "championships"
+        # 🔥 換成精準的 naic2026
+        "北美": "naic2026", "國際": "naic2026", "錦標賽": "naic2026"
     }
 
     pvp_id = "all"
