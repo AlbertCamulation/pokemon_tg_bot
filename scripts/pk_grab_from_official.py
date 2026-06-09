@@ -59,6 +59,7 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
     if name in ["great league", "ultra league", "master league"] or zh_name_clean in ["超級聯盟", "高級聯盟", "大師聯盟"]:
         return "all", cp
 
+    # 英文雷達
     cup_keywords = {
         "kanto": "kanto", "johto": "johto", "hoenn": "hoenn", "sinnoh": "sinnoh", 
         "paldea": "paldea", "hisui": "hisui", "retro": "retro", "love": "love", 
@@ -67,9 +68,12 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
         "halloween": "halloween", "holiday": "holiday", "willpower": "willpower", 
         "weather": "weather", "fossil": "fossil", "summer": "summer", "color": "color", 
         "mountain": "mountain", "psychic": "psychic", "flying": "flying", "fighting": "fighting",
-        "element": "element", "remix": "remix", "premier": "premier"
+        "element": "element", "remix": "remix", "premier": "premier",
+        # 🔥 新增：北美錦標賽相關賽事
+        "north america": "naic", "international": "naic", "championship": "championship", "naic": "naic"
     }
     
+    # 中文雷達
     zh_cup_keywords = {
         "關都": "kanto", "城都": "johto", "豐緣": "hoenn", "神奧": "sinnoh",
         "帕底亞": "paldea", "洗翠": "hisui", "復古": "retro", "愛情": "love",
@@ -78,7 +82,9 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
         "萬聖節": "halloween", "假日": "holiday", "意志": "willpower",
         "天氣": "weather", "化石": "fossil", "夏日": "summer", "色彩": "color",
         "山嶺": "mountain", "超能力": "psychic", "飛行": "flying", "格鬥": "fighting",
-        "元素": "element", "remix": "remix", "紀念": "premier"
+        "元素": "element", "remix": "remix", "紀念": "premier",
+        # 🔥 新增：北美錦標賽相關賽事
+        "北美": "naic", "國際": "naic", "錦標賽": "championship"
     }
 
     pvp_id = "all"
