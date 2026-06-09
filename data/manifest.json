@@ -1,5 +1,5 @@
 {
-  "last_updated_human": "2026-06-09 15:06:06 (台灣時間)",
+  "last_updated_human": "2026-06-09 15:11:38 (台灣時間)",
   "active_leagues": [
     {
       "name_zh": "超級聯盟",
@@ -11,9 +11,9 @@
     {
       "name_zh": "Pokémon North America International Championships 2026：超級聯盟版",
       "name_en": "Pokémon North America International Championships 2026：超級聯盟版",
-      "pvpoke_id": "championships",
+      "pvpoke_id": "naic2026",
       "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/championships/overall/rankings-1500.json"
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/naic2026/overall/rankings-1500.json"
     }
   ]
 }
