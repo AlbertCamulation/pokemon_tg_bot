@@ -21,7 +21,6 @@ def get_soup(url, lang="en"):
         print(f"❌ 無法請求網址 {url}: {e}")
         return None
 
-# 🔥 修正 1：改為取得「多個」符合條件的最新網址，而不只是第一個
 def get_gbl_urls(base_url, lang="en"):
     print(f"🔍 正在尋找「GO對戰聯盟」公告 ({lang})...")
     soup = get_soup(base_url, lang)
@@ -56,10 +55,11 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
     if ("mega" in name or "超級" in zh_name_clean) and cp == "10000":
         return "mega", "10000"
         
-    if name in ["great league", "ultra league", "master league"] or zh_name_clean in ["超級聯盟", "高級聯盟", "大師聯盟"]:
+    # 回復原本的判定，不再把 NAIC 歸類為 all
+    if name in ["great league", "ultra league", "master league"] or \
+       zh_name_clean in ["超級聯盟", "高級聯盟", "大師聯盟"]:
         return "all", cp
 
-    # 英文雷達
     cup_keywords = {
         "kanto": "kanto", "johto": "johto", "hoenn": "hoenn", "sinnoh": "sinnoh", 
         "paldea": "paldea", "hisui": "hisui", "retro": "retro", "love": "love", 
@@ -69,11 +69,11 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
         "weather": "weather", "fossil": "fossil", "summer": "summer", "color": "color", 
         "mountain": "mountain", "psychic": "psychic", "flying": "flying", "fighting": "fighting",
         "element": "element", "remix": "remix", "premier": "premier",
-        # 🔥 新增：北美錦標賽相關賽事
-        "north america": "naic", "international": "naic", "championship": "championship", "naic": "naic"
+        # 🔥 新增：將官方錦標賽映射到 PvPoke 專屬的 'championships' 資料夾
+        "north america": "championships", "international": "championships", 
+        "championship": "championships", "naic": "championships", "euic": "championships"
     }
     
-    # 中文雷達
     zh_cup_keywords = {
         "關都": "kanto", "城都": "johto", "豐緣": "hoenn", "神奧": "sinnoh",
         "帕底亞": "paldea", "洗翠": "hisui", "復古": "retro", "愛情": "love",
@@ -83,8 +83,8 @@ def map_to_pvpoke_id_and_cp(en_name, zh_name=""):
         "天氣": "weather", "化石": "fossil", "夏日": "summer", "色彩": "color",
         "山嶺": "mountain", "超能力": "psychic", "飛行": "flying", "格鬥": "fighting",
         "元素": "element", "remix": "remix", "紀念": "premier",
-        # 🔥 新增：北美錦標賽相關賽事
-        "北美": "naic", "國際": "naic", "錦標賽": "championship"
+        # 🔥 中文映射
+        "北美": "championships", "國際": "championships", "錦標賽": "championships"
     }
 
     pvp_id = "all"
@@ -113,7 +113,7 @@ def get_leagues(url, lang="en"):
         end = int(item.get('data-end-timestamp', 0))
         
         names = []
-        valid_kws = ["league", "cup", "edition", "聯盟", "盃", "版"]
+        valid_kws = ["league", "cup", "edition", "聯盟", "盃", "版", "championship", "錦標賽"]
         
         for text in item.stripped_strings:
             clean_text = text.replace('*', '').strip()
@@ -130,7 +130,6 @@ def run_automation():
     zh_urls = get_gbl_urls(BASE_NEWS_URL_ZH, "zh")
     en_urls = get_gbl_urls(BASE_NEWS_URL_EN, "en")
     
-    # 預防性給予預設網址
     if not zh_urls: zh_urls = ["https://pokemongo.com/zh_Hant/news/go-battle-league-memories-in-motion"]
     if not en_urls: en_urls = ["https://pokemongo.com/en/news/go-battle-league-memories-in-motion"]
     
@@ -138,11 +137,11 @@ def run_automation():
     tw_time = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
     tw_time_str = tw_time.strftime("%Y-%m-%d %H:%M:%S (台灣時間)")
     manifest = {"last_updated_human": tw_time_str, "active_leagues": []}
-    seen = set()
+    
+    # 移除上一版的 seen_meta_keys 去重邏輯，讓超級聯盟和錦標賽能同時存在
+    seen_unique_names = set()
 
-    # 🔥 修正 2：遍歷最近的 3 篇公告，避免新舊賽季交替造成的空窗判斷錯誤
     for zh_url in zh_urls[:3]:
-        # 尋找對應的英文網址 (利用網址尾段的 slug 進行比對)
         slug = zh_url.rstrip('/').split('/')[-1]
         en_url = next((u for u in en_urls if slug in u), en_urls[0])
         
@@ -164,23 +163,22 @@ def run_automation():
                     en_name = en_leagues[idx] if idx < len(en_leagues) else zh_name
                     pvp_id, cp = map_to_pvpoke_id_and_cp(en_name, zh_name)
                     
+                    # 改回以聯盟中文名稱作為唯一鍵值，允許不同聯盟共存
                     unique_key = f"{pvp_id}_{cp}_{zh_name}"
-                    if unique_key in seen: continue
-                    seen.add(unique_key)
+                    if unique_key in seen_unique_names: 
+                        continue
+                        
+                    seen_unique_names.add(unique_key)
                     
                     manifest["active_leagues"].append({
                         "name_zh": zh_name, "name_en": en_name, "pvpoke_id": pvp_id, "cp": cp,
                         "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings-{cp}.json"
                     })
 
-        # 只要在這篇公告找到當下的賽季，就跳出迴圈，不再往舊的公告找
         if active_found:
             print(f"🎯 成功鎖定目前的賽程！")
             break
-        else:
-            print(f"⚠️ 此公告的時間並非當下賽程。")
 
-    # 🔥 修正 3：超級防呆。如果連找 3 篇都沒有當下賽程 (通常是停機過渡期)，直接抓第一篇的「即將開放」賽程
     if not manifest["active_leagues"] and len(zh_urls) > 0:
         print(f"⚠️ 處於賽季交替期！強制抓取最新公告的「第一組未來賽程」作為備案。")
         zh_url = zh_urls[0]
@@ -189,7 +187,6 @@ def run_automation():
         en_data = get_leagues(en_url, "en")
         
         if zh_data:
-            # 找到大於現在時間的第一筆資料
             future_data = [d for d in zh_data if d['start'] > now_ms]
             target_data = future_data[0] if future_data else zh_data[-1]
             
@@ -200,6 +197,11 @@ def run_automation():
             for idx, zh_name in enumerate(zh_leagues):
                 en_name = en_leagues[idx] if idx < len(en_leagues) else zh_name
                 pvp_id, cp = map_to_pvpoke_id_and_cp(en_name, zh_name)
+                
+                unique_key = f"{pvp_id}_{cp}_{zh_name}"
+                if unique_key in seen_unique_names: continue
+                seen_unique_names.add(unique_key)
+                
                 manifest["active_leagues"].append({
                     "name_zh": f"{zh_name} (即將開放)", "name_en": en_name, "pvpoke_id": pvp_id, "cp": cp,
                     "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings-{cp}.json"
