@@ -1,12 +1,12 @@
 {
-  "last_updated_human": "2026-06-09 15:11:38 (台灣時間)",
+  "last_updated_human": "2026-06-10 14:19:17 (台灣時間)",
   "active_leagues": [
     {
-      "name_zh": "超級聯盟",
-      "name_en": "Great League",
+      "name_zh": "高級聯盟",
+      "name_en": "Ultra League",
       "pvpoke_id": "all",
-      "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"
+      "cp": "2500",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"
     },
     {
       "name_zh": "Pokémon North America International Championships 2026：超級聯盟版",
