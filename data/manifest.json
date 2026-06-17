@@ -1,19 +1,19 @@
 {
-  "last_updated_human": "2026-06-16 11:09:42 (台灣時間)",
+  "last_updated_human": "2026-06-17 11:08:54 (台灣時間)",
   "active_leagues": [
     {
-      "name_zh": "高級聯盟",
-      "name_en": "Ultra League",
-      "pvpoke_id": "all",
-      "cp": "2500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"
+      "name_zh": "大師聯盟：超級版",
+      "name_en": "Master League: Mega Edition",
+      "pvpoke_id": "mega",
+      "cp": "10000",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/mega/overall/rankings-10000.json"
     },
     {
-      "name_zh": "Pokémon North America International Championships 2026：超級聯盟版",
-      "name_en": "Pokémon North America International Championships 2026：超級聯盟版",
-      "pvpoke_id": "naic2026",
+      "name_zh": "陽光盃：超級聯盟版",
+      "name_en": "Sunshine Cup: Great League Edition",
+      "pvpoke_id": "sunshine",
       "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/naic2026/overall/rankings-1500.json"
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/sunshine/overall/rankings-1500.json"
     }
   ]
 }
