@@ -1,19 +1,4 @@
 {
-  "last_updated_human": "2026-06-21 11:09:28 (台灣時間)",
-  "active_leagues": [
-    {
-      "name_zh": "大師聯盟：超級版",
-      "name_en": "Master League: Mega Edition",
-      "pvpoke_id": "mega",
-      "cp": "10000",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/mega/overall/rankings-10000.json"
-    },
-    {
-      "name_zh": "陽光盃：超級聯盟版",
-      "name_en": "Sunshine Cup: Great League Edition",
-      "pvpoke_id": "sunshine",
-      "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/sunshine/overall/rankings-1500.json"
-    }
-  ]
+  "last_updated_human": "2026-06-22 11:09:45 (台灣時間)",
+  "active_leagues": []
 }
