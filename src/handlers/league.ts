@@ -132,9 +132,15 @@ export async function handleCurrentLeagues(
       last_updated_human?: string;
     };
 
+    let isManifestFallback = false;
     if (!manifest.active_leagues || manifest.active_leagues.length === 0) {
-      await sendMessage(chatId, "⚠️ 目前沒有偵測到當下聯盟數據。", null, env);
-      return;
+      // Manifest 沒有當季資料（腳本抓取失敗或賽季交替），fallback 到標準三聯盟
+      isManifestFallback = true;
+      manifest.active_leagues = [
+        { cp: "1500", pvpoke_id: "all", name_zh: "超級聯盟" },
+        { cp: "2500", pvpoke_id: "all", name_zh: "高級聯盟" },
+        { cp: "10000", pvpoke_id: "all", name_zh: "大師聯盟" }
+      ];
     }
 
     clearAllCaches();
@@ -193,6 +199,9 @@ export async function handleCurrentLeagues(
     }
 
     let msg = `🔥 <b>當下聯盟整合 (資料來源: 本地資料庫)</b>\n`;
+    if (isManifestFallback) {
+      msg += `⚠️ <i>Manifest 無當季資料，顯示標準三大聯盟</i>\n`;
+    }
     msg += `更新時間: ${manifest.last_updated_human || "未知"}\n\n`;
     msg += `<b>已載入來源檔：</b>\n${matchedLeaguesInfo.join("\n")}\n\n`;
     //msg += `📋 <b>Top 50 整合搜尋 (距離10)</b>\n`;

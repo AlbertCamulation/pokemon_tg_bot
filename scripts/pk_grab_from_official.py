@@ -132,8 +132,13 @@ def run_automation():
     zh_urls = get_gbl_urls(BASE_NEWS_URL_ZH, "zh")
     en_urls = get_gbl_urls(BASE_NEWS_URL_EN, "en")
     
-    if not zh_urls: zh_urls = ["https://pokemongo.com/zh_Hant/news/go-battle-league-memories-in-motion"]
-    if not en_urls: en_urls = ["https://pokemongo.com/en/news/go-battle-league-memories-in-motion"]
+    # 若新聞列表爬取失敗，嘗試從搜尋結果頁抓最新的 GBL 公告
+    if not zh_urls:
+        fallback_search = get_gbl_urls("https://pokemongo.com/zh_Hant/news?q=go+battle+league", "zh")
+        zh_urls = fallback_search if fallback_search else []
+    if not en_urls:
+        fallback_search = get_gbl_urls("https://pokemongo.com/en/news?q=go+battle+league", "en")
+        en_urls = fallback_search if fallback_search else []
     
     now_ms = int(time.time() * 1000)
     tw_time = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
@@ -181,33 +186,38 @@ def run_automation():
             print(f"🎯 成功鎖定目前的賽程！")
             break
 
-    if not manifest["active_leagues"] and len(zh_urls) > 0:
-        print(f"⚠️ 處於賽季交替期！強制抓取最新公告的「第一組未來賽程」作為備案。")
-        zh_url = zh_urls[0]
-        en_url = en_urls[0]
-        zh_data = get_leagues(zh_url, "zh")
-        en_data = get_leagues(en_url, "en")
-        
-        if zh_data:
-            future_data = [d for d in zh_data if d['start'] > now_ms]
-            target_data = future_data[0] if future_data else zh_data[-1]
-            
-            i = zh_data.index(target_data)
-            en_leagues = en_data[i]['leagues'] if i < len(en_data) else []
-            zh_leagues = zh_data[i]['leagues']
-            
-            for idx, zh_name in enumerate(zh_leagues):
-                en_name = en_leagues[idx] if idx < len(en_leagues) else zh_name
-                pvp_id, cp = map_to_pvpoke_id_and_cp(en_name, zh_name)
-                
-                unique_key = f"{pvp_id}_{cp}_{zh_name}"
-                if unique_key in seen_unique_names: continue
-                seen_unique_names.add(unique_key)
-                
-                manifest["active_leagues"].append({
-                    "name_zh": f"{zh_name} (即將開放)", "name_en": en_name, "pvpoke_id": pvp_id, "cp": cp,
-                    "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings-{cp}.json"
-                })
+    if not manifest["active_leagues"]:
+        if zh_urls:
+            print(f"⚠️ 處於賽季交替期！強制抓取最新公告的「第一組未來賽程」作為備案。")
+            zh_url = zh_urls[0]
+            en_url = en_urls[0] if en_urls else zh_url
+            zh_data = get_leagues(zh_url, "zh")
+            en_data = get_leagues(en_url, "en") if en_url != zh_url else []
+
+            if zh_data:
+                future_data = [d for d in zh_data if d['start'] > now_ms]
+                target_data = future_data[0] if future_data else zh_data[-1]
+
+                i = zh_data.index(target_data)
+                en_leagues = en_data[i]['leagues'] if i < len(en_data) else []
+                zh_leagues = zh_data[i]['leagues']
+
+                for idx, zh_name in enumerate(zh_leagues):
+                    en_name = en_leagues[idx] if idx < len(en_leagues) else zh_name
+                    pvp_id, cp = map_to_pvpoke_id_and_cp(en_name, zh_name)
+
+                    unique_key = f"{pvp_id}_{cp}_{zh_name}"
+                    if unique_key in seen_unique_names: continue
+                    seen_unique_names.add(unique_key)
+
+                    manifest["active_leagues"].append({
+                        "name_zh": f"{zh_name} (即將開放)", "name_en": en_name, "pvpoke_id": pvp_id, "cp": cp,
+                        "json_url": f"https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/{pvp_id}/overall/rankings-{cp}.json"
+                    })
+            else:
+                print(f"❌ 無法解析賽程頁面結構，manifest 保持空白（Bot 端將 fallback 到標準三聯盟）")
+        else:
+            print(f"❌ 無法找到任何 GBL 公告網址，manifest 保持空白（Bot 端將 fallback 到標準三聯盟）")
 
     os.makedirs('data', exist_ok=True)
     with open('data/manifest.json', 'w', encoding='utf-8') as f:
