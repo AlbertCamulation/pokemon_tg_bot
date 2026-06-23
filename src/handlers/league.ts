@@ -1,416 +1,195 @@
 // =========================================================
-//  聯盟排名處理 (League Ranking Handlers)
+//  聯盟排名 / Meta 分析 — 回傳結構化 JSON
 // =========================================================
 
-import type { Env, PokemonData, RankingPokemon } from '../types';
-import { leagues, MANIFEST_URL, NAME_CLEANER_REGEX, typeNames } from '../constants';
-import { fetchWithCache, getDataUrl, getAllRankingsBundle, clearAllCaches } from '../utils/cache';
-import { sendMessage, deleteMessage } from '../utils/telegram';
-import { getPokemonRating, getDefenseProfile, getWeaknesses } from '../utils/helpers';
-
-// 🔥 定義後綴對照表
-const SUFFIX_MAP: Record<string, string> = {
-  "_shadow": " (暗影)", "_alolan": " (阿羅拉)", "_galarian": " (伽勒爾)",
-  "_hisuian": " (洗翠)", "_paldean": " (帕底亞)", "_apex": " (頂點)", "_mega": " (Mega)"
-};
-
-// 🔥 核心翻譯邏輯：精準拔除後綴以還原基礎型態
-function getFullTranslatedName(speciesId: string, nameMap: Map<string, string>): string {
-  const id = speciesId.toLowerCase();
-  
-  let baseId = id;
-  const suffixesToRemove = ["_shadow", "_mega", "_xl", "_apex"];
-  suffixesToRemove.forEach(s => {
-    baseId = baseId.replace(s, '');
-  });
-
-  let name = nameMap.get(id) || nameMap.get(baseId) || id;
-
-  if (name && !name.includes("(")) {
-    Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
-      const zhClean = zh.replace(/[()]/g, '').trim();
-      if (id.includes(key) && !name.includes(zhClean)) name += zh;
-    });
-  }
-
-  if (id.startsWith("cradily")) name = "搖籃百合" + (id.includes("_shadow") ? " (暗影)" : "");
-  if (id.startsWith("golisopod")) name = "具甲武者" + (id.includes("_shadow") ? " (暗影)" : "");
-  if (id === "victreebel_mega") name = "大食花 (Mega)";
-  if (id === "malamar_mega") name = "烏賊王 (Mega)";
-
-  return name;
-}
+import type {
+  Env, PokemonData, RankingPokemon, RankingEntry, MetaAnalysis, TeamMember
+} from '../types';
+import { leagues } from '../constants';
+import { fetchWithCache, getDataUrl, getAllRankingsBundle } from '../utils/cache';
+import {
+  getPokemonRating, getFullName, toCopyName, getDefenseProfile, getWeaknesses
+} from '../utils/helpers';
 
 /**
- * 處理聯盟排名查詢
+ * 取得單一聯盟排行榜
  */
-export async function handleLeagueCommand(
-  chatId: number,
+export async function getLeagueRankingData(
   command: string,
   limit: number,
   env: Env,
   ctx: ExecutionContext
-): Promise<void> {
-  const leagueInfo = leagues.find((l) => l.command === command);
-  if (!leagueInfo) {
-    await sendMessage(chatId, "未知的命令。", null, env);
-    return;
-  }
+): Promise<{ leagueName: string; entries: RankingEntry[]; copyString: string } | null> {
+  const leagueInfo = leagues.find(l => l.command === command);
+  if (!leagueInfo) return null;
 
-  await sendMessage(chatId, `查詢 <b>${leagueInfo.name}</b>...`, { parse_mode: "HTML" }, env);
-
-  try {
-    const [bundledData, resTrans] = await Promise.all([
-      getAllRankingsBundle(env, ctx),
-      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
-    ]);
-
-    const rankings = bundledData[leagueInfo.path] || [];
-    if (rankings.length === 0) {
-        throw new Error("無法從資料庫讀取該聯盟資料");
-    }
-
-    const trans = await resTrans.json() as PokemonData[];
-    const map = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-
-    const list = rankings.slice(0, limit);
-    let msg = `🏆 <b>${leagueInfo.name}</b> (Top ${limit})\n\n`;
-    const copyList: string[] = [];
-
-    list.forEach((p, i) => {
-      const rank = p.rank || p.tier || i + 1;
-      const rating = getPokemonRating(rank);
-      if (rating === "垃圾") return;
-
-      const name = getFullTranslatedName(p.speciesId, map);
-      
-      // 🔥 修正複製字串：只取第一個空格或括號前的字（基礎名稱）
-      const copyName = name.split(/[\s(]/)[0].trim();
-      if (copyName) copyList.push(copyName);
-
-      const rankDisplay = `#${rank}`;
-      msg += `${rankDisplay} ${name} ${p.cp ? `CP:${p.cp}` : ""} ${p.score ? `(${p.score.toFixed(1)})` : ""} - ${rating}\n`;
-    });
-
-    if (copyList.length) {
-      msg += `\n<code>${[...new Set(copyList)].join(",")}</code>`;
-    }
-
-    await sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
-  } catch (e) {
-    await sendMessage(chatId, `Error: ${(e as Error).message}`, null, env);
-  }
-}
-
-/**
- * 處理當下聯盟整合查詢
- */
-export async function handleCurrentLeagues(
-  chatId: number,
-  env: Env,
-  ctx: ExecutionContext
-): Promise<void> {
-  const loadingMsg = await sendMessage(
-    chatId,
-    "🔄 正在同步賽季資訊並整合搜尋字串...",
-    { parse_mode: "HTML" },
-    env
-  );
-
-  try {
-    // 🔥 強制打破 Manifest 快取
-    const manifestRes = await fetch(`${MANIFEST_URL}?v=${Date.now()}`, {
-      headers: { 
-        "User-Agent": "PokeMaster-Pro/1.0",
-        "Cache-Control": "no-cache"
-      }
-    });
-
-    if (!manifestRes.ok) throw new Error(`Manifest 讀取失敗 (${manifestRes.status})`);
-    const manifest = await manifestRes.json() as {
-      active_leagues: Array<{ cp: string; pvpoke_id: string; name_zh: string }>;
-      last_updated_human?: string;
-    };
-
-    let isManifestFallback = false;
-    if (!manifest.active_leagues || manifest.active_leagues.length === 0) {
-      // Manifest 沒有當季資料（腳本抓取失敗或賽季交替），fallback 到標準三聯盟
-      isManifestFallback = true;
-      manifest.active_leagues = [
-        { cp: "1500", pvpoke_id: "all", name_zh: "超級聯盟" },
-        { cp: "2500", pvpoke_id: "all", name_zh: "高級聯盟" },
-        { cp: "10000", pvpoke_id: "all", name_zh: "大師聯盟" }
-      ];
-    }
-
-    clearAllCaches();
-    
-    const [bundledData, transRes] = await Promise.all([
-      getAllRankingsBundle(env, ctx),
-      fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
-    ]);
-    const transData = await transRes.json() as PokemonData[];
-    const transMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
-
-    const allTopPokemons = new Set<string>();
-    const matchedLeaguesInfo: string[] = [];
-
-    manifest.active_leagues.forEach((activeLeague) => {
-      const localLeague = leagues.find(l => {
-        if (String(l.cp) !== String(activeLeague.cp)) return false;
-        const targetId = activeLeague.pvpoke_id;
-        const localName = l.name;
-        const localCmd = l.command;
-
-        if (targetId === "all") return localCmd === "great_league_top" || localCmd === "ultra_league_top" || localCmd === "master_league_top";
-        if (targetId === "premier") return localName.includes("紀念") || localCmd.includes("premier") || localCmd.includes("permier");
-        if (targetId === "remix") return localName.includes("Remix") || localCmd.includes("remix");
-        return localCmd.includes(targetId);
-      });
-
-      if (!localLeague) {
-        console.log(`⚠️ 找不到本地對應設定: ${activeLeague.name_zh}`);
-        return;
-      }
-
-      const data = bundledData[localLeague.path];
-      if (data && data.length > 0) {
-        matchedLeaguesInfo.push(`${activeLeague.name_zh}\n   └ 📂 <code>${localLeague.path}</code>`);
-        
-        data.slice(0, 50).forEach(p => {
-          const name = getFullTranslatedName(p.speciesId, transMap);
-          // 🔥 修正複製字串：只取第一個空格或括號前的字
-          const copyName = name.split(/[\s(]/)[0].trim();
-          if (copyName && !p.speciesId.toLowerCase().includes("shadow")) {
-            allTopPokemons.add(copyName);
-          }
-        });
-      }
-    });
-
-    if (allTopPokemons.size === 0) throw new Error("無有效資料");
-
-    const sortedList = Array.from(allTopPokemons).join(",");
-    //const searchString1 = `${sortedList}&!我的最愛&距離10`;
-    //const searchString2 = `${sortedList}&!我的最愛&距離10-`;
-
-    if (loadingMsg.result?.message_id) {
-      await deleteMessage(chatId, loadingMsg.result.message_id, env);
-    }
-
-    let msg = `🔥 <b>當下聯盟整合 (資料來源: 本地資料庫)</b>\n`;
-    if (isManifestFallback) {
-      msg += `⚠️ <i>Manifest 無當季資料，顯示標準三大聯盟</i>\n`;
-    }
-    msg += `更新時間: ${manifest.last_updated_human || "未知"}\n\n`;
-    msg += `<b>已載入來源檔：</b>\n${matchedLeaguesInfo.join("\n")}\n\n`;
-    //msg += `📋 <b>Top 50 整合搜尋 (距離10)</b>\n`;
-    //msg += `<code>${searchString1}</code>\n\n`;
-    //msg += `📋 <b>Top 50 整合搜尋 (距離10-)</b>\n`;
-    //msg += `<code>${searchString2}</code>`;
-    msg += `📋 <b>Top 50 整合搜尋</b>\n`;
-    msg += `<code>${sortedList}</code>`;
-
-
-    await sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
-
-  } catch (e) {
-    await sendMessage(chatId, `❌ 處理失敗: ${(e as Error).message}`, null, env);
-  }
-}
-
-/**
- * 尋找最佳隊友 (用於 Meta 分析)
- */
-function findBestPartner(
-  rankings: RankingPokemon[],
-  currentTeam: RankingPokemon[],
-  pokemonTypeMap: Map<string, PokemonData>
-): RankingPokemon | undefined {
-  const teamWeaknessCounts: Record<string, number> = {};
-
-  currentTeam.forEach(p => {
-    const pInfo = pokemonTypeMap.get(p.speciesId.toLowerCase());
-    if (pInfo?.types) {
-      const weaknesses = getWeaknesses(pInfo.types);
-      weaknesses.forEach(w => {
-        teamWeaknessCounts[w] = (teamWeaknessCounts[w] || 0) + 1;
-      });
-    }
-  });
-
-  const urgentWeaknesses = Object.keys(teamWeaknessCounts)
-    .sort((a, b) => teamWeaknessCounts[b] - teamWeaknessCounts[a]);
-
-  let bestPartner: RankingPokemon | undefined;
-  let bestScore = -9999;
-  const searchPool = rankings.slice(0, 40);
-
-  for (const candidate of searchPool) {
-    if (currentTeam.some(m => m.speciesId === candidate.speciesId)) continue;
-
-    const candInfo = pokemonTypeMap.get(candidate.speciesId.toLowerCase());
-    if (!candInfo?.types) continue;
-
-    let score = 0;
-    const candProfile = getDefenseProfile(candInfo.types);
-    const candWeaknesses = getWeaknesses(candInfo.types);
-
-    urgentWeaknesses.forEach(weakType => {
-      if (candProfile[weakType] < 1.0) score += (20 * (teamWeaknessCounts[weakType] || 1));
-    });
-
-    urgentWeaknesses.forEach(weakType => {
-      if (candProfile[weakType] > 1.0) score -= (30 * (teamWeaknessCounts[weakType] || 1));
-    });
-
-    candWeaknesses.forEach(w => {
-      let covered = false;
-      currentTeam.forEach(teammate => {
-        const tInfo = pokemonTypeMap.get(teammate.speciesId.toLowerCase());
-        if (tInfo) {
-          const tProfile = getDefenseProfile(tInfo.types);
-          if (tProfile[w] < 1.0) covered = true;
-        }
-      });
-      if (covered) score += 5;
-      else score -= 5;
-    });
-
-    const rankIndex = rankings.indexOf(candidate);
-    score -= (rankIndex * 0.5);
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestPartner = candidate;
-    }
-  }
-
-  if (!bestPartner || bestScore < -50) {
-    bestPartner = searchPool.find(p => !currentTeam.some(m => m.speciesId === p.speciesId));
-  }
-
-  return bestPartner;
-}
-
-/**
- * 建立平衡隊伍
- */
-function buildBalancedTeam(
-  leader: RankingPokemon,
-  rankings: RankingPokemon[],
-  map: Map<string, PokemonData>
-): RankingPokemon[] {
-  const team = [leader];
-  const partner1 = findBestPartner(rankings, team, map);
-  if (partner1) team.push(partner1);
-  const partner2 = findBestPartner(rankings, team, map);
-  if (partner2) team.push(partner2);
-  return team;
-}
-
-/**
- * 處理 Meta 分析
- */
-export async function handleMetaAnalysis(
-  chatId: number,
-  env: Env,
-  ctx: ExecutionContext
-): Promise<void> {
-  const targetLeagues = [
-    leagues.find(l => l.command === "great_league_top"),
-    leagues.find(l => l.command === "ultra_league_top"),
-    leagues.find(l => l.command === "master_league_top")
-  ];
-
-  await sendMessage(
-    chatId,
-    `🔄 <b>正在分析三聯盟實時生態與屬性聯防...</b>`,
-    { parse_mode: "HTML" },
-    env
-  );
-
-  const [bundledData, transResponse] = await Promise.all([
+  const [bundledData, transRes] = await Promise.all([
     getAllRankingsBundle(env, ctx),
     fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
   ]);
 
-  if (!transResponse.ok) {
-    await sendMessage(chatId, "❌ 無法讀取資料庫", null, env);
-    return;
-  }
+  const rankings = (bundledData[leagueInfo.path] || []) as RankingPokemon[];
+  if (!rankings.length) return { leagueName: leagueInfo.name, entries: [], copyString: "" };
 
-  const allPokemonData = await transResponse.json() as PokemonData[];
-  const pokemonDetailMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p]));
-  const nameMap = new Map(allPokemonData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+  const trans = await transRes.json() as PokemonData[];
+  const nameMap = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+  const typeMap = new Map(trans.map(p => [p.speciesId.toLowerCase(), p.types]));
 
-  const getName = (p: RankingPokemon, forCopy = false): string => {
-    const name = getFullTranslatedName(p.speciesId, nameMap);
-    // 🔥 修正複製字串：只取第一個空格或括號前的字
-    if (forCopy) return name.split(/[\s(]/)[0].trim();
-    return name;
+  const entries: RankingEntry[] = [];
+  const copySet = new Set<string>();
+
+  rankings.slice(0, limit).forEach((p, i) => {
+    const rank = (typeof p.rank === "number" ? p.rank : 0) || i + 1;
+    const rating = getPokemonRating(rank);
+    if (rating === "垃圾") return;
+
+    const name = getFullName(p.speciesId, nameMap);
+    const copyName = toCopyName(name);
+    if (copyName) copySet.add(copyName);
+
+    entries.push({
+      rank,
+      name,
+      copyName,
+      types: typeMap.get(p.speciesId.toLowerCase()) || [],
+      score: p.score ? p.score.toFixed(1) : "N/A",
+      rating,
+      cp: p.cp,
+      moves: ""
+    });
+  });
+
+  return { leagueName: leagueInfo.name, entries, copyString: [...copySet].join(",") };
+}
+
+// ── Meta 分析 ──
+
+function findBestPartner(
+  rankings: RankingPokemon[],
+  currentTeam: RankingPokemon[],
+  detailMap: Map<string, PokemonData>
+): RankingPokemon | undefined {
+  const teamWeaknessCounts: Record<string, number> = {};
+  currentTeam.forEach(p => {
+    const info = detailMap.get(p.speciesId.toLowerCase());
+    if (info?.types) getWeaknesses(info.types).forEach(w => {
+      teamWeaknessCounts[w] = (teamWeaknessCounts[w] || 0) + 1;
+    });
+  });
+
+  const urgent = Object.keys(teamWeaknessCounts);
+  const searchPool = rankings.slice(0, 40);
+  const teamIds = new Set(currentTeam.map(m => m.speciesId));
+
+  // 預先計算隊友防禦面，避免內層重複運算
+  const teamProfiles = currentTeam
+    .map(m => detailMap.get(m.speciesId.toLowerCase()))
+    .filter((i): i is PokemonData => !!i?.types)
+    .map(i => getDefenseProfile(i.types));
+
+  let best: RankingPokemon | undefined;
+  let bestScore = -9999;
+
+  searchPool.forEach((candidate, idx) => {
+    if (teamIds.has(candidate.speciesId)) return;
+    const info = detailMap.get(candidate.speciesId.toLowerCase());
+    if (!info?.types) return;
+
+    let score = 0;
+    const profile = getDefenseProfile(info.types);
+
+    urgent.forEach(w => {
+      if (profile[w] < 1.0) score += 20 * (teamWeaknessCounts[w] || 1);
+      else if (profile[w] > 1.0) score -= 30 * (teamWeaknessCounts[w] || 1);
+    });
+
+    getWeaknesses(info.types).forEach(w => {
+      const covered = teamProfiles.some(tp => tp[w] < 1.0);
+      score += covered ? 5 : -5;
+    });
+
+    score -= idx * 0.5;
+
+    if (score > bestScore) { bestScore = score; best = candidate; }
+  });
+
+  if (!best || bestScore < -50) best = searchPool.find(p => !teamIds.has(p.speciesId));
+  return best;
+}
+
+function buildBalancedTeam(
+  leader: RankingPokemon,
+  rankings: RankingPokemon[],
+  detailMap: Map<string, PokemonData>
+): RankingPokemon[] {
+  const team = [leader];
+  const p1 = findBestPartner(rankings, team, detailMap);
+  if (p1) team.push(p1);
+  const p2 = findBestPartner(rankings, team, detailMap);
+  if (p2) team.push(p2);
+  return team;
+}
+
+/**
+ * 取得三大聯盟 Meta 分析
+ */
+export async function getMetaAnalysisData(
+  env: Env,
+  ctx: ExecutionContext
+): Promise<MetaAnalysis[]> {
+  const targetCommands = ["great_league_top", "ultra_league_top", "master_league_top"];
+
+  const [bundledData, transRes] = await Promise.all([
+    getAllRankingsBundle(env, ctx),
+    fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx)
+  ]);
+  const allData = await transRes.json() as PokemonData[];
+  const detailMap = new Map(allData.map(p => [p.speciesId.toLowerCase(), p]));
+  const nameMap = new Map(allData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
+
+  const toMember = (p: RankingPokemon): TeamMember => {
+    const name = getFullName(p.speciesId, nameMap);
+    const detail = detailMap.get(p.speciesId.toLowerCase());
+    return {
+      rank: typeof p.rank === "number" ? p.rank : 0,
+      name,
+      copyName: toCopyName(name),
+      types: (detail?.types || []).filter(t => t.toLowerCase() !== "none"),
+      score: p.score ? p.score.toFixed(1) : "N/A"
+    };
   };
 
-  const getTypesStr = (p: RankingPokemon): string => {
-    const detail = pokemonDetailMap.get(p.speciesId.toLowerCase());
-    if (!detail?.types) return "";
-    const chiTypes = detail.types
-      .filter(t => t.toLowerCase() !== "none")
-      .map(t => typeNames[t.toLowerCase()] || t);
-    return `(${chiTypes.join("/")})`;
-  };
-
-  const circleNums = ['①', '②', '③'];
-
-  for (const league of targetLeagues) {
+  const out: MetaAnalysis[] = [];
+  for (const command of targetCommands) {
+    const league = leagues.find(l => l.command === command);
     if (!league) continue;
+    const rankings = (bundledData[league.path] || []) as RankingPokemon[];
+    if (!rankings.length) continue;
 
-    try {
-      const rankings = bundledData[league.path] || [];
-      if (rankings.length === 0) continue;
+    const topOne = rankings[0];
+    const teamViolence = rankings.slice(0, 3);
+    const teamBalanced = buildBalancedTeam(topOne, rankings, detailMap);
 
-      const topOne = rankings[0];
-      const topOneScore = topOne.score ? topOne.score.toFixed(1) : "N/A";
-      const teamViolence = rankings.slice(0, 3);
-      const teamBalanced = buildBalancedTeam(topOne, rankings, pokemonDetailMap);
+    let altLeader = rankings[1] || rankings[0];
+    if (teamBalanced.some(p => p.speciesId === altLeader.speciesId)) altLeader = rankings[2] || altLeader;
+    const teamAlternative = buildBalancedTeam(altLeader, rankings, detailMap);
 
-      let altLeader = rankings[1];
-      if (teamBalanced.some(p => p.speciesId === altLeader.speciesId)) {
-        altLeader = rankings[2];
-      }
-      const teamAlternative = buildBalancedTeam(altLeader, rankings, pokemonDetailMap);
+    const copySet = new Set<string>();
+    [...teamViolence, ...teamBalanced, ...teamAlternative].forEach(p => {
+      const c = toCopyName(getFullName(p.speciesId, nameMap));
+      if (c) copySet.add(c);
+    });
 
-      const copySet = new Set<string>();
-      [...teamViolence, ...teamBalanced, ...teamAlternative].forEach(p => {
-        const cleanName = getName(p, true);
-        if (cleanName) copySet.add(cleanName);
-      });
-      const copyString = [...copySet].join(",");
-
-      let msg = `📊 <b>${league.name} 戰略分析</b>\n\n`;
-      msg += `👑 <b>META 核心</b>\n👉 <b>${getName(topOne)}</b> (分: ${topOneScore})\n\n`;
-      
-      msg += `<b>暴力 T0 隊</b> (純強度)\n`;
-      teamViolence.forEach((p, i) => {
-        msg += `${circleNums[i]} ${getName(p)} ${getTypesStr(p)}\n`;
-      });
-      
-      msg += `\n🛡️ <b>智慧聯防隊</b> (以王者為核)\n`;
-      teamBalanced.forEach((p, i) => {
-        msg += `${circleNums[i]} ${getName(p)} ${getTypesStr(p)}\n`;
-      });
-      
-      msg += `\n🔄 <b>二當家聯防隊</b> (替代方案)\n`;
-      teamAlternative.forEach((p, i) => {
-        msg += `${circleNums[i]} ${getName(p)} ${getTypesStr(p)}\n`;
-      });
-      
-      msg += `\n📋 <b>一鍵複製搜尋字串</b>\n`;
-      msg += `<code>${copyString}</code>`;
-
-      await sendMessage(chatId, msg, { parse_mode: "HTML" }, env);
-    } catch (e) {
-      await sendMessage(chatId, `⚠️ ${league.name} 分析錯誤: ${(e as Error).message}`, null, env);
-    }
+    out.push({
+      leagueId: league.command,
+      leagueName: league.name,
+      core: toMember(topOne),
+      teamViolence: teamViolence.map(toMember),
+      teamBalanced: teamBalanced.map(toMember),
+      teamAlternative: teamAlternative.map(toMember),
+      copyString: [...copySet].join(",")
+    });
   }
+
+  return out;
 }

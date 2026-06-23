@@ -4,5 +4,7 @@ dist/
 
 # TypeScript build 產生的檔案
 *.tsbuildinfo
-package.json
-package-lock.json
+
+# 機密與本機設定 (切勿上傳)
+.dev.vars
+.claude/

@@ -2,8 +2,7 @@
 //  處理器統一匯出 (Handlers Index)
 // =========================================================
 
-export * from './search';
-export * from './menu';
-export * from './league';
-export * from './trash';
-export * from './admin';
+export { searchPokemon, getAllPokemonNames } from './search';
+export { getLeagueRankingData, getMetaAnalysisData } from './league';
+export { analyzeUserBoxTeam, filterGarbage } from './box';
+export { getTypeQuery, getAllTypeOptions } from './types';

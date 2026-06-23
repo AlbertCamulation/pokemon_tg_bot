@@ -5,70 +5,11 @@
 // --- Cloudflare Workers 環境變數 ---
 export interface Env {
   POKEMON_KV: KVNamespace;
-  ENV_BOT_TOKEN: string;
-  ENV_BOT_SECRET: string;
-  ADMIN_UID: string;
-  ADMIN_GROUP_UID?: string;
-}
-
-// --- Telegram API 型別 ---
-export interface TelegramUser {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  is_bot?: boolean;
-}
-
-export interface TelegramChat {
-  id: number;
-  type: 'private' | 'group' | 'supergroup' | 'channel';
-  title?: string;
-  username?: string;
-}
-
-export interface TelegramMessage {
-  message_id: number;
-  from?: TelegramUser;
-  chat: TelegramChat;
-  date: number;
-  text?: string;
-  reply_to_message?: TelegramMessage;
-  // 👇 就是要加這三行！讓機器人看得懂 Web App 傳回來的東西
-  web_app_data?: {
-    data: string;
-    button_text: string;
-  };
-}
-
-export interface TelegramCallbackQuery {
-  id: string;
-  from: TelegramUser;
-  message?: TelegramMessage;
-  data?: string;
-}
-
-export interface TelegramUpdate {
-  update_id: number;
-  message?: TelegramMessage;
-  callback_query?: TelegramCallbackQuery;
-}
-
-export interface TelegramSendMessageResponse {
-  ok: boolean;
-  result?: TelegramMessage;
-  description?: string;
-}
-
-export interface TelegramInlineKeyboardButton {
-  text: string;
-  callback_data?: string;
-  url?: string;
-}
-
-export interface SendMessageOptions {
-  inline_keyboard?: TelegramInlineKeyboardButton[][];
-  parse_mode?: 'HTML' | 'Markdown' | 'MarkdownV2';
+  // Google OAuth
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  // 逗號分隔的允許登入 email 白名單；留空 = 任何人皆可登入
+  ALLOWED_EMAILS?: string;
 }
 
 // --- 寶可夢資料型別 ---
@@ -105,6 +46,13 @@ export interface League {
   path: string;
 }
 
+export interface ActiveLeague {
+  name: string;
+  path: string;
+  command: string;
+  cp: string;
+}
+
 // --- 搜尋結果型別 ---
 export interface EvolutionChainItem {
   name: string;
@@ -119,11 +67,13 @@ export interface LeaguePokemonResult {
   score: string;
   rating: string;
   moves: string;
+  elite: boolean;
 }
 
 export interface LeagueResult {
   leagueId: string;
   leagueName: string;
+  cp: string;
   pokemons: LeaguePokemonResult[];
 }
 
@@ -135,20 +85,99 @@ export interface EventInfo {
 }
 
 export interface SearchResult {
+  query: string;
   evolutionChain: EvolutionChainItem[];
   results: LeagueResult[];
   events: EventInfo[];
-  allLeagues: { id: string; name: string }[];
+  conclusion: number[];
   hasEliteWarning: boolean;
-  typeChart: TypeChart;
+}
+
+// --- 排行榜 / Meta 型別 ---
+export interface RankingEntry {
+  rank: number;
+  name: string;
+  copyName: string;
+  types: string[];
+  score: string;
+  rating: string;
+  cp?: number;
+  moves: string;
+}
+
+export interface TeamMember {
+  rank: number;
+  name: string;
+  copyName: string;
+  types: string[];
+  score: string;
+}
+
+export interface MetaAnalysis {
+  leagueId: string;
+  leagueName: string;
+  core: TeamMember;
+  teamViolence: TeamMember[];
+  teamBalanced: TeamMember[];
+  teamAlternative: TeamMember[];
+  copyString: string;
+}
+
+// --- 盒子隊伍分析型別 ---
+export interface AnalyzedPokemon {
+  speciesId: string;
+  name: string;
+  types: string[];
+  rank: number;
+  score: number;
+  scoreIcon: string;
+  moves: string;
+  isFav: boolean;
+  lowRank: boolean;
+}
+
+export interface TrioResult {
+  members: AnalyzedPokemon[];
+  sharedWeaks: string[];
+  copyString: string;
+}
+
+export interface BoxAnalysis {
+  leagueName: string;
+  bestTrio: TrioResult;
+  favTrio: TrioResult | null;
+  favSameAsBest: boolean;
+  favCount: number;
+  garbage: string[];
+  error?: string;
 }
 
 // --- 屬性相剋表型別 ---
 export type TypeMultiplier = Record<string, number>;
 export type TypeChart = Record<string, TypeMultiplier>;
 
-// --- KV 存儲型別 ---
-export type BannedUsersMap = Record<string, string>; // { [uid]: userName }
+export interface TypeMatchEntry {
+  type: string;
+  name: string;
+  multiplier: number;
+}
+
+export interface TypeQueryResult {
+  type: string;
+  name: string;
+  mode: 'atk' | 'def';
+  superEffective: TypeMatchEntry[];  // atk: 效果絕佳 / def: 弱點
+  resist: TypeMatchEntry[];          // 抗性
+  immune: TypeMatchEntry[];          // 雙抗/無效
+}
+
+// --- 登入 / Session 型別 ---
+export interface SessionData {
+  sub: string;
+  email: string;
+  name: string;
+  picture: string;
+}
 
 // --- 招式資料型別 ---
 export type MovesMap = Record<string, string>; // { [moveId]: moveName }

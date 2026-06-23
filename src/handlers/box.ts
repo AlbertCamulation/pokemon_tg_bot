@@ -1,311 +1,228 @@
 // =========================================================
-//  對戰盒子分析處理 (Box Handlers)
+//  對戰盒子分析 (Box) — 回傳結構化 JSON
 // =========================================================
 
-import type { Env, PokemonData, RankingPokemon } from '../types';
+import type {
+  Env, PokemonData, RankingPokemon, BoxAnalysis, AnalyzedPokemon, TrioResult
+} from '../types';
 import { fetchWithCache, getDataUrl, getAllRankingsBundle } from '../utils/cache';
-import { leagues } from '../constants';
-
-const TYPE_MAP: Record<string, string> = {
-  "normal": "一般", "fire": "火", "water": "水", "grass": "草", "electric": "電",
-  "ice": "冰", "fighting": "格鬥", "poison": "毒", "ground": "地面", "flying": "飛行",
-  "psychic": "超能力", "bug": "蟲", "rock": "岩石", "ghost": "幽靈", "dragon": "龍",
-  "dark": "惡", "steel": "鋼", "fairy": "妖精", "none": ""
-};
-
-const SUFFIX_MAP: Record<string, string> = {
-  "_shadow": " (暗影)", "_alolan": " (阿羅拉)", "_galarian": " (伽勒爾)",
-  "_hisuian": " (洗翠)", "_paldean": " (帕底亞)", "_apex": " (頂點)", "_mega": " (Mega)"
-};
+import { leagues, typeNames } from '../constants';
+import { getScoreIcon, getFullName, getDefenseProfile } from '../utils/helpers';
 
 const GARBAGE_RANK_THRESHOLD = 500;
+const TRIO_POOL_CAP = 25; // 限制三人組搜尋池上限，避免 O(n³) 爆炸
 
-function getRankIcon(score: number): string {
-  if (score >= 90) return "🥇白金";
-  if (score >= 80) return "🥇金";
-  if (score >= 70) return "🥈銀";
-  return "🥉銅";
+interface Mon {
+  speciesId: string;
+  name: string;
+  types: string[];
+  moveTypes: string[];
+  fastMove: string;
+  chargedMoves: string[];
+  rank: number;
+  score: number;
+  isFav: boolean;
 }
 
-// 🔥 優化 1：快取屬性弱點運算 (記憶化機制)，避免每次分析重複計算
-const weaknessCache = new Map<string, Record<string, number>>();
-
-function getWeaknesses(types: string[], typeChart: any): Record<string, number> {
-  const cacheKey = types.join(',');
-  if (weaknessCache.has(cacheKey)) return weaknessCache.get(cacheKey)!;
-
-  const mults: Record<string, number> = {};
-  Object.keys(typeChart).forEach(atk => {
-    let m = 1.0;
-    types.forEach(def => {
-      if (def.toLowerCase() !== 'none')
-        m *= (typeChart[def.toLowerCase()]?.[atk.toLowerCase()] ?? 1.0);
-    });
-    mults[atk] = m;
-  });
-
-  weaknessCache.set(cacheKey, mults);
-  return mults;
+function weakKeys(types: string[]): string[] {
+  const p = getDefenseProfile(types);
+  return Object.entries(p).filter(([, m]) => m > 1.0).map(([t]) => t);
 }
 
-function scoreTeam(trio: any[], typeChart: any): number {
+function scoreTeam(trio: Mon[]): number {
   let score = 0;
-
   trio.forEach(p => { score += p.score; });
-
   trio.forEach(p => {
     if (p.rank <= 50) score += 30;
     else if (p.rank <= 100) score += 10;
     else score -= 20;
   });
 
+  const weakSets = trio.map(p => new Set(weakKeys(p.types)));
+  const profiles = trio.map(p => getDefenseProfile(p.types));
+
   for (let i = 0; i < trio.length; i++) {
-    const myWeaks = Object.entries(getWeaknesses(trio[i].types, typeChart))
-      .filter(([_, m]) => m > 1.0).map(([t]) => t);
-    for (const w of myWeaks) {
-      const covered = trio.some((other, j) => {
-        if (j === i) return false;
-        return (getWeaknesses(other.types, typeChart)[w] ?? 1.0) < 1.0;
-      });
+    for (const w of weakSets[i]) {
+      const covered = trio.some((_, j) => j !== i && profiles[j][w] < 1.0);
       if (covered) score += 8;
     }
   }
 
-  const allMoveTypes: string[] = [];
-  trio.forEach(p => allMoveTypes.push(...p.moveTypes));
-  score += new Set(allMoveTypes).size * 5;
+  const moveTypes = new Set<string>();
+  trio.forEach(p => p.moveTypes.forEach(t => moveTypes.add(t)));
+  score += moveTypes.size * 5;
 
   const typeCounts: Record<string, number> = {};
-  trio.forEach(p => {
-    p.types.forEach((t: string) => {
-      if (t !== 'none') typeCounts[t] = (typeCounts[t] || 0) + 1;
-    });
-  });
-  Object.values(typeCounts).forEach(count => {
-    if (count >= 3) score -= 25;
-    else if (count === 2) score -= 10;
+  trio.forEach(p => p.types.forEach(t => {
+    if (t !== 'none') typeCounts[t] = (typeCounts[t] || 0) + 1;
+  }));
+  Object.values(typeCounts).forEach(c => {
+    if (c >= 3) score -= 25; else if (c === 2) score -= 10;
   });
 
-  const allWeakSets = trio.map(p => {
-    const w = getWeaknesses(p.types, typeChart);
-    return new Set(Object.entries(w).filter(([_, m]) => m > 1.0).map(([t]) => t));
-  });
-  const sharedWeaks = [...allWeakSets[0]].filter(w => allWeakSets[1].has(w) && allWeakSets[2].has(w));
-  score -= sharedWeaks.length * 20;
+  const shared = [...weakSets[0]].filter(w => weakSets[1].has(w) && weakSets[2].has(w));
+  score -= shared.length * 20;
 
   return score;
 }
 
-function findBestTrio(pool: any[], typeChart: any): any[] | null {
+function findBestTrio(pool: Mon[]): Mon[] | null {
   if (pool.length < 3) return null;
+  // 先依名次取前 N 隻，限制組合爆炸
+  const capped = [...pool].sort((a, b) => a.rank - b.rank).slice(0, TRIO_POOL_CAP);
   let bestScore = -Infinity;
-  let best = pool.slice(0, 3);
-  for (let i = 0; i < pool.length; i++) {
-    for (let j = i + 1; j < pool.length; j++) {
-      for (let k = j + 1; k < pool.length; k++) {
-        const trio = [pool[i], pool[j], pool[k]];
-        const s = scoreTeam(trio, typeChart);
+  let best = capped.slice(0, 3);
+  for (let i = 0; i < capped.length; i++)
+    for (let j = i + 1; j < capped.length; j++)
+      for (let k = j + 1; k < capped.length; k++) {
+        const trio = [capped[i], capped[j], capped[k]];
+        const s = scoreTeam(trio);
         if (s > bestScore) { bestScore = s; best = trio; }
       }
-    }
-  }
   return best;
 }
 
+function sharedWeakNames(trio: Mon[]): string[] {
+  const sets = trio.map(p => new Set(weakKeys(p.types)));
+  return [...sets[0]].filter(w => sets[1].has(w) && sets[2].has(w))
+    .map(w => typeNames[w] || w);
+}
+
+function buildTrioResult(trio: Mon[], translateMove: (m: string) => string): TrioResult {
+  const members: AnalyzedPokemon[] = trio.map(p => {
+    const fast = translateMove(p.fastMove);
+    const charged = p.chargedMoves.map(translateMove).filter(Boolean).join(', ');
+    return {
+      speciesId: p.speciesId,
+      name: p.name,
+      types: p.types.filter(t => t.toLowerCase() !== 'none'),
+      rank: p.rank,
+      score: p.score,
+      scoreIcon: getScoreIcon(p.score),
+      moves: [fast, charged].filter(Boolean).join(' / '),
+      isFav: p.isFav,
+      lowRank: p.rank > 100
+    };
+  });
+  return {
+    members,
+    sharedWeaks: sharedWeakNames(trio),
+    copyString: trio.map(p => p.name).join(',')
+  };
+}
+
+/**
+ * 分析使用者盒子並回傳最佳/即戰力三人組
+ */
 export async function analyzeUserBoxTeam(
   leaguePath: string,
   teamNames: string[],
   favNames: string[],
   env: Env,
   ctx: ExecutionContext
-): Promise<string> {
+): Promise<BoxAnalysis> {
+  const leagueInfo = leagues.find(l => l.path === leaguePath);
+  const leagueName = leagueInfo ? leagueInfo.name : leaguePath;
+
   try {
-    const [transRes, typeRes, moveTransRes, bundledData] = await Promise.all([
+    const [transRes, moveTransRes, bundledData] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
-      fetchWithCache(getDataUrl("data/type_chart.json"), env, ctx),
       fetchWithCache(getDataUrl("data/move.json"), env, ctx),
       getAllRankingsBundle(env, ctx),
     ]);
 
     const transData = await transRes.json() as PokemonData[];
-    const typeChart = await typeRes.json() as any;
     const moveTrans = await moveTransRes.json() as Record<string, string>;
     const favSet = new Set(favNames);
 
-    // 🔥 優化 2：將 O(N) 的 Array.find 改為 O(1) 的 Map 查詢
-    const transMap = new Map<string, string>();
+    const nameMap = new Map<string, string>();
     const typeMap = new Map<string, string[]>();
     transData.forEach(p => {
       const id = p.speciesId.toLowerCase();
-      transMap.set(id, p.speciesName);
+      nameMap.set(id, p.speciesName);
       typeMap.set(id, p.types);
     });
-
-    const getFullName = (speciesId: string): string => {
-      const id = speciesId.toLowerCase();
-      // 極速 O(1) 匹配
-      if (transMap.has(id)) return transMap.get(id)!;
-
-      let baseId = id;
-      const suffixesToRemove = ["_shadow", "_mega", "_xl", "_apex"];
-      suffixesToRemove.forEach(s => {
-        baseId = baseId.replace(s, '');
-      });
-
-      let name = transMap.get(baseId) || speciesId;
-
-      if (!name.includes("(")) {
-        Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
-          if (id.includes(key)) name += zh;
-        });
-      }
-      return name;
-    };
 
     const translateMove = (mId: string): string => {
       if (!mId) return "";
       const isElite = mId.includes('*');
-      const cleanId = mId.replace('*', '').toUpperCase();
-      const name = moveTrans[cleanId] || cleanId;
+      const clean = mId.replace('*', '').toUpperCase();
+      const name = moveTrans[clean] || clean;
       return isElite ? `${name}*` : name;
     };
 
     const rankings = (bundledData[leaguePath] || []) as RankingPokemon[];
-    if (rankings.length === 0) return `⚠️ 找不到聯盟排名資料`;
+    if (!rankings.length) return { leagueName, error: "找不到聯盟排名資料" } as BoxAnalysis;
 
-    const rankedList = rankings.map((r, idx) => ({ ...r, realRank: idx + 1 }));
-
-    // 🔥 優化 3：為排名清單建立中文對照表，避免重複執行翻譯邏輯
-    const rankedNameMap = new Map<string, any>();
-    rankedList.forEach(r => {
-       const zhName = getFullName(r.speciesId);
-       // 只保留最高排名的那一隻 (避免重複名稱蓋掉高排名)
-       if (!rankedNameMap.has(zhName)) {
-           rankedNameMap.set(zhName, { ...r, chineseName: zhName });
-       }
+    // 排名 → 中文名對照 (保留最高排名)
+    const rankedMap = new Map<string, RankingPokemon & { realRank: number }>();
+    rankings.forEach((r, idx) => {
+      const zh = getFullName(r.speciesId, nameMap);
+      if (!rankedMap.has(zh)) rankedMap.set(zh, { ...r, realRank: idx + 1 });
     });
 
-    // 🚀 極速過濾與資料綁定
-    const myPokemons = teamNames
-      .filter(name => rankedNameMap.has(name)) // O(1) 直接判斷是否在排名內
+    const myPokemons: Mon[] = teamNames
+      .filter(name => rankedMap.has(name))
       .map(name => {
-        const r = rankedNameMap.get(name);
+        const r = rankedMap.get(name)!;
         const id = r.speciesId.toLowerCase();
-        
-        // O(1) 取得屬性
-        const pTypes = typeMap.get(id) || typeMap.get(id.split('_')[0]) || [];
-
-        let fastMove: string = r.moveFast || "";
-        let chargedMoves: string[] = Array.isArray(r.moveCharged)
-          ? r.moveCharged.slice(0, 2)
+        const types = typeMap.get(id) || typeMap.get(id.split('_')[0]) || [];
+        let fastMove = r.moveFast || "";
+        let chargedMoves = Array.isArray(r.moveCharged) ? r.moveCharged.slice(0, 2)
           : (r.moveCharged ? [r.moveCharged] : []);
         if (!fastMove && Array.isArray(r.moveset)) {
           fastMove = r.moveset[0] || "";
           chargedMoves = r.moveset.slice(1, 3);
         }
-
         return {
-          speciesId: r.speciesId,
-          chineseName: name,
-          types: pTypes,
-          moveTypes: pTypes.filter((t: string) => t !== 'none'),
+          speciesId: r.speciesId, name, types,
+          moveTypes: types.filter(t => t !== 'none'),
           fastMove, chargedMoves,
-          rank: r.realRank,
-          score: r.score || 0,
+          rank: r.realRank, score: r.score || 0,
           isFav: favSet.has(name)
         };
       });
 
     if (myPokemons.length < 3) {
-      return "⚠️ 在此聯盟中符合排名的寶可夢不足 3 隻，請加入更多有排名的寶可夢。";
+      return { leagueName, error: "在此聯盟中符合排名的寶可夢不足 3 隻" } as BoxAnalysis;
     }
 
-    const toZh = (ts: string[]) =>
-      ts.filter(t => t.toLowerCase() !== 'none').map(t => TYPE_MAP[t.toLowerCase()] || t).join('/');
+    const bestTrioMons = findBestTrio(myPokemons)!;
+    const bestTrio = buildTrioResult(bestTrioMons, translateMove);
 
-    const formatPoke = (p: any, icon: string, role: string) => {
-      const fast = translateMove(p.fastMove);
-      const charged = p.chargedMoves.map((m: string) => translateMove(m)).filter(Boolean).join(', ');
-      const moveLine = [fast, charged].filter(Boolean).join(' / ');
-      const rankWarn = p.rank > 100 ? ' ⚠️' : '';
-      const favTag = p.isFav ? ' ⭐' : '';
-      return (
-        `${icon} ${role}　<b>#${p.rank} ${p.chineseName}</b>${favTag}${rankWarn}\n` +
-        `${getRankIcon(p.score)} ${p.score.toFixed(1)} ｜ ${toZh(p.types)}\n` +
-        `└ ${moveLine}`
-      );
-    };
-
-    const getSharedWeaks = (trio: any[]) => {
-      const sets = trio.map(p => {
-        const w = getWeaknesses(p.types, typeChart);
-        return new Set(Object.entries(w).filter(([_, m]) => m > 1.0).map(([t]) => t));
-      });
-      return [...sets[0]].filter(w => sets[1].has(w) && sets[2].has(w)).map(w => TYPE_MAP[w] || w);
-    };
-
-    const leagueInfo = leagues.find(l => l.path === leaguePath);
-    const leagueName = leagueInfo ? leagueInfo.name : leaguePath;
-
-    // ── 最佳三人組 ──
-    const bestTrio = findBestTrio(myPokemons, typeChart)!;
-    const sharedWeaks = getSharedWeaks(bestTrio);
-
-    let msg = `📊 <b>${leagueName} 最佳三人組</b>\n\n`;
-    msg += `${formatPoke(bestTrio[0], "👑", "先發")}\n\n`;
-    msg += `${formatPoke(bestTrio[1], "🛡", "替換")}\n\n`;
-    msg += `${formatPoke(bestTrio[2], "⚔️", "壓軸")}\n\n`;
-    msg += sharedWeaks.length > 0
-      ? `⚠️ 共同弱點：${sharedWeaks.join('、')} 系\n`
-      : `✅ 弱點覆蓋良好，無共同致命弱點\n`;
-    msg += `\n📋 <code>${bestTrio.map(p => p.chineseName).join(',')}</code>`;
-
-    // ── 即戰力優先組 ──
+    let favTrio: TrioResult | null = null;
+    let favSameAsBest = false;
     const favPool = myPokemons.filter(p => p.isFav);
     if (favPool.length >= 3) {
-      const favTrio = findBestTrio(favPool, typeChart)!;
-      const favWeaks = getSharedWeaks(favTrio);
-      const sameAsBest = favTrio.map(p => p.speciesId).sort().join(',') ===
-                         bestTrio.map(p => p.speciesId).sort().join(',');
-      if (!sameAsBest) {
-        msg += `\n\n⭐ <b>${leagueName} 即戰力優先組</b>\n\n`;
-        msg += `${formatPoke(favTrio[0], "👑", "先發")}\n\n`;
-        msg += `${formatPoke(favTrio[1], "🛡", "替換")}\n\n`;
-        msg += `${formatPoke(favTrio[2], "⚔️", "壓軸")}\n\n`;
-        msg += favWeaks.length > 0
-          ? `⚠️ 共同弱點：${favWeaks.join('、')} 系\n`
-          : `✅ 弱點覆蓋良好，無共同致命弱點\n`;
-        msg += `\n📋 <code>${favTrio.map(p => p.chineseName).join(',')}</code>`;
-      } else {
-        msg += `\n\n⭐ 即戰力優先組與最佳三人組相同`;
-      }
-    } else if (favPool.length > 0) {
-      msg += `\n\n⭐ 即戰力寶可夢僅 ${favPool.length} 隻，不足 3 隻無法分析優先組`;
+      const favTrioMons = findBestTrio(favPool)!;
+      favSameAsBest = favTrioMons.map(p => p.speciesId).sort().join(',') ===
+        bestTrioMons.map(p => p.speciesId).sort().join(',');
+      if (!favSameAsBest) favTrio = buildTrioResult(favTrioMons, translateMove);
     }
 
-    // ── 垃圾判斷 ──
-    const garbageList = teamNames.filter(name => {
-      if (!rankedNameMap.has(name)) return true; // O(1) 完全不在排名裡
-      return rankedNameMap.get(name).realRank > GARBAGE_RANK_THRESHOLD; 
+    const garbage = teamNames.filter(name => {
+      const r = rankedMap.get(name);
+      return !r || r.realRank > GARBAGE_RANK_THRESHOLD;
     });
 
-    if (garbageList.length > 0) {
-      msg += `\n\n🗑 <b>建議移除（此聯盟排名過低）：</b>\n<code>${garbageList.join(',')}</code>`;
-    }
-
-    return msg;
-
-  } catch (error) {
-    return "❌ 運算錯誤: " + (error as Error).message;
+    return {
+      leagueName, bestTrio, favTrio, favSameAsBest,
+      favCount: favPool.length, garbage
+    };
+  } catch (e) {
+    return { leagueName, error: "運算錯誤: " + (e as Error).message } as BoxAnalysis;
   }
 }
-// 🔥 新增：專門用來過濾垃圾清單的 API 邏輯
+
+/**
+ * 過濾盒子垃圾 (未上榜 / 名次過低)
+ */
 export async function filterGarbage(
   leaguePath: string,
   teamNames: string[],
   env: Env,
   ctx: ExecutionContext
-): Promise<{ keep: string[], removed: string[] }> {
+): Promise<{ keep: string[]; removed: string[] }> {
   try {
     const [transRes, bundledData] = await Promise.all([
       fetchWithCache(getDataUrl("data/chinese_translation.json"), env, ctx),
@@ -313,47 +230,24 @@ export async function filterGarbage(
     ]);
 
     const transData = await transRes.json() as PokemonData[];
-    const transMap = new Map<string, string>();
-    transData.forEach(p => transMap.set(p.speciesId.toLowerCase(), p.speciesName));
-
-    const getFullName = (speciesId: string): string => {
-      const id = speciesId.toLowerCase();
-      if (transMap.has(id)) return transMap.get(id)!;
-      let baseId = id;
-      const suffixesToRemove = ["_shadow", "_mega", "_xl", "_apex"];
-      suffixesToRemove.forEach(s => { baseId = baseId.replace(s, ''); });
-      let name = transMap.get(baseId) || speciesId;
-      if (!name.includes("(")) {
-        Object.entries(SUFFIX_MAP).forEach(([key, zh]) => {
-          if (id.includes(key)) name += zh;
-        });
-      }
-      return name;
-    };
+    const nameMap = new Map(transData.map(p => [p.speciesId.toLowerCase(), p.speciesName]));
 
     const rankings = (bundledData[leaguePath] || []) as RankingPokemon[];
-    const rankedNameMap = new Map<string, any>();
+    const rankedMap = new Map<string, number>();
     rankings.forEach((r, idx) => {
-       const zhName = getFullName(r.speciesId);
-       if (!rankedNameMap.has(zhName)) {
-           rankedNameMap.set(zhName, { realRank: idx + 1 });
-       }
+      const zh = getFullName(r.speciesId, nameMap);
+      if (!rankedMap.has(zh)) rankedMap.set(zh, idx + 1);
     });
 
     const keep: string[] = [];
     const removed: string[] = [];
-    
-    // 比對並分類：沒在排名內或名次 > 500 的就丟進 removed
     teamNames.forEach(name => {
-       if (!rankedNameMap.has(name) || rankedNameMap.get(name).realRank > GARBAGE_RANK_THRESHOLD) {
-           removed.push(name);
-       } else {
-           keep.push(name);
-       }
+      const rank = rankedMap.get(name);
+      if (!rank || rank > GARBAGE_RANK_THRESHOLD) removed.push(name);
+      else keep.push(name);
     });
-
     return { keep, removed };
-  } catch (e) {
-    return { keep: teamNames, removed: [] }; // 發生錯誤時先保留原本陣容
+  } catch {
+    return { keep: teamNames, removed: [] };
   }
 }

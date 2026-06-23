@@ -9,13 +9,14 @@ export const GITHUB_USERNAME = "AlbertCamulation";
 export const REPO_NAME = "pokemon_tg_bot";
 export const BRANCH_NAME = "main";
 
-// --- Telegram Webhook ---
-export const WEBHOOK_PATH = "/endpoint";
+// --- KV 存儲 Key 前綴 ---
+export const TRASH_PREFIX = "trash_";          // trash_{sub}
+export const BOX_PREFIX = "box_";              // box_{sub}_{acct}_{cp}
+export const ACCT_NAMES_PREFIX = "acctnames_"; // acctnames_{sub}
+export const SESSION_PREFIX = "session_";      // session_{sid}
 
-// --- KV 存儲 Key ---
-export const TRASH_LIST_PREFIX = "trash_pokemon_";
-export const ALLOWED_UID_KEY = "allowed_user_ids";
-export const BANNED_UID_KEY = "banned_user_ids";
+// --- Session 設定 ---
+export const SESSION_TTL = 60 * 60 * 24 * 30;  // 30 天
 
 // --- 快取設定 ---
 export const CACHE_TTL = 86400; // 24 小時
@@ -23,10 +24,16 @@ export const LIMIT_LEAGUES_SHOW = 50;
 
 // --- 清理名稱用正則表達式 ---
 export const NAME_CLEANER_REGEX = /\s*(一擊流|靈獸|冰凍|水流|普通|完全體|闇黑|拂曉之翼|黃昏之鬃|特大尺寸|普通尺寸|大尺寸|小尺寸|別種|裝甲|滿腹花紋|洗翠|Mega|X|Y|原始|起源|劍之王|盾之王|焰白|暗影|伽勒爾|極巨化|超極巨化|盾牌形態|阿羅拉|歌聲|・|覺悟|的樣子)/g;
-export const QUERY_CLEANER_REGEX = /[\s\d\.\u2070-\u209F\u00B0-\u00BE\u2460-\u24FF\u3251-\u32BF]+/g;
+export const QUERY_CLEANER_REGEX = /[\s\d\.⁰-₟°-¾①-⓿㉑-㊿]+/g;
 
-// 改成指向 pokemon_tg_bot 自己的 main 分支
-export const MANIFEST_URL = "https://raw.githubusercontent.com/AlbertCamulation/pokemon_tg_bot/main/data/manifest.json";
+// Manifest (當下開放聯盟)
+export const MANIFEST_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH_NAME}/data/manifest.json`;
+
+// --- 型態後綴對照表 (共用) ---
+export const SUFFIX_MAP: Record<string, string> = {
+  "_shadow": " (暗影)", "_alolan": " (阿羅拉)", "_galarian": " (伽勒爾)",
+  "_hisuian": " (洗翠)", "_paldean": " (帕底亞)", "_apex": " (頂點)", "_mega": " (Mega)"
+};
 
 // --- 聯盟設定 ---
 export const leagues: League[] = [
@@ -41,14 +48,14 @@ export const leagues: League[] = [
   { command: "great_league_top_halloween", name: "萬聖節盃 (1500)", cp: "1500", path: "data/rankings_1500_halloween.json" },
   { command: "great_league_top_retro", name: "復古盃 (1500)", cp: "1500", path: "data/rankings_1500_retro.json" },
   { command: "great_league_top_summer", name: "夏日盃 (1500)", cp: "1500", path: "data/rankings_1500_summer.json" },
-  { command: "great_league_top_willpower", name: "意志盃 (1500)", cp: "1500", path: "data/rankingsr_1500_willpowe.json" },
+  { command: "great_league_top_willpower", name: "意志盃 (1500)", cp: "1500", path: "data/rankings_1500_willpower.json" },
   { command: "great_league_top_jungle", name: "叢林盃 (1500)", cp: "1500", path: "data/rankings_1500_jungle.json" },
   { command: "ultra_league_top", name: "高級聯盟 (2500)", cp: "2500", path: "data/rankings_2500.json" },
   { command: "ultra_league_top_permier", name: "究極紀念賽 (2500)", cp: "2500", path: "data/rankings_2500_premierultra.json" },
   { command: "ultra_league_top_holiday", name: "假日盃 (2500)", cp: "2500", path: "data/rankings_2500_holiday.json" },
   { command: "ultra_league_top_summer", name: "夏日盃 (2500)", cp: "2500", path: "data/rankings_2500_summer.json" },
   { command: "master_league_top", name: "大師聯盟 (無上限)", cp: "10000", path: "data/rankings_10000.json" },
-  { command: "master_league_top_mega", name: "大師聯盟：超級版 (無上限)", cp: "10000", path: "data/rankings_10000_mega.json" }, // 🔥 加入這行
+  { command: "master_league_top_mega", name: "大師聯盟：超級版 (無上限)", cp: "10000", path: "data/rankings_10000_mega.json" },
   { command: "master_league_top_permier", name: "大師紀念賽 (無上限)", cp: "10000", path: "data/rankings_10000_premier.json" },
   { command: "master_league_top_meta", name: "大師 Meta (無上限)", cp: "10000", path: "data/rankings_10000_meta_master.json" },
   { command: "attackers_top", name: "最佳攻擊手", cp: "Any", path: "data/rankings_attackers_tier.json" },
@@ -92,4 +99,12 @@ export const typeNames: Record<string, string> = {
   ice: "冰", fighting: "格鬥", poison: "毒", ground: "地面", flying: "飛行",
   psychic: "超能", bug: "蟲", rock: "岩石", ghost: "幽靈", dragon: "龍",
   dark: "惡", steel: "鋼", fairy: "妖精"
+};
+
+// --- 屬性主題色 (前端徽章用) ---
+export const typeColors: Record<string, string> = {
+  normal: "#9099a1", fire: "#ff9d55", water: "#4d90d5", electric: "#f4d23c", grass: "#63bc5a",
+  ice: "#73cec0", fighting: "#ce4069", poison: "#ab6ac8", ground: "#d97746", flying: "#8fa8dd",
+  psychic: "#fa7179", bug: "#90c12c", rock: "#c7b78b", ghost: "#5269ac", dragon: "#0b6dc3",
+  dark: "#5a5366", steel: "#5a8ea1", fairy: "#ec8fe6"
 };

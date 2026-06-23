@@ -2,8 +2,8 @@
 //  快取管理 (Cache Management)
 // =========================================================
 
-import type { Env, PokemonData, MovesMap, EventInfo, RankingPokemon, League } from '../types';
-import { CACHE_TTL, GITHUB_USERNAME, REPO_NAME, BRANCH_NAME } from '../constants';
+import type { Env, PokemonData, MovesMap, EventInfo, RankingPokemon, League, ActiveLeague } from '../types';
+import { CACHE_TTL, GITHUB_USERNAME, REPO_NAME, BRANCH_NAME, MANIFEST_URL, leagues } from '../constants';
 
 // --- 全域記憶體快取 ---
 let GLOBAL_TRANS_CACHE: PokemonData[] | null = null;
@@ -137,11 +137,11 @@ export async function getAllRankingsBundle(
 
     const data = await res.json() as Record<string, RankingPokemon[]>;
 
-    // C. 存入記憶體快取
-    if (data && typeof data === 'object') {
+    // C. 只在資料有效 (非空) 時才寫入記憶體快取，避免暫時性失敗毒化整個 isolate
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       GLOBAL_BUNDLE_CACHE = data;
     }
-    return GLOBAL_BUNDLE_CACHE || {};
+    return GLOBAL_BUNDLE_CACHE || data || {};
   } catch (e) {
     console.error("讀取大禮包失敗:", e);
     return {};
@@ -174,10 +174,55 @@ export async function getLeagueRanking(
   }
 }
 
+// --- 當下開放聯盟 (Manifest) ---
+let GLOBAL_ACTIVE_CACHE: { at: number; data: ActiveLeague[] } | null = null;
+const ACTIVE_TTL_MS = 5 * 60 * 1000; // 5 分鐘
+
+/**
+ * 取得當下開放聯盟 (對照 manifest 與本地 leagues 設定)
+ */
+export async function getActiveLeagues(): Promise<ActiveLeague[]> {
+  if (GLOBAL_ACTIVE_CACHE && Date.now() - GLOBAL_ACTIVE_CACHE.at < ACTIVE_TTL_MS) {
+    return GLOBAL_ACTIVE_CACHE.data;
+  }
+
+  try {
+    const res = await fetch(`${MANIFEST_URL}?v=${Math.floor(Date.now() / 300000)}`, {
+      headers: { "Cache-Control": "no-cache" }
+    });
+    if (!res.ok) return GLOBAL_ACTIVE_CACHE?.data || [];
+
+    const manifest = await res.json() as {
+      active_leagues?: Array<{ cp: string; pvpoke_id: string; name_zh: string }>;
+    };
+
+    const result: ActiveLeague[] = [];
+    (manifest.active_leagues || []).forEach(a => {
+      const local = leagues.find(l => {
+        if (String(l.cp) !== String(a.cp)) return false;
+        if (a.pvpoke_id === "all")
+          return l.command === "great_league_top" || l.command === "ultra_league_top" || l.command === "master_league_top";
+        if (a.pvpoke_id === "premier")
+          return l.name.includes("紀念") || l.command.includes("premier") || l.command.includes("permier");
+        if (a.pvpoke_id === "remix")
+          return l.name.includes("Remix") || l.command.includes("remix");
+        return l.command.includes(a.pvpoke_id);
+      });
+      if (local) result.push({ name: local.name, path: local.path, command: local.command, cp: String(local.cp) });
+    });
+
+    GLOBAL_ACTIVE_CACHE = { at: Date.now(), data: result };
+    return result;
+  } catch {
+    return GLOBAL_ACTIVE_CACHE?.data || [];
+  }
+}
+
 /**
  * 清除所有快取 (測試用)
  */
 export function clearAllCaches(): void {
+  GLOBAL_ACTIVE_CACHE = null;
   GLOBAL_TRANS_CACHE = null;
   GLOBAL_MOVES_CACHE = null;
   GLOBAL_EVENTS_CACHE = null;

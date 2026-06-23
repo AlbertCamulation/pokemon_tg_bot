@@ -1,16 +1,21 @@
+# wrangler.toml — Pokemon PvP Web (Cloudflare Workers)
+name = "pokemon"
 
-# wrangler.toml
-name = 'pokemon'
-
-# 主程式入口點 (TypeScript)
 main = "src/worker.ts"
-
-# 相容性日期
 compatibility_date = "2025-08-05"
 
 [observability.logs]
 enabled = true
 
+# KV：使用者盒子 / 垃圾清單 / 登入 session
 [[kv_namespaces]]
 binding = "POKEMON_KV"
 id = "a6aecf7af8304faabc3d8620b7e66bdd"
+
+# 一般環境變數 (非機密)。逗號分隔的允許登入 email 白名單；留空 = 任何人皆可登入。
+[vars]
+ALLOWED_EMAILS = "gba28945@gmail.com"
+
+# 機密請用 wrangler secret 設定，勿寫在此檔：
+#   npx wrangler secret put GOOGLE_CLIENT_ID
+#   npx wrangler secret put GOOGLE_CLIENT_SECRET

@@ -1,238 +1,110 @@
-# CLAUDE.md - Pokemon Telegram Bot 開發指南
+# CLAUDE.md - Pokemon PvP 手機網頁 開發指南
 
 ## 專案概述
 
-這是一個 **Pokemon GO PvP 戰術分析 Telegram 機器人**，部署在 Cloudflare Workers 上。主要功能是查詢寶可夢的 PvP 排名、技能組合、屬性剋制等資訊。
+**Pokemon GO PvP 戰術分析手機網頁**，部署在 Cloudflare Workers。
+查詢寶可夢 PvP 排名、技能、屬性剋制；登入後可管理對戰盒子並取得最佳隊伍分析。
+
+> v2.0：本專案原為 Telegram Bot，已全面改寫為獨立手機網頁，改用 **Google 登入**做跨裝置同步。
+> Telegram 相關程式碼（webhook、admin、gatekeeper）已全部移除。
 
 ## 技術棧
 
-- **執行環境**: Cloudflare Workers (Serverless)
-- **語言**: TypeScript
-- **資料庫**: Cloudflare KV (鍵值存儲，用於用戶權限管理)
-- **API**: Telegram Bot API
-- **資料來源**: PvPoke 排名數據、wingzero.tw 活動資訊
-- **自動化**: GitHub Actions (每日更新排名和活動資料)
+- **執行環境**：Cloudflare Workers (Serverless)
+- **語言**：TypeScript（無打包步驟，wrangler 直接 bundle `src/worker.ts`）
+- **前端**：原生 SPA（`src/web/app.ts` 匯出單一 HTML 字串）
+- **登入**：Google OAuth 2.0（白名單 email，session 存 KV，sid cookie）
+- **儲存**：Cloudflare KV（盒子 / 垃圾清單 / session）
+- **資料**：PvPoke 排名、wingzero.tw 活動（GitHub Actions 每日更新）
 
 ## 專案結構
 
 ```
-/
-├── src/                       # TypeScript 原始碼
-│   ├── worker.ts              # 主程式入口點
-│   ├── types.ts               # 型別定義
-│   ├── constants.ts           # 常數與設定
-│   ├── handlers/              # 功能處理器
-│   │   ├── index.ts           # 統一匯出
-│   │   ├── search.ts          # 寶可夢搜尋
-│   │   ├── menu.ts            # 選單與按鈕
-│   │   ├── league.ts          # 聯盟排名
-│   │   ├── trash.ts           # 垃圾清單
-│   │   └── admin.ts           # 管理員功能
-│   ├── utils/                 # 工具函數
-│   │   ├── index.ts           # 統一匯出
-│   │   ├── cache.ts           # 快取管理
-│   │   ├── telegram.ts        # Telegram API
-│   │   ├── kv.ts              # KV 存儲操作
-│   │   └── helpers.ts         # 通用工具
-│   └── web/
-│       └── html.ts            # Web 介面 HTML
-├── data/                      # JSON 資料檔案
-│   ├── rankings_*.json        # 各聯盟排名
-│   ├── chinese_translation.json
-│   ├── move.json
-│   └── events.json
-├── scripts/                   # Python 自動化腳本
-│   ├── fetch_data.py
-│   └── update_events.py
-├── worker.js                  # 舊版 JavaScript (保留)
-├── wrangler.toml              # Cloudflare Workers 設定
-├── tsconfig.json              # TypeScript 設定
-├── package.json               # npm 套件設定
-└── .github/workflows/         # GitHub Actions
+src/
+├── worker.ts            # 入口：路由 (SPA + 公開 API + 登入 + 受保護 API)
+├── auth.ts              # Google OAuth + session 管理
+├── types.ts             # 型別定義
+├── constants.ts         # 聯盟設定 / 屬性相剋表 / 常數
+├── handlers/
+│   ├── index.ts         # 統一匯出
+│   ├── search.ts        # searchPokemon / getAllPokemonNames
+│   ├── league.ts        # getLeagueRankingData / getMetaAnalysisData
+│   ├── box.ts           # analyzeUserBoxTeam / filterGarbage
+│   └── types.ts         # getTypeQuery / getAllTypeOptions
+├── utils/
+│   ├── index.ts         # 統一匯出
+│   ├── cache.ts         # 資料抓取 / 記憶體快取 / getActiveLeagues
+│   ├── userdata.ts      # 盒子 / 垃圾 / 帳號名稱 (KV，key 為 Google sub)
+│   └── helpers.ts       # 名稱解析 / 屬性計算 / 評級
+└── web/
+    └── app.ts           # 手機版 SPA (HTML/CSS/JS，APP_HTML)
+
+data/                    # JSON 資料 (rankings_*.json, all_rankings_bundle.json, ...)
+scripts/                 # Python 自動化腳本
+wrangler.toml            # Cloudflare 設定
 ```
 
 ## 常用指令
 
-### 安裝依賴
-
 ```bash
 npm install
+npm run dev          # wrangler dev
+npm run typecheck    # tsc --noEmit
+npm run deploy       # wrangler deploy
+npm run tail         # 日誌
 ```
 
-### 部署與開發
-
-```bash
-# 本地開發
-npm run dev
-# 或
-npx wrangler dev
-
-# 部署到 Cloudflare
-npm run deploy
-# 或
-npx wrangler deploy
-
-# 查看日誌
-npm run tail
-# 或
-npx wrangler tail
-
-# TypeScript 型別檢查
-npm run typecheck
-```
-
-### 資料更新
-
-```bash
-# 手動更新排名資料
-python scripts/fetch_data.py
-
-# 手動更新活動資料
-python scripts/update_events.py
-```
+資料更新：`python scripts/fetch_data.py`、`python scripts/update_events.py`
 
 ## 環境變數
 
-| 變數名稱 | 說明 |
-|---------|------|
-| `ENV_BOT_TOKEN` | Telegram Bot Token (從 BotFather 取得) |
-| `ENV_BOT_SECRET` | Webhook 驗證密鑰 |
-| `ADMIN_UID` | 超級管理員 User ID |
-| `ADMIN_GROUP_UID` | 管理群組 ID (格式: `-100...`) |
+| 變數 | 種類 | 說明 |
+|------|------|------|
+| `GOOGLE_CLIENT_ID` | secret | Google OAuth 用戶端 ID |
+| `GOOGLE_CLIENT_SECRET` | secret | Google OAuth 用戶端密鑰 |
+| `ALLOWED_EMAILS` | var (wrangler.toml) | 允許登入 email 白名單（逗號分隔，留空=全部） |
 
 ## 核心架構
 
-### 模組說明
+### 路由 (`src/worker.ts`)
+- `GET /` → SPA
+- 公開 API：`/api/search`、`/api/names`、`/api/leagues`、`/api/rankings`、`/api/meta`、`/api/types`、`/api/type`
+- 登入：`/auth/login`、`/auth/callback`、`/auth/logout`、`/api/me`
+- 受保護 API（需 session）：`/api/box`、`/api/analyze`、`/api/clean-box`、`/api/account-names`、`/api/trash`
 
-| 模組 | 說明 |
-|-----|------|
-| `src/worker.ts` | 主入口，處理路由和 Webhook |
-| `src/types.ts` | 所有 TypeScript 型別定義 |
-| `src/constants.ts` | 聯盟設定、屬性表、正則表達式 |
-| `src/handlers/search.ts` | 寶可夢搜尋邏輯 |
-| `src/handlers/league.ts` | 聯盟排名和 Meta 分析 |
-| `src/handlers/menu.ts` | 選單生成和屬性查詢 |
-| `src/utils/cache.ts` | 快取管理 (全域 + HTTP) |
-| `src/utils/telegram.ts` | Telegram API 封裝 |
-| `src/utils/kv.ts` | KV 存儲操作 |
+### 登入與權限 (`src/auth.ts`)
+- Google OAuth authorization code flow；id_token 由 token endpoint 取得（走 TLS，僅解碼 payload）。
+- session 存 KV `session_{sid}`，sid 放 HttpOnly Secure cookie。
+- email 白名單在 `ALLOWED_EMAILS`。
+- **安全要點**：所有個人資料 API 的使用者身分一律取自 session（`session.sub`），**不信任**前端傳來的任何 userId（修正了舊版的 IDOR/冒用問題）。
 
-### 權限系統 (Gatekeeper)
+### 個人資料 (`src/utils/userdata.ts`)
+- 盒子 key：`box_{sub}_{acct}_{cp}` → `{ box: string[], favs: string[] }`
+- 帳號名稱：`acctnames_{sub}`；垃圾清單：`trash_{sub}`
 
-預設拒絕所有用戶，需管理員審核：
-1. 超級管理員 (`ADMIN_UID`) - 完全權限
-2. 管理群組成員 - 可審核用戶
-3. 白名單用戶 - 已授權使用
-4. 黑名單用戶 - 永久封禁
-
-### API 端點
-
-- `POST /endpoint` - Telegram Webhook
-- `GET /api/search?q=<query>` - 寶可夢搜尋 API
-- `GET /api/names` - 取得所有寶可夢名稱 (自動完成用)
-- `GET /registerWebhook` - 註冊 Webhook
-- `GET /` - Web 介面
-
-### 資料快取策略
-
-快取定義在 `src/utils/cache.ts`：
-- 全域記憶體快取: `GLOBAL_TRANS_CACHE`, `GLOBAL_MOVES_CACHE`, `GLOBAL_EVENTS_CACHE`
-- 排名快取: `GLOBAL_RANKINGS_CACHE` (Map 結構)
-- HTTP 快取: 24 小時 TTL
-
-## 聯盟類型
-
-| CP 上限 | 聯盟名稱 | 變體杯賽 |
-|--------|---------|---------|
-| 500 | 小聯盟 | - |
-| 1500 | 超級聯盟 | 假日杯、陽光杯、復古杯、萬聖杯等 |
-| 2500 | 高級聯盟 | 假日杯、菁英杯、夏日杯 |
-| 10000 | 大師聯盟 | 菁英杯、元老杯 |
+### 資料快取 (`src/utils/cache.ts`)
+- 記憶體快取：trans / moves / events / bundle。
+- 主要走 `getAllRankingsBundle()`（大禮包），失敗才退回單檔。
+- 空值不寫入快取，避免毒化 isolate。
+- `getActiveLeagues()` 5 分鐘快取，對照 manifest 與本地 `leagues`。
 
 ## 修改注意事項
 
 ### 新增聯盟/杯賽
+1. `src/constants.ts` 的 `leagues` 陣列新增 `{ command, name, cp, path }`。
+2. 確保 `data/` 有對應排名 JSON（會被打包進 `all_rankings_bundle.json`）。
 
-1. 在 `src/constants.ts` 中找到 `leagues` 陣列
-2. 新增對應的 `{ command, name, cp, path }` 物件
-3. 確保 `data/` 目錄有對應的排名 JSON 檔案
+### 前端修改 (`src/web/app.ts`)
+- 是一段純 HTML/CSS/JS 字串（非編譯內容）。
+- **前端 JS 刻意不使用樣板字面值**（template literal），以免與外層 TS 樣板字串跳脫衝突。
+- DOM 一律用 `h()` 輔助函式以 `textContent` 建立，**禁止**把使用者資料塞進 `innerHTML`（避免 XSS）。
 
-### 修改權限邏輯
+### 分析邏輯回傳 JSON
+- 所有 handler 回傳結構化資料，由前端渲染（不再產生 Telegram HTML 字串）。
 
-權限判斷在 `src/worker.ts` 的 `onMessage()` 函數中：
-1. 檢查是否為超級管理員
-2. 檢查是否在管理群組
-3. 檢查黑名單 (使用 `src/utils/kv.ts`)
-4. 檢查白名單
-5. 若未授權，發送審核請求到管理群組
+## 常見問題
 
-### 修改搜尋邏輯
-
-搜尋邏輯在 `src/handlers/search.ts`：
-- `handlePokemonSearch()` - Telegram 搜尋指令
-- `getPokemonDataOnly()` - API 搜尋回應
-
-### 新增型別
-
-在 `src/types.ts` 中定義新型別，例如：
-```typescript
-export interface NewFeature {
-  id: string;
-  name: string;
-}
-```
-
-## 資料檔案格式
-
-### rankings_*.json
-
-```json
-[
-  {
-    "speciesId": "registeel",
-    "speciesName": "Registeel",
-    "rating": 726,
-    "moveset": ["lock_on", "focus_blast", "flash_cannon"],
-    "score": 99.1
-  }
-]
-```
-
-### chinese_translation.json
-
-```json
-[
-  {
-    "speciesId": "bulbasaur",
-    "speciesName": "妙蛙種子",
-    "types": ["grass", "poison"],
-    "family": { "id": "1" },
-    "eliteMoves": []
-  }
-]
-```
-
-## 常見問題排除
-
-### Bot 無回應
-
-1. 檢查 Webhook 是否正確註冊: 訪問 `/registerWebhook`
-2. 檢查環境變數是否正確設定
-3. 使用 `npx wrangler tail` 查看錯誤日誌
-
-### TypeScript 編譯錯誤
-
-1. 執行 `npm run typecheck` 檢查型別
-2. 確認 `@cloudflare/workers-types` 已安裝
-3. 檢查 `tsconfig.json` 設定
-
-### 資料未更新
-
-1. 檢查 GitHub Actions 是否正常執行
-2. 手動執行 Python 腳本更新資料
-3. 確認 PvPoke 網站是否可訪問
-
-### 權限問題
-
-1. 確認 `ADMIN_UID` 設定正確
-2. 檢查 KV 中的白名單/黑名單資料
-3. 使用 `/banlist` 指令管理封禁用戶
+- **登入失敗**：檢查 Google「重新導向 URI」是否填了 `https://<worker網址>/auth/callback`；`GOOGLE_CLIENT_ID/SECRET` 是否已 `wrangler secret put`。
+- **登入被擋**：email 不在 `ALLOWED_EMAILS` 白名單。
+- **資料未更新**：檢查 GitHub Actions；`data/manifest.json` 為空時當下聯盟會退回標準三聯盟。
+- **型別錯誤**：`npm run typecheck`。
