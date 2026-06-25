@@ -1,26 +1,4 @@
 {
-  "last_updated_human": "2026-06-24 11:07:08 (台灣時間)",
-  "active_leagues": [
-    {
-      "name_zh": "超級聯盟",
-      "name_en": "Great League",
-      "pvpoke_id": "all",
-      "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"
-    },
-    {
-      "name_zh": "高級聯盟",
-      "name_en": "Ultra League",
-      "pvpoke_id": "all",
-      "cp": "2500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"
-    },
-    {
-      "name_zh": "大師聯盟",
-      "name_en": "Master League",
-      "pvpoke_id": "all",
-      "cp": "10000",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-10000.json"
-    }
-  ]
+  "last_updated_human": "2026-06-25 11:07:12 (台灣時間)",
+  "active_leagues": []
 }
