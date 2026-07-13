@@ -1,19 +1,4 @@
 {
-  "last_updated_human": "2026-07-06 11:06:26 (台灣時間)",
-  "active_leagues": [
-    {
-      "name_zh": "超級聯盟",
-      "name_en": "Great League",
-      "pvpoke_id": "all",
-      "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"
-    },
-    {
-      "name_zh": "夏日盃：超級聯盟版",
-      "name_en": "Summer Cup: Great League Edition",
-      "pvpoke_id": "summer",
-      "cp": "1500",
-      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/summer/overall/rankings-1500.json"
-    }
-  ]
+  "last_updated_human": "2026-07-13 11:04:08 (台灣時間)",
+  "active_leagues": []
 }
