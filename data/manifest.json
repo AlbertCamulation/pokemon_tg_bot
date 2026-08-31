@@ -1,4 +1,26 @@
 {
-  "last_updated_human": "2026-08-30 15:45:52 (台灣時間)",
-  "active_leagues": []
+  "last_updated_human": "2026-08-31 16:00:09 (台灣時間)",
+  "active_leagues": [
+    {
+      "name_zh": "超級聯盟：超級版 (即將開放)",
+      "name_en": "Great League: Mega Edition",
+      "pvpoke_id": "all",
+      "cp": "1500",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"
+    },
+    {
+      "name_zh": "高級聯盟：超級版 (即將開放)",
+      "name_en": "Ultra League: Mega Edition",
+      "pvpoke_id": "all",
+      "cp": "2500",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"
+    },
+    {
+      "name_zh": "大師聯盟：超級版 (即將開放)",
+      "name_en": "Master League: Mega Edition",
+      "pvpoke_id": "mega",
+      "cp": "10000",
+      "json_url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/mega/overall/rankings-10000.json"
+    }
+  ]
 }
