@@ -1,6 +1,6 @@
 
 # wrangler.toml
-name = 'pokemon'
+name = 'pokemon-tgbot'
 
 # 主程式入口點 (TypeScript)
 main = "src/worker.ts"
