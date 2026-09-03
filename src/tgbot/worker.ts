@@ -161,10 +161,14 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
   }
 
   const bannedMap = await getBannedUsers(env);
-  if (bannedMap[userId]) return;
+  if (bannedMap[userId]) {
+    console.warn("Telegram message blocked: banned user", { chatId, userId });
+    return;
+  }
 
   // Bot 功能僅能在指定管理群組使用；其他私訊/群組只通知管理群組，不回應來源。
   if (!isInAdminGroup) {
+    console.info("Telegram message blocked: unexpected chat", { chatId, userId, chatType: msg.chat.type });
     if (adminGroupId) {
       await sendAuthorizationRequest(userId, firstName, username, text, msg.chat, adminGroupId, env);
     }
@@ -199,6 +203,7 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
   }
 
   if (text.length >= 2 && !text.startsWith("/")) {
+    console.info("Telegram Pokemon search accepted", { chatId, userId });
     await handlePokemonSearch(chatId, userId, text, env, ctx);
   }
 }

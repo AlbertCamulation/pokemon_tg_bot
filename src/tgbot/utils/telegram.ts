@@ -45,7 +45,9 @@ export async function sendMessage(
     }
   );
 
-  return await response.json() as TelegramSendMessageResponse;
+  const result = await response.json() as TelegramSendMessageResponse;
+  if (!result.ok) console.error("Telegram sendMessage failed", result.description);
+  return result;
 }
 
 /**
