@@ -9,22 +9,23 @@ import { escapeHtml } from '../utils/helpers';
 
 // 截至 2026-09-03 已在 Pokemon GO 實裝的超級進化；原始回歸依遊戲機制一併列入。
 const DEFAULT_SUPER_POKEMON = [
-  '妙蛙花', '噴火龍（X/Y）', '水箭龜', '大針蜂', '大比鳥', '胡地',
+  '妙蛙花', '噴火龍', '水箭龜', '大針蜂', '大比鳥', '胡地',
   '呆殼獸', '耿鬼', '袋獸', '凱羅斯', '暴鯉龍', '化石翼龍',
   '電龍', '大鋼蛇', '巨鉗螳螂', '赫拉克羅斯', '黑魯加', '班基拉斯',
   '蜥蜴王', '火焰雞', '巨沼怪', '沙奈朵', '勾魂眼', '大嘴娃',
   '波士可多拉', '恰雷姆', '雷電獸', '巨牙鯊', '噴火駝', '七夕青鳥',
   '詛咒娃娃', '阿勃梭魯', '冰鬼護', '暴雪王', '血翼飛龍', '巨金怪',
-  '拉帝亞斯', '拉帝歐斯', '固拉多（原始回歸）', '蓋歐卡（原始回歸）',
+  '拉帝亞斯', '拉帝歐斯', '固拉多', '蓋歐卡',
   '烈咬陸鯊', '長耳兔', '路卡利歐', '艾路雷朵', '差不多娃娃', '蒂安希',
-  '大食花', '快龍', '烏賊王', '列陣兵', '超夢（X/Y）', '盔甲鳥',
-  '雷丘（X/Y）', '寶石海星', '布里卡隆', '妖火紅狐', '甲賀忍蛙',
-  '巨鉗螳螂', '大甲', '大嘴娃', '勾魂眼', '阿勃梭魯', '赫拉克羅斯',
-  '路卡利歐', '暴雪王'
+  '大食花', '快龍', '烏賊王', '列陣兵', '超夢', '盔甲鳥',
+  '雷丘', '寶石海星', '布里卡隆', '妖火紅狐', '甲賀忍蛙'
 ] as const;
 
 function normalizeName(name: string): string {
-  return name.replace(/\s+/g, ' ').trim();
+  return name
+    .replace(/[（(][^（）()]*[）)]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function uniqueNames(names: string[]): string[] {
@@ -48,8 +49,7 @@ async function saveSuperList(list: string[], env: Env): Promise<void> {
 }
 
 function renderSuperList(list: string[]): string {
-  const lines = list.map((name, index) => `${index + 1}. ${name}`);
-  return `⚡ <b>Pokemon GO 可超級進化清單</b>（${list.length} 隻）\n\n<code>${escapeHtml(lines.join('\n'))}</code>\n\n` +
+  return `⚡ <b>Pokemon GO 可超級進化清單</b>（${list.length} 隻）\n\n<code>${escapeHtml(list.join(','))}</code>\n\n` +
     '管理員：<code>/addsuper 寶可夢名稱</code> 新增\n<code>/delsuper</code> 以按鈕刪除';
 }
 
