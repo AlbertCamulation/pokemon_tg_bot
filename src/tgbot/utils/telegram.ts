@@ -156,7 +156,10 @@ export async function registerWebhook(
             { command: "menu", description: "開啟功能選單" },
             { command: "help", description: "使用說明" },
             { command: "trash", description: "查看或新增垃圾清單" },
-            { command: "untrash", description: "移除垃圾清單項目" }
+            { command: "untrash", description: "移除垃圾清單項目" },
+            { command: "super", description: "可超級進化寶可夢清單" },
+            { command: "addsuper", description: "新增超級進化寶可夢" },
+            { command: "delsuper", description: "按鈕刪除超級進化寶可夢" }
           ]
         })
       }

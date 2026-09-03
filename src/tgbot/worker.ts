@@ -16,7 +16,8 @@ import {
   sendTypeSelectionMenu, handleTypeDetail, handleLeagueCommand, handleCurrentLeagues,
   handleMetaAnalysis, handleTrashCommand, handleAddTrashCommand, handleUntrashCommand,
   handleBanlistCommand, handleApproveUser, handleBanUser, handleUnbanUser,
-  sendAuthorizationRequest
+  sendAuthorizationRequest, handleSuperCommand, handleAddSuperCommand,
+  handleDeleteSuperCommand, handleDeleteSuperButton
 } from './handlers';
 import { generateHTML, myBoxHtml } from './web/html';
 
@@ -88,6 +89,16 @@ async function onCallbackQuery(cq: TelegramCallbackQuery, env: Env, ctx: Executi
 
   if (!isInAdminGroup) {
     await answerCallbackQuery(cqId, `⛔ 權限不足`, env); return;
+  }
+
+  if (data.startsWith("super_del_")) {
+    if (!isSuperAdmin) { await answerCallbackQuery(cqId, "⛔ 僅超級管理員可操作", env); return; }
+    const itemIndex = Number.parseInt(data.replace("super_del_", ""), 10);
+    const deletedName = Number.isInteger(itemIndex)
+      ? await handleDeleteSuperButton(chatId, messageId, itemIndex, env)
+      : null;
+    await answerCallbackQuery(cqId, deletedName ? `已刪除：${deletedName}` : "此清單已更新，請重新執行 /delsuper", env);
+    return;
   }
 
   if (data.startsWith("untrash_btn_")) {
@@ -173,6 +184,13 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
         else await handleTrashCommand(chatId, userId, msg.from!, env);
         return;
       case "untrash": await handleUntrashCommand(chatId, userId, args, env); return;
+      case "super": await handleSuperCommand(chatId, env); return;
+      case "addsuper":
+        if (!isSuperAdmin) { await sendMessage(chatId, "⛔ 僅超級管理員可新增清單項目", null, env); return; }
+        await handleAddSuperCommand(chatId, args.join(' '), env); return;
+      case "delsuper":
+        if (!isSuperAdmin) { await sendMessage(chatId, "⛔ 僅超級管理員可刪除清單項目", null, env); return; }
+        await handleDeleteSuperCommand(chatId, env); return;
       case "banlist": if (isSuperAdmin) await handleBanlistCommand(chatId, env); return;
     }
     if (leagues.find(l => l.command === command)) {

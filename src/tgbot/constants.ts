@@ -14,6 +14,7 @@ export const WEBHOOK_PATH = "/endpoint";
 
 // --- KV 存儲 Key ---
 export const TRASH_LIST_PREFIX = "trash_pokemon_";
+export const SUPER_LIST_KEY = "super_pokemon_list_v1";
 export const ALLOWED_UID_KEY = "allowed_user_ids";
 export const BANNED_UID_KEY = "banned_user_ids";
 
