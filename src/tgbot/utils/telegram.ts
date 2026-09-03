@@ -190,7 +190,23 @@ export async function registerWebhook(
     return new Response("Telegram registration failed", { status: 500 });
   }
 
-  return new Response("Webhook and command menu registered");
+  const [webhookInfoRes, botInfoRes] = await Promise.all([
+    fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/getWebhookInfo`),
+    fetch(`https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/getMe`)
+  ]);
+  const webhookInfo = await webhookInfoRes.json() as {
+    ok?: boolean;
+    result?: { url?: string; pending_update_count?: number; last_error_message?: string };
+  };
+  const botInfo = await botInfoRes.json() as { ok?: boolean; result?: { username?: string } };
+
+  return new Response(JSON.stringify({
+    registered: true,
+    botUsername: botInfo.result?.username || null,
+    webhookUrl: webhookInfo.result?.url || null,
+    pendingUpdateCount: webhookInfo.result?.pending_update_count || 0,
+    lastError: webhookInfo.result?.last_error_message || null
+  }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
 }
 
 /**
