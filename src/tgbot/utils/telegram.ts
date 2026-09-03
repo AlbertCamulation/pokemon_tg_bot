@@ -132,8 +132,43 @@ export async function registerWebhook(
   env: Env
 ): Promise<Response> {
   const webhookUrl = `${url.protocol}//${url.hostname}/endpoint`;
+  const commands = [
+    { command: "start", description: "啟動 Pokemon PvP 選單" },
+    { command: "menu", description: "開啟功能選單" },
+    { command: "help", description: "使用說明" },
+    { command: "trash", description: "查看或新增垃圾清單" },
+    { command: "untrash", description: "移除垃圾清單項目" },
+    { command: "super", description: "可超級進化寶可夢清單" },
+    { command: "addsuper", description: "新增超級進化寶可夢" },
+    { command: "delsuper", description: "按鈕刪除超級進化寶可夢" }
+  ];
+  const groupId = Number(env.ADMIN_GROUP_UID);
+  const commandRequests = [
+    fetch(
+      `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setMyCommands`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commands })
+      }
+    )
+  ];
 
-  const [webhookRes, commandsRes] = await Promise.all([
+  // 群組範圍的指令優先於預設指令，必須明確覆蓋舊的 group scope。
+  if (Number.isSafeInteger(groupId)) {
+    commandRequests.push(
+      fetch(
+        `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setMyCommands`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ commands, scope: { type: "chat", chat_id: groupId } })
+        }
+      )
+    );
+  }
+
+  const [webhookRes, ...commandResponses] = await Promise.all([
     fetch(
       `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setWebhook`,
       {
@@ -145,29 +180,11 @@ export async function registerWebhook(
         })
       }
     ),
-    fetch(
-      `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setMyCommands`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          commands: [
-            { command: "start", description: "啟動 Pokemon PvP 選單" },
-            { command: "menu", description: "開啟功能選單" },
-            { command: "help", description: "使用說明" },
-            { command: "trash", description: "查看或新增垃圾清單" },
-            { command: "untrash", description: "移除垃圾清單項目" },
-            { command: "super", description: "可超級進化寶可夢清單" },
-            { command: "addsuper", description: "新增超級進化寶可夢" },
-            { command: "delsuper", description: "按鈕刪除超級進化寶可夢" }
-          ]
-        })
-      }
-    )
+    ...commandRequests
   ]);
 
-  if (!webhookRes.ok || !commandsRes.ok) {
-    console.error("Telegram registration failed", webhookRes.status, commandsRes.status);
+  if (!webhookRes.ok || commandResponses.some(response => !response.ok)) {
+    console.error("Telegram registration failed", webhookRes.status, commandResponses.map(response => response.status));
     return new Response("Telegram registration failed", { status: 500 });
   }
 
