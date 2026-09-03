@@ -5,6 +5,11 @@
 // --- Cloudflare Workers 環境變數 ---
 export interface Env {
   POKEMON_KV: KVNamespace;
+  // Telegram Bot（由同一個 Worker 的 /endpoint 處理）
+  ENV_BOT_TOKEN: string;
+  ENV_BOT_SECRET: string;
+  ADMIN_UID: string;
+  ADMIN_GROUP_UID?: string;
   // Google OAuth
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;

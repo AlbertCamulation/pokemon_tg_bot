@@ -15,6 +15,7 @@ import {
 } from './utils/userdata';
 import { loginRedirect, handleCallback, getSession, logout } from './auth';
 import { APP_HTML } from './web/app';
+import tgbotWorker from './tgbot/worker';
 
 // ── 回應工具 ──
 function json(data: unknown, init: ResponseInit = {}): Response {
@@ -34,6 +35,33 @@ export default {
     const method = request.method;
 
     try {
+      // ───────── Telegram Bot ─────────
+      // Bot 專用 API 使用 /tg/api/*，避免和手機網頁的 /api/* 發生衝突。
+      if (
+        path === "/endpoint" ||
+        path === "/registerWebhook" ||
+        path === "/mybox" ||
+        path.startsWith("/tg/api/")
+      ) {
+        const botRequest = path.startsWith("/tg/api/")
+          ? new Request(new URL(path.slice(3) + url.search, url).toString(), request)
+          : request;
+        const botResponse = await tgbotWorker.fetch(botRequest, env as never, ctx);
+
+        // 舊版 Telegram Web App 的 API 絕對路徑改由本 Worker 的獨立前綴提供。
+        if (path === "/mybox" && botResponse.headers.get("Content-Type")?.includes("text/html")) {
+          const headers = new Headers(botResponse.headers);
+          headers.delete("Content-Length");
+          return new Response((await botResponse.text()).replaceAll("/api/", "/tg/api/"), {
+            status: botResponse.status,
+            statusText: botResponse.statusText,
+            headers
+          });
+        }
+
+        return botResponse;
+      }
+
       // ───────── 頁面 ─────────
       if (path === "/" && method === "GET") return html(APP_HTML);
 
