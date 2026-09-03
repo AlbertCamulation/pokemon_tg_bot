@@ -57,6 +57,7 @@ function deletionKeyboard(list: string[]): TelegramInlineKeyboardButton[][] {
   const buttons = list.map((name, index) => ({ text: `🗑 ${name}`, callback_data: `super_del_${index}` }));
   const rows: TelegramInlineKeyboardButton[][] = [];
   for (let index = 0; index < buttons.length; index += 2) rows.push(buttons.slice(index, index + 2));
+  rows.push([{ text: '❌ 取消刪除', callback_data: 'close_menu' }]);
   return rows;
 }
 
