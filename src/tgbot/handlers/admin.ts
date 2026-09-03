@@ -2,7 +2,7 @@
 //  管理員功能處理 (Admin Handlers)
 // =========================================================
 
-import type { Env, TelegramInlineKeyboardButton } from '../types';
+import type { Env, TelegramChat, TelegramInlineKeyboardButton } from '../types';
 import { sendMessage, editMessage, answerCallbackQuery } from '../utils/telegram';
 import {
   getBannedUsers,
@@ -175,33 +175,35 @@ export async function handleUnbanUser(
  * 發送未授權通知給管理群組
  */
 export async function sendAuthorizationRequest(
-  chatId: number,
   userId: number,
   firstName: string,
   username: string | undefined,
   messageText: string,
+  sourceChat: TelegramChat,
   adminGroupId: string,
   env: Env
 ): Promise<void> {
-  // 發送給用戶
-  await sendMessage(
-    chatId,
-    `⛔ <b>權限不足</b>\n您的 UID (<code>${userId}</code>) 未授權。\n已自動提交申請給管理員。`,
-    { parse_mode: "HTML" },
-    env
-  );
+  // 相同來源的重複訊息每 10 分鐘僅通知一次，避免外部群組洗版管理群組。
+  const throttleKey = `outside_bot_use:${sourceChat.id}:${userId}`;
+  if (env.POKEMON_KV) {
+    if (await env.POKEMON_KV.get(throttleKey)) return;
+    await env.POKEMON_KV.put(throttleKey, "1", { expirationTtl: 600 });
+  }
 
   // 發送給管理群組
   const safeName = escapeHtml(firstName);
   const safeText = escapeHtml(messageText);
   const safeUser = escapeHtml(username ? `@${username}` : "無");
+  const sourceType = sourceChat.type === "private" ? "私訊" : "群組";
+  const sourceName = sourceChat.type === "private"
+    ? `與 ${safeName} 的私訊`
+    : escapeHtml(sourceChat.title || sourceChat.username || "未命名群組");
 
-  const adminMsg = `🚨 <b>申請存取</b>\n\n👤 <b>使用者:</b> ${safeName} (${safeUser})\n🆔 <b>UID:</b> <code>${userId}</code>\n💬 <b>訊息:</b> ${safeText}`;
+  const adminMsg = `🚨 <b>非授權位置使用 Bot</b>\n\n📍 <b>來源:</b> ${sourceType} - ${sourceName}\n🧭 <b>Chat ID:</b> <code>${sourceChat.id}</code>\n\n👤 <b>使用者:</b> ${safeName} (${safeUser})\n🆔 <b>UID:</b> <code>${userId}</code>\n💬 <b>訊息:</b> ${safeText}`;
 
   const adminOptions = {
     parse_mode: "HTML" as const,
     inline_keyboard: [[
-      { text: "✅ 批准", callback_data: `approve_uid_${userId}` },
       { text: "🚫 封禁", callback_data: `ban_uid_${userId}` }
     ]]
   };

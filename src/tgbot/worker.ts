@@ -72,7 +72,7 @@ async function onCallbackQuery(cq: TelegramCallbackQuery, env: Env, ctx: Executi
   if (data === "close_menu") { await deleteMessage(chatId, messageId, env); return; }
 
   if (data.startsWith("approve_uid_") || data.startsWith("ban_uid_")) {
-    if (!isSuperAdmin && !isInAdminGroup) { await answerCallbackQuery(cqId, "⛔ 權限不足", env); return; }
+    if (!isSuperAdmin) { await answerCallbackQuery(cqId, "⛔ 僅超級管理員可操作", env); return; }
     const targetUid = parseInt(data.split("_")[2]);
     const nameMatch = (cq.message?.text || "").match(/使用者:\s*(.*?)(\n|\(|$)/);
     const targetName = nameMatch ? nameMatch[1].trim() : "Unknown User";
@@ -86,8 +86,7 @@ async function onCallbackQuery(cq: TelegramCallbackQuery, env: Env, ctx: Executi
     return;
   }
 
-  const allowedIds = await getAllowedUserIds(env);
-  if (!isSuperAdmin && !isInAdminGroup && !allowedIds.includes(userId)) {
+  if (!isInAdminGroup) {
     await answerCallbackQuery(cqId, `⛔ 權限不足`, env); return;
   }
 
@@ -145,23 +144,20 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
   const args = parts.slice(1);
 
   // 僅限超級管理員在目標群組取得 chat.id，方便首次設定 ADMIN_GROUP_UID。
-  if (command === "groupid" && isSuperAdmin) {
-    if (msg.chat.type === "private") {
-      await sendMessage(chatId, "請在目標群組中使用 /groupid。", null, env);
-    } else {
-      await sendMessage(chatId, `🔑 <b>Group ID</b>\n<code>${chatId}</code>`, { parse_mode: "HTML" }, env);
-    }
+  if (command === "groupid" && isSuperAdmin && isInAdminGroup) {
+    await sendMessage(chatId, `🔑 <b>Group ID</b>\n<code>${chatId}</code>`, { parse_mode: "HTML" }, env);
     return;
   }
 
-  if (!isSuperAdmin && !isInAdminGroup) {
-    const [bannedMap, allowedIds] = await Promise.all([getBannedUsers(env), getAllowedUserIds(env)]);
-    if (bannedMap[userId]) return;
-    if (!allowedIds.includes(userId)) {
-      if (adminGroupId) await sendAuthorizationRequest(chatId, userId, firstName, username, text, adminGroupId, env);
-      else await sendMessage(chatId, `⛔ <b>權限不足</b>\nUID: <code>${userId}</code>`, { parse_mode: "HTML" }, env);
-      return;
+  const bannedMap = await getBannedUsers(env);
+  if (bannedMap[userId]) return;
+
+  // Bot 功能僅能在指定管理群組使用；其他私訊/群組只通知管理群組，不回應來源。
+  if (!isInAdminGroup) {
+    if (adminGroupId) {
+      await sendAuthorizationRequest(userId, firstName, username, text, msg.chat, adminGroupId, env);
     }
+    return;
   }
 
   if (command) {
