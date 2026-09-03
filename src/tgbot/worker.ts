@@ -222,8 +222,10 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
       updateId: update.update_id,
       types: Object.keys(update).filter(key => key !== "update_id")
     });
-    if (update.message) ctx.waitUntil(onMessage(update.message, env, ctx, origin));
-    else if (update.callback_query) ctx.waitUntil(onCallbackQuery(update.callback_query, env, ctx));
+    // Telegram Webhook 必須在回傳 200 前完成處理；背景 waitUntil 在巢狀 Worker
+    // 路由下可能提早結束，會造成請求雖成功但 Bot 沒有任何回覆。
+    if (update.message) await onMessage(update.message, env, ctx, origin);
+    else if (update.callback_query) await onCallbackQuery(update.callback_query, env, ctx);
     return new Response("Ok");
   } catch (e) { console.error(e); return new Response("Error", { status: 500 }); }
 }
