@@ -133,19 +133,42 @@ export async function registerWebhook(
 ): Promise<Response> {
   const webhookUrl = `${url.protocol}//${url.hostname}/endpoint`;
 
-  const res = await fetch(
-    `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setWebhook`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        url: webhookUrl,
-        secret_token: env.ENV_BOT_SECRET
-      })
-    }
-  );
+  const [webhookRes, commandsRes] = await Promise.all([
+    fetch(
+      `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setWebhook`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: webhookUrl,
+          secret_token: env.ENV_BOT_SECRET
+        })
+      }
+    ),
+    fetch(
+      `https://api.telegram.org/bot${env.ENV_BOT_TOKEN}/setMyCommands`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          commands: [
+            { command: "start", description: "啟動 Pokemon PvP 選單" },
+            { command: "menu", description: "開啟功能選單" },
+            { command: "help", description: "使用說明" },
+            { command: "trash", description: "查看或新增垃圾清單" },
+            { command: "untrash", description: "移除垃圾清單項目" }
+          ]
+        })
+      }
+    )
+  ]);
 
-  return new Response(await res.text());
+  if (!webhookRes.ok || !commandsRes.ok) {
+    console.error("Telegram registration failed", webhookRes.status, commandsRes.status);
+    return new Response("Telegram registration failed", { status: 500 });
+  }
+
+  return new Response("Webhook and command menu registered");
 }
 
 /**
