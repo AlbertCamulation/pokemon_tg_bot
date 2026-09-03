@@ -26,6 +26,14 @@ const SUFFIX_MAP: Record<string, string> = {
   "_hisuian": " (洗翠)", "_paldean": " (帕底亞)", "_mega": " (Mega)"
 };
 
+const TELEGRAM_DEBUG_KEY = "telegram_debug_last";
+
+async function recordTelegramDebug(env: Env, stage: string, detail: Record<string, unknown> = {}): Promise<void> {
+  await env.POKEMON_KV.put(TELEGRAM_DEBUG_KEY, JSON.stringify({ stage, detail, at: new Date().toISOString() }), {
+    expirationTtl: 600
+  });
+}
+
 function sanitizeKey(s: string): string {
   return s.replace(/[\/\.\s]/g, '_');
 }
@@ -153,6 +161,7 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
   const parts = text.split(" ");
   const command = parts[0].startsWith("/") ? parts[0].split("@")[0].substring(1) : null;
   const args = parts.slice(1);
+  await recordTelegramDebug(env, "message_received", { command: command || null, chatType: msg.chat.type });
 
   // 僅限超級管理員在目標群組取得 chat.id，方便首次設定 ADMIN_GROUP_UID。
   if (command === "groupid" && isSuperAdmin && isInAdminGroup) {
@@ -162,12 +171,14 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
 
   const bannedMap = await getBannedUsers(env);
   if (bannedMap[userId]) {
+    await recordTelegramDebug(env, "blocked_banned");
     console.warn("Telegram message blocked: banned user", { chatId, userId });
     return;
   }
 
   // Bot 功能僅能在指定管理群組使用；其他私訊/群組只通知管理群組，不回應來源。
   if (!isInAdminGroup) {
+    await recordTelegramDebug(env, "blocked_unexpected_chat", { chatType: msg.chat.type });
     console.info("Telegram message blocked: unexpected chat", { chatId, userId, chatType: msg.chat.type });
     if (adminGroupId) {
       await sendAuthorizationRequest(userId, firstName, username, text, msg.chat, adminGroupId, env);
@@ -203,6 +214,7 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
   }
 
   if (text.length >= 2 && !text.startsWith("/")) {
+    await recordTelegramDebug(env, "search_accepted");
     console.info("Telegram Pokemon search accepted", { chatId, userId });
     await handlePokemonSearch(chatId, userId, text, env, ctx);
   }
@@ -218,6 +230,9 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
   try {
     const update = await request.json() as TelegramUpdate;
     const origin = new URL(request.url).origin;
+    await recordTelegramDebug(env, "webhook_received", {
+      types: Object.keys(update).filter(key => key !== "update_id")
+    });
     console.info("Telegram update received", {
       updateId: update.update_id,
       types: Object.keys(update).filter(key => key !== "update_id")
