@@ -218,6 +218,10 @@ async function handleWebhook(request: Request, env: Env, ctx: ExecutionContext):
   try {
     const update = await request.json() as TelegramUpdate;
     const origin = new URL(request.url).origin;
+    console.info("Telegram update received", {
+      updateId: update.update_id,
+      types: Object.keys(update).filter(key => key !== "update_id")
+    });
     if (update.message) ctx.waitUntil(onMessage(update.message, env, ctx, origin));
     else if (update.callback_query) ctx.waitUntil(onCallbackQuery(update.callback_query, env, ctx));
     return new Response("Ok");
