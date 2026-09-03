@@ -140,6 +140,19 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
   const isSuperAdmin = String(userId) === String(env.ADMIN_UID);
   const adminGroupId = env.ADMIN_GROUP_UID ? String(env.ADMIN_GROUP_UID).trim() : null;
   const isInAdminGroup = adminGroupId ? String(chatId) === adminGroupId : false;
+  const parts = text.split(" ");
+  const command = parts[0].startsWith("/") ? parts[0].split("@")[0].substring(1) : null;
+  const args = parts.slice(1);
+
+  // 僅限超級管理員在目標群組取得 chat.id，方便首次設定 ADMIN_GROUP_UID。
+  if (command === "groupid" && isSuperAdmin) {
+    if (msg.chat.type === "private") {
+      await sendMessage(chatId, "請在目標群組中使用 /groupid。", null, env);
+    } else {
+      await sendMessage(chatId, `🔑 <b>Group ID</b>\n<code>${chatId}</code>`, { parse_mode: "HTML" }, env);
+    }
+    return;
+  }
 
   if (!isSuperAdmin && !isInAdminGroup) {
     const [bannedMap, allowedIds] = await Promise.all([getBannedUsers(env), getAllowedUserIds(env)]);
@@ -150,10 +163,6 @@ async function onMessage(msg: TelegramMessage, env: Env, ctx: ExecutionContext, 
       return;
     }
   }
-
-  const parts = text.split(" ");
-  const command = parts[0].startsWith("/") ? parts[0].split("@")[0].substring(1) : null;
-  const args = parts.slice(1);
 
   if (command) {
     switch (command) {
