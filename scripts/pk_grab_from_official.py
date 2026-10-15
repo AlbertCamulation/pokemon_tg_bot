@@ -128,6 +128,22 @@ def get_leagues(url, lang="en"):
             
     return data
 
+def resolve_en_url(zh_url, en_urls):
+    """對應中文 GBL 公告的英文網址。
+
+    英文新聞列表有時完全沒有 GBL 公告。此時不能取 en_urls[0]，
+    否則會 IndexError。各語系共用同一則 slug，改組英文文章網址。
+    """
+    slug = zh_url.rstrip("/").split("/")[-1]
+    matched = next((u for u in en_urls if slug and slug in u), None)
+    if matched:
+        return matched
+    if en_urls:
+        return en_urls[0]
+    if slug:
+        return f"https://pokemongo.com/en/news/{slug}"
+    return zh_url
+
 def run_automation():
     zh_urls = get_gbl_urls(BASE_NEWS_URL_ZH, "zh")
     en_urls = get_gbl_urls(BASE_NEWS_URL_EN, "en")
@@ -148,9 +164,11 @@ def run_automation():
     # 移除上一版的 seen_meta_keys 去重邏輯，讓超級聯盟和錦標賽能同時存在
     seen_unique_names = set()
 
+    if zh_urls and not en_urls:
+        print("⚠️ 英文新聞列表沒有 GBL 公告，改以中文公告 slug 組英文網址")
+
     for zh_url in zh_urls[:3]:
-        slug = zh_url.rstrip('/').split('/')[-1]
-        en_url = next((u for u in en_urls if slug in u), en_urls[0])
+        en_url = resolve_en_url(zh_url, en_urls)
         
         print(f"\n🌐 嘗試解析: {zh_url}")
         zh_data = get_leagues(zh_url, "zh")
@@ -190,7 +208,7 @@ def run_automation():
         if zh_urls:
             print(f"⚠️ 處於賽季交替期！強制抓取最新公告的「第一組未來賽程」作為備案。")
             zh_url = zh_urls[0]
-            en_url = en_urls[0] if en_urls else zh_url
+            en_url = resolve_en_url(zh_url, en_urls)
             zh_data = get_leagues(zh_url, "zh")
             en_data = get_leagues(en_url, "en") if en_url != zh_url else []
 
